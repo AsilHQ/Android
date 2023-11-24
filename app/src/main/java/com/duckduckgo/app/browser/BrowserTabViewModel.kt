@@ -1150,7 +1150,7 @@ class BrowserTabViewModel @Inject constructor(
         }
     }
 
-    fun onRefreshRequested() {
+    fun onRefreshRequested(triggeredByUser: Boolean) {
         val omnibarContent = currentOmnibarViewState().omnibarText
         if (!Patterns.WEB_URL.matcher(omnibarContent).matches()) {
             fireQueryChangedPixel(currentOmnibarViewState().omnibarText)
@@ -1160,6 +1160,10 @@ class BrowserTabViewModel @Inject constructor(
             recoverTabWithQuery(url.orEmpty())
         } else {
             command.value = NavigationCommand.Refresh
+        }
+
+        if (triggeredByUser) {
+            privacyProtectionsPopupManager.onPageRefreshTriggeredByUser()
         }
     }
 
