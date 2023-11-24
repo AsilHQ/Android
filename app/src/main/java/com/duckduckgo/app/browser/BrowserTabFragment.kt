@@ -238,6 +238,8 @@ import com.duckduckgo.js.messaging.api.JsMessageHelper
 import com.duckduckgo.js.messaging.api.JsMessaging
 import com.duckduckgo.mobile.android.app.tracking.ui.AppTrackingProtectionScreens.AppTrackerOnboardingActivityWithEmptyParamsParams
 import com.duckduckgo.navigation.api.GlobalActivityStarter
+import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopup
+import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupFactory
 import com.duckduckgo.remote.messaging.api.RemoteMessage
 import com.duckduckgo.savedsites.api.models.SavedSite
 import com.duckduckgo.savedsites.api.models.SavedSite.Bookmark
@@ -259,6 +261,8 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.json.JSONObject
 import timber.log.Timber
 
@@ -425,6 +429,9 @@ class BrowserTabFragment :
 
     @Inject
     lateinit var externalCameraLauncher: UploadFromExternalCameraLauncher
+
+    @Inject
+    lateinit var privacyProtectionsPopupFactory: PrivacyProtectionsPopupFactory
 
     /**
      * We use this to monitor whether the user was seeing the in-context Email Protection signup prompt
@@ -708,6 +715,8 @@ class BrowserTabFragment :
             contentScopeScripts.onResponse(it)
         }
 
+    private lateinit var privacyProtectionsPopup: PrivacyProtectionsPopup
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         removeDaxDialogFromActivity()
@@ -765,6 +774,7 @@ class BrowserTabFragment :
         configureAutoComplete()
         configureOmnibarQuickAccessGrid()
         configureHomeTabQuickAccessGrid()
+        initPrivacyProtectionsPopup()
 
         decorator.decorateWithFeatures()
 
@@ -794,6 +804,15 @@ class BrowserTabFragment :
             (dialog as EditSavedSiteDialogFragment).listener = viewModel
             dialog.deleteBookmarkListener = viewModel
         }
+    }
+
+    private fun initPrivacyProtectionsPopup() {
+        privacyProtectionsPopup = privacyProtectionsPopupFactory.createPopup(
+            anchor = omnibar.shieldIcon,
+        )
+        privacyProtectionsPopup.events
+            .onEach(viewModel::onPrivacyProtectionsPopupUiEvent)
+            .launchIn(lifecycleScope)
     }
 
     private fun getDaxDialogFromActivity(): Fragment? = activity?.supportFragmentManager?.findFragmentByTag(DAX_DIALOG_DIALOG_TAG)
@@ -3399,6 +3418,7 @@ class BrowserTabFragment :
                 renderFullscreenMode(viewState)
                 renderVoiceSearch(viewState)
                 omnibar.spacer.isVisible = viewState.showVoiceSearch && lastSeenBrowserViewState?.showClearButton ?: false
+                privacyProtectionsPopup.setViewState(viewState.privacyProtectionsPopupViewState)
             }
         }
 
