@@ -137,6 +137,7 @@ import com.duckduckgo.privacy.config.api.*
 import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupManager
 import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupUiEvent
 import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupViewState
+import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsToggleUsageListener
 import com.duckduckgo.remote.messaging.api.RemoteMessage
 import com.duckduckgo.savedsites.api.SavedSitesRepository
 import com.duckduckgo.savedsites.api.models.BookmarkFolder
@@ -218,6 +219,7 @@ class BrowserTabViewModel @Inject constructor(
     private val syncEngine: SyncEngine,
     private val cameraHardwareChecker: CameraHardwareChecker,
     private val privacyProtectionsPopupManager: PrivacyProtectionsPopupManager,
+    private val privacyProtectionsToggleUsageListener: PrivacyProtectionsToggleUsageListener,
 ) : WebViewClientListener,
     EditSavedSiteListener,
     DeleteBookmarkListener,
@@ -2204,6 +2206,8 @@ class BrowserTabViewModel @Inject constructor(
             } else {
                 addToAllowList(domain)
             }
+
+            privacyProtectionsToggleUsageListener.onPrivacyProtectionsToggleUsed()
         }
     }
 
