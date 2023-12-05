@@ -1378,7 +1378,8 @@ class BrowserTabViewModel @Inject constructor(
         automaticSavedLoginsMonitor.clearAutoSavedLoginId(tabId)
 
         site?.run {
-            privacyProtectionsPopupManager.onPageLoaded(url, httpErrorCodeEvents)
+            val hasBrowserError = currentBrowserViewState().browserError != OMITTED
+            privacyProtectionsPopupManager.onPageLoaded(url, httpErrorCodeEvents, hasBrowserError)
         }
     }
 
