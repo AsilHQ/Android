@@ -36,14 +36,14 @@ import com.duckduckgo.savedsites.impl.sync.SyncSavedSitesRepository
 import com.duckduckgo.savedsites.impl.sync.algorithm.SavedSitesTimestampPersister
 import com.duckduckgo.savedsites.store.SavedSitesEntitiesDao
 import com.duckduckgo.savedsites.store.SavedSitesRelationsDao
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import org.junit.Assert
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.ZoneOffset
 
 @RunWith(AndroidJUnit4::class)
 class SavedSitesTimestampPersisterTest {
