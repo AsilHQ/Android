@@ -34,6 +34,8 @@ import com.duckduckgo.savedsites.impl.RealSavedSitesRepository
 import com.duckduckgo.savedsites.impl.sync.RealSyncSavedSitesRepository
 import com.duckduckgo.savedsites.impl.sync.SyncSavedSitesRepository
 import com.duckduckgo.savedsites.impl.sync.algorithm.SavedSitesRemoteWinsPersister
+import com.duckduckgo.savedsites.impl.sync.store.SavedSitesSyncMetadataDao
+import com.duckduckgo.savedsites.impl.sync.store.SavedSitesSyncMetadataDatabase
 import com.duckduckgo.savedsites.store.SavedSitesEntitiesDao
 import com.duckduckgo.savedsites.store.SavedSitesRelationsDao
 import org.junit.Assert.assertFalse
@@ -57,10 +59,12 @@ class SavedSitesRemoteWinsPersisterTest {
     var coroutinesTestRule = CoroutineTestRule()
 
     private lateinit var db: AppDatabase
+    private lateinit var savedSitesDatabase: SavedSitesSyncMetadataDatabase
     private lateinit var repository: SavedSitesRepository
     private lateinit var syncRepository: SyncSavedSitesRepository
     private lateinit var savedSitesEntitiesDao: SavedSitesEntitiesDao
     private lateinit var savedSitesRelationsDao: SavedSitesRelationsDao
+    private lateinit var savedSitesMetadataDao: SavedSitesSyncMetadataDao
 
     private lateinit var persister: SavedSitesRemoteWinsPersister
 
@@ -74,13 +78,21 @@ class SavedSitesRemoteWinsPersisterTest {
         savedSitesEntitiesDao = db.syncEntitiesDao()
         savedSitesRelationsDao = db.syncRelationsDao()
 
+        savedSitesDatabase = Room.inMemoryDatabaseBuilder(
+            InstrumentationRegistry.getInstrumentation().targetContext,
+            SavedSitesSyncMetadataDatabase::class.java,
+        )
+            .allowMainThreadQueries()
+            .build()
+        savedSitesMetadataDao = savedSitesDatabase.syncMetadataDao()
+
         val favoritesDelegate = RealFavoritesDelegate(
             savedSitesEntitiesDao,
             savedSitesRelationsDao,
             FakeDisplayModeSettingsRepository(),
             coroutinesTestRule.testDispatcherProvider,
         )
-        syncRepository = RealSyncSavedSitesRepository(savedSitesEntitiesDao, savedSitesRelationsDao)
+        syncRepository = RealSyncSavedSitesRepository(savedSitesEntitiesDao, savedSitesRelationsDao, savedSitesMetadataDao)
         repository = RealSavedSitesRepository(
             savedSitesEntitiesDao,
             savedSitesRelationsDao,
@@ -226,7 +238,7 @@ class SavedSitesRemoteWinsPersisterTest {
         val folder = BookmarkFolder("folder1", "title", SavedSitesNames.BOOKMARKS_ROOT, 0, 0)
         assertTrue(repository.getFolder(folder.id) == null)
 
-        persister.processBookmarkFolder(folder)
+        persister.processBookmarkFolder(folder, emptyList())
 
         assertTrue(repository.getFolder(folder.id) != null)
     }
@@ -238,7 +250,7 @@ class SavedSitesRemoteWinsPersisterTest {
         assertTrue(repository.getFolder(folder.id) != null)
 
         val deletedFolder = folder.copy(deleted = "1")
-        persister.processBookmarkFolder(deletedFolder)
+        persister.processBookmarkFolder(deletedFolder, emptyList())
 
         assertTrue(repository.getFolder(folder.id) == null)
     }
@@ -250,7 +262,7 @@ class SavedSitesRemoteWinsPersisterTest {
         assertTrue(repository.getFolder(folder.id) != null)
 
         val updatedFolder = folder.copy(name = "remoteFolder1")
-        persister.processBookmarkFolder(updatedFolder)
+        persister.processBookmarkFolder(updatedFolder, emptyList())
 
         assertTrue(repository.getFolder(folder.id) != null)
         assertTrue(repository.getFolder(folder.id)!!.name == updatedFolder.name)

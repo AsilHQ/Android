@@ -38,8 +38,10 @@ class SavedSitesDeduplicationPersister @Inject constructor(
 ) : SavedSitesSyncPersisterStrategy {
     override fun processBookmarkFolder(
         folder: BookmarkFolder,
+        children: List<String>,
     ) {
         // in deduplication we replace local folder with remote folder (id, name, parentId, add children to existent ones)
+        // we don't replace the children here, because they might be children already present before the deduplication
         when (val result = duplicateFinder.findFolderDuplicate(folder)) {
             is Duplicate -> {
                 if (folder.isDeleted()) {
@@ -73,7 +75,7 @@ class SavedSitesDeduplicationPersister @Inject constructor(
             when (val result = duplicateFinder.findBookmarkDuplicate(bookmark)) {
                 is Duplicate -> {
                     Timber.d("Sync-Bookmarks-Persister: child ${bookmark.id} has a local duplicate in ${result.id}, replacing")
-                    savedSitesRepository.replaceBookmark(bookmark, result.id)
+                    syncSavedSitesRepository.replaceBookmark(bookmark, result.id)
                 }
 
                 is NotDuplicate -> {

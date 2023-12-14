@@ -35,6 +35,8 @@ import com.duckduckgo.savedsites.impl.sync.SyncSavedSitesRepository
 import com.duckduckgo.savedsites.impl.sync.algorithm.RealSavedSitesDuplicateFinder
 import com.duckduckgo.savedsites.impl.sync.algorithm.SavedSitesDeduplicationPersister
 import com.duckduckgo.savedsites.impl.sync.algorithm.SavedSitesDuplicateFinder
+import com.duckduckgo.savedsites.impl.sync.store.SavedSitesSyncMetadataDao
+import com.duckduckgo.savedsites.impl.sync.store.SavedSitesSyncMetadataDatabase
 import com.duckduckgo.savedsites.store.SavedSitesEntitiesDao
 import com.duckduckgo.savedsites.store.SavedSitesRelationsDao
 import org.junit.Assert.assertTrue
@@ -54,10 +56,13 @@ class SavedSitesDeduplicationPersisterTest {
     var coroutinesTestRule = CoroutineTestRule()
 
     private lateinit var db: AppDatabase
+    private lateinit var savedSitesDatabase: SavedSitesSyncMetadataDatabase
+
     private lateinit var repository: SavedSitesRepository
     private lateinit var syncSavedSitesRepository: SyncSavedSitesRepository
     private lateinit var savedSitesEntitiesDao: SavedSitesEntitiesDao
     private lateinit var savedSitesRelationsDao: SavedSitesRelationsDao
+    private lateinit var savedSitesMetadataDao: SavedSitesSyncMetadataDao
     private lateinit var duplicateFinder: SavedSitesDuplicateFinder
 
     private lateinit var persister: SavedSitesDeduplicationPersister
@@ -71,6 +76,14 @@ class SavedSitesDeduplicationPersisterTest {
         savedSitesEntitiesDao = db.syncEntitiesDao()
         savedSitesRelationsDao = db.syncRelationsDao()
 
+        savedSitesDatabase = Room.inMemoryDatabaseBuilder(
+            InstrumentationRegistry.getInstrumentation().targetContext,
+            SavedSitesSyncMetadataDatabase::class.java,
+        )
+            .allowMainThreadQueries()
+            .build()
+        savedSitesMetadataDao = savedSitesDatabase.syncMetadataDao()
+
         val favoritesDelegate = RealFavoritesDelegate(
             savedSitesEntitiesDao,
             savedSitesRelationsDao,
@@ -78,7 +91,7 @@ class SavedSitesDeduplicationPersisterTest {
             coroutinesTestRule.testDispatcherProvider,
         )
 
-        syncSavedSitesRepository = RealSyncSavedSitesRepository(savedSitesEntitiesDao, savedSitesRelationsDao)
+        syncSavedSitesRepository = RealSyncSavedSitesRepository(savedSitesEntitiesDao, savedSitesRelationsDao, savedSitesMetadataDao)
         repository = RealSavedSitesRepository(
             savedSitesEntitiesDao,
             savedSitesRelationsDao,
@@ -178,7 +191,7 @@ class SavedSitesDeduplicationPersisterTest {
         val folder = BookmarkFolder("folder1", "title", SavedSitesNames.BOOKMARKS_ROOT, 0, 0)
         assertTrue(repository.getFolder(folder.id) == null)
 
-        persister.processBookmarkFolder(folder)
+        persister.processBookmarkFolder(folder, emptyList())
 
         assertTrue(repository.getFolder(folder.id) != null)
     }
@@ -188,7 +201,7 @@ class SavedSitesDeduplicationPersisterTest {
         val folder = BookmarkFolder("folder1", "title", SavedSitesNames.BOOKMARKS_ROOT, 0, 0, deleted = "1")
         assertTrue(repository.getFolder(folder.id) == null)
 
-        persister.processBookmarkFolder(folder)
+        persister.processBookmarkFolder(folder, emptyList())
 
         assertTrue(repository.getFolder(folder.id) == null)
     }
@@ -200,20 +213,20 @@ class SavedSitesDeduplicationPersisterTest {
         assertTrue(repository.getFolder(folder.id) != null)
 
         val remoteFolder = folder.copy(name = "remotefolder1")
-        persister.processBookmarkFolder(remoteFolder)
+        persister.processBookmarkFolder(remoteFolder, emptyList())
 
         assertTrue(repository.getFolder(folder.id) != null)
         assertTrue(repository.getFolder(folder.id)!!.name == remoteFolder.name)
     }
 
     @Test
-    fun whenProcessingRemoteDeletdFolderPresentLocallyThenFolderIsDeleted() {
+    fun whenProcessingRemoteDeletedFolderPresentLocallyThenFolderIsDeleted() {
         val folder = BookmarkFolder("folder1", "title", SavedSitesNames.BOOKMARKS_ROOT, 0, 0)
         repository.insert(folder)
         assertTrue(repository.getFolder(folder.id) != null)
 
         val deletedFolder = folder.copy(deleted = "1")
-        persister.processBookmarkFolder(deletedFolder)
+        persister.processBookmarkFolder(deletedFolder, emptyList())
 
         assertTrue(repository.getFolder(folder.id) == null)
     }

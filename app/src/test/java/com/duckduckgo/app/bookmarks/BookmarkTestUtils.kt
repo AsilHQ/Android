@@ -17,6 +17,16 @@
 package com.duckduckgo.app.bookmarks
 
 import com.duckduckgo.common.utils.formatters.time.DatabaseDateFormatter
+import com.duckduckgo.savedsites.api.models.BookmarkFolder
+import com.duckduckgo.savedsites.api.models.SavedSite
+import com.duckduckgo.savedsites.api.models.SavedSite.Bookmark
+import com.duckduckgo.savedsites.api.models.SavedSite.Favorite
+import com.duckduckgo.savedsites.impl.sync.SyncBookmarkPage
+import com.duckduckgo.savedsites.impl.sync.SyncFolderChildren
+import com.duckduckgo.savedsites.impl.sync.SyncSavedSiteRequestFolder
+import com.duckduckgo.savedsites.impl.sync.SyncSavedSiteResponseFolder
+import com.duckduckgo.savedsites.impl.sync.SyncSavedSitesRequestEntry
+import com.duckduckgo.savedsites.impl.sync.SyncSavedSitesResponseEntry
 import com.duckduckgo.savedsites.store.Entity
 import com.duckduckgo.savedsites.store.EntityType.BOOKMARK
 import com.duckduckgo.savedsites.store.EntityType.FOLDER
@@ -58,5 +68,109 @@ object BookmarkTestUtils {
             relations.add(Relation(folderId = folderId, entityId = it.entityId))
         }
         return relations
+    }
+
+    fun aBookmarkFolder(
+        id: String,
+        name: String,
+        parentId: String,
+        timestamp: String = "2023-05-10T16:10:32.338Z",
+    ): BookmarkFolder {
+        return BookmarkFolder(id = id, name = name, parentId = parentId, lastModified = timestamp)
+    }
+
+    fun aFavorite(
+        id: String,
+        title: String,
+        url: String,
+        position: Int,
+        timestamp: String = "2023-05-10T16:10:32.338Z",
+    ): Favorite {
+        return Favorite(id, title, url, lastModified = timestamp, position)
+    }
+
+    fun aBookmark(
+        id: String,
+        title: String,
+        url: String,
+        timestamp: String = "2023-05-10T16:10:32.338Z",
+    ): Bookmark {
+        return Bookmark(id, title, url, lastModified = timestamp)
+    }
+
+    fun getRequestEntryFromBookmarkFolder(
+        bookmarkFolder: BookmarkFolder,
+        children: List<String>,
+    ): SyncSavedSitesRequestEntry {
+        return SyncSavedSitesRequestEntry(
+            id = bookmarkFolder.id,
+            title = bookmarkFolder.name,
+            folder = SyncSavedSiteRequestFolder(SyncFolderChildren(current = children, insert = children, remove = emptyList())),
+            page = null,
+            deleted = null,
+            client_last_modified = bookmarkFolder.lastModified ?: DatabaseDateFormatter.iso8601(),
+        )
+    }
+
+    fun getRequestEntryFromSavedSite(savedSite: SavedSite): SyncSavedSitesRequestEntry {
+        return SyncSavedSitesRequestEntry(
+            id = savedSite.id,
+            title = savedSite.title,
+            page = SyncBookmarkPage(savedSite.url),
+            folder = null,
+            deleted = null,
+            client_last_modified = savedSite.lastModified ?: DatabaseDateFormatter.iso8601(),
+        )
+    }
+
+    fun getResponseEntryFromSavedSite(
+        savedSite: SavedSite,
+        deleted: Boolean = false,
+    ): SyncSavedSitesResponseEntry {
+        if (deleted) {
+            return SyncSavedSitesResponseEntry(
+                id = savedSite.id,
+                title = savedSite.title,
+                page = SyncBookmarkPage(savedSite.url),
+                folder = null,
+                deleted = "1",
+                last_modified = savedSite.lastModified ?: DatabaseDateFormatter.iso8601(),
+            )
+        } else {
+            return SyncSavedSitesResponseEntry(
+                id = savedSite.id,
+                title = savedSite.title,
+                page = SyncBookmarkPage(savedSite.url),
+                folder = null,
+                deleted = null,
+                last_modified = savedSite.lastModified ?: DatabaseDateFormatter.iso8601(),
+            )
+        }
+    }
+
+    fun getResponseEntryFromBookmarkFolder(
+        bookmarkFolder: BookmarkFolder,
+        children: List<String>,
+        deleted: Boolean = false,
+    ): SyncSavedSitesResponseEntry {
+        if (deleted) {
+            return SyncSavedSitesResponseEntry(
+                id = bookmarkFolder.id,
+                title = bookmarkFolder.name,
+                folder = SyncSavedSiteResponseFolder(children),
+                page = null,
+                deleted = "1",
+                last_modified = bookmarkFolder.lastModified ?: DatabaseDateFormatter.iso8601(),
+            )
+        } else {
+            return SyncSavedSitesResponseEntry(
+                id = bookmarkFolder.id,
+                title = bookmarkFolder.name,
+                folder = SyncSavedSiteResponseFolder(children),
+                page = null,
+                deleted = null,
+                last_modified = bookmarkFolder.lastModified ?: DatabaseDateFormatter.iso8601(),
+            )
+        }
     }
 }

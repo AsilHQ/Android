@@ -34,6 +34,8 @@ import com.duckduckgo.savedsites.impl.RealSavedSitesRepository
 import com.duckduckgo.savedsites.impl.sync.RealSyncSavedSitesRepository
 import com.duckduckgo.savedsites.impl.sync.SyncSavedSitesRepository
 import com.duckduckgo.savedsites.impl.sync.algorithm.SavedSitesTimestampPersister
+import com.duckduckgo.savedsites.impl.sync.store.SavedSitesSyncMetadataDao
+import com.duckduckgo.savedsites.impl.sync.store.SavedSitesSyncMetadataDatabase
 import com.duckduckgo.savedsites.store.SavedSitesEntitiesDao
 import com.duckduckgo.savedsites.store.SavedSitesRelationsDao
 import org.junit.Assert
@@ -56,10 +58,13 @@ class SavedSitesTimestampPersisterTest {
     var coroutinesTestRule = CoroutineTestRule()
 
     private lateinit var db: AppDatabase
+    private lateinit var savedSitesDatabase: SavedSitesSyncMetadataDatabase
+
     private lateinit var repository: SavedSitesRepository
     private lateinit var syncRepository: SyncSavedSitesRepository
     private lateinit var savedSitesEntitiesDao: SavedSitesEntitiesDao
     private lateinit var savedSitesRelationsDao: SavedSitesRelationsDao
+    private lateinit var savedSitesMetadataDao: SavedSitesSyncMetadataDao
 
     private lateinit var persister: SavedSitesTimestampPersister
 
@@ -75,13 +80,21 @@ class SavedSitesTimestampPersisterTest {
         savedSitesEntitiesDao = db.syncEntitiesDao()
         savedSitesRelationsDao = db.syncRelationsDao()
 
+        savedSitesDatabase = Room.inMemoryDatabaseBuilder(
+            InstrumentationRegistry.getInstrumentation().targetContext,
+            SavedSitesSyncMetadataDatabase::class.java,
+        )
+            .allowMainThreadQueries()
+            .build()
+        savedSitesMetadataDao = savedSitesDatabase.syncMetadataDao()
+
         val favoritesDelegate = RealFavoritesDelegate(
             savedSitesEntitiesDao,
             savedSitesRelationsDao,
             FakeDisplayModeSettingsRepository(),
             coroutinesTestRule.testDispatcherProvider,
         )
-        syncRepository = RealSyncSavedSitesRepository(savedSitesEntitiesDao, savedSitesRelationsDao)
+        syncRepository = RealSyncSavedSitesRepository(savedSitesEntitiesDao, savedSitesRelationsDao, savedSitesMetadataDao)
         repository = RealSavedSitesRepository(
             savedSitesEntitiesDao,
             savedSitesRelationsDao,
@@ -277,7 +290,7 @@ class SavedSitesTimestampPersisterTest {
         val folder = BookmarkFolder("folder1", "title", SavedSitesNames.BOOKMARKS_ROOT, 0, 0)
         assertTrue(repository.getFolder(folder.id) == null)
 
-        persister.processBookmarkFolder(folder)
+        persister.processBookmarkFolder(folder, emptyList())
 
         assertTrue(repository.getFolder(folder.id) != null)
     }
@@ -289,7 +302,7 @@ class SavedSitesTimestampPersisterTest {
         assertTrue(repository.getFolder(folder.id) != null)
 
         val deletedFolder = folder.copy(deleted = "1")
-        persister.processBookmarkFolder(deletedFolder)
+        persister.processBookmarkFolder(deletedFolder, emptyList())
 
         assertTrue(repository.getFolder(folder.id) == null)
     }
@@ -301,7 +314,7 @@ class SavedSitesTimestampPersisterTest {
         assertTrue(repository.getFolder(folder.id) != null)
 
         val updatedFolder = folder.copy(name = "remoteFolder1", lastModified = twoHoursAgo)
-        persister.processBookmarkFolder(updatedFolder)
+        persister.processBookmarkFolder(updatedFolder, emptyList())
 
         assertTrue(repository.getFolder(folder.id) != null)
         assertTrue(repository.getFolder(folder.id)!!.name == updatedFolder.name)
@@ -314,7 +327,7 @@ class SavedSitesTimestampPersisterTest {
         assertTrue(repository.getFolder(folder.id) != null)
 
         val updatedFolder = folder.copy(name = "remoteFolder1", lastModified = threeHoursAgo)
-        persister.processBookmarkFolder(updatedFolder)
+        persister.processBookmarkFolder(updatedFolder, emptyList())
 
         assertTrue(repository.getFolder(folder.id) != null)
         assertTrue(repository.getFolder(folder.id)!!.name == folder.name)
@@ -328,7 +341,7 @@ class SavedSitesTimestampPersisterTest {
         assertTrue(repository.getFolder(folder.id) != null)
 
         val updatedFolder = folder.copy(name = "remoteFolder1", lastModified = timestamp)
-        persister.processBookmarkFolder(updatedFolder)
+        persister.processBookmarkFolder(updatedFolder, emptyList())
 
         assertTrue(repository.getFolder(folder.id) != null)
         assertTrue(repository.getFolder(folder.id)!!.name == updatedFolder.name)
