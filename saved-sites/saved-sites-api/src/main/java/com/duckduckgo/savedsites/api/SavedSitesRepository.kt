@@ -230,6 +230,7 @@ interface SavedSitesRepository {
     fun updateBookmark(
         bookmark: Bookmark,
         fromFolderId: String,
+        updateFavorite: Boolean,
     )
 
     /**
@@ -349,4 +350,9 @@ interface SavedSitesRepository {
      * Updates entity [entityId] to a modified date of [modifiedSince]
      */
     fun updateModifiedSince(entityId: String, modifiedSince: String)
+
+    /**
+     * Deletes and re-inserts a folder relation
+     */
+    fun updateFolderRelation(folder: BookmarkFolder)
 }
