@@ -23,7 +23,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.duckduckgo.common.utils.DispatcherProvider
-import com.duckduckgo.subscriptions.impl.SubscriptionsManager
+import com.duckduckgo.subscriptions.api.Subscriptions
 import com.duckduckgo.subscriptions.impl.settings.views.PirSettingViewModel.Command.OpenPir
 import javax.inject.Inject
 import kotlinx.coroutines.channels.BufferOverflow
@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("NoLifecycleObserver") // we don't observe app lifecycle
 class PirSettingViewModel(
-    private val subscriptionsManager: SubscriptionsManager,
+    private val subscriptions: Subscriptions,
     private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel(), DefaultLifecycleObserver {
 
@@ -58,7 +58,7 @@ class PirSettingViewModel(
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
         viewModelScope.launch(dispatcherProvider.io()) {
-            subscriptionsManager.hasSubscription.collect {
+            subscriptions.hasEntitlement(PIR_ENTITLEMENT_NAME).also {
                 _viewState.emit(viewState.value.copy(hasSubscription = it))
             }
         }
@@ -72,16 +72,20 @@ class PirSettingViewModel(
 
     @Suppress("UNCHECKED_CAST")
     class Factory @Inject constructor(
-        private val subscriptionsManager: SubscriptionsManager,
+        private val subscriptions: Subscriptions,
         private val dispatcherProvider: DispatcherProvider,
     ) : ViewModelProvider.NewInstanceFactory() {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return with(modelClass) {
                 when {
-                    isAssignableFrom(PirSettingViewModel::class.java) -> PirSettingViewModel(subscriptionsManager, dispatcherProvider)
+                    isAssignableFrom(PirSettingViewModel::class.java) -> PirSettingViewModel(subscriptions, dispatcherProvider)
                     else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
                 }
             } as T
         }
+    }
+
+    companion object {
+        private const val PIR_ENTITLEMENT_NAME = "dummy2"
     }
 }

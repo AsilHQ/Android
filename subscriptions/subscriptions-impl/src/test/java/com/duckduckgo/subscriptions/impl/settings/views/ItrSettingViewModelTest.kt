@@ -2,10 +2,9 @@ package com.duckduckgo.subscriptions.impl.settings.views
 
 import app.cash.turbine.test
 import com.duckduckgo.common.test.CoroutineTestRule
-import com.duckduckgo.subscriptions.impl.SubscriptionsManager
+import com.duckduckgo.subscriptions.api.Subscriptions
 import com.duckduckgo.subscriptions.impl.settings.views.ItrSettingViewModel.Command.OpenItr
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -19,12 +18,12 @@ class ItrSettingViewModelTest {
     @get:Rule
     val coroutineTestRule: CoroutineTestRule = CoroutineTestRule()
 
-    private val subscriptionsManager: SubscriptionsManager = mock()
+    private val subscriptions: Subscriptions = mock()
     private lateinit var viewModel: ItrSettingViewModel
 
     @Before
     fun before() {
-        viewModel = ItrSettingViewModel(subscriptionsManager, coroutineTestRule.testDispatcherProvider)
+        viewModel = ItrSettingViewModel(subscriptions, coroutineTestRule.testDispatcherProvider)
     }
 
     @Test
@@ -38,7 +37,7 @@ class ItrSettingViewModelTest {
 
     @Test
     fun whenOnResumeIfSubscriptionEmitViewState() = runTest {
-        whenever(subscriptionsManager.hasSubscription).thenReturn(flowOf(true))
+        whenever(subscriptions.hasEntitlement("dummy2")).thenReturn(true)
 
         viewModel.onResume(mock())
         viewModel.viewState.test {
@@ -49,7 +48,7 @@ class ItrSettingViewModelTest {
 
     @Test
     fun whenOnResumeIfNotSubscriptionEmitViewState() = runTest {
-        whenever(subscriptionsManager.hasSubscription).thenReturn(flowOf(false))
+        whenever(subscriptions.hasEntitlement("dummy2")).thenReturn(false)
 
         viewModel.onResume(mock())
         viewModel.viewState.test {
