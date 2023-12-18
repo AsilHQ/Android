@@ -109,6 +109,7 @@ class AppSyncAccountRepositoryTest {
             secretKey = secretKey,
             token = token,
         )
+        verify(syncPixels).fireSignupDirectPixel()
     }
 
     @Test
@@ -214,6 +215,8 @@ class AppSyncAccountRepositoryTest {
             secretKey = secretKey,
             token = token,
         )
+
+        verify(syncPixels).fireLoginPixel()
     }
 
     @Test
@@ -354,6 +357,7 @@ class AppSyncAccountRepositoryTest {
 
         verify(syncApi).connect(token, deviceId, encryptedRecoveryCode)
         assertTrue(result is Success)
+        verify(syncPixels).fireSignupConnectPixel()
     }
 
     @Test
@@ -372,6 +376,7 @@ class AppSyncAccountRepositoryTest {
 
         verify(syncApi).connect(token, deviceId, encryptedRecoveryCode)
         assertTrue(result is Success)
+        verify(syncPixels).fireSignupConnectPixel()
     }
 
     @Test
@@ -386,6 +391,7 @@ class AppSyncAccountRepositoryTest {
         val result = syncRepo.pollConnectionKeys()
 
         assertTrue(result is Success)
+        verify(syncPixels).fireLoginPixel()
     }
 
     @Test

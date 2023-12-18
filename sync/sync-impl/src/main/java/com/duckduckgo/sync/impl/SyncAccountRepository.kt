@@ -25,6 +25,7 @@ import com.duckduckgo.sync.api.engine.SyncEngine.SyncTrigger.ACCOUNT_CREATION
 import com.duckduckgo.sync.api.engine.SyncEngine.SyncTrigger.ACCOUNT_LOGIN
 import com.duckduckgo.sync.crypto.*
 import com.duckduckgo.sync.impl.Result.Error
+import com.duckduckgo.sync.impl.Result.Success
 import com.duckduckgo.sync.impl.pixels.*
 import com.duckduckgo.sync.store.*
 import com.duckduckgo.sync.store.SyncStore
@@ -104,6 +105,7 @@ class AppSyncAccountRepository @Inject constructor(
             }
 
             is Result.Success -> {
+                syncPixels.fireSignupDirectPixel()
                 syncStore.storeCredentials(account.userId, deviceId, deviceName, account.primaryKey, account.secretKey, result.data.token)
                 syncEngine.triggerSync(ACCOUNT_CREATION)
                 Timber.d("Sync-Account: recovery code is ${getRecoveryCode()}")
@@ -195,9 +197,11 @@ class AppSyncAccountRepository @Inject constructor(
         val seal = nativeLib.seal(recoverKey, connectKeys.secretKey)
 
         val result = syncApi.connect(token = token, deviceId = connectKeys.deviceId, publicKey = seal)
-        if (result is Error) {
-            syncPixels.fireSyncAccountErrorPixel(result)
+        when (result) {
+            is Error -> syncPixels.fireSyncAccountErrorPixel(result)
+            is Success -> syncPixels.fireSignupConnectPixel()
         }
+
         return result
     }
 
@@ -352,6 +356,7 @@ class AppSyncAccountRepository @Inject constructor(
                     }
                 }
                 syncStore.storeCredentials(userId, deviceId, deviceName, preLogin.primaryKey, decryptResult.decryptedData, result.data.token)
+                syncPixels.fireLoginPixel()
                 appCoroutineScope.launch(dispatcherProvider.io()) {
                     syncEngine.triggerSync(ACCOUNT_LOGIN)
                 }
