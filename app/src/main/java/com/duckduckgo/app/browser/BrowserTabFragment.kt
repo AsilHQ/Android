@@ -129,6 +129,7 @@ import com.duckduckgo.app.browser.omnibar.QueryOrigin.FromAutocomplete
 import com.duckduckgo.app.browser.omnibar.animations.BrowserTrackersAnimatorHelper
 import com.duckduckgo.app.browser.omnibar.animations.PrivacyShieldAnimationHelper
 import com.duckduckgo.app.browser.omnibar.animations.TrackersAnimatorListener
+import com.duckduckgo.app.browser.orientation.JsOrientationHandler
 import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.browser.remotemessage.SharePromoLinkRMFBroadCastReceiver
 import com.duckduckgo.app.browser.remotemessage.asMessage
@@ -2144,8 +2145,9 @@ class BrowserTabFragment :
                 it,
                 object : JsMessageCallback() {
                     override fun process(featureName: String, method: String, id: String?, data: JSONObject?) {
-                        if (id == null || data == null)
+                        if (id == null || data == null) {
                             return
+                        }
 
                         when (method) {
                             "webShare" -> webShare(featureName, method, id, data)
@@ -2168,36 +2170,7 @@ class BrowserTabFragment :
     }
 
     private fun screenLock(featureName: String, method: String, id: String, data: JSONObject) {
-
-        if (renderer.isFullScreen() == false) {
-            val returnData = JsCallbackData(
-                JSONObject("""{ "error":"notFullScreen"}"""),
-                featureName,
-                method,
-                id,
-            )
-            contentScopeScripts.onResponse(returnData)
-            return
-        }
-
-
-        Timber.v("Before reqOr = ${activity?.requestedOrientation}; config = ${resources.configuration.orientation}")
-
-
-        val orientation = data.getString("orientation")
-        when (orientation) {
-            "landscape-primary" -> activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-            "portrait-primary" -> activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        }
-
-        Timber.v("After reqOr = ${activity?.requestedOrientation}; config = ${resources.configuration.orientation}")
-
-        val returnData = JsCallbackData(
-            JSONObject("""{ "orientation":"landscape"}"""),
-            featureName,
-            method,
-            id,
-        )
+        val returnData = JsOrientationHandler().updateOrientation(JsCallbackData(data, featureName, method, id), renderer.isFullScreen(), activity)
         contentScopeScripts.onResponse(returnData)
     }
 
@@ -3447,7 +3420,7 @@ class BrowserTabFragment :
             }
         }
 
-        fun isFullScreen() : Boolean? {
+        fun isFullScreen(): Boolean? {
             return lastSeenBrowserViewState?.isFullScreen
         }
 
@@ -3756,6 +3729,7 @@ class BrowserTabFragment :
             binding.webViewFullScreenContainer.removeAllViews()
             binding.webViewFullScreenContainer.gone()
             activity?.toggleFullScreen()
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED // reset orientation
             binding.focusDummy.requestFocus()
         }
 
