@@ -2145,14 +2145,11 @@ class BrowserTabFragment :
                 it,
                 object : JsMessageCallback() {
                     override fun process(featureName: String, method: String, id: String?, data: JSONObject?) {
-                        if (id == null || data == null) {
-                            return
-                        }
-
                         when (method) {
-                            "webShare" -> webShare(featureName, method, id, data)
-                            "permissionsQuery" -> viewModel.onPermissionsQuery(featureName, method, id, data)
-                            "screenLock" -> screenLock(featureName, method, id, data)
+                            "webShare" -> if (id != null && data != null) { webShare(featureName, method, id, data) }
+                            "permissionsQuery" -> if (id != null && data != null) { viewModel.onPermissionsQuery(featureName, method, id, data) }
+                            "screenLock" -> if (id != null && data != null) { screenLock(featureName, method, id, data) }
+                            "screenUnlock" -> screenUnlock()
                             else -> {
                                 // NOOP
                             }
@@ -2172,6 +2169,10 @@ class BrowserTabFragment :
     private fun screenLock(featureName: String, method: String, id: String, data: JSONObject) {
         val returnData = JsOrientationHandler().updateOrientation(JsCallbackData(data, featureName, method, id), renderer.isFullScreen(), activity)
         contentScopeScripts.onResponse(returnData)
+    }
+
+    private fun screenUnlock() {
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED // reset orientation
     }
 
     private fun configureWebViewForAutofill(it: DuckDuckGoWebView) {
