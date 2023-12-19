@@ -36,7 +36,7 @@ interface NetworkProtectionRepository {
     var enabledTimeInMillis: Long
     var serverDetails: ServerDetails?
     var clientInterface: ClientInterface?
-    var disabledDueToAccessRevoked: Boolean
+    var vpnAccessRevoked: Boolean
 
     enum class ReconnectStatus {
         NotReconnecting,
@@ -145,10 +145,10 @@ class RealNetworkProtectionRepository @Inject constructor(
             }
         }
 
-    override var disabledDueToAccessRevoked: Boolean
-        get() = networkProtectionPrefs.getBoolean(KEY_DISABLED_DUE_TO_ACCESS_REVOKED, false)
+    override var vpnAccessRevoked: Boolean
+        get() = networkProtectionPrefs.getBoolean(KEY_VPN_ACCESS_REVOKED, false)
         set(value) {
-            networkProtectionPrefs.putBoolean(KEY_DISABLED_DUE_TO_ACCESS_REVOKED, value)
+            networkProtectionPrefs.putBoolean(KEY_VPN_ACCESS_REVOKED, value)
         }
 
     companion object {
@@ -160,6 +160,6 @@ class RealNetworkProtectionRepository @Inject constructor(
         private const val KEY_WG_SERVER_ENABLE_TIME = "wg_server_enable_time"
         private const val KEY_WG_RECONNECT_STATUS = "wg_reconnect_status"
         private const val KEY_WG_CLIENT_IFACE_TUNNEL_IP = "wg_client_iface_tunnel_ip"
-        private const val KEY_DISABLED_DUE_TO_ACCESS_REVOKED = "key_disabled_due_to_access_revoked"
+        private const val KEY_VPN_ACCESS_REVOKED = "key_vpn_access_revoked"
     }
 }
