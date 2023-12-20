@@ -150,7 +150,6 @@
     <string name="settingsWebTrackingProtectionDescription">Activat în mod implicit</string>
     <string name="settingsHeadingSettings">Setări</string>
     <string name="settingsPermissionsSetting">Permisiuni</string>
-    <string name="settingsAutofillLoginsSetting">Conectări</string>
     <string name="settingsSyncSetting">Sincronizare și copiere de rezervă</string>
     <string name="settingsFireButton">Butonul Foc</string>
 
@@ -636,8 +635,6 @@
 
     <!-- Autofill -->
     <string name="autofillSnackbarAction" instruction="Label for a button that lets the user view the details for a login credential">Vezi</string>
-    <string name="autofillLoginSavedSnackbarMessage">Date de conectare salvate</string>
-    <string name="autofillLoginUpdatedSnackbarMessage">Date de conectare actualizate</string>
 
     <!-- Waitlist Notification -->
     <string name="waitlistNotificationDialogDescription">Dorești să îți trimitem o notificare când este rândul tău?</string>
@@ -790,4 +787,9 @@
     <string name="imageCaptureCameraPermissionDeniedMessage">Site-urile îți pot utiliza camera numai dacă permiți ca DuckDuckGo să solicite accesul.</string>
     <string name="imageCaptureCameraPermissionDeniedPositiveButton">Deschide Setări</string>
     <string name="imageCaptureCameraPermissionDeniedNegativeButton">Anulare</string>
+
+    <!-- Autofill -->
+    <string name="settingsAutofillLoginsSetting">Parole</string>
+    <string name="autofillLoginSavedSnackbarMessage">Parolă salvată</string>
+    <string name="autofillLoginUpdatedSnackbarMessage">Parolă actualizată</string>
 </resources>

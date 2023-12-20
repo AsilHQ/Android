@@ -150,7 +150,6 @@
     <string name="settingsWebTrackingProtectionDescription">Vaikimisi sisse lülitatud</string>
     <string name="settingsHeadingSettings">Sätted</string>
     <string name="settingsPermissionsSetting">Load</string>
-    <string name="settingsAutofillLoginsSetting">Sisselogimine</string>
     <string name="settingsSyncSetting">Sünkroonimine ja varundamine</string>
     <string name="settingsFireButton">Fire Button</string>
 
@@ -634,8 +633,6 @@
 
     <!-- Autofill -->
     <string name="autofillSnackbarAction" instruction="Label for a button that lets the user view the details for a login credential">Kuva</string>
-    <string name="autofillLoginSavedSnackbarMessage">Sisselogimisandmed salvestatud</string>
-    <string name="autofillLoginUpdatedSnackbarMessage">Sisselogimisandmed värskendatud</string>
 
     <!-- Waitlist Notification -->
     <string name="waitlistNotificationDialogDescription">Kas soovite, et me saadame teile teavituse, kui on teie kord?</string>
@@ -786,4 +783,9 @@
     <string name="imageCaptureCameraPermissionDeniedMessage">Saidid saavad sinu kaamerat kasutada ainult siis, kui lubad DuckDuckGo’l küsida sellele juurdepääsu.</string>
     <string name="imageCaptureCameraPermissionDeniedPositiveButton">Ava sätted</string>
     <string name="imageCaptureCameraPermissionDeniedNegativeButton">Loobu</string>
+
+    <!-- Autofill -->
+    <string name="settingsAutofillLoginsSetting">Paroolid</string>
+    <string name="autofillLoginSavedSnackbarMessage">Parool salvestatud</string>
+    <string name="autofillLoginUpdatedSnackbarMessage">Parool uuendatud</string>
 </resources>

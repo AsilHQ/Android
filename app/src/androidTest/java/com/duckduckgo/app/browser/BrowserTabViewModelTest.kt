@@ -54,6 +54,9 @@ import com.duckduckgo.app.browser.BrowserTabViewModel.NavigationCommand
 import com.duckduckgo.app.browser.BrowserTabViewModel.NavigationCommand.Navigate
 import com.duckduckgo.app.browser.LongPressHandler.RequiredAction.DownloadFile
 import com.duckduckgo.app.browser.LongPressHandler.RequiredAction.OpenInNewTab
+import com.duckduckgo.app.browser.WebViewErrorResponse.BAD_URL
+import com.duckduckgo.app.browser.WebViewErrorResponse.LOADING
+import com.duckduckgo.app.browser.WebViewErrorResponse.OMITTED
 import com.duckduckgo.app.browser.addtohome.AddToHomeCapabilityDetector
 import com.duckduckgo.app.browser.applinks.AppLinksHandler
 import com.duckduckgo.app.browser.camera.CameraHardwareChecker
@@ -4552,6 +4555,29 @@ class BrowserTabViewModelTest {
         val params = buildFileChooserParams(arrayOf("application/pdf"))
         testee.showFileChooser(mockFileChooserCallback, params)
         assertCommandIssued<Command.ShowFileChooser>()
+    }
+
+    @Test
+    fun whenWebViewRefreshedThenBrowserErrorStateIsOmitted() {
+        testee.onWebViewRefreshed()
+
+        assertEquals(OMITTED, browserViewState().browserError)
+    }
+
+    @Test
+    fun whenWebViewRefreshedWithErrorThenBrowserErrorStateIsLoading() {
+        testee.onReceivedError(BAD_URL, "http://example.com")
+        testee.onWebViewRefreshed()
+
+        assertEquals(LOADING, browserViewState().browserError)
+    }
+
+    @Test
+    fun whenResetBrowserErrorThenBrowserErrorStateIsLoading() {
+        testee.onReceivedError(BAD_URL, "http://example.com")
+        assertEquals(BAD_URL, browserViewState().browserError)
+        testee.resetBrowserError()
+        assertEquals(OMITTED, browserViewState().browserError)
     }
 
     private fun aCredential(): LoginCredentials {

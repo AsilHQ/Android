@@ -93,6 +93,7 @@ import com.duckduckgo.app.browser.BrowserTabViewModel.OmnibarViewState
 import com.duckduckgo.app.browser.BrowserTabViewModel.PrivacyShieldViewState
 import com.duckduckgo.app.browser.BrowserTabViewModel.SavedSiteChangedViewState
 import com.duckduckgo.app.browser.DownloadConfirmationFragment.DownloadConfirmationDialogListener
+import com.duckduckgo.app.browser.WebViewErrorResponse.LOADING
 import com.duckduckgo.app.browser.WebViewErrorResponse.OMITTED
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter
 import com.duckduckgo.app.browser.cookies.ThirdPartyCookieManager
@@ -1020,7 +1021,7 @@ class BrowserTabFragment :
         dismissAppLinkSnackBar()
         errorSnackbar.dismiss()
         newBrowserTab.newTabLayout.show()
-        binding.browserLayout.gone()
+        webViewContainer.gone()
         omnibar.appBarLayout.setExpanded(true)
         webView?.onPause()
         webView?.hide()
@@ -1029,14 +1030,14 @@ class BrowserTabFragment :
 
     private fun showBrowser() {
         newBrowserTab.newTabLayout.gone()
-        binding.browserLayout.show()
+        webViewContainer.show()
         webView?.show()
         webView?.onResume()
         errorView.errorLayout.gone()
     }
 
     private fun showError(errorType: WebViewErrorResponse, url: String?) {
-        binding.browserLayout.gone()
+        webViewContainer.gone()
         newBrowserTab.newTabLayout.gone()
         omnibar.appBarLayout.setExpanded(true)
         omnibar.shieldIcon.isInvisible = true
@@ -1118,6 +1119,7 @@ class BrowserTabFragment :
     fun refresh() {
         webView?.reload()
         viewModel.onWebViewRefreshed()
+        viewModel.resetErrors()
     }
 
     private fun processCommand(it: Command?) {
@@ -1154,11 +1156,13 @@ class BrowserTabFragment :
 
             is NavigationCommand.NavigateBack -> {
                 dismissAppLinkSnackBar()
+                viewModel.refreshBrowserError()
                 webView?.goBackOrForward(-it.steps)
             }
 
             is NavigationCommand.NavigateForward -> {
                 dismissAppLinkSnackBar()
+                viewModel.refreshBrowserError()
                 webView?.goForward()
             }
 
@@ -3287,6 +3291,10 @@ class BrowserTabFragment :
                 lastSeenLoadingViewState = viewState
 
                 if (viewState.progress == MAX_PROGRESS) {
+                    if (lastSeenBrowserViewState?.browserError == LOADING) {
+                        showBrowser()
+                        viewModel.resetBrowserError()
+                    }
                     webView?.setBottomMatchingBehaviourEnabled(true)
                 }
 
