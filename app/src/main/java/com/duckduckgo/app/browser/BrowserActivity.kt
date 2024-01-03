@@ -175,6 +175,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
         intent?.getStringExtra(LAUNCH_FROM_NOTIFICATION_PIXEL_NAME)?.let {
             viewModel.onLaunchedFromNotification(it)
         }
+        handleBottomNavigationView()
         configureOnBackPressedListener()
     }
 
@@ -205,6 +206,41 @@ open class BrowserActivity : DuckDuckGoActivity() {
         }
 
         viewModel.launchFromThirdParty()
+    }
+
+    private fun handleBottomNavigationView() {
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.back_button -> {
+                    println("Back button clicked")
+                    true
+                }
+
+                R.id.forward_button -> {
+                    println("Forward button clicked")
+                    true
+                }
+
+                R.id.home_button -> {
+                    println("Home button clicked")
+                    true
+                }
+
+                R.id.tabs_button -> {
+                    println("Tabs button clicked")
+                    true
+                }
+
+                R.id.settings_button -> {
+                    println("Settings button clicked")
+                    true
+                }
+
+                else -> {
+                    false
+                }
+            }
+        }
     }
 
     private fun initializeServiceWorker() {
@@ -284,7 +320,10 @@ open class BrowserActivity : DuckDuckGoActivity() {
         transaction.commit()
     }
 
-    override fun onKeyLongPress(keyCode: Int, event: KeyEvent?): Boolean {
+    override fun onKeyLongPress(
+        keyCode: Int,
+        event: KeyEvent?
+    ): Boolean {
         return if (keyCode == KeyEvent.KEYCODE_BACK) {
             currentTab?.onLongPressBackButton()
             true
@@ -650,6 +689,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
                     override fun onDialogShown() {
                         viewModel.onAppRatingDialogShown(promptCount)
                     }
+
                     override fun onDialogCancelled() {
                         viewModel.onUserCancelledRateAppDialog(promptCount)
                     }
@@ -678,6 +718,7 @@ open class BrowserActivity : DuckDuckGoActivity() {
                     override fun onDialogShown() {
                         viewModel.onGiveFeedbackDialogShown(promptCount)
                     }
+
                     override fun onDialogCancelled() {
                         viewModel.onUserCancelledGiveFeedbackDialog(promptCount)
                     }
