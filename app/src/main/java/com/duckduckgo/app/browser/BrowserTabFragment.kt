@@ -132,6 +132,7 @@ import com.duckduckgo.app.browser.omnibar.animations.PrivacyShieldAnimationHelpe
 import com.duckduckgo.app.browser.omnibar.animations.TrackersAnimatorListener
 import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.browser.remotemessage.SharePromoLinkRMFBroadCastReceiver
+import com.duckduckgo.app.browser.safe_gaze.SafeGazeJsInterface
 import com.duckduckgo.app.browser.session.WebViewSessionStorage
 import com.duckduckgo.app.browser.shortcut.ShortcutBuilder
 import com.duckduckgo.app.browser.tabpreview.WebViewPreviewGenerator
@@ -251,15 +252,15 @@ import com.duckduckgo.voice.api.VoiceSearchLauncher.Source.BROWSER
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.cancellable
+import org.json.JSONObject
+import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.cancellable
-import org.json.JSONObject
-import timber.log.Timber
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -2096,7 +2097,7 @@ class BrowserTabFragment :
         webView?.let {
             it.webViewClient = browserWebViewClient
             it.webChromeClient = browserWebChromeClient
-
+            it.addJavascriptInterface(SafeGazeJsInterface(), "SafeGazeInterface")
             it.settings.apply {
                 userAgentString = userAgentProvider.userAgent()
                 javaScriptEnabled = true
