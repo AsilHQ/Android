@@ -49,10 +49,10 @@ import com.duckduckgo.mobile.android.vpn.ui.onboarding.Command.ShowVpnAlwaysOnCo
 import com.duckduckgo.mobile.android.vpn.ui.onboarding.Command.ShowVpnConflictDialog
 import com.duckduckgo.mobile.android.vpn.ui.tracker_activity.DeviceShieldTrackerActivity
 import com.duckduckgo.navigation.api.GlobalActivityStarter
-import javax.inject.Inject
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @InjectWith(ActivityScope::class)
 @ContributeToActivityStarter(AppTrackerOnboardingActivityWithEmptyParamsParams::class)
@@ -303,6 +303,6 @@ class VpnOnboardingActivity : DuckDuckGoActivity() {
 
     companion object {
         private const val REQUEST_ASK_VPN_PERMISSION = 101
-        private const val FAQ_WEBSITE = "https://help.duckduckgo.com/duckduckgo-help-pages/p-app-tracking-protection/what-is-app-tracking-protection/"
+        private const val FAQ_WEBSITE = "https://asil.co/asil-help-pages/p-app-tracking-protection/what-is-app-tracking-protection/"
     }
 }
