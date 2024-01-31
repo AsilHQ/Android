@@ -272,6 +272,7 @@ import kotlin.coroutines.CoroutineContext
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
+import java.util.Locale
 
 @InjectWith(FragmentScope::class)
 class BrowserTabFragment :
@@ -3551,16 +3552,31 @@ class BrowserTabFragment :
         }
 
         private fun renderToolbarMenus(viewState: BrowserViewState) {
-            if (viewState.browserShowing) {
-                omnibar.daxIcon.isVisible = viewState.showDaxIcon
-                omnibar.shieldIcon.isInvisible = !viewState.showPrivacyShield || viewState.showDaxIcon
-                omnibar.clearTextButton.isVisible = viewState.showClearButton
-                omnibar.searchIcon.isVisible = viewState.showSearchIcon
-            } else {
-                omnibar.daxIcon.isVisible = false
-                omnibar.shieldIcon.isVisible = false
-                omnibar.clearTextButton.isVisible = viewState.showClearButton
-                omnibar.searchIcon.isVisible = true
+            val currentLanguage = Locale.getDefault().language
+            if (currentLanguage == "ar"){
+                if (viewState.browserShowing) {
+                    omnibar.daxIcon.isVisible = true
+                    omnibar.shieldIcon.isInvisible = true
+                    omnibar.clearTextButton.isVisible = viewState.showClearButton
+                    omnibar.searchIcon.isVisible = viewState.showSearchIcon
+                } else {
+                    omnibar.daxIcon.isVisible = false
+                    omnibar.shieldIcon.isVisible = false
+                    omnibar.clearTextButton.isVisible = viewState.showClearButton
+                    omnibar.searchIcon.isVisible = true
+                }
+            }else{
+                if (viewState.browserShowing) {
+                    omnibar.daxIcon.isVisible = viewState.showDaxIcon
+                    omnibar.shieldIcon.isInvisible = !viewState.showPrivacyShield || viewState.showDaxIcon
+                    omnibar.clearTextButton.isVisible = viewState.showClearButton
+                    omnibar.searchIcon.isVisible = viewState.showSearchIcon
+                } else {
+                    omnibar.daxIcon.isVisible = false
+                    omnibar.shieldIcon.isVisible = false
+                    omnibar.clearTextButton.isVisible = viewState.showClearButton
+                    omnibar.searchIcon.isVisible = true
+                }
             }
 
             omnibar.spacer.isVisible = viewState.showClearButton && lastSeenBrowserViewState?.showVoiceSearch ?: false
