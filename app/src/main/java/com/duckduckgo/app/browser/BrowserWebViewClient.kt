@@ -49,6 +49,7 @@ import com.duckduckgo.app.browser.WebViewPixelName.WEB_RENDERER_GONE_KILLED
 import com.duckduckgo.app.browser.certificates.rootstore.CertificateValidationState
 import com.duckduckgo.app.browser.certificates.rootstore.TrustedCertificateStore
 import com.duckduckgo.app.browser.cookies.ThirdPartyCookieManager
+import com.duckduckgo.app.browser.host_blocker.helper.HostBlockerHelper
 import com.duckduckgo.app.browser.httpauth.WebViewHttpAuthStore
 import com.duckduckgo.app.browser.logindetection.DOMLoginDetector
 import com.duckduckgo.app.browser.logindetection.WebNavigationEvent
@@ -142,126 +143,129 @@ class BrowserWebViewClient @Inject constructor(
         isForMainFrame: Boolean,
     ): Boolean {
         Timber.v("shouldOverride $url")
-        try {
-            if (isForMainFrame && dosDetector.isUrlGeneratingDos(url)) {
-                webView.loadUrl("about:blank")
-                webViewClientListener?.dosAttackDetected()
-                return false
-            }
-
-            return when (val urlType = specialUrlDetector.determineType(initiatingUrl = webView.originalUrl, uri = url)) {
-                is SpecialUrlDetector.UrlType.Email -> {
-                    webViewClientListener?.sendEmailRequested(urlType.emailAddress)
-                    true
+        if (!(HostBlockerHelper(webView, context = context).blockUrl(url.toString()))){
+            try {
+                if (isForMainFrame && dosDetector.isUrlGeneratingDos(url)) {
+                    webView.loadUrl("about:blank")
+                    webViewClientListener?.dosAttackDetected()
+                    return false
                 }
 
-                is SpecialUrlDetector.UrlType.Telephone -> {
-                    webViewClientListener?.dialTelephoneNumberRequested(urlType.telephoneNumber)
-                    true
-                }
-
-                is SpecialUrlDetector.UrlType.Sms -> {
-                    webViewClientListener?.sendSmsRequested(urlType.telephoneNumber)
-                    true
-                }
-
-                is SpecialUrlDetector.UrlType.AppLink -> {
-                    Timber.i("Found app link for ${urlType.uriString}")
-                    webViewClientListener?.let { listener ->
-                        return listener.handleAppLink(urlType, isForMainFrame)
+                return when (val urlType = specialUrlDetector.determineType(initiatingUrl = webView.originalUrl, uri = url)) {
+                    is SpecialUrlDetector.UrlType.Email -> {
+                        webViewClientListener?.sendEmailRequested(urlType.emailAddress)
+                        true
                     }
-                    false
-                }
 
-                is SpecialUrlDetector.UrlType.NonHttpAppLink -> {
-                    Timber.i("Found non-http app link for ${urlType.uriString}")
-                    if (isForMainFrame) {
+                    is SpecialUrlDetector.UrlType.Telephone -> {
+                        webViewClientListener?.dialTelephoneNumberRequested(urlType.telephoneNumber)
+                        true
+                    }
+
+                    is SpecialUrlDetector.UrlType.Sms -> {
+                        webViewClientListener?.sendSmsRequested(urlType.telephoneNumber)
+                        true
+                    }
+
+                    is SpecialUrlDetector.UrlType.AppLink -> {
+                        Timber.i("Found app link for ${urlType.uriString}")
                         webViewClientListener?.let { listener ->
-                            return listener.handleNonHttpAppLink(urlType)
+                            return listener.handleAppLink(urlType, isForMainFrame)
                         }
+                        false
                     }
-                    true
-                }
 
-                is SpecialUrlDetector.UrlType.Unknown -> {
-                    Timber.w("Unable to process link type for ${urlType.uriString}")
-                    webView.originalUrl?.let {
-                        webView.loadUrl(it)
+                    is SpecialUrlDetector.UrlType.NonHttpAppLink -> {
+                        Timber.i("Found non-http app link for ${urlType.uriString}")
+                        if (isForMainFrame) {
+                            webViewClientListener?.let { listener ->
+                                return listener.handleNonHttpAppLink(urlType)
+                            }
+                        }
+                        true
                     }
-                    false
-                }
 
-                is SpecialUrlDetector.UrlType.SearchQuery -> false
-                is SpecialUrlDetector.UrlType.Web -> {
-                    if (requestRewriter.shouldRewriteRequest(url)) {
-                        val newUri = requestRewriter.rewriteRequestWithCustomQueryParams(url)
-                        webView.loadUrl(newUri.toString())
-                        return true
+                    is SpecialUrlDetector.UrlType.Unknown -> {
+                        Timber.w("Unable to process link type for ${urlType.uriString}")
+                        webView.originalUrl?.let {
+                            webView.loadUrl(it)
+                        }
+                        false
                     }
-                    if (isForMainFrame) {
-                        webViewClientListener?.willOverrideUrl(url.toString())
-                    }
-                    false
-                }
 
-                is SpecialUrlDetector.UrlType.ExtractedAmpLink -> {
-                    if (isForMainFrame) {
-                        webViewClientListener?.let { listener ->
-                            listener.startProcessingTrackingLink()
-                            Timber.d("AMP link detection: Loading extracted URL: ${urlType.extractedUrl}")
-                            loadUrl(listener, webView, urlType.extractedUrl)
+                    is SpecialUrlDetector.UrlType.SearchQuery -> false
+                    is SpecialUrlDetector.UrlType.Web -> {
+                        if (requestRewriter.shouldRewriteRequest(url)) {
+                            val newUri = requestRewriter.rewriteRequestWithCustomQueryParams(url)
+                            webView.loadUrl(newUri.toString())
                             return true
                         }
-                    }
-                    false
-                }
-
-                is SpecialUrlDetector.UrlType.CloakedAmpLink -> {
-                    val lastAmpLinkInfo = ampLinks.lastAmpLinkInfo
-                    if (isForMainFrame && (lastAmpLinkInfo == null || lastPageStarted != lastAmpLinkInfo.destinationUrl)) {
-                        webViewClientListener?.let { listener ->
-                            listener.handleCloakedAmpLink(urlType.ampUrl)
-                            return true
+                        if (isForMainFrame) {
+                            webViewClientListener?.willOverrideUrl(url.toString())
                         }
+                        false
                     }
-                    false
-                }
 
-                is SpecialUrlDetector.UrlType.TrackingParameterLink -> {
-                    if (isForMainFrame) {
-                        webViewClientListener?.let { listener ->
-                            listener.startProcessingTrackingLink()
-                            Timber.d("Loading parameter cleaned URL: ${urlType.cleanedUrl}")
+                    is SpecialUrlDetector.UrlType.ExtractedAmpLink -> {
+                        if (isForMainFrame) {
+                            webViewClientListener?.let { listener ->
+                                listener.startProcessingTrackingLink()
+                                Timber.d("AMP link detection: Loading extracted URL: ${urlType.extractedUrl}")
+                                loadUrl(listener, webView, urlType.extractedUrl)
+                                return true
+                            }
+                        }
+                        false
+                    }
 
-                            return when (
-                                val parameterStrippedType =
-                                    specialUrlDetector.processUrl(initiatingUrl = webView.originalUrl, uriString = urlType.cleanedUrl)
-                            ) {
-                                is SpecialUrlDetector.UrlType.AppLink -> {
-                                    loadUrl(listener, webView, urlType.cleanedUrl)
-                                    listener.handleAppLink(parameterStrippedType, isForMainFrame)
-                                }
+                    is SpecialUrlDetector.UrlType.CloakedAmpLink -> {
+                        val lastAmpLinkInfo = ampLinks.lastAmpLinkInfo
+                        if (isForMainFrame && (lastAmpLinkInfo == null || lastPageStarted != lastAmpLinkInfo.destinationUrl)) {
+                            webViewClientListener?.let { listener ->
+                                listener.handleCloakedAmpLink(urlType.ampUrl)
+                                return true
+                            }
+                        }
+                        false
+                    }
 
-                                is SpecialUrlDetector.UrlType.ExtractedAmpLink -> {
-                                    Timber.d("AMP link detection: Loading extracted URL: ${parameterStrippedType.extractedUrl}")
-                                    loadUrl(listener, webView, parameterStrippedType.extractedUrl)
-                                    true
-                                }
+                    is SpecialUrlDetector.UrlType.TrackingParameterLink -> {
+                        if (isForMainFrame) {
+                            webViewClientListener?.let { listener ->
+                                listener.startProcessingTrackingLink()
+                                Timber.d("Loading parameter cleaned URL: ${urlType.cleanedUrl}")
 
-                                else -> {
-                                    loadUrl(listener, webView, urlType.cleanedUrl)
-                                    true
+                                return when (
+                                    val parameterStrippedType =
+                                        specialUrlDetector.processUrl(initiatingUrl = webView.originalUrl, uriString = urlType.cleanedUrl)
+                                ) {
+                                    is SpecialUrlDetector.UrlType.AppLink -> {
+                                        loadUrl(listener, webView, urlType.cleanedUrl)
+                                        listener.handleAppLink(parameterStrippedType, isForMainFrame)
+                                    }
+
+                                    is SpecialUrlDetector.UrlType.ExtractedAmpLink -> {
+                                        Timber.d("AMP link detection: Loading extracted URL: ${parameterStrippedType.extractedUrl}")
+                                        loadUrl(listener, webView, parameterStrippedType.extractedUrl)
+                                        true
+                                    }
+
+                                    else -> {
+                                        loadUrl(listener, webView, urlType.cleanedUrl)
+                                        true
+                                    }
                                 }
                             }
                         }
+                        false
                     }
-                    false
                 }
+            } catch (e: Throwable) {
+                crashLogger.logCrash(CrashLogger.Crash(shortName = "m_webview_should_override", t = e))
+                return false
             }
-        } catch (e: Throwable) {
-            crashLogger.logCrash(CrashLogger.Crash(shortName = "m_webview_should_override", t = e))
-            return false
         }
+        return false
     }
 
     private fun handleSafeGaze(webView: WebView) {

@@ -17,7 +17,12 @@
 package com.duckduckgo.app.global
 
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.work.OneTimeWorkRequest
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.duckduckgo.app.browser.BuildConfig
+import com.duckduckgo.app.browser.host_blocker.HostBlockerWorker
 import com.duckduckgo.app.di.AppComponent
 import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.app.di.DaggerAppComponent
@@ -37,6 +42,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.*
 import org.threeten.bp.zone.ZoneRulesProvider
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 private const val VPN_PROCESS_NAME = "vpn"
 
@@ -79,7 +85,7 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
         setupActivityLifecycleCallbacks()
         configureUncaughtExceptionHandlerBrowser()
         initializeDateLibrary()
-
+        scheduleTasks()
         // Deprecated, we need to move all these into AppLifecycleEventObserver
         ProcessLifecycleOwner.get().lifecycle.apply {
             primaryLifecycleObserverPluginPoint.getPlugins().forEach {
@@ -114,6 +120,32 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
 
     private fun setupActivityLifecycleCallbacks() {
         activityLifecycleCallbacks.getPlugins().forEach { registerActivityLifecycleCallbacks(it) }
+    }
+
+    private fun scheduleTasks() {
+        val initialWorkRequest = OneTimeWorkRequest.Builder(HostBlockerWorker::class.java).build()
+        val periodicWorkRequest = PeriodicWorkRequest.Builder(
+            HostBlockerWorker::class.java, 7, TimeUnit.DAYS
+        ).build()
+
+        val workManager = WorkManager.getInstance(this)
+        workManager.enqueue(initialWorkRequest)
+        workManager.enqueue(periodicWorkRequest)
+
+        val initialWorkRequestStatus = workManager.getWorkInfoById(initialWorkRequest.id).get()
+        val periodicWorkRequestStatus = workManager.getWorkInfoById(periodicWorkRequest.id).get()
+
+        if (initialWorkRequestStatus.state == WorkInfo.State.SUCCEEDED) {
+            println("Initial worked")
+        } else if (initialWorkRequestStatus.state == WorkInfo.State.FAILED) {
+            println("Initial failed")
+        }
+
+        if (periodicWorkRequestStatus.state == WorkInfo.State.SUCCEEDED) {
+            println("periodicWorkRequestStatus worked")
+        } else if (periodicWorkRequestStatus.state == WorkInfo.State.FAILED) {
+            println("periodicWorkRequestStatus failed")
+        }
     }
 
     private fun configureUncaughtExceptionHandlerBrowser() {
