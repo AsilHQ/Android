@@ -799,4 +799,7 @@
     <string name="gender">Gender</string>
     <string name="religion_status">Religion Status</string>
     <string name="save">Save</string>
+    <string name="kahftube">Kahf Tube</string>
+    <string name="allow">Allow</string>
+    <string name="kahf_tube_email_access_message">Kah Tube wants your permission to access your Youtube email and name to use Youtube Filtration feature.</string>
 </resources>

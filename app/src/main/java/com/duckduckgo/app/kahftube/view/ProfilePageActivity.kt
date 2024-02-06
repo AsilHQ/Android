@@ -20,7 +20,7 @@ class ProfilePageActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         sharedPref = SharedPreferenceManager(this@ProfilePageActivity)
-        saveTempDummyInfo()
+        //saveTempDummyInfo()
         prepareViews()
         initListeners()
     }

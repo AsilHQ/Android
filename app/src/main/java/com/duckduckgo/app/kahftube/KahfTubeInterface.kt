@@ -3,6 +3,8 @@ package com.duckduckgo.app.kahftube
 import android.content.Context
 import android.webkit.JavascriptInterface
 import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
+import org.halalz.kahftube.enums.GenderEnum
+import org.halalz.kahftube.enums.PracticingLevelEnum
 import timber.log.Timber
 
 /**
@@ -50,12 +52,20 @@ class KahfTubeInterface(
 
     @JavascriptInterface
     fun getUserGender(): Int {
-        return SharedPreferenceManager(context).getIntValue(KeyString.GENDER)
+        return if (SharedPreferenceManager(context).getIntValue(KeyString.GENDER) == -1) {
+            GenderEnum.MALE.value //default set to male
+        } else {
+            SharedPreferenceManager(context).getIntValue(KeyString.GENDER)
+        }
     }
 
     @JavascriptInterface
     fun getUserPracticingLevel(): Int {
-        return SharedPreferenceManager(context).getIntValue(KeyString.PRACTICING_LEVEL)
+        return if (SharedPreferenceManager(context).getIntValue(KeyString.PRACTICING_LEVEL) == -1) {
+            PracticingLevelEnum.PRACTICING_MUSLIM.value //default set to male
+        } else {
+            SharedPreferenceManager(context).getIntValue(KeyString.PRACTICING_LEVEL)
+        }
     }
 
     @JavascriptInterface
