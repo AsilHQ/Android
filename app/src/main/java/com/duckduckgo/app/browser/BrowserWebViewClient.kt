@@ -113,6 +113,7 @@ class BrowserWebViewClient @Inject constructor(
     var webViewClientListener: WebViewClientListener? = null
     private var lastPageStarted: String? = null
     private var isMainJSLoaded = false
+    private var isEmailAccessForKahfTubeDialogShowed = false
     lateinit var activity: FragmentActivity
 
     /**
@@ -291,9 +292,11 @@ class BrowserWebViewClient @Inject constructor(
             webView.injectJavascriptFileFromAsset("kahftube/email.js")
         } else */
         if (!isMainJSLoaded && url?.contains("m.youtube.com") == true) {
-            if (SharedPreferenceManager(context).getValue(KeyString.NAME).isEmpty() || SharedPreferenceManager(context).getValue(KeyString.NAME)
-                    .contentEquals("Guest", true)
+            if (!isEmailAccessForKahfTubeDialogShowed
+                && (SharedPreferenceManager(context).getValue(KeyString.NAME).isEmpty()
+                    || SharedPreferenceManager(context).getValue(KeyString.NAME).contentEquals("Guest", true))
             ) {
+                isEmailAccessForKahfTubeDialogShowed = true
                 showEmailAccessForKahfTubeDialog()
             }
             isMainJSLoaded = true
