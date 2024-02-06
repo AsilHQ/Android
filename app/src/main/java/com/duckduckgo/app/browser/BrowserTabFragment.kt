@@ -179,13 +179,16 @@ import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.app.survey.model.Survey
 import com.duckduckgo.app.survey.ui.SurveyActivity
 import com.duckduckgo.app.survey.ui.SurveyActivity.Companion.SurveySource
+import com.duckduckgo.app.tabs.BrowserNav
 import com.duckduckgo.app.tabs.model.TabEntity
+import com.duckduckgo.app.tabs.model.TabRepository
 import com.duckduckgo.app.tabs.ui.GridViewColumnCalculator
 import com.duckduckgo.app.tabs.ui.TabSwitcherActivity
 import com.duckduckgo.app.widget.AddWidgetLauncher
 import com.duckduckgo.appbuildconfig.api.AppBuildConfig
 import com.duckduckgo.autoconsent.api.Autoconsent
 import com.duckduckgo.autoconsent.api.AutoconsentCallback
+import com.duckduckgo.autoconsent.api.AutoconsentNav
 import com.duckduckgo.autofill.api.AutofillCapabilityChecker
 import com.duckduckgo.autofill.api.AutofillEventListener
 import com.duckduckgo.autofill.api.AutofillFragmentResultsPlugin
@@ -211,7 +214,9 @@ import com.duckduckgo.autofill.api.domain.app.LoginTriggerType
 import com.duckduckgo.autofill.api.emailprotection.EmailInjector
 import com.duckduckgo.autofill.api.store.AutofillStore.ContainsCredentialsResult.*
 import com.duckduckgo.browser.api.brokensite.BrokenSiteData
+import com.duckduckgo.browser.api.brokensite.BrokenSiteNav
 import com.duckduckgo.common.ui.DuckDuckGoFragment
+import com.duckduckgo.common.ui.store.AppTheme
 import com.duckduckgo.common.ui.store.BrowserAppTheme
 import com.duckduckgo.common.ui.view.DaxDialog
 import com.duckduckgo.common.ui.view.DaxDialogListener
@@ -250,6 +255,7 @@ import com.duckduckgo.js.messaging.api.JsMessageHelper
 import com.duckduckgo.js.messaging.api.JsMessaging
 import com.duckduckgo.mobile.android.app.tracking.ui.AppTrackingProtectionScreens.AppTrackerOnboardingActivityWithEmptyParamsParams
 import com.duckduckgo.navigation.api.GlobalActivityStarter
+import com.duckduckgo.privacy.dashboard.impl.ui.PrivacyDashboardRendererFactory
 import com.duckduckgo.remote.messaging.api.RemoteMessage
 import com.duckduckgo.savedsites.api.models.SavedSite
 import com.duckduckgo.savedsites.api.models.SavedSite.Bookmark
@@ -444,6 +450,22 @@ class BrowserTabFragment :
     @Inject
     lateinit var externalCameraLauncher: UploadFromExternalCameraLauncher
 
+    @Inject
+    lateinit var repository: TabRepository
+
+    @Inject
+    lateinit var rendererFactory: PrivacyDashboardRendererFactory
+
+    @Inject
+    lateinit var autoconsentNav: AutoconsentNav
+
+    @Inject
+    lateinit var brokenSiteNav: BrokenSiteNav
+
+    @Inject
+    lateinit var browserNav: BrowserNav
+
+
     /**
      * We use this to monitor whether the user was seeing the in-context Email Protection signup prompt
      * This is needed because the activity stack will be cleared if an external link is opened in our browser
@@ -527,6 +549,9 @@ class BrowserTabFragment :
 
     private val safeGazeIcon: AppCompatImageView
         get() = omnibar.safeGazeIcon
+
+    private val asilShieldIcon: AppCompatImageView
+        get() = omnibar.asilIcon
 
     // private val fireMenuButton: ViewGroup
     //     get() = omnibar.fireIconMenu
@@ -813,13 +838,14 @@ class BrowserTabFragment :
             dialog.deleteBookmarkListener = viewModel
         }
         handleSafeGazePopUp()
+        handleAsilShieldPopUp()
     }
 
     @SuppressLint("InflateParams")
     private fun handleSafeGazePopUp(){
         val popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up, null)
         val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        val toggle = popupView.findViewById<SwitchCompat>(R.id.asil_shield_toggle_button)
+        val toggle = popupView.findViewById<SwitchCompat>(R.id.safe_gaze_toggle_button)
         val sharedPref = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
         val editor = sharedPref.edit()
         if (sharedPref.getBoolean("safe_gaze_active", true)){
@@ -886,6 +912,39 @@ class BrowserTabFragment :
         }
     }
 
+    private fun handleAsilShieldPopUp() {
+        val popupView = LayoutInflater.from(context).inflate(R.layout.asil_shield_pop_up, null)
+        val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        asilShieldIcon.setOnClickListener {
+            val iconRect = Rect()
+            asilShieldIcon.getGlobalVisibleRect(iconRect)
+            val x = iconRect.left
+            val y = iconRect.top
+            println("x is -> $x")
+            popupWindow.apply {
+                animationStyle = 2132017505
+                isFocusable = true
+            }
+            asilShieldIcon.post {
+                val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
+                val popUpLayingOut = 300.dpToPx(context?.resources!!.displayMetrics) - leftOverDevicePixel
+                val newPopUpPosition = (x - popUpLayingOut) - 50
+                popupWindow.showAtLocation(
+                    asilShieldIcon,
+                    Gravity.NO_GRAVITY,
+                    newPopUpPosition,
+                    (y + omnibar.toolbar.height) - 25,
+                )
+                val pointerArrow =
+                    popupView.findViewById<ImageView>(R.id.pointer_arrow_asil_shield_image_view)
+                val pointerArrowParams =
+                    pointerArrow.layoutParams as ConstraintLayout.LayoutParams
+                pointerArrowParams.rightMargin = leftOverDevicePixel - 170
+                pointerArrow.layoutParams = pointerArrowParams
+            }
+        }
+    }
     @Suppress("DEPRECATION")
     private fun getDeviceWidthInPixels(context: Context): Int {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
