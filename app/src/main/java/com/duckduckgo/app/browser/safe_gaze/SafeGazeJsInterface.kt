@@ -2,48 +2,91 @@ package com.duckduckgo.app.browser.safe_gaze
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Bitmap
 import android.webkit.JavascriptInterface
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
+import com.duckduckgo.app.safegaze.ondeviceobjectdetection.ObjectDetectionHelper
 
-class SafeGazeJsInterface(context: Context) {
+class SafeGazeJsInterface(private val context: Context) {
 
     private val preferences: SharedPreferences =
         context.getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
 
+    private val objectDetectionHelper = ObjectDetectionHelper(context)
+
+    private fun isImageContainsHumanFromWebView(url: String, callback: (Boolean) -> Unit) {
+        loadImageBitmapFromUrl(url, context) { bitmap ->
+            if (bitmap != null) {
+                val containsHuman = objectDetectionHelper.isImageContainsHuman(bitmap)
+                callback(containsHuman)
+            } else {
+                callback(false)
+            }
+        }
+    }
+
+    private fun loadImageBitmapFromUrl(url: String, context: Context, listener: (Bitmap?) -> Unit) {
+        try {
+            Glide.with(context)
+                .asBitmap()
+                .load(url)
+                .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE))
+                .into(object : SimpleTarget<Bitmap>() {
+                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                        listener(resource)
+                    }
+                })
+        } catch (e: Exception) {
+            e.printStackTrace()
+            listener(null)
+        }
+    }
+
     @JavascriptInterface
     fun sendMessage(message: String) {
-        if (message.contains("page_refresh")){
-            preferences.edit().putInt("session_cencored_count", 0).apply()
-        }else{
+        if (message.startsWith("coreML/-/")){
+            isImageContainsHumanFromWebView(message.removePrefix("coreML/-/")){
+                println("Is human? -> $it")
+            }
+        }
+        if (message.contains("page_refresh")) {
+            preferences.edit().putInt("session_censored_count", 0).apply()
+        } else if(message.contains("replaced")) {
             handleAllTimeCounter()
             handleCurrentSessionCounter()
         }
     }
 
-    private fun handleAllTimeCounter(){
+    private fun handleAllTimeCounter() {
         val currentAllTimeCounter = getAllTimeCounter()
         val newAllTimeCounter = currentAllTimeCounter + 1
         saveAllTimeCounterValue(newAllTimeCounter)
     }
 
-    private fun handleCurrentSessionCounter(){
+    private fun handleCurrentSessionCounter() {
+        println("Currenct session counter -> ${getCurrentSessionCounter()}")
         val currentSessionCounter = getCurrentSessionCounter()
         val newSessionCounter = currentSessionCounter + 1
         saveSessionCounterValue(newSessionCounter)
     }
 
     private fun saveAllTimeCounterValue(value: Int) {
-        preferences.edit().putInt("all_time_cencored_count", value).apply()
+        preferences.edit().putInt("all_time_censored_count", value).apply()
     }
 
     private fun getAllTimeCounter(): Int {
-        return preferences.getInt("all_time_cencored_count", 0)
+        return preferences.getInt("all_time_censored_count", 0)
     }
 
     private fun saveSessionCounterValue(value: Int) {
-        preferences.edit().putInt("session_cencored_count", value).apply()
+        preferences.edit().putInt("session_censored_count", value).apply()
     }
 
     private fun getCurrentSessionCounter(): Int {
-        return preferences.getInt("session_cencored_count", 0)
+        return preferences.getInt("session_censored_count", 0)
     }
 }
