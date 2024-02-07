@@ -9,6 +9,7 @@ import com.google.gson.Gson
 
 class KahfTubeUnsubscribeInterface(
     private val haramChannelIds: List<String>,
+    private val cookies: String,
     private val javaScriptCallBack: JavaScriptCallBack
 ) {
 
@@ -21,9 +22,12 @@ class KahfTubeUnsubscribeInterface(
 
     @JavascriptInterface
     fun getHaramChannelIds(): String {
-
-        //return haramChannelIds
         return Gson().toJson(haramChannelIds)
+    }
+
+    @JavascriptInterface
+    fun getCookies(): String {
+        return cookies
     }
 
     interface JavaScriptCallBack {

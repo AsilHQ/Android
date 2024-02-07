@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
+import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
@@ -78,7 +79,11 @@ class ProfilePageActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun unsubscribe(channelList: List<String>) {
+        //val cookies = CookieManager.getInstance().getCookie("https://m.youtube.com/","SAPISID")
+        val cookies = getCookie("https://m.youtube.com/", "SAPISID") ?: ""
+
         Timber.d("KahfTubeUnsubscribeInterface:: Unsubscribe:: channelList: $channelList")
+        Timber.d("KahfTubeUnsubscribeInterface:: Unsubscribe:: cookies: $cookies")
         //showEmailAccessForKahfTubeDialog()
         progressDialog.show()
         binding.headlessKahfTubeWebview.apply {
@@ -98,6 +103,7 @@ class ProfilePageActivity : AppCompatActivity() {
             addJavascriptInterface(
                 KahfTubeUnsubscribeInterface(
                     channelList,
+                    cookies,
                     object : KahfTubeUnsubscribeInterface.JavaScriptCallBack {
                         override fun responseCallback(isSuccess: Boolean) {
                             lifecycleScope.launch {
@@ -191,5 +197,24 @@ class ProfilePageActivity : AppCompatActivity() {
             )
             loadUrl("https://m.youtube.com/feed/channels")
         }
+    }
+
+    fun getCookie(
+        siteName: String?,
+        cookieName: String?
+    ): String? {
+        var cookieValue: String? = null
+        val cookieManager = CookieManager.getInstance()
+        val cookies = cookieManager.getCookie(siteName)
+        Timber.d("KahfTubeUnsubscribeInterface:: Unsubscribe:: cookies: getCookie: $cookies")
+        val temp = cookies.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        for (ar1 in temp) {
+            if (ar1.contains(cookieName!!)) {
+                val temp1 = ar1.split("=".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                cookieValue = temp1[1]
+                break
+            }
+        }
+        return cookieValue
     }
 }
