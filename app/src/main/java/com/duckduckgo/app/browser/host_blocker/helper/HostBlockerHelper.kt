@@ -82,8 +82,8 @@ class HostBlockerHelper(
         "</body>\n" +
         "</html>\n"
     
-    @SuppressLint("SetJavaScriptEnabled") fun blockUrl(uri: String): Boolean{
-        return if (shouldBlockHost(uri)){
+    @SuppressLint("SetJavaScriptEnabled") fun blockUrl(uri: String, isQuery: Boolean = false): Boolean{
+        return if (shouldBlockHost(uri, isQuery)){
             val dataUri = "data:text/html;charset=utf-8;base64," + Base64.encodeToString(
                 errorHtml.toByteArray(),
                 Base64.NO_PADDING,
@@ -96,12 +96,15 @@ class HostBlockerHelper(
         }
     }
 
-    private fun shouldBlockHost(url: String?): Boolean {
+    private fun shouldBlockHost(url: String?, isQuery: Boolean): Boolean {
+        val host: String = if (isQuery){
+            url ?: ""
+        }else{
+            extractHost(url)
+        }
+
         try {
             val hostsTxtFilePath = "${context?.filesDir}/hosts.txt"
-            val host = extractHost(url)
-            Timber.tag("HostBlocker").d("URL string -> $url")
-            Timber.tag("HostBlocker").d("Extracted Host -> ${extractHost(url)}")
             val file = File(hostsTxtFilePath)
             if (!file.exists()) {
                 Timber.tag("HostBlocker").d("Hosts file not found at path: $hostsTxtFilePath")
