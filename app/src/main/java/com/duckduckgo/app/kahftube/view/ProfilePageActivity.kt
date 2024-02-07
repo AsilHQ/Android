@@ -1,17 +1,34 @@
 package org.halalz.kahftube.view
 
+import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.duckduckgo.app.browser.R.string
 import com.duckduckgo.app.browser.databinding.ActivityProfilePageBinding
+import com.duckduckgo.app.kahftube.KahfTubeInterface
+import com.duckduckgo.app.kahftube.KahfTubeInterface.JavaScriptCallBack
 import com.duckduckgo.app.kahftube.SharedPreferenceManager
 import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
+import com.duckduckgo.app.kahftube.model.ChannelModel
+import com.duckduckgo.app.kahftube.utils.CustomDialog
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.launch
+import org.halalz.kahftube.extentions.injectJavascriptFileFromAsset
 import org.halalz.kahftube.extentions.loadFromUrl
+import org.json.JSONArray
+import timber.log.Timber
 
 class ProfilePageActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityProfilePageBinding
     private lateinit var sharedPref: SharedPreferenceManager
+    private lateinit var progressDialog: Dialog
+    private lateinit var subscribedChannelDialog: Dialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,8 +56,23 @@ class ProfilePageActivity : AppCompatActivity() {
             startActivity(Intent(this@ProfilePageActivity, PreferencePageActivity::class.java))
         }
         binding.layoutUnsubscribe.setOnClickListener {
-            //startActivity(Intent(this@ProfilePageActivity,PreferencePageActivity::class.java))
+            getSubscribedChannel()
+            // showSubscribedChannelDialog()
         }
+    }
+
+    private fun showSubscribedChannelDialog(channelList: List<ChannelModel>) {
+        val dialogTitle = getString(string.haram_channels_found, channelList.size)
+        subscribedChannelDialog = CustomDialog(this).showChannelListDialog(
+            title = dialogTitle,
+            channelList = channelList,
+            cancelClickListener = {
+
+            },
+            unsubscribeClickListener = {
+
+            },
+        )
     }
 
     private fun prepareViews() {
@@ -49,7 +81,70 @@ class ProfilePageActivity : AppCompatActivity() {
             onBackPressedDispatcher.onBackPressed()
         }
 
+        progressDialog = CustomDialog(this).progressDialog()
         binding.textName.text = sharedPref.getValue(KeyString.NAME)
         binding.imageProfile.loadFromUrl(sharedPref.getValue(KeyString.IMAGE_SRC))
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun getSubscribedChannel() {
+        //showEmailAccessForKahfTubeDialog()
+        progressDialog.show()
+        binding.headlessKahfTubeWebview.apply {
+            settings.javaScriptEnabled = true
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(
+                    webView: WebView?,
+                    url: String?
+                ) {
+                    super.onPageFinished(webView, url)
+                    Timber.v("onPageFinished.url: $url")
+                    webView?.injectJavascriptFileFromAsset("kahftube/channel.js")
+                }
+            }
+            addJavascriptInterface(
+                KahfTubeInterface(
+                    this@ProfilePageActivity,
+                    object :
+                        JavaScriptCallBack {
+                        override fun getChannels(jsonArrayString: String) {
+                            Timber.d("Channel List: ${jsonArrayString}")
+                            progressDialog.dismiss()
+
+                            val jsonArray = JSONArray(jsonArrayString)
+
+                            val channelList = mutableListOf<ChannelModel>()
+
+                            for (i in 0 until jsonArray.length()) {
+                                val jsonObject = jsonArray.getJSONObject(i)
+                                val channel = ChannelModel(
+                                    id = jsonObject.getString("id"),
+                                    name = jsonObject.getString("name"),
+                                    isUnsubscribed = jsonObject.getBoolean("isUnsubscribed"),
+                                    thumbnail = jsonObject.getString("thumbnail"),
+                                    isHaram = jsonObject.getBoolean("isHaram"),
+                                )
+                                channelList.add(channel)
+                            }
+                            lifecycleScope.launch {
+                                //binding.headlessKahfTubeWebview.clearWebView()
+                                if (channelList.isNotEmpty()) {
+                                    showSubscribedChannelDialog(channelList)
+                                } else {
+                                    Snackbar.make(binding.root, "No haram channel found", Snackbar.LENGTH_LONG).show()
+                                }
+
+                            }
+                        }
+
+                        override fun shouldRestart() {
+                            //recreate()
+                        }
+                    },
+                ),
+                "KahfTubeInterface",
+            )
+            loadUrl("https://m.youtube.com/feed/channels")
+        }
     }
 }

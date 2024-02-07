@@ -78,6 +78,11 @@ class KahfTubeInterface(
         return javaScriptCallBack.share(href)
     }
 
+    @JavascriptInterface
+    fun getChannels(jsonArrayString: String) {
+        return javaScriptCallBack.getChannels(jsonArrayString)
+    }
+
     interface JavaScriptCallBack {
         fun showToast(message: String) {}
         fun callHandler(
@@ -92,5 +97,7 @@ class KahfTubeInterface(
         fun onHalalzTap() {}
 
         fun shouldRestart() {}
+
+        fun getChannels(jsonArrayString: String) {}
     }
 }

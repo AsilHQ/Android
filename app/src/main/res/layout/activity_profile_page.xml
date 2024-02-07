@@ -29,7 +29,7 @@
         app:layout_constraintTop_toBottomOf="@id/toolbar">
 
         <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/image_profile"
+            android:id="@+id/imageProfile"
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:layout_marginTop="40dp"
@@ -134,6 +134,16 @@
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>
+
+    <WebView
+        android:id="@+id/headlessKahfTubeWebview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
