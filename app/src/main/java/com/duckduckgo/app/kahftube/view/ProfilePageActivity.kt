@@ -12,6 +12,7 @@ import com.duckduckgo.app.browser.R.string
 import com.duckduckgo.app.browser.databinding.ActivityProfilePageBinding
 import com.duckduckgo.app.kahftube.KahfTubeInterface
 import com.duckduckgo.app.kahftube.KahfTubeInterface.JavaScriptCallBack
+import com.duckduckgo.app.kahftube.KahfTubeUnsubscribeInterface
 import com.duckduckgo.app.kahftube.SharedPreferenceManager
 import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
 import com.duckduckgo.app.kahftube.model.ChannelModel
@@ -70,9 +71,51 @@ class ProfilePageActivity : AppCompatActivity() {
 
             },
             unsubscribeClickListener = {
-
+                unsubscribe(channelList.map { it.id })
             },
         )
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun unsubscribe(channelList: List<String>) {
+        Timber.d("KahfTubeUnsubscribeInterface:: Unsubscribe:: channelList: $channelList")
+        //showEmailAccessForKahfTubeDialog()
+        progressDialog.show()
+        binding.headlessKahfTubeWebview.apply {
+            settings.javaScriptEnabled = true
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(
+                    webView: WebView?,
+                    url: String?
+                ) {
+                    super.onPageFinished(webView, url)
+                    if (binding.headlessKahfTubeWebview.progress >= 100) {
+                        Timber.v("onPageFinished.url: $url")
+                        webView?.injectJavascriptFileFromAsset("kahftube/unsubscribe.js")
+                    }
+                }
+            }
+            addJavascriptInterface(
+                KahfTubeUnsubscribeInterface(
+                    channelList,
+                    object : KahfTubeUnsubscribeInterface.JavaScriptCallBack {
+                        override fun responseCallback(isSuccess: Boolean) {
+                            lifecycleScope.launch {
+                                progressDialog.dismiss()
+                                if (isSuccess) {
+                                    Snackbar.make(binding.root, "Unsubscribed successfully.", Snackbar.LENGTH_LONG).show()
+                                } else {
+                                    Snackbar.make(binding.root, "Please try again.", Snackbar.LENGTH_LONG).show()
+                                }
+
+                            }
+                        }
+                    },
+                ),
+                "KahfTubeUnsubscribeInterface",
+            )
+            loadUrl("https://www.youtube.com")
+        }
     }
 
     private fun prepareViews() {
@@ -98,8 +141,10 @@ class ProfilePageActivity : AppCompatActivity() {
                     url: String?
                 ) {
                     super.onPageFinished(webView, url)
-                    Timber.v("onPageFinished.url: $url")
-                    webView?.injectJavascriptFileFromAsset("kahftube/channel.js")
+                    if (binding.headlessKahfTubeWebview.progress >= 100) {
+                        Timber.v("onPageFinished.url: $url")
+                        webView?.injectJavascriptFileFromAsset("kahftube/channel.js")
+                    }
                 }
             }
             addJavascriptInterface(
