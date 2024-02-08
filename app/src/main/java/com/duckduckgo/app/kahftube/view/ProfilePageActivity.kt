@@ -20,6 +20,7 @@ import com.duckduckgo.app.kahftube.model.ChannelModel
 import com.duckduckgo.app.kahftube.utils.CustomDialog
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
+import org.halalz.kahftube.extentions.desktopSite
 import org.halalz.kahftube.extentions.injectJavascriptFileFromAsset
 import org.halalz.kahftube.extentions.loadFromUrl
 import org.json.JSONArray
@@ -86,15 +87,17 @@ class ProfilePageActivity : AppCompatActivity() {
         Timber.d("KahfTubeUnsubscribeInterface:: Unsubscribe:: cookies: $cookies")
         //showEmailAccessForKahfTubeDialog()
         progressDialog.show()
-        binding.headlessKahfTubeWebview.apply {
+        binding.headlessKahfTubeDesktopWebView.apply {
             settings.javaScriptEnabled = true
+            desktopSite()
+            //settings.userAgentString = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1"
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(
                     webView: WebView?,
                     url: String?
                 ) {
                     super.onPageFinished(webView, url)
-                    if (binding.headlessKahfTubeWebview.progress >= 100) {
+                    if (binding.headlessKahfTubeDesktopWebView.progress >= 100) {
                         Timber.v("onPageFinished.url: $url")
                         webView?.injectJavascriptFileFromAsset("kahftube/unsubscribe.js")
                     }
@@ -139,7 +142,7 @@ class ProfilePageActivity : AppCompatActivity() {
     private fun getSubscribedChannel() {
         //showEmailAccessForKahfTubeDialog()
         progressDialog.show()
-        binding.headlessKahfTubeWebview.apply {
+        binding.headlessKahfTubeWebView.apply {
             settings.javaScriptEnabled = true
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(
@@ -147,7 +150,7 @@ class ProfilePageActivity : AppCompatActivity() {
                     url: String?
                 ) {
                     super.onPageFinished(webView, url)
-                    if (binding.headlessKahfTubeWebview.progress >= 100) {
+                    if (binding.headlessKahfTubeWebView.progress >= 100) {
                         Timber.v("onPageFinished.url: $url")
                         webView?.injectJavascriptFileFromAsset("kahftube/channel.js")
                     }

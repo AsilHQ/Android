@@ -19,3 +19,7 @@ fun WebView.clearWebView() {
 // Additionally, you might want to load a blank page
     this.loadUrl("about:blank") // Load a blank page
 }
+
+fun WebView.desktopSite() {
+    settings.userAgentString = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1"
+}
