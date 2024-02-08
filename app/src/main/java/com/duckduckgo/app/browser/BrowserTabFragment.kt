@@ -877,8 +877,8 @@ class BrowserTabFragment :
             }
             popupView.findViewById<TextView>(R.id.website_url_text_view).text = viewModel.url
             val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
-            val totalCensoredText = "Total ${sharedPreferences.getInt("all_time_cencored_count", 0)} Sinful acts avoided since beginning"
-            popupView.findViewById<TextView>(R.id.count_text).text = sharedPreferences.getInt("session_cencored_count", 0).toString()
+            val totalCensoredText = "Total ${sharedPreferences.getInt("all_time_censored_count", 0)} Sinful acts avoided since beginning"
+            popupView.findViewById<TextView>(R.id.count_text).text = sharedPreferences.getInt("session_censored_count", 0).toString()
             popupView.findViewById<TextView>(R.id.asil_shield_exp_text).text = buildString {
                 this.append("Sinful acts avoided")
             }
@@ -2196,7 +2196,7 @@ class BrowserTabFragment :
         webView?.let {
             it.webViewClient = browserWebViewClient
             it.webChromeClient = browserWebChromeClient
-            it.addJavascriptInterface(SafeGazeJsInterface(requireContext()), "SafeGazeInterface")
+            it.addJavascriptInterface(SafeGazeJsInterface(requireContext(), webView!!), "SafeGazeInterface")
             it.addJavascriptInterface(
                 KahfTubeInterface(
                     requireContext(),
