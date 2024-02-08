@@ -2196,7 +2196,7 @@ class BrowserTabFragment :
         webView?.let {
             it.webViewClient = browserWebViewClient
             it.webChromeClient = browserWebChromeClient
-            it.addJavascriptInterface(SafeGazeJsInterface(requireContext()), "SafeGazeInterface")
+            it.addJavascriptInterface(SafeGazeJsInterface(requireContext(), webView!!), "SafeGazeInterface")
             it.addJavascriptInterface(
                 KahfTubeInterface(
                     requireContext(),

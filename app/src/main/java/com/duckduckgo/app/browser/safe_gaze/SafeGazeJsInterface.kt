@@ -9,9 +9,13 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
+import com.duckduckgo.app.browser.DuckDuckGoWebView
 import com.duckduckgo.app.safegaze.ondeviceobjectdetection.ObjectDetectionHelper
 
-class SafeGazeJsInterface(private val context: Context) {
+class SafeGazeJsInterface(
+    private val context: Context,
+    private val webView: DuckDuckGoWebView
+) {
 
     private val preferences: SharedPreferences =
         context.getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
@@ -47,10 +51,21 @@ class SafeGazeJsInterface(private val context: Context) {
     }
 
     @JavascriptInterface
+    fun callSafegazeOnDeviceModelHandler(isExist: Boolean, index: Int) {
+        val jsFunctionCall = "safegazeOnDeviceModelHandler($isExist, $index);"
+        webView.post {
+            webView.evaluateJavascript(jsFunctionCall, null)
+        }
+    }
+
+    @JavascriptInterface
     fun sendMessage(message: String) {
         if (message.startsWith("coreML/-/")){
-            isImageContainsHumanFromWebView(message.removePrefix("coreML/-/")){
-                println("Is human? -> $it")
+            val parts = message.split("/-/")
+            val imageUrl = if (parts.size >= 2) parts[1] else ""
+            val index = if (parts.size >= 2) parts[2] else ""
+            isImageContainsHumanFromWebView(imageUrl){
+                callSafegazeOnDeviceModelHandler(it, index.toInt())
             }
         }
         if (message.contains("page_refresh")) {
@@ -68,7 +83,6 @@ class SafeGazeJsInterface(private val context: Context) {
     }
 
     private fun handleCurrentSessionCounter() {
-        println("Currenct session counter -> ${getCurrentSessionCounter()}")
         val currentSessionCounter = getCurrentSessionCounter()
         val newSessionCounter = currentSessionCounter + 1
         saveSessionCounterValue(newSessionCounter)
