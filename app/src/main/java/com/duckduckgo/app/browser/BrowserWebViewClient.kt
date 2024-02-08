@@ -37,10 +37,12 @@ import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import androidx.core.net.toUri
+import androidx.fragment.app.FragmentActivity
 import com.bumptech.glide.Glide
 import com.duckduckgo.adclick.api.AdClickManager
 import com.duckduckgo.anrs.api.CrashLogger
 import com.duckduckgo.app.accessibility.AccessibilityManager
+import com.duckduckgo.app.browser.R.string
 import com.duckduckgo.app.browser.WebViewErrorResponse.BAD_URL
 import com.duckduckgo.app.browser.WebViewErrorResponse.CONNECTION
 import com.duckduckgo.app.browser.WebViewErrorResponse.OMITTED
@@ -57,12 +59,15 @@ import com.duckduckgo.app.browser.model.BasicAuthenticationRequest
 import com.duckduckgo.app.browser.navigation.safeCopyBackForwardList
 import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.di.AppCoroutineScope
+import com.duckduckgo.app.kahftube.SharedPreferenceManager
+import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
 import com.duckduckgo.app.safegaze.ondeviceobjectdetection.ObjectDetectionHelper
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.autoconsent.api.Autoconsent
 import com.duckduckgo.autofill.api.BrowserAutofill
 import com.duckduckgo.autofill.api.InternalTestUserChecker
 import com.duckduckgo.browser.api.JsInjectorPlugin
+import com.duckduckgo.common.ui.view.dialog.TextAlertDialogBuilder
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.plugins.PluginPoint
 import com.duckduckgo.cookies.api.CookieManagerProvider
@@ -109,6 +114,8 @@ class BrowserWebViewClient @Inject constructor(
     var webViewClientListener: WebViewClientListener? = null
     private var lastPageStarted: String? = null
     private var isMainJSLoaded = false
+    private var isEmailAccessForKahfTubeDialogShowed = false
+    lateinit var activity: FragmentActivity
 
     /**
      * This is the new method of url overriding available from API 24 onwards
@@ -285,10 +292,17 @@ class BrowserWebViewClient @Inject constructor(
     ) {
         Timber.v("handleKahfTube:: Url: $url")
         Timber.v("handleKahfTube:: lastPageStarted: ${url == lastPageStarted}")
-        if (url == "https://m.youtube.com/?noapp") {
+        /*if (url == "https://m.youtube.com/?noapp") {
             webView.injectJavascriptFileFromAsset("kahftube/email.js")
-        } else if (!isMainJSLoaded && url?.contains("m.youtube.com") == true) {
-            Timber.v("isMainLoaded: $isMainJSLoaded")
+        } else */
+        if (!isMainJSLoaded && url?.contains("m.youtube.com") == true) {
+            if (!isEmailAccessForKahfTubeDialogShowed
+                && (SharedPreferenceManager(context).getValue(KeyString.NAME).isEmpty()
+                    || SharedPreferenceManager(context).getValue(KeyString.NAME).contentEquals("Guest", true))
+            ) {
+                isEmailAccessForKahfTubeDialogShowed = true
+                showEmailAccessForKahfTubeDialog()
+            }
             isMainJSLoaded = true
             webView.injectJavascriptFileFromAsset("kahftube/main.js")
         }
@@ -431,6 +445,27 @@ class BrowserWebViewClient @Inject constructor(
             if (url.contains(keyword, true)) return true
         }
         return false
+    }
+
+    fun showEmailAccessForKahfTubeDialog() {
+        val emailAccessForKahfTubeDialog = TextAlertDialogBuilder(activity)
+            .setTitle(context.getString(string.kahftube))
+            .setMessage(context.getString(string.kahf_tube_email_access_message))
+            .setPositiveButton(R.string.allow)
+            .setNegativeButton(R.string.cancel)
+            //.setView(inputBinding)
+            .addEventListener(
+                object : TextAlertDialogBuilder.EventListener() {
+                    override fun onPositiveButtonClicked() {
+                        super.onPositiveButtonClicked()
+                    }
+
+                    override fun onNegativeButtonClicked() {
+                        super.onNegativeButtonClicked()
+                    }
+                },
+            )
+            .show()
     }
 
     private fun checkForFacesAndMask(

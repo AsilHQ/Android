@@ -170,6 +170,7 @@ import com.duckduckgo.app.global.view.renderIfChanged
 import com.duckduckgo.app.global.view.toggleFullScreen
 import com.duckduckgo.app.kahftube.KahfTubeInterface
 import com.duckduckgo.app.kahftube.KahfTubeInterface.JavaScriptCallBack
+import com.duckduckgo.app.kahftube.KahfTubeWebViewClient
 import com.duckduckgo.app.kahftube.SharedPreferenceManager
 import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
 import com.duckduckgo.app.location.data.LocationPermissionType
@@ -266,6 +267,8 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.cancellable
+import org.halalz.kahftube.network.ApiService
+import org.halalz.kahftube.network.RequestListener
 import org.halalz.kahftube.view.ProfilePageActivity
 import org.json.JSONObject
 import timber.log.Timber
@@ -813,21 +816,115 @@ class BrowserTabFragment :
             dialog.deleteBookmarkListener = viewModel
         }
         handleSafeGazePopUp()
+        prepareHeadlessKahfTubeWebView()
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun prepareHeadlessKahfTubeWebView() {
+        //showEmailAccessForKahfTubeDialog()
+        binding.headerlessKahfTubeWebview.apply {
+            settings.javaScriptEnabled = true
+            webViewClient = KahfTubeWebViewClient()
+            browserWebViewClient.activity = requireActivity()
+            addJavascriptInterface(
+                KahfTubeInterface(
+                    requireContext(),
+                    object :
+                        JavaScriptCallBack {
+                        override fun showToast(message: String) {
+                            Toast.makeText(context, "KahfTubeInterface: $message", Toast.LENGTH_SHORT).show()
+                        }
+
+                        override fun callHandler(
+                            name: String?,
+                            email: String?,
+                            imgSrc: String?
+                        ) {
+                            var userName = name
+                            var userEmail = email
+
+                            if (userName.isNullOrEmpty() && userEmail.isNullOrEmpty()) {
+                                userName = "Guest"
+                                userEmail = "guest@gmail.com"
+                            }
+                            val sharedPref = SharedPreferenceManager(requireContext())
+                            sharedPref.setValue(KeyString.NAME, userName)
+                            sharedPref.setValue(KeyString.EMAIL, userEmail)
+                            sharedPref.setValue(KeyString.IMAGE_SRC, imgSrc)
+
+                            if (!userName.isNullOrEmpty() && !userEmail.isNullOrEmpty()) {
+                                makeKahfTubeRegisterRequest(userName, userEmail)
+                            }
+                        }
+
+                        override fun shouldRestart() {
+                            //recreate()
+                        }
+                    },
+                ),
+                "KahfTubeInterface",
+            )
+            loadUrl("https://m.youtube.com/?noapp")
+        }
+    }
+
+    private fun makeKahfTubeRegisterRequest(
+        name: String,
+        email: String
+    ) {
+        ApiService().registerApi(
+            name = name, email = email,
+            callback = object : RequestListener {
+                override fun onSuccess(response: String) {
+                    Timber.d("response: $response")
+                    makeKahfTubeLoginRequest(email = email)
+                }
+
+                override fun onError(error: String) {
+                    Timber.e("error: $error")
+                }
+            },
+        )
+    }
+
+    private fun makeKahfTubeLoginRequest(email: String) {
+        ApiService().loginApi(
+            email = email,
+            callback = object : RequestListener {
+                override fun onSuccess(response: String) {
+                    Timber.d("response: $response")
+                    val responseJSONObject = JSONObject(response)
+                    val dataObject = responseJSONObject.getJSONObject("data")
+                    val id = dataObject.getInt("id")
+                    val name = dataObject.getString("name")
+                    val email = dataObject.getString("email")
+
+                    // Parse token
+                    val token = responseJSONObject.getString("token")
+                    Timber.d("response token: $token")
+                    SharedPreferenceManager(requireContext()).setValue(KeyString.TOKEN, token)
+                }
+
+                override fun onError(error: String) {
+                    Timber.e("error: $error")
+                }
+            },
+        )
     }
 
     @SuppressLint("InflateParams")
-    private fun handleSafeGazePopUp(){
+    private fun handleSafeGazePopUp() {
         val popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up, null)
         val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         val toggle = popupView.findViewById<SwitchCompat>(R.id.asil_shield_toggle_button)
         val sharedPref = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
         val editor = sharedPref.edit()
-        if (sharedPref.getBoolean("safe_gaze_active", true)){
+        if (sharedPref.getBoolean("safe_gaze_active", true)) {
             popupView.findViewById<TextView>(R.id.asil_shield_state_text_view).text = buildString {
                 this.append("Safe Gaze UP")
             }
             toggle.isChecked = true
-        }else{
+        } else {
             popupView.findViewById<TextView>(R.id.asil_shield_state_text_view).text = buildString {
                 this.append("Safe Gaze DOWN")
             }
@@ -2195,6 +2292,7 @@ class BrowserTabFragment :
 
         webView?.let {
             it.webViewClient = browserWebViewClient
+            browserWebViewClient.activity = requireActivity()
             it.webChromeClient = browserWebChromeClient
             it.addJavascriptInterface(SafeGazeJsInterface(requireContext(), webView!!), "SafeGazeInterface")
             it.addJavascriptInterface(

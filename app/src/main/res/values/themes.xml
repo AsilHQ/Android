@@ -3,6 +3,10 @@
 
     <style name="Theme.KahfTube" parent="Theme.MaterialComponents.DayNight.NoActionBar" />
 
+    <style name="backgroundStyle" parent="Theme.KahfTube">
+        <item name="android:background">@color/whiteFive</item>
+    </style>
+
     <style name="circleImageView" parent="Theme.KahfTube">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
