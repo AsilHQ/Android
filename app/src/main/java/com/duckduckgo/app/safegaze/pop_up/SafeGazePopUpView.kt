@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.duckduckgo.app.safegaze.pop_up.ResizableImageView
 import com.duckduckgo.app.safegaze.pop_up.SafegazeCloseView
+import com.duckduckgo.app.safegaze.pop_up.SafegazeOpenView
 
 @Composable
 fun SafegazePopUpView(

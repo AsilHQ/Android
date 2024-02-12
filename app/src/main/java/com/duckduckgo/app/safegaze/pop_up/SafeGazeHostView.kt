@@ -40,6 +40,7 @@ fun SafegazeHostView(url: String?) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Spacer(modifier = Modifier.width(10.dp))
             ResizableImageView(imageName = "safe_gaze_icon", width = 12, height = 12)
             Spacer(modifier = Modifier.width(4.dp))
             Text(

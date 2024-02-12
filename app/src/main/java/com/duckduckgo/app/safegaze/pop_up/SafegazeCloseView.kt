@@ -42,7 +42,7 @@ fun SafegazeCloseView() {
 @Composable
 private fun HeaderView(image: ImageBitmap) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
     ) {
         ResizableImageView(width = 44, height = 40, imageName = "safe_gaze_icon")
         Spacer(modifier = Modifier)
@@ -56,7 +56,7 @@ private fun ToggleView(){
             println("Hello World")
         },
     ) {
-        ResizableImageView(width = 122, height = 136)
+        ResizableImageView(width = 136, height = 136)
     }
 }
 
