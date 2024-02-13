@@ -1,9 +1,14 @@
 package com.duckduckgo.app.safegaze.pop_up
 
+import ImageBlurIntensityView
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -15,13 +20,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.duckduckgo.app.browser.R
 
 @Composable
@@ -36,6 +45,81 @@ fun SafegazeOpenView(
         OpenContentStack(domainAvoidedContentCount = 0, lifetimeAvoidedContentCount = 0)
         Spacer(modifier = Modifier.height(16.dp))
         GenderModeView()
+        Spacer(modifier = Modifier.height(16.dp))
+        ImageBlurIntensityView(value = 1.1f, onValueChange = {
+
+        })
+        SupportView(LocalContext.current)
+    }
+}
+
+@Composable
+fun SupportView(context: Context){
+    Row {
+        Button(
+            onClick = {  },
+            modifier = Modifier
+                .size(width = 44.dp, height = 40.dp)
+                .background(Color.White, shape = RoundedCornerShape(10.dp))
+                .shadow(
+                    elevation = 2.5.dp,
+                    shape = RoundedCornerShape(10.dp)
+                )
+        ) {
+            ResizableImageView(
+                width = 16,
+                height = 16
+            )
+        }
+        Spacer(modifier = Modifier)
+        Button(
+            onClick = {
+                val url = "https://safegaze.com/support-safegaze/"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                context.startActivity(intent)
+            },
+            modifier = Modifier
+                .size(width = 232.dp, height = 40.dp)
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF01BDD9),
+                            Color(0xFF0199B8),
+                            Color(0xFF0199B8),
+                        ),
+                        start = Offset(0.5f, 0f),
+                        end = Offset(0.5f, 1f)
+                    ),
+                    shape = RoundedCornerShape(10.dp)
+                )
+        ) {
+            Text(
+                text = stringResource(id = R.string._0),
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Button(
+            onClick = { /* no action */ },
+            modifier = Modifier
+                .size(width = 44.dp, height = 40.dp)
+                .background(Color.White, shape = RoundedCornerShape(10.dp))
+                .shadow(
+                    elevation = 2.5.dp,
+                    shape = RoundedCornerShape(10.dp)
+                ),
+            enabled = false
+        ) {
+            ResizableImageView(
+                width = 16,
+                height = 16
+            )
+        }
+
     }
 }
 
