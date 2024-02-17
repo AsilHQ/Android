@@ -52,6 +52,7 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.PopupWindow
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
@@ -61,6 +62,7 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.SwitchCompat
+import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -912,24 +914,47 @@ class BrowserTabFragment :
         )
     }
 
+    @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
+    private fun handleProgressBar(view: View) {
+        val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
+        val iconImageView: ImageView = view.findViewById(R.id.iconImageView)
+        val percentageTextView: TextView = view.findViewById(R.id.percentageTextView)
+        val progress = 50
+
+        progressBar.progress = progress
+        percentageTextView.text = "$progress%"
+
+        progressBar.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                    val width = progressBar.width.toFloat()
+                    val x = event.x
+                    val calculatedProgress = (x / width * progressBar.max).toInt()
+                    progressBar.progress = calculatedProgress
+                    percentageTextView.text = "$calculatedProgress%"
+                    updateViewsPosition(progressBar, iconImageView, percentageTextView, calculatedProgress)
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+
     @SuppressLint("InflateParams")
     private fun handleSafeGazePopUp() {
-        val popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up, null)
-        val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        val toggle = popupView.findViewById<SwitchCompat>(R.id.asil_shield_toggle_button)
         val sharedPref = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
-        val editor = sharedPref.edit()
+        //val editor = sharedPref.edit()
+        val popupView: View
+        val isOpen: Boolean
         if (sharedPref.getBoolean("safe_gaze_active", true)) {
-            popupView.findViewById<TextView>(R.id.asil_shield_state_text_view).text = buildString {
-                this.append("Safe Gaze UP")
-            }
-            toggle.isChecked = true
+            popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up_open, null)
+            isOpen = true
         } else {
-            popupView.findViewById<TextView>(R.id.asil_shield_state_text_view).text = buildString {
-                this.append("Safe Gaze DOWN")
-            }
-            toggle.isChecked = false
+            popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up_close, null)
+            isOpen = false
         }
+        val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         safeGazeIcon.setOnClickListener {
             val iconRect = Rect()
             safeGazeIcon.getGlobalVisibleRect(iconRect)
@@ -939,23 +964,27 @@ class BrowserTabFragment :
                 animationStyle = 2132017505
                 isFocusable = true
             }
-            toggle.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked){
-                    editor.putBoolean("safe_gaze_active", true)
-                    popupView.findViewById<TextView>(R.id.asil_shield_state_text_view).text = buildString {
-                        viewModel.url?.let { it1 -> webView?.loadUrl(it1) }
-                        this.append("Safe Gaze UP")
-                    }
-                } else{
-                    editor.putBoolean("safe_gaze_active", false)
-                    popupView.findViewById<TextView>(R.id.asil_shield_state_text_view).text = buildString {
-                        viewModel.url?.let { it1 -> webView?.loadUrl(it1) }
-                        this.append("Safe Gaze DOWN")
-                    }
-                }
-                editor.apply()
-            }
+
+            // toggle.setOnCheckedChangeListener { _, isChecked ->
+            //     if (isChecked){
+            //         editor.putBoolean("safe_gaze_active", true)
+            //         popupView.findViewById<TextView>(R.id.asil_shield_state_text_view).text = buildString {
+            //             viewModel.url?.let { it1 -> webView?.loadUrl(it1) }
+            //             this.append("Safe Gaze UP")
+            //         }
+            //     } else{
+            //         editor.putBoolean("safe_gaze_active", false)
+            //         popupView.findViewById<TextView>(R.id.asil_shield_state_text_view).text = buildString {
+            //             viewModel.url?.let { it1 -> webView?.loadUrl(it1) }
+            //             this.append("Safe Gaze DOWN")
+            //         }
+            //     }
+            //     editor.apply()
+            // }
             safeGazeIcon.post {
+                if (isOpen){
+                    handleProgressBar(popupView)
+                }
                 val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
                 val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
                 val newPopUpPosition = (x - popUpLayingOut) - 50
@@ -965,22 +994,35 @@ class BrowserTabFragment :
                     newPopUpPosition,
                     (y + omnibar.toolbar.height) - 25,
                 )
-                val pointerArrow =
-                    popupView.findViewById<ImageView>(R.id.pointer_arrow_safe_gaze_image_view)
-                val pointerArrowParams =
-                    pointerArrow.layoutParams as ConstraintLayout.LayoutParams
-                pointerArrowParams.rightMargin = leftOverDevicePixel - 113
-                pointerArrow.layoutParams = pointerArrowParams
+                // val pointerArrow =
+                //     popupView.findViewById<ImageView>(R.id.pointer_arrow_safe_gaze_image_view)
+                // val pointerArrowParams =
+                //     pointerArrow.layoutParams as ConstraintLayout.LayoutParams
+                // pointerArrowParams.rightMargin = leftOverDevicePixel - 113
+                // pointerArrow.layoutParams = pointerArrowParams
             }
-            popupView.findViewById<TextView>(R.id.website_url_text_view).text = viewModel.url
-            val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
-            val totalCensoredText = "Total ${sharedPreferences.getInt("all_time_censored_count", 0)} Sinful acts avoided since beginning"
-            popupView.findViewById<TextView>(R.id.count_text).text = sharedPreferences.getInt("session_censored_count", 0).toString()
-            popupView.findViewById<TextView>(R.id.asil_shield_exp_text).text = buildString {
-                this.append("Sinful acts avoided")
-            }
-            popupView.findViewById<TextView>(R.id.site_broken_text_view).text = totalCensoredText
+            // popupView.findViewById<TextView>(R.id.website_url_text_view).text = viewModel.url
+            // val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
+            // val totalCensoredText = "Total ${sharedPreferences.getInt("all_time_censored_count", 0)} Sinful acts avoided since beginning"
+            // popupView.findViewById<TextView>(R.id.count_text).text = sharedPreferences.getInt("session_censored_count", 0).toString()
+            // popupView.findViewById<TextView>(R.id.asil_shield_exp_text).text = buildString {
+            //     this.append("Sinful acts avoided")
+            // }
+            // popupView.findViewById<TextView>(R.id.site_broken_text_view).text = totalCensoredText
         }
+    }
+
+    private fun updateViewsPosition(progressBar: ProgressBar, iconImageView: ImageView, percentageTextView: TextView, progress: Int) {
+        val layoutParams = iconImageView.layoutParams as ConstraintLayout.LayoutParams
+        val progressBarWidth = progressBar.width
+        layoutParams.horizontalBias = progress / 100f
+        iconImageView.layoutParams = layoutParams
+
+        val percentageTextX = progressBarWidth * progress / 100f - percentageTextView.width / 2f
+        percentageTextView.x = percentageTextX
+
+        iconImageView.visibility = if (progress in 0..100) ImageView.VISIBLE else ImageView.INVISIBLE
+        percentageTextView.visibility = if (progress in 0..100) TextView.VISIBLE else TextView.INVISIBLE
     }
 
     @Suppress("DEPRECATION")

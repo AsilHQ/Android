@@ -180,6 +180,7 @@ dependencies {
     implementation project(':autofill-api')
     implementation project(':autofill-impl')
     implementation project(':autofill-store')
+    implementation 'androidx.compose.ui:ui-android:1.6.1'
     internalImplementation project(':autofill-internal')
     testImplementation project(':autofill-test')
 
