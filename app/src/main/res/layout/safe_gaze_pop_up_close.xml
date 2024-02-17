@@ -35,7 +35,7 @@
                     android:id="@+id/web_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/safe_gaze_icon_gray"
+                    android:src="@drawable/web_icon"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"/>
                 <TextView
@@ -58,7 +58,7 @@
             app:layout_constraintTop_toBottomOf="@id/url_card_view"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:src="@drawable/safe_gaze_icon_gray"/>
+            android:src="@drawable/safe_gaze_open_button"/>
 
         <TextView
             android:id="@+id/open_safe_gaze_text_view"
@@ -86,7 +86,7 @@
                 android:layout_height="match_parent"
                 android:textAlignment="center"
                 android:textColor="@color/black"
-                android:text="Take control of your digital space with our Ad Blocker and Image Purificator extension combo. Savegaze will save your eyes from singul act."
+                android:text="Take control of your digital space with our Ad Blocker and Image Purificator extension combo. Safegaze will save your eyes from sinful act."
                 tools:ignore="DeprecatedWidgetInXml,HardcodedText" />
         </com.google.android.material.card.MaterialCardView>
 
@@ -96,7 +96,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/safe_gaze_exp_card_view"
-            android:src="@drawable/safe_gaze_icon_gray"/>
+            android:src="@drawable/report_bug_icon"/>
 
         <TextView
             android:id="@+id/report_text_view"

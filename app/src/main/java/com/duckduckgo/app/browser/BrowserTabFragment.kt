@@ -60,6 +60,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.annotation.AnyThread
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
+import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.compose.ui.platform.ComposeView
@@ -267,6 +268,7 @@ import com.duckduckgo.voice.api.VoiceSearchLauncher.Source.BROWSER
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import jp.wasabeef.blurry.Blurry
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.cancellable
 import org.halalz.kahftube.network.ApiService
@@ -914,6 +916,56 @@ class BrowserTabFragment :
         )
     }
 
+    private fun handleSafeGazeOpenView(view: View, sharedPreferences: SharedPreferences){
+        handleProgressBar(view)
+        val editor = sharedPreferences.edit()
+        val thisPageCounter = view.findViewById<TextView>(R.id.this_page_counter_text_view)
+        val lifeTimeCounter = view.findViewById<TextView>(R.id.lifetime_counter_text_view)
+        val switch = view.findViewById<SwitchCompat>(R.id.safe_gaze_open_switch_view)
+        val urlTextView = view.findViewById<TextView>(R.id.url_open_text_view)
+        val supportButton = view.findViewById<AppCompatButton>(R.id.support_this_project_button)
+        val reportTextView = view.findViewById<TextView>(R.id.report_text_view_open)
+        reportTextView.setOnClickListener {
+            val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        }
+        supportButton.setOnClickListener {
+            val url = "https://safegaze.com/support-safegaze/"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            if (intent.resolveActivity(requireActivity().packageManager) != null) {
+                startActivity(intent)
+            }
+        }
+        urlTextView.text = viewModel.url
+        thisPageCounter.text = sharedPreferences.getInt("session_censored_count", 0).toString()
+        lifeTimeCounter.text = sharedPreferences.getInt("all_time_censored_count", 0).toString()
+        switch.setOnCheckedChangeListener { _, _ ->
+            editor.putBoolean("safe_gaze_active", false)
+            editor.apply()
+            handleSafeGazePopUp()
+        }
+        println("SafeGaze Boolean -> ${sharedPreferences.getBoolean("safe_gaze_active", false)}")
+    }
+
+    private fun handleSafeGazeCloseView(view: View, sharedPreferences: SharedPreferences){
+        val editor = sharedPreferences.edit()
+        val safeGazeOpenImageView = view.findViewById<AppCompatImageView>(R.id.safe_gaze_on_image_view)
+        val urlTextView = view.findViewById<TextView>(R.id.url_text_view)
+        val reportTextView = view.findViewById<TextView>(R.id.report_text_view)
+        reportTextView.setOnClickListener {
+            val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        }
+        urlTextView.text = viewModel.url
+        safeGazeOpenImageView.setOnClickListener{
+            editor.putBoolean("safe_gaze_active", true)
+            editor.apply()
+            handleSafeGazePopUp()
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     private fun handleProgressBar(view: View) {
         val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
@@ -940,11 +992,9 @@ class BrowserTabFragment :
         }
     }
 
-
     @SuppressLint("InflateParams")
     private fun handleSafeGazePopUp() {
         val sharedPref = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
-        //val editor = sharedPref.edit()
         val popupView: View
         val isOpen: Boolean
         if (sharedPref.getBoolean("safe_gaze_active", true)) {
@@ -964,26 +1014,11 @@ class BrowserTabFragment :
                 animationStyle = 2132017505
                 isFocusable = true
             }
-
-            // toggle.setOnCheckedChangeListener { _, isChecked ->
-            //     if (isChecked){
-            //         editor.putBoolean("safe_gaze_active", true)
-            //         popupView.findViewById<TextView>(R.id.asil_shield_state_text_view).text = buildString {
-            //             viewModel.url?.let { it1 -> webView?.loadUrl(it1) }
-            //             this.append("Safe Gaze UP")
-            //         }
-            //     } else{
-            //         editor.putBoolean("safe_gaze_active", false)
-            //         popupView.findViewById<TextView>(R.id.asil_shield_state_text_view).text = buildString {
-            //             viewModel.url?.let { it1 -> webView?.loadUrl(it1) }
-            //             this.append("Safe Gaze DOWN")
-            //         }
-            //     }
-            //     editor.apply()
-            // }
             safeGazeIcon.post {
                 if (isOpen){
-                    handleProgressBar(popupView)
+                    handleSafeGazeOpenView(popupView, sharedPref)
+                }else{
+                    handleSafeGazeCloseView(popupView, sharedPref)
                 }
                 val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
                 val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel

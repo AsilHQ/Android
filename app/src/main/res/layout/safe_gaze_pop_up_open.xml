@@ -65,6 +65,8 @@
                             app:layout_constraintStart_toEndOf="@id/safe_gaze_up_text_view"
                             app:layout_constraintTop_toTopOf="@id/safe_gaze_up_text_view"
                             app:layout_constraintBottom_toBottomOf="@+id/safe_gaze_up_text_view"
+                            app:thumbTint="@color/white"
+                            android:checked="true"
                             tools:ignore="DeprecatedWidgetInXml" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -88,16 +90,18 @@
                     android:id="@+id/web_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/safe_gaze_icon_gray"
+                    android:src="@drawable/web_icon"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"/>
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
                 <TextView
-                    android:id="@+id/url_text_view"
+                    android:id="@+id/url_open_text_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toTopOf="@id/web_icon"
                     app:layout_constraintStart_toEndOf="@id/web_icon"
                     app:layout_constraintBottom_toBottomOf="@id/web_icon"
+                    android:textAlignment="center"
                     android:textColor="@color/black"
                     android:text="prothomalo.com"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -142,7 +146,7 @@
                     app:layout_constraintEnd_toEndOf="@id/this_page_image_view"
                     app:layout_constraintTop_toTopOf="@id/this_page_image_view"
                     app:layout_constraintBottom_toBottomOf="@id/this_page_image_view"
-                    android:textColor="@color/white"
+                    android:textColor="#FF0000"
                     android:text="10"/>
 
                 <TextView
@@ -152,7 +156,7 @@
                     app:layout_constraintStart_toEndOf="@id/this_page_image_view"
                     app:layout_constraintTop_toTopOf="@id/this_page_image_view"
                     app:layout_constraintBottom_toBottomOf="@id/this_page_image_view"
-                    android:textColor="@color/black"
+                    android:textColor="#6D6D6D"
                     android:text="This Page"/>
 
                 <androidx.appcompat.widget.AppCompatImageView
@@ -171,7 +175,7 @@
                     app:layout_constraintEnd_toEndOf="@id/lifetime_image_view"
                     app:layout_constraintTop_toTopOf="@id/lifetime_image_view"
                     app:layout_constraintBottom_toBottomOf="@id/lifetime_image_view"
-                    android:textColor="@color/white"
+                    android:textColor="#FF0000"
                     android:text="10"/>
 
                 <TextView
@@ -181,7 +185,7 @@
                     app:layout_constraintStart_toEndOf="@id/lifetime_image_view"
                     app:layout_constraintTop_toTopOf="@id/lifetime_image_view"
                     app:layout_constraintBottom_toBottomOf="@id/lifetime_image_view"
-                    android:textColor="@color/black"
+                    android:textColor="#6D6D6D"
                     android:text="Lifetime"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -218,6 +222,91 @@
                     app:layout_constraintBottom_toBottomOf="@id/gender_mode_text_view"
                     android:src="@drawable/safe_gaze_icon"/>
 
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="#1A9F7AEA">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#FF9F7AEA"
+                        android:text="Coming Soon"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/gender_mode_switch_card_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:cardCornerRadius="20dp"
+                    app:cardBackgroundColor="#FFF6F4F5"
+                    app:layout_constraintTop_toBottomOf="@id/gender_mode_text_view"
+                    tools:ignore="InvalidColorAttribute">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/man_card_view"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:cardCornerRadius="20dp"
+                            android:backgroundTint="@color/white"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
+
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent">
+
+                                <androidx.appcompat.widget.AppCompatImageView
+                                    android:id="@+id/man_image_view"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    android:src="@drawable/safe_gaze_icon"/>
+
+                                <TextView
+                                    android:id="@+id/man_text_view"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    app:layout_constraintStart_toEndOf="@id/man_image_view"
+                                    app:layout_constraintTop_toTopOf="@id/man_image_view"
+                                    app:layout_constraintBottom_toBottomOf="@id/man_image_view"
+                                    android:text="I am a Man"/>
+
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <androidx.appcompat.widget.AppCompatImageView
+                            android:id="@+id/woman_image_view"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintStart_toEndOf="@id/man_card_view"
+                            app:layout_constraintTop_toTopOf="parent"
+                            android:src="@drawable/safe_gaze_icon"/>
+
+                        <TextView
+                            android:id="@+id/woman_text_view"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintStart_toEndOf="@id/woman_image_view"
+                            app:layout_constraintTop_toTopOf="@id/woman_image_view"
+                            app:layout_constraintBottom_toBottomOf="@id/woman_image_view"
+                            android:text="I am a Woman"/>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </com.google.android.material.card.MaterialCardView>
@@ -251,7 +340,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/blur_image_view"
                     app:layout_constraintTop_toTopOf="parent"
                     android:layout_marginTop="20dp"/>
 
@@ -281,7 +370,7 @@
                     android:id="@+id/blur_image_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/safe_gaze_icon"
+                    android:src="@drawable/blur_image_background"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
@@ -350,10 +439,10 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/support_this_project_card_view"
-            android:src="@drawable/safe_gaze_icon_gray"/>
+            android:src="@drawable/report_bug_icon"/>
 
         <TextView
-            android:id="@+id/report_text_view"
+            android:id="@+id/report_text_view_open"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toEndOf="@id/report_image_view"
