@@ -61,7 +61,6 @@ class SafeGazeJsInterface(
     @JavascriptInterface
     fun updateBlur(blur: Float){
         val trimmedBlur = blur / 100
-        println("Trimmed blur -> $trimmedBlur")
         val jsFunction = "window.blurIntensity = $trimmedBlur; updateBluredImageOpacity();"
         webView?.post {
             webView.evaluateJavascript(jsFunction, null)

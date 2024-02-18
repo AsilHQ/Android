@@ -929,6 +929,13 @@ class BrowserTabFragment :
         val supportButton = view.findViewById<AppCompatButton>(R.id.support_this_project_button)
         val reportTextView = view.findViewById<TextView>(R.id.report_text_view_open)
         val blurImageView = view.findViewById<AppCompatImageView>(R.id.blur_image_view)
+        val shareImageView = view.findViewById<AppCompatImageView>(R.id.share_image_view)
+        shareImageView.setOnClickListener {
+            val shareIntent = Intent(Intent.ACTION_SEND)
+            shareIntent.type = "text/plain"
+            shareIntent.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=org.halalz.asil")
+            startActivity(Intent.createChooser(shareIntent, "Share via"))
+        }
         handleProgressBar(view, blurImageView)
         loadImageWithBlur(sharedPreferences.getInt("safe_gaze_blur_progress", 0), blurImageView)
         reportTextView.setOnClickListener {
@@ -1096,7 +1103,6 @@ class BrowserTabFragment :
     private fun saveProgressToSharedPreferences(progress: Int) {
         val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
-        println("Save progress -> $progress")
         editor.putInt("safe_gaze_blur_progress", progress)
         editor.apply()
     }
