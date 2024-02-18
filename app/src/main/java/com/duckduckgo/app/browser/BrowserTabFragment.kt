@@ -495,6 +495,8 @@ class BrowserTabFragment :
 
     private val downloadMessagesJob = ConflatedJob()
 
+    private lateinit var safeGazeInterface: SafeGazeJsInterface
+
     private val viewModel: BrowserTabViewModel by lazy {
         val viewModel = ViewModelProvider(this, viewModelFactory).get(BrowserTabViewModel::class.java)
         viewModel.loadData(tabId, initialUrl, skipHome, favoritesOnboarding)
@@ -740,6 +742,7 @@ class BrowserTabFragment :
         removeDaxDialogFromActivity()
         renderer = BrowserTabFragmentRenderer()
         decorator = BrowserTabFragmentDecorator()
+        safeGazeInterface = SafeGazeJsInterface(requireContext())
         voiceSearchLauncher.registerResultsCallback(this, requireActivity(), BROWSER) {
             when (it) {
                 is VoiceSearchLauncher.Event.VoiceRecognitionSuccess -> {
@@ -992,7 +995,6 @@ class BrowserTabFragment :
         val percentageTextView: TextView = view.findViewById(R.id.percentage_text_view)
         val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
         val progress = sharedPreferences.getInt("safe_gaze_blur_progress", 0)
-        println("Progress -> $progress")
         progressBar.progress = progress
         percentageTextView.text = "$progress%"
 
@@ -1005,6 +1007,7 @@ class BrowserTabFragment :
                     progressBar.progress = calculatedProgress
                     percentageTextView.text = "$calculatedProgress%"
                     updateViewsPosition(progressBar, iconImageView, percentageTextView, calculatedProgress)
+                    safeGazeInterface.updateBlur(calculatedProgress.toFloat())
                     saveProgressToSharedPreferences(calculatedProgress)
                     loadImageWithBlur(calculatedProgress, imageView)
                     true
@@ -1022,6 +1025,7 @@ class BrowserTabFragment :
         var isOpen: Boolean
         val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         safeGazeIcon.setOnClickListener {
+            safeGazeInterface.updateBlur(sharedPref.getInt("safe_gaze_blur_progress", 0).toFloat())
             val iconRect = Rect()
             safeGazeIcon.getGlobalVisibleRect(iconRect)
             val x = iconRect.left
