@@ -296,9 +296,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             app:cardCornerRadius="20dp"
+                            android:layout_margin="5dp"
                             android:backgroundTint="@color/white"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent">
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent">
 
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:layout_width="match_parent"
@@ -310,7 +312,9 @@
                                     android:layout_height="wrap_content"
                                     app:layout_constraintStart_toStartOf="parent"
                                     app:layout_constraintTop_toTopOf="parent"
-                                    android:src="@drawable/safe_gaze_icon"/>
+                                    android:paddingVertical="13dp"
+                                    android:paddingStart="30dp"
+                                    android:src="@drawable/male_icon"/>
 
                                 <TextView
                                     android:id="@+id/man_text_view"
@@ -319,6 +323,8 @@
                                     app:layout_constraintStart_toEndOf="@id/man_image_view"
                                     app:layout_constraintTop_toTopOf="@id/man_image_view"
                                     app:layout_constraintBottom_toBottomOf="@id/man_image_view"
+                                    android:textColor="#0FB2C9"
+                                    android:paddingEnd="30dp"
                                     android:text="I am a Man"/>
 
                             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -332,7 +338,9 @@
                             android:layout_height="wrap_content"
                             app:layout_constraintStart_toEndOf="@id/man_card_view"
                             app:layout_constraintTop_toTopOf="parent"
-                            android:src="@drawable/safe_gaze_icon"/>
+                            android:paddingVertical="18dp"
+                            android:paddingStart="30dp"
+                            android:src="@drawable/female_icon"/>
 
                         <TextView
                             android:id="@+id/woman_text_view"
