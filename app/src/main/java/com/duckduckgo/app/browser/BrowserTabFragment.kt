@@ -27,9 +27,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.res.AssetManager
 import android.content.res.Configuration
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.BlurMaskFilter.Blur
 import android.graphics.Rect
 import android.net.Uri
 import android.os.*
@@ -67,14 +65,12 @@ import androidx.annotation.StringRes
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.SwitchCompat
-import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
-import androidx.core.util.TypedValueCompat.dpToPx
 import androidx.core.view.*
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
@@ -86,9 +82,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
 import com.duckduckgo.anvil.annotations.InjectWith
 import com.duckduckgo.app.accessibility.data.AccessibilitySettingsDataStore
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion
@@ -934,7 +927,7 @@ class BrowserTabFragment :
         val reportTextView = view.findViewById<TextView>(R.id.report_text_view_open)
         val blurImageView = view.findViewById<AppCompatImageView>(R.id.blur_image_view)
         handleProgressBar(view, blurImageView)
-        loadImageWithBlur(10, blurImageView)
+        loadImageWithBlur(sharedPreferences.getInt("safe_gaze_blur_progress", 0), blurImageView)
         reportTextView.setOnClickListener {
             val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -995,10 +988,11 @@ class BrowserTabFragment :
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
     private fun handleProgressBar(view: View, imageView: ImageView) {
         val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
-        val iconImageView: ImageView = view.findViewById(R.id.iconImageView)
-        val percentageTextView: TextView = view.findViewById(R.id.percentageTextView)
-        val progress = 50
-
+        val iconImageView: ImageView = view.findViewById(R.id.icon_image_view)
+        val percentageTextView: TextView = view.findViewById(R.id.percentage_text_view)
+        val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
+        val progress = sharedPreferences.getInt("safe_gaze_blur_progress", 0)
+        println("Progress -> $progress")
         progressBar.progress = progress
         percentageTextView.text = "$progress%"
 
@@ -1011,6 +1005,7 @@ class BrowserTabFragment :
                     progressBar.progress = calculatedProgress
                     percentageTextView.text = "$calculatedProgress%"
                     updateViewsPosition(progressBar, iconImageView, percentageTextView, calculatedProgress)
+                    saveProgressToSharedPreferences(calculatedProgress)
                     loadImageWithBlur(calculatedProgress, imageView)
                     true
                 }
@@ -1095,9 +1090,14 @@ class BrowserTabFragment :
 
         val percentageTextX = progressBarWidth * progress / 100f - percentageTextView.width / 2f
         percentageTextView.x = percentageTextX
+    }
 
-        iconImageView.visibility = if (progress in 0..100) ImageView.VISIBLE else ImageView.INVISIBLE
-        percentageTextView.visibility = if (progress in 0..100) TextView.VISIBLE else TextView.INVISIBLE
+    private fun saveProgressToSharedPreferences(progress: Int) {
+        val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        println("Save progress -> $progress")
+        editor.putInt("safe_gaze_blur_progress", progress)
+        editor.apply()
     }
 
     @Suppress("DEPRECATION")
