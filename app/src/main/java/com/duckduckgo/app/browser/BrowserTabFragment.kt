@@ -997,7 +997,7 @@ class BrowserTabFragment :
         val progress = sharedPreferences.getInt("safe_gaze_blur_progress", 0)
         progressBar.progress = progress
         percentageTextView.text = "$progress%"
-
+        updateViewsPosition(progressBar, iconImageView, percentageTextView, sharedPreferences.getInt("safe_gaze_blur_progress", 0))
         progressBar.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
@@ -1022,7 +1022,6 @@ class BrowserTabFragment :
         val sharedPref = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
         val popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up_view, null)
         var currentLayout: View
-        var isOpen: Boolean
         val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         safeGazeIcon.setOnClickListener {
             safeGazeInterface.updateBlur(sharedPref.getInt("safe_gaze_blur_progress", 0).toFloat())
@@ -1040,12 +1039,10 @@ class BrowserTabFragment :
                     currentLayout = popupView.findViewById(R.id.open_view)
                     popupView.findViewById<View>(R.id.close_view).visibility = GONE
                     currentLayout.visibility = VISIBLE
-                    isOpen = true
                 } else {
                     currentLayout = popupView.findViewById(R.id.close_view)
                     popupView.findViewById<View>(R.id.open_view).visibility = GONE
                     currentLayout.visibility = VISIBLE
-                    isOpen = false
                 }
                 handleSafeGazeOpenView(popupView, sharedPref)
                 handleSafeGazeCloseView(popupView, sharedPref)
