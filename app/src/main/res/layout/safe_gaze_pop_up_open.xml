@@ -406,22 +406,33 @@
                     android:id="@+id/icon_image_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/safe_gaze_icon"
+                    android:src="@drawable/progress_icon"
                     app:layout_constraintTop_toTopOf="@id/progress_bar"
                     app:layout_constraintBottom_toBottomOf="@id/progress_bar"
                     app:layout_constraintStart_toStartOf="@id/progress_bar"
                     app:layout_constraintEnd_toEndOf="@id/progress_bar" />
 
-                <TextView
-                    android:id="@+id/percentage_text_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0%"
-                    android:textColor="@android:color/black"
-                    android:textSize="16sp"
-                    app:layout_constraintBottom_toTopOf="@id/progress_bar"
-                    app:layout_constraintStart_toStartOf="@id/progress_bar"
-                    app:layout_constraintEnd_toEndOf="@id/progress_bar" />
+<!--                <TextView-->
+<!--                    android:id="@+id/percentage_text_view"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="0%"-->
+<!--                    android:textColor="@color/white"-->
+<!--                    android:textSize="10sp"-->
+<!--                    app:layout_constraintTop_toTopOf="@id/progress_pointer"-->
+<!--                    app:layout_constraintStart_toStartOf="@+id/progress_pointer"-->
+<!--                    app:layout_constraintEnd_toEndOf="@+id/progress_pointer"-->
+<!--                    android:layout_marginTop="8dp" />-->
+
+<!--                <androidx.appcompat.widget.AppCompatImageView-->
+<!--                    android:id="@+id/progress_pointer"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:src="@drawable/progress_pointer_icon"-->
+<!--                    app:layout_constraintBottom_toTopOf="@id/progress_bar"-->
+<!--                    app:layout_constraintStart_toStartOf="@id/progress_bar"-->
+<!--                    app:layout_constraintEnd_toEndOf="@id/progress_bar" />-->
+
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/blur_image_view"
@@ -432,6 +443,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_marginEnd="20dp"/>
+
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -999,12 +999,13 @@ class BrowserTabFragment :
     private fun handleProgressBar(view: View, imageView: ImageView) {
         val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
         val iconImageView: ImageView = view.findViewById(R.id.icon_image_view)
-        val percentageTextView: TextView = view.findViewById(R.id.percentage_text_view)
+        // val percentageTextView: TextView = view.findViewById(R.id.percentage_text_view)
+        // val progressPointer: AppCompatImageView = view.findViewById(R.id.progress_pointer)
         val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
         val progress = sharedPreferences.getInt("safe_gaze_blur_progress", 0)
         progressBar.progress = progress
-        percentageTextView.text = "$progress%"
-        updateViewsPosition(progressBar, iconImageView, percentageTextView, sharedPreferences.getInt("safe_gaze_blur_progress", 0))
+        //percentageTextView.text = "$progress%"
+        updateViewsPosition(progressBar, iconImageView, sharedPreferences.getInt("safe_gaze_blur_progress", 0))
         progressBar.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
@@ -1012,8 +1013,8 @@ class BrowserTabFragment :
                     val x = event.x
                     val calculatedProgress = (x / width * progressBar.max).toInt()
                     progressBar.progress = calculatedProgress
-                    percentageTextView.text = "$calculatedProgress%"
-                    updateViewsPosition(progressBar, iconImageView, percentageTextView, calculatedProgress)
+                    //percentageTextView.text = "$calculatedProgress%"
+                    updateViewsPosition(progressBar, iconImageView, calculatedProgress)
                     safeGazeInterface.updateBlur(calculatedProgress.toFloat())
                     saveProgressToSharedPreferences(calculatedProgress)
                     loadImageWithBlur(calculatedProgress, imageView)
@@ -1090,15 +1091,27 @@ class BrowserTabFragment :
         view.visibility = visibility
     }
 
-    private fun updateViewsPosition(progressBar: ProgressBar, iconImageView: ImageView, percentageTextView: TextView, progress: Int) {
-        val layoutParams = iconImageView.layoutParams as ConstraintLayout.LayoutParams
-        val progressBarWidth = progressBar.width
-        layoutParams.horizontalBias = progress / 100f
-        iconImageView.layoutParams = layoutParams
+    private fun updateViewsPosition(progressBar: ProgressBar, iconImageView: ImageView, progress: Int) {
+        val clampedProgress = progress.coerceIn(0, 100)
 
-        val percentageTextX = progressBarWidth * progress / 100f - percentageTextView.width / 2f
-        percentageTextView.x = percentageTextX
+        val iconLayoutParams = iconImageView.layoutParams as ConstraintLayout.LayoutParams
+        iconLayoutParams.horizontalBias = clampedProgress / 100f
+        iconImageView.layoutParams = iconLayoutParams
+
+        // val textLayoutParams = percentageTextView.layoutParams as ConstraintLayout.LayoutParams
+        // textLayoutParams.horizontalBias = clampedProgress / 100f
+        // percentageTextView.layoutParams = textLayoutParams
+        //
+        // val pointerLayoutParams = progressPointer.layoutParams as ConstraintLayout.LayoutParams
+        // pointerLayoutParams.horizontalBias = clampedProgress / 100f
+        // progressPointer.layoutParams = pointerLayoutParams
+
     }
+
+
+
+
+
 
     private fun saveProgressToSharedPreferences(progress: Int) {
         val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
