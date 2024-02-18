@@ -36,6 +36,7 @@ import android.text.Editable
 import android.util.DisplayMetrics
 import android.view.*
 import android.view.View.*
+import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
 import android.webkit.PermissionRequest
 import android.webkit.URLUtil
@@ -925,6 +926,7 @@ class BrowserTabFragment :
         val urlTextView = view.findViewById<TextView>(R.id.url_open_text_view)
         val supportButton = view.findViewById<AppCompatButton>(R.id.support_this_project_button)
         val reportTextView = view.findViewById<TextView>(R.id.report_text_view_open)
+
         reportTextView.setOnClickListener {
             val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -940,12 +942,14 @@ class BrowserTabFragment :
         urlTextView.text = viewModel.url
         thisPageCounter.text = sharedPreferences.getInt("session_censored_count", 0).toString()
         lifeTimeCounter.text = sharedPreferences.getInt("all_time_censored_count", 0).toString()
+
         switch.setOnCheckedChangeListener { _, _ ->
             editor.putBoolean("safe_gaze_active", false)
             editor.apply()
-            handleSafeGazePopUp()
+            toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), VISIBLE)
+            toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), GONE)
+            switch.isChecked = true
         }
-        println("SafeGaze Boolean -> ${sharedPreferences.getBoolean("safe_gaze_active", false)}")
     }
 
     private fun handleSafeGazeCloseView(view: View, sharedPreferences: SharedPreferences){
@@ -962,7 +966,9 @@ class BrowserTabFragment :
         safeGazeOpenImageView.setOnClickListener{
             editor.putBoolean("safe_gaze_active", true)
             editor.apply()
-            handleSafeGazePopUp()
+            toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), VISIBLE)
+            toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), GONE)
+
         }
     }
 
@@ -995,15 +1001,9 @@ class BrowserTabFragment :
     @SuppressLint("InflateParams")
     private fun handleSafeGazePopUp() {
         val sharedPref = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
-        val popupView: View
-        val isOpen: Boolean
-        if (sharedPref.getBoolean("safe_gaze_active", true)) {
-            popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up_open, null)
-            isOpen = true
-        } else {
-            popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up_close, null)
-            isOpen = false
-        }
+        val popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up_view, null)
+        var currentLayout: View
+        var isOpen: Boolean
         val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         safeGazeIcon.setOnClickListener {
             val iconRect = Rect()
@@ -1015,11 +1015,20 @@ class BrowserTabFragment :
                 isFocusable = true
             }
             safeGazeIcon.post {
-                if (isOpen){
+                if (sharedPref.getBoolean("safe_gaze_active", true)) {
+                    currentLayout = popupView.findViewById(R.id.open_view)
+                    popupView.findViewById<View>(R.id.close_view).visibility = GONE
+                    currentLayout.visibility = VISIBLE
                     handleSafeGazeOpenView(popupView, sharedPref)
-                }else{
+                    isOpen = true
+                } else {
+                    currentLayout = popupView.findViewById(R.id.close_view)
+                    popupView.findViewById<View>(R.id.open_view).visibility = GONE
+                    currentLayout.visibility = VISIBLE
                     handleSafeGazeCloseView(popupView, sharedPref)
+                    isOpen = false
                 }
+
                 val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
                 val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
                 val newPopUpPosition = (x - popUpLayingOut) - 50
@@ -1045,6 +1054,16 @@ class BrowserTabFragment :
             // }
             // popupView.findViewById<TextView>(R.id.site_broken_text_view).text = totalCensoredText
         }
+    }
+
+    private fun toggleVisibilityWithAnimation(view: View, visibility: Int) {
+        val anim = if (visibility == View.VISIBLE) {
+            AnimationUtils.loadAnimation(context, R.anim.tab_anim_fade_in)
+        } else {
+            AnimationUtils.loadAnimation(context, R.anim.tab_anim_fade_out)
+        }
+        view.startAnimation(anim)
+        view.visibility = visibility
     }
 
     private fun updateViewsPosition(progressBar: ProgressBar, iconImageView: ImageView, percentageTextView: TextView, progress: Int) {
