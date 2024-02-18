@@ -27,6 +27,9 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.res.AssetManager
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.BlurMaskFilter.Blur
 import android.graphics.Rect
 import android.net.Uri
 import android.os.*
@@ -71,6 +74,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
+import androidx.core.util.TypedValueCompat.dpToPx
 import androidx.core.view.*
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
@@ -82,6 +86,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
 import com.duckduckgo.anvil.annotations.InjectWith
 import com.duckduckgo.app.accessibility.data.AccessibilitySettingsDataStore
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion
@@ -269,7 +276,7 @@ import com.duckduckgo.voice.api.VoiceSearchLauncher.Source.BROWSER
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
-import jp.wasabeef.blurry.Blurry
+import com.hoko.blur.HokoBlur
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.cancellable
 import org.halalz.kahftube.network.ApiService
@@ -918,7 +925,6 @@ class BrowserTabFragment :
     }
 
     private fun handleSafeGazeOpenView(view: View, sharedPreferences: SharedPreferences){
-        handleProgressBar(view)
         val editor = sharedPreferences.edit()
         val thisPageCounter = view.findViewById<TextView>(R.id.this_page_counter_text_view)
         val lifeTimeCounter = view.findViewById<TextView>(R.id.lifetime_counter_text_view)
@@ -926,7 +932,9 @@ class BrowserTabFragment :
         val urlTextView = view.findViewById<TextView>(R.id.url_open_text_view)
         val supportButton = view.findViewById<AppCompatButton>(R.id.support_this_project_button)
         val reportTextView = view.findViewById<TextView>(R.id.report_text_view_open)
-
+        val blurImageView = view.findViewById<AppCompatImageView>(R.id.blur_image_view)
+        handleProgressBar(view, blurImageView)
+        loadImageWithBlur(10, blurImageView)
         reportTextView.setOnClickListener {
             val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -952,6 +960,18 @@ class BrowserTabFragment :
         }
     }
 
+    private fun loadImageWithBlur(blurRadius: Int, imageView: ImageView) {
+        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.blur_image_background)
+        val blurredBitmap = HokoBlur.with(requireContext())
+            .radius(blurRadius / 5)
+            .sampleFactor(1.0f)
+            .forceCopy(false)
+            .processor()
+            .blur(bitmap)
+
+        imageView.setImageBitmap(blurredBitmap)
+    }
+
     private fun handleSafeGazeCloseView(view: View, sharedPreferences: SharedPreferences){
         val editor = sharedPreferences.edit()
         val safeGazeOpenImageView = view.findViewById<AppCompatImageView>(R.id.safe_gaze_on_image_view)
@@ -973,7 +993,7 @@ class BrowserTabFragment :
     }
 
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
-    private fun handleProgressBar(view: View) {
+    private fun handleProgressBar(view: View, imageView: ImageView) {
         val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
         val iconImageView: ImageView = view.findViewById(R.id.iconImageView)
         val percentageTextView: TextView = view.findViewById(R.id.percentageTextView)
@@ -991,6 +1011,7 @@ class BrowserTabFragment :
                     progressBar.progress = calculatedProgress
                     percentageTextView.text = "$calculatedProgress%"
                     updateViewsPosition(progressBar, iconImageView, percentageTextView, calculatedProgress)
+                    loadImageWithBlur(calculatedProgress, imageView)
                     true
                 }
                 else -> false
@@ -1014,6 +1035,7 @@ class BrowserTabFragment :
                 animationStyle = 2132017505
                 isFocusable = true
             }
+
             safeGazeIcon.post {
                 if (sharedPref.getBoolean("safe_gaze_active", true)) {
                     currentLayout = popupView.findViewById(R.id.open_view)
