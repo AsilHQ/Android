@@ -1019,16 +1019,15 @@ class BrowserTabFragment :
                     currentLayout = popupView.findViewById(R.id.open_view)
                     popupView.findViewById<View>(R.id.close_view).visibility = GONE
                     currentLayout.visibility = VISIBLE
-                    handleSafeGazeOpenView(popupView, sharedPref)
                     isOpen = true
                 } else {
                     currentLayout = popupView.findViewById(R.id.close_view)
                     popupView.findViewById<View>(R.id.open_view).visibility = GONE
                     currentLayout.visibility = VISIBLE
-                    handleSafeGazeCloseView(popupView, sharedPref)
                     isOpen = false
                 }
-
+                handleSafeGazeOpenView(popupView, sharedPref)
+                handleSafeGazeCloseView(popupView, sharedPref)
                 val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
                 val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
                 val newPopUpPosition = (x - popUpLayingOut) - 50
