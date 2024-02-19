@@ -1055,26 +1055,26 @@ class BrowserTabFragment :
                 handleSafeGazeOpenView(popupView, sharedPref)
                 handleSafeGazeCloseView(popupView, sharedPref)
                 val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
-                val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
+                val popUpLayingOut = 350.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
                 val newPopUpPosition = (x - popUpLayingOut) - 50
                 popupWindow.showAtLocation(
                     safeGazeIcon,
                     Gravity.NO_GRAVITY,
                     newPopUpPosition,
-                    (y + omnibar.toolbar.height) - 25,
+                    (y + omnibar.toolbar.height) - 20,
                 )
-                // val pointerArrow =
-                //     popupView.findViewById<ImageView>(R.id.pointer_arrow_image_view)
-                // val pointerArrowParams =
-                //     pointerArrow.layoutParams as ConstraintLayout.LayoutParams
-                // pointerArrowParams.rightMargin = leftOverDevicePixel - 113
-                // pointerArrow.layoutParams = pointerArrowParams
+                val pointerArrow =
+                    popupView.findViewById<ImageView>(R.id.pointer_arrow_image_view)
+                val pointerArrowParams =
+                    pointerArrow.layoutParams as ConstraintLayout.LayoutParams
+                pointerArrowParams.rightMargin = leftOverDevicePixel - 113
+                pointerArrow.layoutParams = pointerArrowParams
             }
         }
     }
 
     private fun toggleVisibilityWithAnimation(view: View, visibility: Int) {
-        val anim = if (visibility == View.VISIBLE) {
+        val anim = if (visibility == VISIBLE) {
             AnimationUtils.loadAnimation(context, R.anim.tab_anim_fade_in)
         } else {
             AnimationUtils.loadAnimation(context, R.anim.tab_anim_fade_out)

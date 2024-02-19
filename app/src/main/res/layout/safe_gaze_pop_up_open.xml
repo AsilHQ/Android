@@ -9,22 +9,21 @@
         android:id="@+id/pointer_arrow_image_view"
         android:layout_width="14dp"
         android:layout_height="9dp"
-        android:visibility="invisible"
+        android:layout_marginTop="2dp"
         android:src="@drawable/pointer_arrow"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/pop_up_layout"
         android:contentDescription="@string/pointer_arrow" />
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/pop_up_layout"
         android:layout_width="350dp"
         android:layout_height="wrap_content"
-        app:cardUseCompatPadding="true"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:padding="14dp"
+        app:cardUseCompatPadding="true"
         app:cardCornerRadius="20dp"
         >
 
@@ -69,6 +68,7 @@
                         android:layout_margin="20dp"
                         app:strokeWidth="1dp"
                         app:strokeColor="#FFE7E7E7"
+                        app:cardBackgroundColor="@color/white"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
 
@@ -103,6 +103,7 @@
                                 app:layout_constraintStart_toEndOf="@id/safe_gaze_up_text_view"
                                 app:layout_constraintTop_toTopOf="@id/safe_gaze_up_text_view"
                                 app:thumbTint="@color/white"
+                                app:trackTint="#11B9CD"
                                 tools:ignore="DeprecatedWidgetInXml" />
 
                         </androidx.constraintlayout.widget.ConstraintLayout>
