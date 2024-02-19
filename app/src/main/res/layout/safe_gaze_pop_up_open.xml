@@ -137,11 +137,11 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="5dp"
                         android:layout_marginBottom="4dp"
-                        android:fontFamily="@font/quicksand"
                         android:text="prothomalo.com"
                         android:textAlignment="center"
                         android:textColor="@color/black"
                         android:textFontWeight="700"
+                        android:fontFamily="@font/quicksand_medium"
                         app:layout_constraintBottom_toBottomOf="@id/web_icon"
                         app:layout_constraintStart_toEndOf="@id/web_icon"
                         app:layout_constraintTop_toTopOf="@id/web_icon" />

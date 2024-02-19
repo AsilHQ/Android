@@ -51,10 +51,13 @@
                     app:layout_constraintStart_toEndOf="@id/web_icon"
                     app:layout_constraintBottom_toBottomOf="@id/web_icon"
                     android:textSize="14sp"
+                    android:textFontWeight="400"
+                    android:fontFamily="@font/quicksand_medium"
                     android:layout_marginBottom="4dp"
                     android:layout_marginStart="5dp"
                     android:textColor="@color/black"
-                    android:text="prothomalo.com"/>
+                    android:text="prothomalo.com"
+                    tools:targetApi="p" />
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/always_pause_check_box"
@@ -75,8 +78,11 @@
                     android:layout_marginStart="5dp"
                     android:layout_marginBottom="2dp"
                     android:textSize="12sp"
+                    android:textFontWeight="500"
+                    android:fontFamily="@font/quicksand_medium"
                     android:text="Always pause"
-                    android:textColor="#959595"/>
+                    android:textColor="#959595"
+                    tools:targetApi="p" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </com.google.android.material.card.MaterialCardView>
@@ -100,9 +106,12 @@
             app:layout_constraintTop_toBottomOf="@id/safe_gaze_on_image_view"
             android:textStyle="bold"
             android:textSize="14sp"
+            android:textFontWeight="700"
+            android:fontFamily="@font/quicksand_medium"
             android:text="Turn on SafeGaze"
             android:textColor="@color/black"
-            tools:ignore="DeprecatedWidgetInXml,HardcodedText,InvalidColorAttribute" />
+            tools:ignore="DeprecatedWidgetInXml,HardcodedText,InvalidColorAttribute"
+            tools:targetApi="p" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/safe_gaze_exp_card_view"
@@ -120,9 +129,12 @@
                 android:textAlignment="center"
                 android:textColor="@color/black"
                 android:layout_margin="18dp"
+                android:textFontWeight="500"
+                android:fontFamily="@font/quicksand_medium"
                 android:textSize="12sp"
                 android:text="Take control of your digital space with our Ad Blocker and Image Purificator extension combo. Safegaze will save your eyes from sinful act."
-                tools:ignore="DeprecatedWidgetInXml,HardcodedText" />
+                tools:ignore="DeprecatedWidgetInXml,HardcodedText"
+                tools:targetApi="p" />
         </com.google.android.material.card.MaterialCardView>
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -146,8 +158,11 @@
             app:layout_constraintBottom_toBottomOf="@id/report_image_view"
             app:layout_constraintEnd_toEndOf="parent"
             android:textSize="12sp"
+            android:textFontWeight="400"
+            android:fontFamily="@font/quicksand_medium"
             android:textColor="#454545"
-            android:text="Please report any bugs or suggestions to this form"/>
+            android:text="Please report any bugs or suggestions to this form"
+            tools:targetApi="p" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
