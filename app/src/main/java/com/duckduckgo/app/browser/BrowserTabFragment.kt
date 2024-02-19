@@ -1056,7 +1056,7 @@ class BrowserTabFragment :
                 handleSafeGazeCloseView(popupView, sharedPref)
                 val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
                 val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
-                val newPopUpPosition = (x - popUpLayingOut) - 50
+                val newPopUpPosition = (x - popUpLayingOut) - 30
                 popupWindow.showAtLocation(
                     safeGazeIcon,
                     Gravity.NO_GRAVITY,
