@@ -15,19 +15,19 @@
   -->
 
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
 
     <include
         android:id="@+id/open_view"
         layout="@layout/safe_gaze_pop_up_open"
-        android:layout_width="match_parent"
+        android:layout_width="350dp"
         android:layout_height="wrap_content"
         android:visibility="gone"/>
     <include
         android:id="@+id/close_view"
         layout="@layout/safe_gaze_pop_up_close"
-        android:layout_width="match_parent"
+        android:layout_width="350dp"
         android:layout_height="wrap_content"
         android:visibility="gone"/>
 

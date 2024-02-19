@@ -929,7 +929,7 @@ class BrowserTabFragment :
         val supportButton = view.findViewById<AppCompatButton>(R.id.support_this_project_button)
         val reportTextView = view.findViewById<TextView>(R.id.report_text_view_open)
         val blurImageView = view.findViewById<AppCompatImageView>(R.id.blur_image_view)
-        val shareImageView = view.findViewById<AppCompatImageView>(R.id.share_image_view)
+        val shareImageView = view.findViewById<AppCompatImageView>(R.id.share_card_view)
         shareImageView.setOnClickListener {
             val shareIntent = Intent(Intent.ACTION_SEND)
             shareIntent.type = "text/plain"
@@ -1030,7 +1030,7 @@ class BrowserTabFragment :
         val sharedPref = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
         val popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up_view, null)
         var currentLayout: View
-        val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         safeGazeIcon.setOnClickListener {
             safeGazeInterface.updateBlur(sharedPref.getInt("safe_gaze_blur_progress", 0).toFloat())
             val iconRect = Rect()
@@ -1056,19 +1056,19 @@ class BrowserTabFragment :
                 handleSafeGazeCloseView(popupView, sharedPref)
                 val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
                 val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
-                val newPopUpPosition = (x - popUpLayingOut) - 30
+                val newPopUpPosition = (x - popUpLayingOut) - 50
                 popupWindow.showAtLocation(
                     safeGazeIcon,
                     Gravity.NO_GRAVITY,
                     newPopUpPosition,
                     (y + omnibar.toolbar.height) - 25,
                 )
-                val pointerArrow =
-                    popupView.findViewById<ImageView>(R.id.pointer_arrow_image_view)
-                val pointerArrowParams =
-                    pointerArrow.layoutParams as ConstraintLayout.LayoutParams
-                pointerArrowParams.rightMargin = leftOverDevicePixel - 113
-                pointerArrow.layoutParams = pointerArrowParams
+                // val pointerArrow =
+                //     popupView.findViewById<ImageView>(R.id.pointer_arrow_image_view)
+                // val pointerArrowParams =
+                //     pointerArrow.layoutParams as ConstraintLayout.LayoutParams
+                // pointerArrowParams.rightMargin = leftOverDevicePixel - 113
+                // pointerArrow.layoutParams = pointerArrowParams
             }
         }
     }
