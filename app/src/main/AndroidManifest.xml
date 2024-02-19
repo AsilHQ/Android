@@ -78,6 +78,9 @@
         <meta-data
             android:name="android.webkit.WebView.EnableSafeBrowsing"
             android:value="false" />
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
 
         <!-- Renamed to allow for the introduction of custom icons without breaking existing shortcuts -->
         <activity

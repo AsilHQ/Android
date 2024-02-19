@@ -77,8 +77,9 @@
                                 app:layout_constraintStart_toStartOf="parent"
                                 app:layout_constraintTop_toTopOf="parent"
                                 app:layout_constraintBottom_toBottomOf="parent"
-                                android:textStyle="bold"
+                                android:textFontWeight="700"
                                 android:text="Safegaze Up"
+                                android:fontFamily="@font/quicksand_medium"
                                 android:textColor="@color/black"
                                 android:layout_marginVertical="14dp"
                                 android:layout_marginStart="14dp"
@@ -129,18 +130,21 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"/>
+
                     <TextView
                         android:id="@+id/url_open_text_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:layout_constraintTop_toTopOf="@id/web_icon"
-                        app:layout_constraintStart_toEndOf="@id/web_icon"
-                        app:layout_constraintBottom_toBottomOf="@id/web_icon"
-                        android:layout_marginBottom="4dp"
                         android:layout_marginStart="5dp"
+                        android:layout_marginBottom="4dp"
+                        android:fontFamily="@font/quicksand"
+                        android:text="prothomalo.com"
                         android:textAlignment="center"
                         android:textColor="@color/black"
-                        android:text="prothomalo.com"/>
+                        android:textFontWeight="700"
+                        app:layout_constraintBottom_toBottomOf="@id/web_icon"
+                        app:layout_constraintStart_toEndOf="@id/web_icon"
+                        app:layout_constraintTop_toTopOf="@id/web_icon" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </com.google.android.material.card.MaterialCardView>
@@ -165,9 +169,10 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="14dp"
                         android:layout_marginTop="14dp"
+                        android:fontFamily="@font/quicksand_medium"
                         android:text="Sinful acts avoided"
                         android:textColor="@color/black"
-                        android:textStyle="bold"
+                        android:textFontWeight="700"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -189,6 +194,9 @@
                         android:layout_height="wrap_content"
                         android:text="10"
                         android:textColor="#FF0000"
+                        android:textSize="14sp"
+                        android:textFontWeight="700"
+                        android:fontFamily="@font/quicksand_medium"
                         app:layout_constraintBottom_toBottomOf="@id/this_page_image_view"
                         app:layout_constraintEnd_toEndOf="@id/this_page_image_view"
                         app:layout_constraintStart_toStartOf="@id/this_page_image_view"
@@ -202,6 +210,8 @@
                         android:text="This Page"
                         android:textColor="#6D6D6D"
                         android:textSize="14sp"
+                        android:fontFamily="@font/quicksand_medium"
+                        android:textFontWeight="500"
                         app:layout_constraintBottom_toBottomOf="@id/this_page_image_view"
                         app:layout_constraintStart_toEndOf="@id/this_page_image_view"
                         app:layout_constraintTop_toTopOf="@id/this_page_image_view" />
@@ -222,6 +232,9 @@
                         android:layout_height="wrap_content"
                         android:text="10"
                         android:textColor="#FF0000"
+                        android:textSize="14sp"
+                        android:textFontWeight="700"
+                        android:fontFamily="@font/quicksand_medium"
                         app:layout_constraintBottom_toBottomOf="@id/lifetime_image_view"
                         app:layout_constraintEnd_toEndOf="@id/lifetime_image_view"
                         app:layout_constraintStart_toStartOf="@id/lifetime_image_view"
@@ -235,6 +248,8 @@
                         android:text="Lifetime"
                         android:textColor="#6D6D6D"
                         android:textSize="14sp"
+                        android:fontFamily="@font/quicksand_medium"
+                        android:textFontWeight="500"
                         app:layout_constraintBottom_toBottomOf="@id/lifetime_image_view"
                         app:layout_constraintStart_toEndOf="@id/lifetime_image_view"
                         app:layout_constraintTop_toTopOf="@id/lifetime_image_view" />
@@ -267,6 +282,8 @@
                         app:layout_constraintTop_toTopOf="parent"
                         android:textColor="@color/black"
                         android:textSize="13sp"
+                        android:textFontWeight="700"
+                        android:fontFamily="@font/quicksand_medium"
                         android:textStyle="bold"
                         android:text="Gender Mode"/>
 
@@ -294,7 +311,8 @@
                             android:layout_height="wrap_content"
                             android:textColor="#FF9F7AEA"
                             android:textSize="10sp"
-                            android:textStyle="bold"
+                            android:textFontWeight="700"
+                            android:fontFamily="@font/quicksand_medium"
                             android:layout_margin="3dp"
                             android:text="Coming Soon"/>
                     </com.google.android.material.card.MaterialCardView>
@@ -350,6 +368,9 @@
                                         app:layout_constraintStart_toEndOf="@id/man_image_view"
                                         app:layout_constraintTop_toTopOf="@id/man_image_view"
                                         app:layout_constraintBottom_toBottomOf="@id/man_image_view"
+                                        android:textSize="14sp"
+                                        android:textFontWeight="700"
+                                        android:fontFamily="@font/quicksand_medium"
                                         android:textColor="#0FB2C9"
                                         android:paddingEnd="30dp"
                                         android:text="I am a Man"/>
@@ -377,6 +398,9 @@
                                 app:layout_constraintTop_toTopOf="@id/woman_image_view"
                                 app:layout_constraintBottom_toBottomOf="@id/woman_image_view"
                                 android:textColor="#3B3B3B"
+                                android:textSize="14sp"
+                                android:textFontWeight="700"
+                                android:fontFamily="@font/quicksand_medium"
                                 android:text="I am a Woman"/>
 
                         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -411,6 +435,9 @@
                         app:layout_constraintTop_toTopOf="parent"
                         android:layout_marginStart="12dp"
                         android:layout_marginTop="12dp"
+                        android:textSize="13sp"
+                        android:textFontWeight="700"
+                        android:fontFamily="@font/quicksand_medium"
                         android:textColor="@color/black"
                         android:textStyle="bold"
                         android:text="Image Blur Intensity"/>
@@ -525,7 +552,9 @@
                     android:layout_height="wrap_content"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    android:textStyle="bold"
+                    android:textAllCaps="false"
+                    android:textFontWeight="700"
+                    android:fontFamily="@font/quicksand_medium"
                     android:background="@drawable/support_button_background"
                     android:text="Support this project"
                     android:textColor="@color/white"/>
@@ -554,6 +583,8 @@
                 app:layout_constraintTop_toTopOf="@id/report_image_view"
                 app:layout_constraintBottom_toBottomOf="@id/report_image_view"
                 android:textSize="12sp"
+                android:textFontWeight="400"
+                android:fontFamily="@font/quicksand_medium"
                 android:textColor="#454545"
                 android:text="Please report any bugs or suggestions to this form"/>
 
