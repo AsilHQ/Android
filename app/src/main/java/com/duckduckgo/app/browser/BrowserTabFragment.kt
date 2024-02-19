@@ -1063,21 +1063,13 @@ class BrowserTabFragment :
                     newPopUpPosition,
                     (y + omnibar.toolbar.height) - 25,
                 )
-                // val pointerArrow =
-                //     popupView.findViewById<ImageView>(R.id.pointer_arrow_safe_gaze_image_view)
-                // val pointerArrowParams =
-                //     pointerArrow.layoutParams as ConstraintLayout.LayoutParams
-                // pointerArrowParams.rightMargin = leftOverDevicePixel - 113
-                // pointerArrow.layoutParams = pointerArrowParams
+                val pointerArrow =
+                    popupView.findViewById<ImageView>(R.id.pointer_arrow_image_view)
+                val pointerArrowParams =
+                    pointerArrow.layoutParams as ConstraintLayout.LayoutParams
+                pointerArrowParams.rightMargin = leftOverDevicePixel - 113
+                pointerArrow.layoutParams = pointerArrowParams
             }
-            // popupView.findViewById<TextView>(R.id.website_url_text_view).text = viewModel.url
-            // val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
-            // val totalCensoredText = "Total ${sharedPreferences.getInt("all_time_censored_count", 0)} Sinful acts avoided since beginning"
-            // popupView.findViewById<TextView>(R.id.count_text).text = sharedPreferences.getInt("session_censored_count", 0).toString()
-            // popupView.findViewById<TextView>(R.id.asil_shield_exp_text).text = buildString {
-            //     this.append("Sinful acts avoided")
-            // }
-            // popupView.findViewById<TextView>(R.id.site_broken_text_view).text = totalCensoredText
         }
     }
 
@@ -1097,15 +1089,6 @@ class BrowserTabFragment :
         val iconLayoutParams = iconImageView.layoutParams as ConstraintLayout.LayoutParams
         iconLayoutParams.horizontalBias = clampedProgress / 100f
         iconImageView.layoutParams = iconLayoutParams
-
-        // val textLayoutParams = percentageTextView.layoutParams as ConstraintLayout.LayoutParams
-        // textLayoutParams.horizontalBias = clampedProgress / 100f
-        // percentageTextView.layoutParams = textLayoutParams
-        //
-        // val pointerLayoutParams = progressPointer.layoutParams as ConstraintLayout.LayoutParams
-        // pointerLayoutParams.horizontalBias = clampedProgress / 100f
-        // progressPointer.layoutParams = pointerLayoutParams
-
     }
 
 
