@@ -22,11 +22,9 @@ class DnsOverVpnService : VpnService() {
         Timber.v(SERVICE_NAME, "run() executed.")
         val intentAction = intent.action
         if (intentAction == INTENT_ACTION_START_VPN) {
-            //start
             startVpn()
         } else if (intentAction == INTENT_ACTION_STOP_VPN) {
-            //stop
-            mStopVpn()
+            stopVpn()
         }
         return START_NOT_STICKY
     }
@@ -43,8 +41,6 @@ class DnsOverVpnService : VpnService() {
 
     private fun startVpn() {
         Timber.v(SERVICE_NAME, "Starting...")
-
-        // Start a new session by creating a new thread.
         thread = Thread(
             {
                 Timber.v(SERVICE_NAME, "Creating interface...")
@@ -63,12 +59,10 @@ class DnsOverVpnService : VpnService() {
             },
             SERVICE_NAME + " Runnable",
         )
-
-        //start the service
         thread!!.start()
     }
 
-    private fun mStopVpn() {
+    private fun stopVpn() {
         Timber.v(SERVICE_NAME, "Stopping...")
         stopSelf()
         if (parcelInterface != null) {
