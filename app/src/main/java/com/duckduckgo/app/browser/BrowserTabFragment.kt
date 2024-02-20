@@ -27,6 +27,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.res.AssetManager
 import android.content.res.Configuration
+import android.graphics.BitmapFactory
 import android.graphics.Rect
 import android.net.Uri
 import android.os.*
@@ -36,6 +37,7 @@ import android.text.Editable
 import android.util.DisplayMetrics
 import android.view.*
 import android.view.View.*
+import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
 import android.webkit.PermissionRequest
 import android.webkit.URLUtil
@@ -52,6 +54,7 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.PopupWindow
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
@@ -59,6 +62,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.annotation.AnyThread
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
+import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -265,6 +269,7 @@ import com.duckduckgo.voice.api.VoiceSearchLauncher.Source.BROWSER
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.hoko.blur.HokoBlur
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.cancellable
 import org.halalz.kahftube.network.ApiService
@@ -489,6 +494,8 @@ class BrowserTabFragment :
     private var isActiveTab: Boolean = false
 
     private val downloadMessagesJob = ConflatedJob()
+
+    private lateinit var safeGazeInterface: SafeGazeJsInterface
 
     private val viewModel: BrowserTabViewModel by lazy {
         val viewModel = ViewModelProvider(this, viewModelFactory).get(BrowserTabViewModel::class.java)
@@ -735,6 +742,7 @@ class BrowserTabFragment :
         removeDaxDialogFromActivity()
         renderer = BrowserTabFragmentRenderer()
         decorator = BrowserTabFragmentDecorator()
+        safeGazeInterface = SafeGazeJsInterface(requireContext())
         voiceSearchLauncher.registerResultsCallback(this, requireActivity(), BROWSER) {
             when (it) {
                 is VoiceSearchLauncher.Event.VoiceRecognitionSuccess -> {
@@ -912,25 +920,119 @@ class BrowserTabFragment :
         )
     }
 
+    private fun handleSafeGazeOpenView(view: View, sharedPreferences: SharedPreferences){
+        val editor = sharedPreferences.edit()
+        val thisPageCounter = view.findViewById<TextView>(R.id.this_page_counter_text_view)
+        val lifeTimeCounter = view.findViewById<TextView>(R.id.lifetime_counter_text_view)
+        val switch = view.findViewById<SwitchCompat>(R.id.safe_gaze_open_switch_view)
+        val urlTextView = view.findViewById<TextView>(R.id.url_open_text_view)
+        val supportButton = view.findViewById<AppCompatButton>(R.id.support_this_project_button)
+        val reportTextView = view.findViewById<TextView>(R.id.report_text_view_open)
+        val blurImageView = view.findViewById<AppCompatImageView>(R.id.blur_image_view)
+        val shareImageView = view.findViewById<AppCompatImageView>(R.id.share_card_view)
+        shareImageView.setOnClickListener {
+            val shareIntent = Intent(Intent.ACTION_SEND)
+            shareIntent.type = "text/plain"
+            shareIntent.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=org.halalz.asil")
+            startActivity(Intent.createChooser(shareIntent, "Share via"))
+        }
+        handleProgressBar(view, blurImageView)
+        loadImageWithBlur(sharedPreferences.getInt("safe_gaze_blur_progress", 0), blurImageView)
+        reportTextView.setOnClickListener {
+            val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        }
+        supportButton.setOnClickListener {
+            val url = "https://safegaze.com/support-safegaze/"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            if (intent.resolveActivity(requireActivity().packageManager) != null) {
+                startActivity(intent)
+            }
+        }
+        urlTextView.text = viewModel.url
+        thisPageCounter.text = sharedPreferences.getInt("session_censored_count", 0).toString()
+        lifeTimeCounter.text = sharedPreferences.getInt("all_time_censored_count", 0).toString()
+
+        switch.setOnCheckedChangeListener { _, _ ->
+            editor.putBoolean("safe_gaze_active", false)
+            editor.apply()
+            toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), VISIBLE)
+            toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), GONE)
+            switch.isChecked = true
+        }
+    }
+
+    private fun loadImageWithBlur(blurRadius: Int, imageView: ImageView) {
+        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.blur_image_background)
+        val blurredBitmap = HokoBlur.with(requireContext())
+            .radius(blurRadius / 5)
+            .sampleFactor(1.0f)
+            .forceCopy(false)
+            .processor()
+            .blur(bitmap)
+
+        imageView.setImageBitmap(blurredBitmap)
+    }
+
+    private fun handleSafeGazeCloseView(view: View, sharedPreferences: SharedPreferences){
+        val editor = sharedPreferences.edit()
+        val safeGazeOpenImageView = view.findViewById<AppCompatImageView>(R.id.safe_gaze_on_image_view)
+        val urlTextView = view.findViewById<TextView>(R.id.url_text_view)
+        val reportTextView = view.findViewById<TextView>(R.id.report_text_view)
+        reportTextView.setOnClickListener {
+            val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        }
+        urlTextView.text = viewModel.url
+        safeGazeOpenImageView.setOnClickListener{
+            editor.putBoolean("safe_gaze_active", true)
+            editor.apply()
+            toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), VISIBLE)
+            toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), GONE)
+
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
+    private fun handleProgressBar(view: View, imageView: ImageView) {
+        val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
+        val iconImageView: ImageView = view.findViewById(R.id.icon_image_view)
+        // val percentageTextView: TextView = view.findViewById(R.id.percentage_text_view)
+        // val progressPointer: AppCompatImageView = view.findViewById(R.id.progress_pointer)
+        val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
+        val progress = sharedPreferences.getInt("safe_gaze_blur_progress", 0)
+        progressBar.progress = progress
+        //percentageTextView.text = "$progress%"
+        updateViewsPosition(progressBar, iconImageView, sharedPreferences.getInt("safe_gaze_blur_progress", 0))
+        progressBar.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                    val width = progressBar.width.toFloat()
+                    val x = event.x
+                    val calculatedProgress = (x / width * progressBar.max).toInt()
+                    progressBar.progress = calculatedProgress
+                    //percentageTextView.text = "$calculatedProgress%"
+                    updateViewsPosition(progressBar, iconImageView, calculatedProgress)
+                    safeGazeInterface.updateBlur(calculatedProgress.toFloat())
+                    saveProgressToSharedPreferences(calculatedProgress)
+                    loadImageWithBlur(calculatedProgress, imageView)
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
     @SuppressLint("InflateParams")
     private fun handleSafeGazePopUp() {
-        val popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up, null)
-        val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        val toggle = popupView.findViewById<SwitchCompat>(R.id.asil_shield_toggle_button)
         val sharedPref = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
-        val editor = sharedPref.edit()
-        if (sharedPref.getBoolean("safe_gaze_active", true)) {
-            popupView.findViewById<TextView>(R.id.asil_shield_state_text_view).text = buildString {
-                this.append("Safe Gaze UP")
-            }
-            toggle.isChecked = true
-        } else {
-            popupView.findViewById<TextView>(R.id.asil_shield_state_text_view).text = buildString {
-                this.append("Safe Gaze DOWN")
-            }
-            toggle.isChecked = false
-        }
+        val popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up_view, null)
+        var currentLayout: View
+        val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         safeGazeIcon.setOnClickListener {
+            safeGazeInterface.updateBlur(sharedPref.getInt("safe_gaze_blur_progress", 0).toFloat())
             val iconRect = Rect()
             safeGazeIcon.getGlobalVisibleRect(iconRect)
             val x = iconRect.left
@@ -939,48 +1041,66 @@ class BrowserTabFragment :
                 animationStyle = 2132017505
                 isFocusable = true
             }
-            toggle.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked){
-                    editor.putBoolean("safe_gaze_active", true)
-                    popupView.findViewById<TextView>(R.id.asil_shield_state_text_view).text = buildString {
-                        viewModel.url?.let { it1 -> webView?.loadUrl(it1) }
-                        this.append("Safe Gaze UP")
-                    }
-                } else{
-                    editor.putBoolean("safe_gaze_active", false)
-                    popupView.findViewById<TextView>(R.id.asil_shield_state_text_view).text = buildString {
-                        viewModel.url?.let { it1 -> webView?.loadUrl(it1) }
-                        this.append("Safe Gaze DOWN")
-                    }
-                }
-                editor.apply()
-            }
+
             safeGazeIcon.post {
+                if (sharedPref.getBoolean("safe_gaze_active", true)) {
+                    currentLayout = popupView.findViewById(R.id.open_view)
+                    popupView.findViewById<View>(R.id.close_view).visibility = GONE
+                    currentLayout.visibility = VISIBLE
+                } else {
+                    currentLayout = popupView.findViewById(R.id.close_view)
+                    popupView.findViewById<View>(R.id.open_view).visibility = GONE
+                    currentLayout.visibility = VISIBLE
+                }
+                handleSafeGazeOpenView(popupView, sharedPref)
+                handleSafeGazeCloseView(popupView, sharedPref)
                 val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
-                val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
+                val popUpLayingOut = 350.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
                 val newPopUpPosition = (x - popUpLayingOut) - 50
                 popupWindow.showAtLocation(
                     safeGazeIcon,
                     Gravity.NO_GRAVITY,
                     newPopUpPosition,
-                    (y + omnibar.toolbar.height) - 25,
+                    (y + omnibar.toolbar.height) - 20,
                 )
                 val pointerArrow =
-                    popupView.findViewById<ImageView>(R.id.pointer_arrow_safe_gaze_image_view)
+                    popupView.findViewById<ImageView>(R.id.pointer_arrow_image_view)
                 val pointerArrowParams =
                     pointerArrow.layoutParams as ConstraintLayout.LayoutParams
                 pointerArrowParams.rightMargin = leftOverDevicePixel - 113
                 pointerArrow.layoutParams = pointerArrowParams
             }
-            popupView.findViewById<TextView>(R.id.website_url_text_view).text = viewModel.url
-            val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
-            val totalCensoredText = "Total ${sharedPreferences.getInt("all_time_censored_count", 0)} Sinful acts avoided since beginning"
-            popupView.findViewById<TextView>(R.id.count_text).text = sharedPreferences.getInt("session_censored_count", 0).toString()
-            popupView.findViewById<TextView>(R.id.asil_shield_exp_text).text = buildString {
-                this.append("Sinful acts avoided")
-            }
-            popupView.findViewById<TextView>(R.id.site_broken_text_view).text = totalCensoredText
         }
+    }
+
+    private fun toggleVisibilityWithAnimation(view: View, visibility: Int) {
+        val anim = if (visibility == VISIBLE) {
+            AnimationUtils.loadAnimation(context, R.anim.tab_anim_fade_in)
+        } else {
+            AnimationUtils.loadAnimation(context, R.anim.tab_anim_fade_out)
+        }
+        view.startAnimation(anim)
+        view.visibility = visibility
+    }
+
+    private fun updateViewsPosition(progressBar: ProgressBar, iconImageView: ImageView, progress: Int) {
+        val clampedProgress = progress.coerceIn(0, 100)
+
+        val iconLayoutParams = iconImageView.layoutParams as ConstraintLayout.LayoutParams
+        iconLayoutParams.horizontalBias = clampedProgress / 100f
+        iconImageView.layoutParams = iconLayoutParams
+    }
+
+
+
+
+
+
+    private fun saveProgressToSharedPreferences(progress: Int) {
+        val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putInt("safe_gaze_blur_progress", progress)
+        editor.apply()
     }
 
     @Suppress("DEPRECATION")

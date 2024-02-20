@@ -14,7 +14,7 @@ import com.duckduckgo.app.safegaze.ondeviceobjectdetection.ObjectDetectionHelper
 
 class SafeGazeJsInterface(
     private val context: Context,
-    private val webView: DuckDuckGoWebView
+    private val webView: DuckDuckGoWebView? = null
 ) {
 
     private val preferences: SharedPreferences =
@@ -53,13 +53,23 @@ class SafeGazeJsInterface(
     @JavascriptInterface
     fun callSafegazeOnDeviceModelHandler(isExist: Boolean, index: Int) {
         val jsFunctionCall = "safegazeOnDeviceModelHandler($isExist, $index);"
-        webView.post {
+        webView?.post {
             webView.evaluateJavascript(jsFunctionCall, null)
         }
     }
 
     @JavascriptInterface
+    fun updateBlur(blur: Float){
+        val trimmedBlur = blur / 100
+        val jsFunction = "window.blurIntensity = $trimmedBlur; updateBluredImageOpacity();"
+        webView?.post {
+            webView.evaluateJavascript(jsFunction, null)
+        }
+    }
+
+    @JavascriptInterface
     fun sendMessage(message: String) {
+        updateBlur(preferences.getInt("safe_gaze_blur_progress", 0).toFloat())
         if (message.startsWith("coreML/-/")){
             val parts = message.split("/-/")
             val imageUrl = if (parts.size >= 2) parts[1] else ""
