@@ -52,8 +52,8 @@ class DnsOverVpnService : VpnService() {
         if (thread != null) {
             thread!!.interrupt()
         }
-        mIsServiceRunning = false
-        broadcastVpnStatusChanged(mIsServiceRunning)
+        isServiceRunning = false
+        broadcastVpnStatusChanged(isServiceRunning)
         super.onDestroy()
     }
 
@@ -64,8 +64,8 @@ class DnsOverVpnService : VpnService() {
         thread = Thread(
             {
                 Timber.v(SERVICE_NAME, "Creating interface...")
-                mIsServiceRunning = true
-                broadcastVpnStatusChanged(mIsServiceRunning)
+                isServiceRunning = true
+                broadcastVpnStatusChanged(isServiceRunning)
                 try {
                     parcelInterface = builder.setSession("VPNService")
                         .addAddress("10.0.2.0", 24)
@@ -105,19 +105,16 @@ class DnsOverVpnService : VpnService() {
     }
 
     companion object {
-        //constants
         const val SERVICE_NAME = "DnsOverVpnService"
 
-        //intents
         const val INTENT_ACTION_START_VPN = "LocalVpnServiceStartVpn"
         const val INTENT_ACTION_STOP_VPN = "LocalVpnServiceStopVpn"
         const val INTENT_VPN_STATUS_CHANGED = "LocalVpnServiceVpnStatusChanged"
 
-        //statics
-        private var mIsServiceRunning = false
+        private var isServiceRunning = false
         fun isVpnRunning(connectivityManager: ConnectivityManager): Boolean {
             Timber.v(SERVICE_NAME, "isVpnRunning")
-            if (mIsServiceRunning) {
+            if (isServiceRunning) {
                 Timber.v(SERVICE_NAME, "isVpnRunning - Service running")
                 try {
                     val activeNetwork = connectivityManager.activeNetwork
