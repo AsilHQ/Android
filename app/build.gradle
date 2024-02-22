@@ -20,8 +20,8 @@ android {
         minSdk min_sdk
         targetSdk target_sdk
         compileSdk compile_sdk
-        versionCode 125
-        versionName "1.2.5"
+        versionCode 127
+        versionName "1.2.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         archivesBaseName = "asil-$versionName"
         vectorDrawables.useSupportLibrary = true

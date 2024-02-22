@@ -544,8 +544,8 @@ class BrowserTabFragment :
     private val safeGazeIcon: AppCompatImageView
         get() = omnibar.safeGazeIcon
 
-    private val kahfShieldIcon: AppCompatImageView
-        get() = omnibar.asilIcon
+    private val kahfDnsdIcon: AppCompatImageView
+        get() = omnibar.kahfDnsIcon
 
     // private val fireMenuButton: ViewGroup
     //     get() = omnibar.fireIconMenu
@@ -869,8 +869,54 @@ class BrowserTabFragment :
     }
 
     private fun handleKahfIconClick(){
-        kahfShieldIcon.setOnClickListener {
-            browserActivity?.launchPrivacyDashboard()
+        kahfDnsdIcon.setOnClickListener {
+            val popupView = LayoutInflater.from(context).inflate(R.layout.kahf_dns_pop_up, null)
+            val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            val switch = popupView.findViewById<SwitchCompat>(R.id.kahf_dns_toggle_button)
+            val dnsText = popupView.findViewById<TextView>(R.id.kahf_dns_state_text_view)
+            val iconRect = Rect()
+            kahfDnsdIcon.getGlobalVisibleRect(iconRect)
+            val y = iconRect.top
+            val x = iconRect.left
+            popupWindow.apply {
+                animationStyle = 2132017505
+                isFocusable = true
+            }
+            kahfDnsdIcon.post {
+                val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
+                val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
+                val newPopUpPosition = (x - popUpLayingOut) - 40
+                popupWindow.showAtLocation(
+                    kahfDnsdIcon,
+                    Gravity.NO_GRAVITY,
+                    newPopUpPosition,
+                    (y + omnibar.toolbar.height) - 20,
+                )
+                val pointerArrow =
+                    popupView.findViewById<ImageView>(R.id.pointer_arrow_kahf_dns_image_view)
+                val pointerArrowParams =
+                    pointerArrow.layoutParams as ConstraintLayout.LayoutParams
+                pointerArrowParams.rightMargin = leftOverDevicePixel - 93
+                pointerArrow.layoutParams = pointerArrowParams
+
+                if (DnsOverVpnService.isVpnRunning(connectivityManager)){
+                    switch.isChecked = true
+                    dnsText.text = resources.getString(R.string.kahf_dns_up)
+                }else{
+                    switch.isChecked = false
+                    dnsText.text = resources.getString(R.string.kahf_dns_down)
+                }
+
+                switch.setOnCheckedChangeListener { _, _ ->
+                    if (DnsOverVpnService.isVpnRunning(connectivityManager)){
+                        disconnectVpn()
+                        dnsText.text = resources.getString(R.string.kahf_dns_down)
+                    }else{
+                        connectVpn()
+                        dnsText.text = resources.getString(R.string.kahf_dns_up)
+                    }
+                }
+            }
         }
     }
 
@@ -2384,41 +2430,7 @@ class BrowserTabFragment :
 
     private fun configurePrivacyShield() {
         omnibar.shieldIcon.setOnClickListener {
-            // val popupView = LayoutInflater.from(context).inflate(R.layout.kahf_dns_pop_up, null)
-            // val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            // kahfShieldIcon.setOnClickListener {
-            //     val iconRect = Rect()
-            //     kahfShieldIcon.getGlobalVisibleRect(iconRect)
-            //     val x = iconRect.left
-            //     val y = iconRect.top
-            //     popupWindow.apply {
-            //         animationStyle = 2132017505
-            //         isFocusable = true
-            //     }
-            //
-            //     kahfShieldIcon.post {
-            //         val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
-            //         val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
-            //         val newPopUpPosition = (x - popUpLayingOut) - 50
-            //         popupWindow.showAtLocation(
-            //             kahfShieldIcon,
-            //             Gravity.NO_GRAVITY,
-            //             newPopUpPosition,
-            //             (y + omnibar.toolbar.height) - 20,
-            //         )
-            //         val pointerArrow =
-            //             popupView.findViewById<ImageView>(R.id.pointer_arrow_kahf_dns_image_view)
-            //         val pointerArrowParams =
-            //             pointerArrow.layoutParams as ConstraintLayout.LayoutParams
-            //         pointerArrowParams.rightMargin = leftOverDevicePixel - 113
-            //         pointerArrow.layoutParams = pointerArrowParams
-            //     }
-            // }
-            if (DnsOverVpnService.isVpnRunning(connectivityManager)){
-                disconnectVpn()
-            }else{
-                connectVpn()
-            }
+            browserActivity?.launchPrivacyDashboard()
         }
     }
 

@@ -805,4 +805,6 @@
     <string name="refresh_again">Refresh Again</string>
     <string name="unsubscribe">Unsubscribe</string>
     <string name="haram_channels_found">%1$d Haram channels found</string>
+    <string name="kahf_dns_up">Kahf DNS UP</string>
+    <string name="kahf_dns_down">Kahf DNS DOWN</string>
 </resources>
