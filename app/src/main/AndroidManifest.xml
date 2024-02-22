@@ -536,6 +536,15 @@
             android:name=".remotemessage.SharePromoLinkRMFBroadCastReceiver"
             android:exported="false" />
 
+        <service
+            android:name="com.duckduckgo.app.dns.DnsOverVpnService"
+            android:exported="true"
+            android:permission="android.permission.BIND_VPN_SERVICE" >
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>

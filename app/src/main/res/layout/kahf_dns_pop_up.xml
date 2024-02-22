@@ -7,7 +7,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ImageView
-        android:id="@+id/pointer_arrow_safe_gaze_image_view"
+        android:id="@+id/pointer_arrow_kahf_dns_image_view"
         android:layout_width="14dp"
         android:layout_height="9dp"
         android:src="@drawable/pointer_arrow"

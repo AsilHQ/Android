@@ -29,7 +29,9 @@ import android.content.res.AssetManager
 import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.graphics.Rect
+import android.net.ConnectivityManager
 import android.net.Uri
+import android.net.VpnService
 import android.os.*
 import android.print.PrintAttributes
 import android.print.PrintManager
@@ -78,6 +80,7 @@ import androidx.fragment.app.commitNow
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.transaction
 import androidx.lifecycle.*
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -158,6 +161,7 @@ import com.duckduckgo.app.browser.webview.WebContentDebugging
 import com.duckduckgo.app.cta.ui.*
 import com.duckduckgo.app.cta.ui.DaxDialogCta.*
 import com.duckduckgo.app.di.AppCoroutineScope
+import com.duckduckgo.app.dns.DnsOverVpnService
 import com.duckduckgo.app.downloads.DownloadsFileActions
 import com.duckduckgo.app.fire.fireproofwebsite.data.FireproofWebsiteEntity
 import com.duckduckgo.app.fire.fireproofwebsite.data.website
@@ -512,6 +516,8 @@ class BrowserTabFragment :
 
     private lateinit var webViewContainer: FrameLayout
 
+    private lateinit var connectivityManager: ConnectivityManager
+
     private val findInPage
         get() = omnibar.findInPage
 
@@ -537,6 +543,9 @@ class BrowserTabFragment :
 
     private val safeGazeIcon: AppCompatImageView
         get() = omnibar.safeGazeIcon
+
+    private val kahfShieldIcon: AppCompatImageView
+        get() = omnibar.asilIcon
 
     // private val fireMenuButton: ViewGroup
     //     get() = omnibar.fireIconMenu
@@ -754,6 +763,11 @@ class BrowserTabFragment :
                 is VoiceSearchLauncher.Event.VoiceSearchDisabled -> viewModel.voiceSearchDisabled()
             }
         }
+
+        connectivityManager = requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        LocalBroadcastManager.getInstance(requireContext())
+            .registerReceiver(receiveBroadcastMessageFromVpnService, IntentFilter(DnsOverVpnService.INTENT_VPN_STATUS_CHANGED))
         sitePermissionsDialogLauncher.registerPermissionLauncher(this)
         externalCameraLauncher.registerForResult(this) {
             when (it) {
@@ -772,6 +786,32 @@ class BrowserTabFragment :
             }
             pendingUploadTask = null
         }
+    }
+
+    private val receiveBroadcastMessageFromVpnService: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(
+            context: Context,
+            intent: Intent
+        ) {
+            val newStatus = intent.getBooleanExtra("status", false)
+            println("Broadcast Receiver status -> $newStatus")
+        }
+    }
+
+    private fun connectVpn() {
+        val intent = VpnService.prepare(requireActivity().applicationContext)
+        if (intent != null) {
+            startActivityForResult(intent, 0)
+        } else {
+            onActivityResult(0, RESULT_OK, null)
+        }
+    }
+
+
+    private fun disconnectVpn() {
+        val intent = Intent(requireActivity(), DnsOverVpnService::class.java)
+        intent.setAction(DnsOverVpnService.INTENT_ACTION_STOP_VPN)
+        requireActivity().startService(intent)
     }
 
     private fun resumeWebView() {
@@ -825,7 +865,15 @@ class BrowserTabFragment :
         }
         handleSafeGazePopUp()
         prepareHeadlessKahfTubeWebView()
+        handleKahfIconClick()
     }
+
+    private fun handleKahfIconClick(){
+        kahfShieldIcon.setOnClickListener {
+            browserActivity?.launchPrivacyDashboard()
+        }
+    }
+
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun prepareHeadlessKahfTubeWebView() {
@@ -2178,6 +2226,11 @@ class BrowserTabFragment :
         if (requestCode == REQUEST_CODE_CHOOSE_FILE) {
             handleFileUploadResult(resultCode, data)
         }
+        if (resultCode == RESULT_OK) {
+            val intent = Intent(requireActivity(), DnsOverVpnService::class.java)
+            intent.setAction(DnsOverVpnService.INTENT_ACTION_START_VPN)
+            requireActivity().startService(intent)
+        }
     }
 
     private fun handleFileUploadResult(
@@ -2331,7 +2384,41 @@ class BrowserTabFragment :
 
     private fun configurePrivacyShield() {
         omnibar.shieldIcon.setOnClickListener {
-            browserActivity?.launchPrivacyDashboard()
+            // val popupView = LayoutInflater.from(context).inflate(R.layout.kahf_dns_pop_up, null)
+            // val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            // kahfShieldIcon.setOnClickListener {
+            //     val iconRect = Rect()
+            //     kahfShieldIcon.getGlobalVisibleRect(iconRect)
+            //     val x = iconRect.left
+            //     val y = iconRect.top
+            //     popupWindow.apply {
+            //         animationStyle = 2132017505
+            //         isFocusable = true
+            //     }
+            //
+            //     kahfShieldIcon.post {
+            //         val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
+            //         val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
+            //         val newPopUpPosition = (x - popUpLayingOut) - 50
+            //         popupWindow.showAtLocation(
+            //             kahfShieldIcon,
+            //             Gravity.NO_GRAVITY,
+            //             newPopUpPosition,
+            //             (y + omnibar.toolbar.height) - 20,
+            //         )
+            //         val pointerArrow =
+            //             popupView.findViewById<ImageView>(R.id.pointer_arrow_kahf_dns_image_view)
+            //         val pointerArrowParams =
+            //             pointerArrow.layoutParams as ConstraintLayout.LayoutParams
+            //         pointerArrowParams.rightMargin = leftOverDevicePixel - 113
+            //         pointerArrow.layoutParams = pointerArrowParams
+            //     }
+            // }
+            if (DnsOverVpnService.isVpnRunning(connectivityManager)){
+                disconnectVpn()
+            }else{
+                connectVpn()
+            }
         }
     }
 
