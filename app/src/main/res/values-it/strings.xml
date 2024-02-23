@@ -799,7 +799,7 @@
     <string name="safegaze_popup_alwayspurify_title">Purifica sempre</string>
     <string name="safegaze_popup_neverpurify_title">Mai purificare</string>
     <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
-    <string name="safegaze_popup_imageblur_title">Intensità dello sfocatura dell'immagine</string>
+    <string name="safegaze_popup_imageblur_title">Intensità dello sfocatura dell\'immagine</string>
     <string name="safegaze_popup_takecontrol_title">Migliora la tua esperienza online con SafeGaze, la nostra estensione di purificazione delle immagini che protegge la tua visione dal contenuto inappropriato.</string>
     <string name="safegaze_popup_turnon_title">Attiva SafeGaze</string>
 

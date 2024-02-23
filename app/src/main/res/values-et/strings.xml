@@ -800,7 +800,7 @@
     <string name="safegaze_popup_neverpurify_title">Mitte kunagi puhastada</string>
     <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
     <string name="safegaze_popup_imageblur_title">Pildi hägususe intensiivsus</string>
-    <string name="safegaze_popup_takecontrol_title">Parandage oma veebikogemust SafeGaze'iga, meie pildi puhastuslaiendiga, mis kaitseb teie nägemist sobimatu sisu eest.</string>
+    <string name="safegaze_popup_takecontrol_title">Parandage oma veebikogemust SafeGaze\'iga, meie pildi puhastuslaiendiga, mis kaitseb teie nägemist sobimatu sisu eest.</string>
     <string name="safegaze_popup_turnon_title">Lülitage SafeGaze sisse</string>
 
 </resources>

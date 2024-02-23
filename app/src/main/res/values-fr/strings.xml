@@ -799,8 +799,8 @@
     <string name="safegaze_popup_alwayspurify_title">Toujours purifier</string>
     <string name="safegaze_popup_neverpurify_title">Ne jamais purifier</string>
     <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
-    <string name="safegaze_popup_imageblur_title">Intensité de flou d'image</string>
-    <string name="safegaze_popup_takecontrol_title">Améliorez votre expérience en ligne avec SafeGaze, notre extension de purification d'image qui protège votre vision du contenu inapproprié.</string>
+    <string name="safegaze_popup_imageblur_title">Intensité de flou d\'image</string>
+    <string name="safegaze_popup_takecontrol_title">Améliorez votre expérience en ligne avec SafeGaze, notre extension de purification d\'image qui protège votre vision du contenu inapproprié.</string>
     <string name="safegaze_popup_turnon_title">Activer SafeGaze</string>
 
 </resources>
