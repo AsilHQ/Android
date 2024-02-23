@@ -786,4 +786,21 @@
     <string name="settingsAutofillLoginsSetting">Paroolid</string>
     <string name="autofillLoginSavedSnackbarMessage">Parool salvestatud</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Parool uuendatud</string>
+
+    <string name="safegaze_popup_report_title">Palun teavitage vigadest või ettepanekutest selle vormi kaudu</string>
+    <string name="safegaze_popup_support_title">Toetage seda projekti</string>
+    <string name="safegaze_popup_woman_title">Olen naine</string>
+    <string name="safegaze_popup_man_title">Olen mees</string>
+    <string name="safegaze_popup_comingsoon_title">Varsti saadaval</string>
+    <string name="safegaze_popup_gendermode_title">Soo režiim</string>
+    <string name="safegaze_popup_sinfulacts_title">Patused teod vältis</string>
+    <string name="safegaze_popup_thispage_title">See leht</string>
+    <string name="safegaze_popup_lifetime_title">Eluiga</string>
+    <string name="safegaze_popup_alwayspurify_title">Alati puhasta</string>
+    <string name="safegaze_popup_neverpurify_title">Mitte kunagi puhastada</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Pildi hägususe intensiivsus</string>
+    <string name="safegaze_popup_takecontrol_title">Parandage oma veebikogemust SafeGaze'iga, meie pildi puhastuslaiendiga, mis kaitseb teie nägemist sobimatu sisu eest.</string>
+    <string name="safegaze_popup_turnon_title">Lülitage SafeGaze sisse</string>
+
 </resources>

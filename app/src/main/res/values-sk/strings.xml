@@ -794,4 +794,21 @@
     <string name="settingsAutofillLoginsSetting">Heslo</string>
     <string name="autofillLoginSavedSnackbarMessage">Uložené heslo</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Aktualizácia hesla</string>
+
+    <string name="safegaze_popup_report_title">Prosím, nahlaste akékoľvek chyby alebo návrhy prostredníctvom tohto formulára</string>
+    <string name="safegaze_popup_support_title">Podporte tento projekt</string>
+    <string name="safegaze_popup_woman_title">Som žena</string>
+    <string name="safegaze_popup_man_title">Som muž</string>
+    <string name="safegaze_popup_comingsoon_title">Čoskoro k dispozícii</string>
+    <string name="safegaze_popup_gendermode_title">Režim pohlavia</string>
+    <string name="safegaze_popup_sinfulacts_title">Hriešne činy sa vyhýbajú</string>
+    <string name="safegaze_popup_thispage_title">Táto stránka</string>
+    <string name="safegaze_popup_lifetime_title">Trvanie života</string>
+    <string name="safegaze_popup_alwayspurify_title">Vždy čistiť</string>
+    <string name="safegaze_popup_neverpurify_title">Nikdy nečistiť</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Intenzita rozmazania obrázka</string>
+    <string name="safegaze_popup_takecontrol_title">Vylepšite svoj online zážitok s SafeGaze, našim rozšírením na čistenie obrázkov, ktoré chráni vaše videnie pred nevhodným obsahom.</string>
+    <string name="safegaze_popup_turnon_title">Zapnite SafeGaze</string>
+
 </resources>

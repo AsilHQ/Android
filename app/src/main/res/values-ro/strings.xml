@@ -790,4 +790,21 @@
     <string name="settingsAutofillLoginsSetting">Parole</string>
     <string name="autofillLoginSavedSnackbarMessage">Parolă salvată</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Parolă actualizată</string>
+
+    <string name="safegaze_popup_report_title">Vă rugăm să raportați orice erori sau sugestii prin acest formular</string>
+    <string name="safegaze_popup_support_title">Sprijiniți acest proiect</string>
+    <string name="safegaze_popup_woman_title">Sunt femeie</string>
+    <string name="safegaze_popup_man_title">Sunt bărbat</string>
+    <string name="safegaze_popup_comingsoon_title">În curând disponibil</string>
+    <string name="safegaze_popup_gendermode_title">Modul de gen</string>
+    <string name="safegaze_popup_sinfulacts_title">Acțiuni păcătoase evitate</string>
+    <string name="safegaze_popup_thispage_title">Această pagină</string>
+    <string name="safegaze_popup_lifetime_title">Durata de viață</string>
+    <string name="safegaze_popup_alwayspurify_title">Curățați întotdeauna</string>
+    <string name="safegaze_popup_neverpurify_title">Niciodată să nu purificați</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Intensitatea estomparii imaginii</string>
+    <string name="safegaze_popup_takecontrol_title">Îmbunătățiți-vă experiența online cu SafeGaze, extensia noastră de purificare a imaginilor care protejează vederea dvs. de conținutul inadecvat.</string>
+    <string name="safegaze_popup_turnon_title">Activați SafeGaze</string>
+
 </resources>

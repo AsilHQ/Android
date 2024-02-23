@@ -794,4 +794,21 @@
     <string name="settingsAutofillLoginsSetting">Slaptažodžiai</string>
     <string name="autofillLoginSavedSnackbarMessage">Slaptažodis išsaugotas</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Slaptažodis atnaujintas</string>
+
+    <string name="safegaze_popup_report_title">Prašome pranešti apie bet kokius klaidas arba pasiūlymus naudodami šią formą</string>
+    <string name="safegaze_popup_support_title">Palaikykite šį projektą</string>
+    <string name="safegaze_popup_woman_title">Aš esu moteris</string>
+    <string name="safegaze_popup_man_title">Aš esu vyras</string>
+    <string name="safegaze_popup_comingsoon_title">Artimiausiu metu</string>
+    <string name="safegaze_popup_gendermode_title">Lyties režimas</string>
+    <string name="safegaze_popup_sinfulacts_title">Išvengti nuodėmingų veiksmų</string>
+    <string name="safegaze_popup_thispage_title">Šis puslapis</string>
+    <string name="safegaze_popup_lifetime_title">Visa gyvenimas</string>
+    <string name="safegaze_popup_alwayspurify_title">Visada valykite</string>
+    <string name="safegaze_popup_neverpurify_title">Niekada nesivalykite</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Nuotraukos miglotumo intensyvumas</string>
+    <string name="safegaze_popup_takecontrol_title">Gerinkite savo internetinį patyrimą su SafeGaze, mūsų paveikslėlių valymo plėtiniu, kuris apsaugo jūsų regėjimą nuo netinkamo turinio.</string>
+    <string name="safegaze_popup_turnon_title">Įjunkite SafeGaze</string>
+
 </resources>
