@@ -26,8 +26,10 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.content.res.AssetManager
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.Rect
 import android.net.ConnectivityManager
 import android.net.Uri
@@ -902,12 +904,19 @@ class BrowserTabFragment :
                 if (DnsOverVpnService.isVpnRunning(connectivityManager)){
                     switch.isChecked = true
                     dnsText.text = resources.getString(R.string.kahf_dns_up)
+                    switch.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
                 }else{
                     switch.isChecked = false
                     dnsText.text = resources.getString(R.string.kahf_dns_down)
+                    switch.trackTintList = ColorStateList.valueOf(Color.WHITE)
                 }
 
-                switch.setOnCheckedChangeListener { _, _ ->
+                switch.setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) {
+                        switch.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
+                    } else {
+                        switch.trackTintList = ColorStateList.valueOf(Color.WHITE)
+                    }
                     if (DnsOverVpnService.isVpnRunning(connectivityManager)){
                         disconnectVpn()
                         dnsText.text = resources.getString(R.string.kahf_dns_down)
