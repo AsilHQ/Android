@@ -786,4 +786,21 @@
     <string name="settingsAutofillLoginsSetting">Adgangskoder</string>
     <string name="autofillLoginSavedSnackbarMessage">Adgangskode gemt</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Adgangskode opdateret</string>
+
+    <string name="safegaze_popup_report_title">Venligst rapportér eventuelle fejl eller forslag til dette formular</string>
+    <string name="safegaze_popup_support_title">Støt dette projekt</string>
+    <string name="safegaze_popup_woman_title">Jeg er kvinde</string>
+    <string name="safegaze_popup_man_title">Jeg er mand</string>
+    <string name="safegaze_popup_comingsoon_title">Kommer snart</string>
+    <string name="safegaze_popup_gendermode_title">Kønsmodus</string>
+    <string name="safegaze_popup_sinfulacts_title">Syndige handlinger undgået</string>
+    <string name="safegaze_popup_thispage_title">Denne side</string>
+    <string name="safegaze_popup_lifetime_title">Levetid</string>
+    <string name="safegaze_popup_alwayspurify_title">Altid rense</string>
+    <string name="safegaze_popup_neverpurify_title">Aldrig rense</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Billedets sløringsintensitet</string>
+    <string name="safegaze_popup_takecontrol_title">Forbedre din online oplevelse med SafeGaze, vores billede-rensningsudvidelse, der beskytter dit syn mod upassende indhold.</string>
+    <string name="safegaze_popup_turnon_title">Aktivér SafeGaze</string>
+
 </resources>

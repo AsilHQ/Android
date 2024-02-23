@@ -786,4 +786,21 @@
     <string name="settingsAutofillLoginsSetting">Wachtwoorden</string>
     <string name="autofillLoginSavedSnackbarMessage">Wachtwoord opgeslagen</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Wachtwoord bijgewerkt</string>
+
+    <string name="safegaze_popup_report_title">Gelieve alle fouten of suggesties te melden via dit formulier</string>
+    <string name="safegaze_popup_support_title">Ondersteun dit project</string>
+    <string name="safegaze_popup_woman_title">Ik ben een vrouw</string>
+    <string name="safegaze_popup_man_title">Ik ben een man</string>
+    <string name="safegaze_popup_comingsoon_title">Binnenkort beschikbaar</string>
+    <string name="safegaze_popup_gendermode_title">Geslachtsmodus</string>
+    <string name="safegaze_popup_sinfulacts_title">Zondige handelingen vermeden</string>
+    <string name="safegaze_popup_thispage_title">Deze pagina</string>
+    <string name="safegaze_popup_lifetime_title">Levensduur</string>
+    <string name="safegaze_popup_alwayspurify_title">Altijd zuiveren</string>
+    <string name="safegaze_popup_neverpurify_title">Nooit zuiveren</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Beeldvervaging intensiteit</string>
+    <string name="safegaze_popup_takecontrol_title">Verbeter uw online ervaring met SafeGaze, onze beeldreinigingsuitbreiding die uw zicht beschermt tegen ongepaste inhoud.</string>
+    <string name="safegaze_popup_turnon_title">Zet SafeGaze aan</string>
+
 </resources>

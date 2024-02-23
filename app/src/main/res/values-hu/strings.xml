@@ -786,4 +786,21 @@
     <string name="settingsAutofillLoginsSetting">Jelszavak</string>
     <string name="autofillLoginSavedSnackbarMessage">Jelszó mentve</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Jelszó frissítve</string>
+
+    <string name="safegaze_popup_report_title">Kérjük, jelentse az összes hibát vagy javaslatot ezen az űrlapon keresztül</string>
+    <string name="safegaze_popup_support_title">Támogasd ezt a projektet</string>
+    <string name="safegaze_popup_woman_title">Nő vagyok</string>
+    <string name="safegaze_popup_man_title">Férfi vagyok</string>
+    <string name="safegaze_popup_comingsoon_title">Hamarosan elérhető</string>
+    <string name="safegaze_popup_gendermode_title">Nem módban</string>
+    <string name="safegaze_popup_sinfulacts_title">Bűnös cselekedetek elkerülve</string>
+    <string name="safegaze_popup_thispage_title">Ez az oldal</string>
+    <string name="safegaze_popup_lifetime_title">Élettartam</string>
+    <string name="safegaze_popup_alwayspurify_title">Mindig tisztítsa meg</string>
+    <string name="safegaze_popup_neverpurify_title">Soha ne tisztítsa meg</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Kép elhomályosításának intenzitása</string>
+    <string name="safegaze_popup_takecontrol_title">Javítsa online élményét a SafeGaze segítségével, képfeljavító bővítményünkkel, amely védi látását a nem megfelelő tartalomtól.</string>
+    <string name="safegaze_popup_turnon_title">Kapcsolja be a SafeGaze funkciót</string>
+
 </resources>

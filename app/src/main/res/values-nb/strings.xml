@@ -786,4 +786,21 @@
     <string name="settingsAutofillLoginsSetting">Passord</string>
     <string name="autofillLoginSavedSnackbarMessage">Passordet er lagret</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Passordet er oppdatert</string>
+
+    <string name="safegaze_popup_report_title">Vennligst rapporter eventuelle feil eller forslag via dette skjemaet</string>
+    <string name="safegaze_popup_support_title">Støtt dette prosjektet</string>
+    <string name="safegaze_popup_woman_title">Jeg er kvinne</string>
+    <string name="safegaze_popup_man_title">Jeg er mann</string>
+    <string name="safegaze_popup_comingsoon_title">Kommer snart</string>
+    <string name="safegaze_popup_gendermode_title">Kjønnsmodus</string>
+    <string name="safegaze_popup_sinfulacts_title">Syndige handlinger unngått</string>
+    <string name="safegaze_popup_thispage_title">Denne siden</string>
+    <string name="safegaze_popup_lifetime_title">Levetid</string>
+    <string name="safegaze_popup_alwayspurify_title">Alltid rense</string>
+    <string name="safegaze_popup_neverpurify_title">Aldri rense</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Bilde uskarphet intensitet</string>
+    <string name="safegaze_popup_takecontrol_title">Forbedre din online opplevelse med SafeGaze, vår bilde rensende utvidelse som beskytter ditt syn mot upassende innhold.</string>
+    <string name="safegaze_popup_turnon_title">Slå på SafeGaze</string>
+
 </resources>

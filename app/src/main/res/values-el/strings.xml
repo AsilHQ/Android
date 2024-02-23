@@ -786,4 +786,21 @@
     <string name="settingsAutofillLoginsSetting">Κωδικοί πρόσβασης</string>
     <string name="autofillLoginSavedSnackbarMessage">Αποθηκευμένος κωδικός πρόσβασης</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Ο κωδικός πρόσβασης ενημερώθηκε</string>
+
+    <string name="safegaze_popup_report_title">Παρακαλώ αναφέρετε οποιαδήποτε σφάλματα ή προτάσεις μέσω αυτής της φόρμας</string>
+    <string name="safegaze_popup_support_title">Υποστηρίξτε αυτό το έργο</string>
+    <string name="safegaze_popup_woman_title">Είμαι Γυναίκα</string>
+    <string name="safegaze_popup_man_title">Είμαι Άντρας</string>
+    <string name="safegaze_popup_comingsoon_title">Έρχεται σύντομα</string>
+    <string name="safegaze_popup_gendermode_title">Λειτουργία φύλου</string>
+    <string name="safegaze_popup_sinfulacts_title">Αποφευγόμενες αμαρτωλές πράξεις</string>
+    <string name="safegaze_popup_thispage_title">Αυτή η σελίδα</string>
+    <string name="safegaze_popup_lifetime_title">Διάρκεια Ζωής</string>
+    <string name="safegaze_popup_alwayspurify_title">Πάντα Καθαρίστε</string>
+    <string name="safegaze_popup_neverpurify_title">Ποτέ μην Καθαρίζετε</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Ένταση Θόλωσης Εικόνας</string>
+    <string name="safegaze_popup_takecontrol_title">Βελτιώστε την online εμπειρία σας με το SafeGaze, την επέκταση καθαρισμού εικόνας μας που προστατεύει την όρασή σας από ακατάλληλο περιεχόμενο.</string>
+    <string name="safegaze_popup_turnon_title">Ενεργοποιήστε το SafeGaze</string>
+
 </resources>

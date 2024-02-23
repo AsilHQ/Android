@@ -73,7 +73,7 @@
                                 android:layout_marginVertical="14dp"
                                 android:layout_marginStart="14dp"
                                 android:fontFamily="@font/quicksand_medium"
-                                android:text="Safegaze Up"
+                                android:text="@string/safegaze_popup_safegazeup_title"
                                 android:textColor="@color/black"
                                 android:textFontWeight="700"
                                 app:layout_constraintBottom_toBottomOf="parent"
@@ -171,7 +171,7 @@
                         android:layout_marginStart="14dp"
                         android:layout_marginTop="10dp"
                         android:fontFamily="@font/quicksand_medium"
-                        android:text="Sinful acts avoided"
+                        android:text="@string/safegaze_popup_sinfulacts_title"
                         android:textColor="@color/black"
                         android:textFontWeight="700"
                         app:layout_constraintStart_toStartOf="parent"
@@ -208,7 +208,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="This Page"
+                        android:text="@string/safegaze_popup_thispage_title"
                         android:textColor="#6D6D6D"
                         android:textSize="14sp"
                         android:fontFamily="@font/quicksand_medium"
@@ -246,7 +246,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="Lifetime"
+                        android:text="@string/safegaze_popup_lifetime_title"
                         android:textColor="#6D6D6D"
                         android:textSize="14sp"
                         android:fontFamily="@font/quicksand_medium"
@@ -288,7 +288,7 @@
                         android:textFontWeight="700"
                         android:fontFamily="@font/quicksand_medium"
                         android:textStyle="bold"
-                        android:text="Gender Mode"/>
+                        android:text="@string/safegaze_popup_gendermode_title"/>
 
                     <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/gender_mode_locked_image_view"
@@ -318,7 +318,7 @@
                             android:textFontWeight="700"
                             android:fontFamily="@font/quicksand_medium"
                             android:layout_margin="3dp"
-                            android:text="Coming Soon"/>
+                            android:text="@string/safegaze_popup_comingsoon_title"/>
                     </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.card.MaterialCardView
@@ -377,7 +377,7 @@
                                         android:fontFamily="@font/quicksand_medium"
                                         android:textColor="#0FB2C9"
                                         android:paddingEnd="20dp"
-                                        android:text="I am a Man"/>
+                                        android:text="@string/safegaze_popup_man_title"/>
 
                                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -407,7 +407,7 @@
                                 android:textSize="14sp"
                                 android:textFontWeight="700"
                                 android:fontFamily="@font/quicksand_medium"
-                                android:text="I am a Woman"/>
+                                android:text="@string/safegaze_popup_woman_title"/>
 
                         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -448,7 +448,7 @@
                         android:fontFamily="@font/quicksand_medium"
                         android:textColor="@color/black"
                         android:textStyle="bold"
-                        android:text="Image Blur Intensity"/>
+                        android:text="@string/safegaze_popup_imageblur_title"/>
 
 
                     <ProgressBar
@@ -529,7 +529,7 @@
                     android:textFontWeight="700"
                     android:fontFamily="@font/quicksand_medium"
                     android:background="@drawable/support_button_background"
-                    android:text="Support this project"
+                    android:text="@string/safegaze_popup_support_title"
                     android:textColor="@color/white"/>
 
                 <androidx.appcompat.widget.AppCompatImageView
@@ -571,7 +571,7 @@
                 android:textFontWeight="400"
                 android:fontFamily="@font/quicksand_medium"
                 android:textColor="#454545"
-                android:text="Please report any bugs or suggestions to this form"/>
+                android:text="@string/safegaze_popup_report_title"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

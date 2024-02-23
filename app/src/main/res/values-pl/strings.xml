@@ -794,4 +794,21 @@
     <string name="settingsAutofillLoginsSetting">Hasła</string>
     <string name="autofillLoginSavedSnackbarMessage">Hasło zapisane</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Zaktualizowano hasło</string>
+
+    <string name="safegaze_popup_report_title">Prosimy o zgłaszanie wszelkich błędów lub sugestii za pomocą tego formularza</string>
+    <string name="safegaze_popup_support_title">Wspieraj ten projekt</string>
+    <string name="safegaze_popup_woman_title">Jestem kobietą</string>
+    <string name="safegaze_popup_man_title">Jestem mężczyzną</string>
+    <string name="safegaze_popup_comingsoon_title">Już wkrótce</string>
+    <string name="safegaze_popup_gendermode_title">Tryb płci</string>
+    <string name="safegaze_popup_sinfulacts_title">Uniknięte grzeszne czyny</string>
+    <string name="safegaze_popup_thispage_title">Ta strona</string>
+    <string name="safegaze_popup_lifetime_title">Żywotność</string>
+    <string name="safegaze_popup_alwayspurify_title">Zawsze oczyszczaj</string>
+    <string name="safegaze_popup_neverpurify_title">Nigdy nie oczyszczaj</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Intensywność rozmycia obrazu</string>
+    <string name="safegaze_popup_takecontrol_title">Popraw swoje wrażenia online za pomocą SafeGaze, naszego rozszerzenia do oczyszczania obrazów, które chroni Twój wzrok przed nieodpowiednią treścią.</string>
+    <string name="safegaze_popup_turnon_title">Włącz SafeGaze</string>
+
 </resources>
