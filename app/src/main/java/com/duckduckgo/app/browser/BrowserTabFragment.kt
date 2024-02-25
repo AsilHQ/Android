@@ -512,6 +512,8 @@ class BrowserTabFragment :
 
     private lateinit var webViewContainer: FrameLayout
 
+    private lateinit var sharedPreferences: SharedPreferences
+
     private val findInPage
         get() = omnibar.findInPage
 
@@ -743,6 +745,7 @@ class BrowserTabFragment :
         renderer = BrowserTabFragmentRenderer()
         decorator = BrowserTabFragmentDecorator()
         safeGazeInterface = SafeGazeJsInterface(requireContext())
+        sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
         voiceSearchLauncher.registerResultsCallback(this, requireActivity(), BROWSER) {
             when (it) {
                 is VoiceSearchLauncher.Event.VoiceRecognitionSuccess -> {
@@ -920,7 +923,7 @@ class BrowserTabFragment :
         )
     }
 
-    private fun handleSafeGazeOpenView(view: View, sharedPreferences: SharedPreferences){
+    private fun handleSafeGazeOpenView(view: View){
         val editor = sharedPreferences.edit()
         val thisPageCounter = view.findViewById<TextView>(R.id.this_page_counter_text_view)
         val lifeTimeCounter = view.findViewById<TextView>(R.id.lifetime_counter_text_view)
@@ -975,7 +978,7 @@ class BrowserTabFragment :
         imageView.setImageBitmap(blurredBitmap)
     }
 
-    private fun handleSafeGazeCloseView(view: View, sharedPreferences: SharedPreferences){
+    private fun handleSafeGazeCloseView(view: View){
         val editor = sharedPreferences.edit()
         val safeGazeOpenImageView = view.findViewById<AppCompatImageView>(R.id.safe_gaze_on_image_view)
         val urlTextView = view.findViewById<TextView>(R.id.url_text_view)
@@ -999,13 +1002,9 @@ class BrowserTabFragment :
     private fun handleProgressBar(view: View, imageView: ImageView) {
         val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
         val iconImageView: ImageView = view.findViewById(R.id.icon_image_view)
-        // val percentageTextView: TextView = view.findViewById(R.id.percentage_text_view)
-        // val progressPointer: AppCompatImageView = view.findViewById(R.id.progress_pointer)
-        val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
         val progress = sharedPreferences.getInt("safe_gaze_blur_progress", 0)
         progressBar.progress = progress
-        //percentageTextView.text = "$progress%"
-        updateViewsPosition(progressBar, iconImageView, sharedPreferences.getInt("safe_gaze_blur_progress", 0))
+        updateViewsPosition(iconImageView, sharedPreferences.getInt("safe_gaze_blur_progress", 0))
         progressBar.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
@@ -1013,8 +1012,7 @@ class BrowserTabFragment :
                     val x = event.x
                     val calculatedProgress = (x / width * progressBar.max).toInt()
                     progressBar.progress = calculatedProgress
-                    //percentageTextView.text = "$calculatedProgress%"
-                    updateViewsPosition(progressBar, iconImageView, calculatedProgress)
+                    updateViewsPosition(iconImageView, calculatedProgress)
                     safeGazeInterface.updateBlur(calculatedProgress.toFloat())
                     saveProgressToSharedPreferences(calculatedProgress)
                     loadImageWithBlur(calculatedProgress, imageView)
@@ -1027,12 +1025,11 @@ class BrowserTabFragment :
 
     @SuppressLint("InflateParams")
     private fun handleSafeGazePopUp() {
-        val sharedPref = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
         val popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up_view, null)
         var currentLayout: View
         val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         safeGazeIcon.setOnClickListener {
-            safeGazeInterface.updateBlur(sharedPref.getInt("safe_gaze_blur_progress", 0).toFloat())
+            safeGazeInterface.updateBlur(sharedPreferences.getInt("safe_gaze_blur_progress", 0).toFloat())
             val iconRect = Rect()
             safeGazeIcon.getGlobalVisibleRect(iconRect)
             val x = iconRect.left
@@ -1043,7 +1040,7 @@ class BrowserTabFragment :
             }
 
             safeGazeIcon.post {
-                if (sharedPref.getBoolean("safe_gaze_active", true)) {
+                if (sharedPreferences.getBoolean("safe_gaze_active", true)) {
                     currentLayout = popupView.findViewById(R.id.open_view)
                     popupView.findViewById<View>(R.id.close_view).visibility = GONE
                     currentLayout.visibility = VISIBLE
@@ -1052,8 +1049,8 @@ class BrowserTabFragment :
                     popupView.findViewById<View>(R.id.open_view).visibility = GONE
                     currentLayout.visibility = VISIBLE
                 }
-                handleSafeGazeOpenView(popupView, sharedPref)
-                handleSafeGazeCloseView(popupView, sharedPref)
+                handleSafeGazeOpenView(popupView)
+                handleSafeGazeCloseView(popupView)
                 val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
                 val popUpLayingOut = 350.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
                 val newPopUpPosition = (x - popUpLayingOut) - 50
@@ -1083,7 +1080,7 @@ class BrowserTabFragment :
         view.visibility = visibility
     }
 
-    private fun updateViewsPosition(progressBar: ProgressBar, iconImageView: ImageView, progress: Int) {
+    private fun updateViewsPosition(iconImageView: ImageView, progress: Int) {
         val clampedProgress = progress.coerceIn(0, 100)
 
         val iconLayoutParams = iconImageView.layoutParams as ConstraintLayout.LayoutParams
@@ -1091,13 +1088,8 @@ class BrowserTabFragment :
         iconImageView.layoutParams = iconLayoutParams
     }
 
-
-
-
-
-
     private fun saveProgressToSharedPreferences(progress: Int) {
-        val sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
+
         val editor = sharedPreferences.edit()
         editor.putInt("safe_gaze_blur_progress", progress)
         editor.apply()
