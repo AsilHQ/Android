@@ -824,5 +824,7 @@
     <string name="safegaze_popup_imageblur_title">Image Blur Intensity</string>
     <string name="safegaze_popup_takecontrol_title">Enhance your online experience with SafeGaze, our Image Purificator extension that shields your vision from inappropriate content.</string>
     <string name="safegaze_popup_turnon_title">Turn on SafeGaze</string>
+    <string name="kahf_dns_up">Kahf DNS UP</string>
+    <string name="kahf_dns_down">Kahf DNS DOWN</string>
 
 </resources>
