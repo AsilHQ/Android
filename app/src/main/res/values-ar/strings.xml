@@ -801,4 +801,21 @@
     <string name="if_this_site_appears_broken_try_shields_down">إذا بدا هذا الموقع معطلاً، جرب تعطيل الدروع</string>
     <string name="_0">0</string>
 
+    <string name="safegaze_popup_report_title">الرجاء الإبلاغ عن أي علل أو اقتراحات إلى هذا النموذج</string>
+    <string name="safegaze_popup_support_title">دعم هذا المشروع</string>
+    <string name="safegaze_popup_woman_title">أنا امرأة</string>
+    <string name="safegaze_popup_man_title">أنا رجل</string>
+    <string name="safegaze_popup_comingsoon_title">قريباً</string>
+    <string name="safegaze_popup_gendermode_title">وضع الجنس</string>
+    <string name="safegaze_popup_sinfulacts_title">الأعمال الخاطئة المتجنبة</string>
+    <string name="safegaze_popup_thispage_title">هذه الصفحة</string>
+    <string name="safegaze_popup_lifetime_title">مدى الحياة</string>
+    <string name="safegaze_popup_alwayspurify_title">تنقية دائمة</string>
+    <string name="safegaze_popup_neverpurify_title">لا تنقية أبدًا</string>
+    <string name="safegaze_popup_safegazeup_title">سيف جيز أب</string>
+    <string name="safegaze_popup_imageblur_title">شدة ضبابية الصورة</string>
+    <string name="safegaze_popup_takecontrol_title">قم بتعزيز تجربتك عبر الإنترنت مع SafeGaze ، ملحق تنقية الصور الذي يحمي رؤيتك من المحتوى غير الملائم.</string>
+    <string name="safegaze_popup_turnon_title">تشغيل SafeGaze</string>
+
+
 </resources>

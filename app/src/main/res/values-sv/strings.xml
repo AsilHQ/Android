@@ -786,4 +786,21 @@
     <string name="settingsAutofillLoginsSetting">Lösenord</string>
     <string name="autofillLoginSavedSnackbarMessage">Lösenord sparat</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Lösenordet har uppdaterats</string>
+
+    <string name="safegaze_popup_report_title">Var god rapportera eventuella fel eller förslag genom detta formulär</string>
+    <string name="safegaze_popup_support_title">Stöd detta projekt</string>
+    <string name="safegaze_popup_woman_title">Jag är kvinna</string>
+    <string name="safegaze_popup_man_title">Jag är man</string>
+    <string name="safegaze_popup_comingsoon_title">Kommer snart</string>
+    <string name="safegaze_popup_gendermode_title">Könsläge</string>
+    <string name="safegaze_popup_sinfulacts_title">Undvikna syndiga handlingar</string>
+    <string name="safegaze_popup_thispage_title">Denna sida</string>
+    <string name="safegaze_popup_lifetime_title">Livslängd</string>
+    <string name="safegaze_popup_alwayspurify_title">Alltid rena</string>
+    <string name="safegaze_popup_neverpurify_title">Aldrig rena</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Bildoskärp intensitet</string>
+    <string name="safegaze_popup_takecontrol_title">Förbättra din online-upplevelse med SafeGaze, vår bildrengöringstillägg som skyddar din syn från olämpligt innehåll.</string>
+    <string name="safegaze_popup_turnon_title">Aktivera SafeGaze</string>
+
 </resources>

@@ -805,6 +805,22 @@
     <string name="refresh_again">Refresh Again</string>
     <string name="unsubscribe">Unsubscribe</string>
     <string name="haram_channels_found">%1$d Haram channels found</string>
+
+    <string name="safegaze_popup_report_title">Please report any bugs or suggestions to this form</string>
+    <string name="safegaze_popup_support_title">Support this project</string>
+    <string name="safegaze_popup_woman_title">I am Woman</string>
+    <string name="safegaze_popup_man_title">I am Man</string>
+    <string name="safegaze_popup_comingsoon_title">Coming Soon</string>
+    <string name="safegaze_popup_gendermode_title">Gender Mode</string>
+    <string name="safegaze_popup_sinfulacts_title">Sinful acts avoided</string>
+    <string name="safegaze_popup_thispage_title">This Page</string>
+    <string name="safegaze_popup_lifetime_title">Lifetime</string>
+    <string name="safegaze_popup_alwayspurify_title">Always Purify</string>
+    <string name="safegaze_popup_neverpurify_title">Never Purify</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Image Blur Intensity</string>
+    <string name="safegaze_popup_takecontrol_title">Enhance your online experience with SafeGaze, our Image Purificator extension that shields your vision from inappropriate content.</string>
+    <string name="safegaze_popup_turnon_title">Turn on SafeGaze</string>
     <string name="kahf_dns_up">Kahf DNS UP</string>
     <string name="kahf_dns_down">Kahf DNS DOWN</string>
 </resources>

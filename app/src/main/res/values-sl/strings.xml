@@ -794,4 +794,21 @@
     <string name="settingsAutofillLoginsSetting">Gesla</string>
     <string name="autofillLoginSavedSnackbarMessage">Geslo je shranjeno</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Geslo je posodobljeno</string>
+
+    <string name="safegaze_popup_report_title">Prosimo, da poročate o morebitnih napakah ali predlogih prek tega obrazca</string>
+    <string name="safegaze_popup_support_title">Podprite ta projekt</string>
+    <string name="safegaze_popup_woman_title">Sem ženska</string>
+    <string name="safegaze_popup_man_title">Sem moški</string>
+    <string name="safegaze_popup_comingsoon_title">Kmalu na voljo</string>
+    <string name="safegaze_popup_gendermode_title">Način spola</string>
+    <string name="safegaze_popup_sinfulacts_title">Izogibane grešne dejanja</string>
+    <string name="safegaze_popup_thispage_title">Ta stran</string>
+    <string name="safegaze_popup_lifetime_title">Življenjska doba</string>
+    <string name="safegaze_popup_alwayspurify_title">Vedno očistite</string>
+    <string name="safegaze_popup_neverpurify_title">Nikoli ne očistite</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Intenzivnost zameglitve slike</string>
+    <string name="safegaze_popup_takecontrol_title">Izboljšajte svojo spletno izkušnjo z SafeGaze, našim razširitvijo za čiščenje slik, ki ščiti vaše vidno polje pred neprimernim vsebinam.</string>
+    <string name="safegaze_popup_turnon_title">Vklopite SafeGaze</string>
+
 </resources>

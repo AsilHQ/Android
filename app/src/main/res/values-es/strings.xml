@@ -786,4 +786,21 @@
     <string name="settingsAutofillLoginsSetting">Contraseñas</string>
     <string name="autofillLoginSavedSnackbarMessage">Contraseña guardada</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Contraseña actualizada</string>
+
+    <string name="safegaze_popup_report_title">Por favor, informe de cualquier error o sugerencia a través de este formulario</string>
+    <string name="safegaze_popup_support_title">Apoye este proyecto</string>
+    <string name="safegaze_popup_woman_title">Soy Mujer</string>
+    <string name="safegaze_popup_man_title">Soy Hombre</string>
+    <string name="safegaze_popup_comingsoon_title">Próximamente</string>
+    <string name="safegaze_popup_gendermode_title">Modo de Género</string>
+    <string name="safegaze_popup_sinfulacts_title">Actos pecaminosos evitados</string>
+    <string name="safegaze_popup_thispage_title">Esta Página</string>
+    <string name="safegaze_popup_lifetime_title">Vida útil</string>
+    <string name="safegaze_popup_alwayspurify_title">Siempre Purificar</string>
+    <string name="safegaze_popup_neverpurify_title">Nunca Purificar</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Intensidad del Desenfoque de Imagen</string>
+    <string name="safegaze_popup_takecontrol_title">Mejore su experiencia en línea con SafeGaze, nuestra extensión de purificación de imágenes que protege su visión del contenido inapropiado.</string>
+    <string name="safegaze_popup_turnon_title">Activar SafeGaze</string>
+
 </resources>

@@ -794,4 +794,21 @@
     <string name="settingsAutofillLoginsSetting">Пароли</string>
     <string name="autofillLoginSavedSnackbarMessage">Пароль сохранен</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Пароль обновлен</string>
+
+    <string name="safegaze_popup_report_title">Пожалуйста, сообщите о любых ошибках или предложениях через эту форму</string>
+    <string name="safegaze_popup_support_title">Поддержите этот проект</string>
+    <string name="safegaze_popup_woman_title">Я - Женщина</string>
+    <string name="safegaze_popup_man_title">Я - Мужчина</string>
+    <string name="safegaze_popup_comingsoon_title">Скоро будет доступно</string>
+    <string name="safegaze_popup_gendermode_title">Режим пола</string>
+    <string name="safegaze_popup_sinfulacts_title">Избежанные греховные поступки</string>
+    <string name="safegaze_popup_thispage_title">Эта страница</string>
+    <string name="safegaze_popup_lifetime_title">Продолжительность жизни</string>
+    <string name="safegaze_popup_alwayspurify_title">Всегда очищать</string>
+    <string name="safegaze_popup_neverpurify_title">Никогда не очищать</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Интенсивность размытия изображения</string>
+    <string name="safegaze_popup_takecontrol_title">Улучшите свой онлайн-опыт с помощью SafeGaze, нашего расширения для очистки изображений, которое защищает ваше зрение от неподходящего контента.</string>
+    <string name="safegaze_popup_turnon_title">Включить SafeGaze</string>
+
 </resources>

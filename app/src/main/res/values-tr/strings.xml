@@ -786,4 +786,20 @@
     <string name="settingsAutofillLoginsSetting">Şifreler</string>
     <string name="autofillLoginSavedSnackbarMessage">Şifre kaydedildi</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Şifre güncellendi</string>
+
+    <string name="safegaze_popup_report_title">Lütfen bu form aracılığıyla herhangi bir hata veya öneriyi bildirin</string>
+    <string name="safegaze_popup_support_title">Bu projeyi destekleyin</string>
+    <string name="safegaze_popup_woman_title">Ben Kadınım</string>
+    <string name="safegaze_popup_man_title">Ben Erkeğim</string>
+    <string name="safegaze_popup_comingsoon_title">Yakında gelecek</string>
+    <string name="safegaze_popup_gendermode_title">Cinsiyet Modu</string>
+    <string name="safegaze_popup_sinfulacts_title">Günah işlenmemiş eylemler</string>
+    <string name="safegaze_popup_thispage_title">Bu Sayfa</string>
+    <string name="safegaze_popup_lifetime_title">Ömür Boyu</string>
+    <string name="safegaze_popup_alwayspurify_title">Her zaman temizle</string>
+    <string name="safegaze_popup_neverpurify_title">Asla temizleme</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Görüntü Bulanıklık Yoğunluğu</string>
+    <string name="safegaze_popup_takecontrol_title">Çevrimiçi deneyiminizi SafeGaze ile geliştirin, görüntü temizleme uzantımız, görüşünüzü uygunsuz içerikten korur.</string>
+    <string name="safegaze_popup_turnon_title">SafeGaze\'i aç</string>
 </resources>

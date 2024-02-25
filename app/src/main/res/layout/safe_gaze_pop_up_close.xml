@@ -84,7 +84,7 @@
                     android:textSize="12sp"
                     android:textFontWeight="500"
                     android:fontFamily="@font/quicksand_medium"
-                    android:text="Always pause"
+                    android:text="@string/safegaze_popup_alwayspurify_title"
                     android:textColor="#959595"
                     tools:targetApi="p" />
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -112,7 +112,7 @@
             android:textSize="14sp"
             android:textFontWeight="700"
             android:fontFamily="@font/quicksand_medium"
-            android:text="Turn on SafeGaze"
+            android:text="@string/safegaze_popup_turnon_title"
             android:textColor="@color/black"
             tools:ignore="DeprecatedWidgetInXml,HardcodedText,InvalidColorAttribute"
             tools:targetApi="p" />
@@ -137,7 +137,7 @@
                 android:textFontWeight="500"
                 android:fontFamily="@font/quicksand_medium"
                 android:textSize="12sp"
-                android:text="Take control of your digital space with our Ad Blocker and Image Purificator extension combo. Safegaze will save your eyes from sinful act."
+                android:text="@string/safegaze_popup_takecontrol_title"
                 tools:ignore="DeprecatedWidgetInXml,HardcodedText"
                 tools:targetApi="p" />
         </com.google.android.material.card.MaterialCardView>
@@ -166,7 +166,7 @@
             android:textFontWeight="400"
             android:fontFamily="@font/quicksand_medium"
             android:textColor="#454545"
-            android:text="Please report any bugs or suggestions to this form"
+            android:text="@string/safegaze_popup_report_title"
             tools:targetApi="p" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

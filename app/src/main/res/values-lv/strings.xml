@@ -790,4 +790,21 @@
     <string name="settingsAutofillLoginsSetting">Paroles</string>
     <string name="autofillLoginSavedSnackbarMessage">Parole saglabāta</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Parole atjaunināta</string>
+
+    <string name="safegaze_popup_report_title">Lūdzu, ziņojiet par jebkādiem kļūmēm vai ieteikumiem izmantojot šo veidlapu</string>
+    <string name="safegaze_popup_support_title">Atbalstiet šo projektu</string>
+    <string name="safegaze_popup_woman_title">Es esmu sieviete</string>
+    <string name="safegaze_popup_man_title">Es esmu vīrietis</string>
+    <string name="safegaze_popup_comingsoon_title">Drīz pieejams</string>
+    <string name="safegaze_popup_gendermode_title">Dzimuma režīms</string>
+    <string name="safegaze_popup_sinfulacts_title">Izvairīties no grēcīgajiem darbiem</string>
+    <string name="safegaze_popup_thispage_title">Šī lapa</string>
+    <string name="safegaze_popup_lifetime_title">Mūža ilgums</string>
+    <string name="safegaze_popup_alwayspurify_title">Vienmēr attīrīt</string>
+    <string name="safegaze_popup_neverpurify_title">Nekad neatjaunināt</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Attēla izpludināšanas intensitāte</string>
+    <string name="safegaze_popup_takecontrol_title">Uzlabojiet savu tiešsaistes pieredzi ar SafeGaze, mūsu attēla attīrīšanas paplašinājumu, kas aizsargā jūsu redzi no nevēlamas saturu.</string>
+    <string name="safegaze_popup_turnon_title">Ieslēdziet SafeGaze</string>
+
 </resources>

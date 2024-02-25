@@ -786,4 +786,21 @@
     <string name="settingsAutofillLoginsSetting">Salasanat</string>
     <string name="autofillLoginSavedSnackbarMessage">Salasana tallennettu</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Salasana päivitetty</string>
+
+    <string name="safegaze_popup_report_title">Ole hyvä ja raportoi kaikista virheistä tai ehdotuksista tämän lomakkeen kautta</string>
+    <string name="safegaze_popup_support_title">Tue tätä projektia</string>
+    <string name="safegaze_popup_woman_title">Olen nainen</string>
+    <string name="safegaze_popup_man_title">Olen mies</string>
+    <string name="safegaze_popup_comingsoon_title">Tulossa pian</string>
+    <string name="safegaze_popup_gendermode_title">Sukupuolitila</string>
+    <string name="safegaze_popup_sinfulacts_title">Synnilliset teot vältetty</string>
+    <string name="safegaze_popup_thispage_title">Tämä sivu</string>
+    <string name="safegaze_popup_lifetime_title">Elinaika</string>
+    <string name="safegaze_popup_alwayspurify_title">Aina puhdista</string>
+    <string name="safegaze_popup_neverpurify_title">Älä koskaan puhdista</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Kuvan sumennuksen voimakkuus</string>
+    <string name="safegaze_popup_takecontrol_title">Paranna verkko-ostokokemustasi SafeGaze, kuvanpuhdistuslaajennuksellamme, joka suojaa näköäsi epäasianmukaiselta sisällöltä.</string>
+    <string name="safegaze_popup_turnon_title">Ota SafeGaze käyttöön</string>
+
 </resources>
