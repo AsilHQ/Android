@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2022 Asil
+  ~ Copyright (c) 2022 Kahf
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 <!-- smartling.entity_escaping = false -->
 <!-- smartling.instruction_attributes = instruction -->
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="asilLogoDescription">Logoul Asil</string>
+    <string name="asilLogoDescription">Logoul Kahf</string>
     <string name="asilPrivacySimplified">Despre confidențialitate, pe scurt</string>
     <string name="yes">Da</string>
     <string name="no">Nu</string>
@@ -26,8 +26,8 @@
     <string name="search">Căutare</string>
 
     <!-- Onboarding Activity -->
-    <string name="onboardingDefaultBrowserDescription">Accesează „Setări” pentru a căuta și naviga cu Asil de fiecare dată.</string>
-    <string name="onboardingDefaultBrowserTitle">Fă Asil aplicația ta implicită</string>
+    <string name="onboardingDefaultBrowserDescription">Accesează „Setări” pentru a căuta și naviga cu Kahf de fiecare dată.</string>
+    <string name="onboardingDefaultBrowserTitle">Fă Kahf aplicația ta implicită</string>
 
     <!-- Default Browser -->
     <string name="cannotLaunchDefaultAppSettings">Nu se poate lansa ecranul de setări implicite ale aplicației</string>
@@ -35,7 +35,7 @@
     <string name="defaultBrowserMaybeLater">Poate mai târziu</string>
     <string name="defaultBrowserLetsDoIt">Setare ca browser implicit</string>
     <string name="defaultBrowserDescriptionNoDefault">Deschide link-urile liniștit, de fiecare dată.</string>
-    <string name="defaultBrowserInstructions">Selectează Asil și atinge <font color="#678fff"> Întotdeauna </font>.</string>
+    <string name="defaultBrowserInstructions">Selectează Kahf și atinge <font color="#678fff"> Întotdeauna </font>.</string>
 
     <!-- Browser Activity -->
     <string name="browserPopupMenu">Meniu browser</string>
@@ -88,11 +88,11 @@
     <!-- Opening external apps -->
     <string name="openExternalApp">Deschide aplicația externă</string>
     <string name="launchingExternalApp">Deschide într-o altă aplicație</string>
-    <string name="confirmOpenExternalApp">Dorești să părăsești Asil pentru a vizualiza acest conținut?</string>
+    <string name="confirmOpenExternalApp">Dorești să părăsești Kahf pentru a vizualiza acest conținut?</string>
     <string name="unableToOpenLink">Imposibil de deschis acest tip de link</string>
 
     <!-- Tabs -->
-    <string name="homeTab" translatable="false">Asil</string>
+    <string name="homeTab" translatable="false">Kahf</string>
     <string name="tabActivityTitle">File</string>
     <string name="tabsMenuItem">File</string>
     <string name="newTabMenuItem">Filă nouă</string>
@@ -120,12 +120,12 @@
     <string name="settingsHeadingAppearance">Aspect</string>
     <string name="settingsHeadingCustomize">Personalizare</string>
     <string name="settingsHeadingAbout">Despre</string>
-    <string name="settingsAboutAsil">Despre Asil</string>
+    <string name="settingsAboutAsil">Despre Kahf</string>
     <string name="settingsVersion">Versiune</string>
     <string name="leaveFeedback">Trimite feedback</string>
     <string name="settingsEmailProtectionTitle">Protecția comunicațiilor prin e-mail</string>
     <string name="settingsEmailProtectionSubtitle">Blochează tehnologiile de urmărire prin e-mail și ascunde-ți adresa</string>
-    <string name="settingsHeadingMore">Mai multe de la Asil</string>
+    <string name="settingsHeadingMore">Mai multe de la Kahf</string>
     <string name="settingsLightTheme">Luminoasă</string>
     <string name="settingsTheme">Temă</string>
     <string name="settingsDarkTheme">Intunecată</string>
@@ -140,8 +140,8 @@
     <string name="settingsSubtitleNotificationsDisabled">Dezactivat</string>
     <string name="settingsSubtitleNotificationsEnabled">Activat</string>
     <string name="settingsDefaultBrowserTitle">Browser implicit</string>
-    <string name="settingsDefaultBrowserSetDescription">Asil este browserul tău implicit</string>
-    <string name="settingsDefaultBrowserNotSetDescription">Setează Asil ca browser implicit</string>
+    <string name="settingsDefaultBrowserSetDescription">Kahf este browserul tău implicit</string>
+    <string name="settingsDefaultBrowserNotSetDescription">Setează Kahf ca browser implicit</string>
     <string name="settingsPrivateSearchTitle">Căutare Confidențială</string>
     <string name="settingsPrivateSearchDescription">Activat în mod implicit</string>
     <string name="settingsWebTrackingProtectionTitle">Protecție împotriva urmăririi pe web</string>
@@ -154,7 +154,7 @@
     <!-- Private Search -->
     <string name="privateSearchActivityTitle">Căutare Confidențială</string>
     <string name="privateSearchTitle">Private Search este activată</string>
-    <string name="privateSearchDescription">Asil Private Search este motorul tău de căutare implicit, astfel încât poți căuta pe web fără a fi urmărit(ă).</string>
+    <string name="privateSearchDescription">Kahf Private Search este motorul tău de căutare implicit, astfel încât poți căuta pe web fără a fi urmărit(ă).</string>
     <string name="privateSearchHeadingSearchSettings">Setări de căutare</string>
     <string name="privateSearchAutocompleteToggle">Afișează sugestiile de completare automată</string>
     <string name="privateSearchMoreSearchSettingsPrimaryText">Mai multe setări de căutare</string>
@@ -165,7 +165,7 @@
     <string name="webTrackingProtectionActivityTitle">Protecție împotriva urmăririi pe web</string>
     <string name="webTrackingProtectionLearnMoreTitle">Protecție împotriva urmăririi pe web</string>
     <string name="webTrackingProtectionTitle">Protecția împotriva urmăririi pe web este activată</string>
-    <string name="webTrackingProtectionDescription"><![CDATA[Asil nu te urmărește niciodată și ne propunem să îți protejăm confidențialitatea cât mai mult posibil. Menținem și dezvoltăm în permanență niveluri de protecție pentru a ține pasul cu noile metode de urmărire și pentru a oferi numeroase modalități de protecție pe care alte browsere nu le oferă în mod implicit. <u><a href=\"\">Află mai multe</a><u/>]]></string>
+    <string name="webTrackingProtectionDescription"><![CDATA[Kahf nu te urmărește niciodată și ne propunem să îți protejăm confidențialitatea cât mai mult posibil. Menținem și dezvoltăm în permanență niveluri de protecție pentru a ține pasul cu noile metode de urmărire și pentru a oferi numeroase modalități de protecție pe care alte browsere nu le oferă în mod implicit. <u><a href=\"\">Află mai multe</a><u/>]]></string>
 
     <!-- Cookie Pop-Up Protection -->
     <string name="cookiePopupProtectionTitle">Protecție pentru ferestre pop-up aferente modulelor cookie</string>
@@ -200,9 +200,9 @@
     <string name="settingsAutomaticallyClearWhenAppExit60Minutes">Ieșire din aplicație, inactiv timp de 1 oră</string>
 
     <!-- About Activity -->
-    <string name="aboutActivityTitle">Despre Asil</string>
+    <string name="aboutActivityTitle">Despre Kahf</string>
     <string name="aboutHeader">Welcome to the Duck Side!</string>
-    <string name="aboutDescription">Asil este o companie independentă înființată în 2008, care oferă confidențialitate pe internet pentru toți cei care s-au săturat să fie urmăriți online și doresc o soluție simplă.Suntem dovada că protecția confidențialității online fără compromisuri este reală.\n\nBrowserul Asil oferă funcțiile la care vă așteptați de la browserul preferat, cum ar fi marcajele, filele, parolele și multe altele, plus peste <annotation type="privacy_protection_link">o duzină de protecții ale confidențialității remarcabile,</annotation> care nu sunt oferite implicit în majoritatea browserelor populare.Acest set unic și cuprinzător de măsuri de protecție a confidențialității vă ajută să vă protejați activitățile online, de la căutări la navigare, e-mailuri și multe altele.\n\nMăsurile noastre robuste de protecție a confidențialității funcționează fără a fi nevoie să cunoașteți detalii tehnice sau să aveți de-a face cu setări complicate.Tot ce trebuie să faceți este să folosiți browserul Asil pe toate dispozitivele și veți beneficia automat de confidențialitate.\n\nDar dacă doriți să aflați detaliile din culise, puteți găsi mai multe informații despre modul în care funcționează protecțiile de confidențialitate Asil pe paginile noastre de <annotation type="learn_more_link">ajutor</annotation></string>
+    <string name="aboutDescription">Kahf este o companie independentă înființată în 2008, care oferă confidențialitate pe internet pentru toți cei care s-au săturat să fie urmăriți online și doresc o soluție simplă.Suntem dovada că protecția confidențialității online fără compromisuri este reală.\n\nBrowserul Kahf oferă funcțiile la care vă așteptați de la browserul preferat, cum ar fi marcajele, filele, parolele și multe altele, plus peste <annotation type="privacy_protection_link">o duzină de protecții ale confidențialității remarcabile,</annotation> care nu sunt oferite implicit în majoritatea browserelor populare.Acest set unic și cuprinzător de măsuri de protecție a confidențialității vă ajută să vă protejați activitățile online, de la căutări la navigare, e-mailuri și multe altele.\n\nMăsurile noastre robuste de protecție a confidențialității funcționează fără a fi nevoie să cunoașteți detalii tehnice sau să aveți de-a face cu setări complicate.Tot ce trebuie să faceți este să folosiți browserul Kahf pe toate dispozitivele și veți beneficia automat de confidențialitate.\n\nDar dacă doriți să aflați detaliile din culise, puteți găsi mai multe informații despre modul în care funcționează protecțiile de confidențialitate Kahf pe paginile noastre de <annotation type="learn_more_link">ajutor</annotation></string>
     <string name="no_suggestions">Fără sugestii</string>
 
     <!-- Broken Site Activity -->
@@ -263,7 +263,7 @@
     <string name="removeAll">Elimină tot</string>
 
     <!-- Widget -->
-    <string name="searchWidgetTextHint">Căutare Asil</string>
+    <string name="searchWidgetTextHint">Căutare Kahf</string>
 
     <!-- Favorites widget -->
     <string name="addFavoriteMenuTitleHighlighted">👋 Adaugă la favorite</string>
@@ -290,7 +290,7 @@
     <string name="surveyCtaLaunchButton">Participă la sondaj</string>
     <string name="surveyCtaDismissButton">Nu, mulțumesc</string>
     <string name="surveyActivityTitle">Sondajul utilizatorului</string>
-    <string name="surveyTitle">Sondaj Asil</string>
+    <string name="surveyTitle">Sondaj Kahf</string>
     <string name="surveyDismissContentDescription">Renunță la sondaj</string>
     <string name="surveyLoadingErrorTitle">Oh, nu!</string>
     <string name="surveyLoadingErrorText">Sondajul nostru nu se încarcă.\nTe rugăm să încercerci din nou, mai târziu.</string>
@@ -305,14 +305,14 @@
     <string name="addWidgetInstruction1Label">1</string>
     <string name="addWidgetInstruction1">Apasă lung pe ecranul de pornire, apoi deschide meniul widget-urilor.</string>
     <string name="addWidgetInstruction2Label">2</string>
-    <string name="addWidgetInstruction2">Găsește widget-ul Asil.</string>
+    <string name="addWidgetInstruction2">Găsește widget-ul Kahf.</string>
     <string name="addWidgetInstruction3Label">3</string>
     <string name="addWidgetInstruction3">Trage widget-ul pe ecranul de pornire.</string>
     <string name="addWidgetInstructionsButtonGoHome">Accesează ecranul de pornire</string>
     <string name="addWidgetInstructionsButtonClose">Închide</string>
 
     <!-- App Enjoyment / Rating / Feedback -->
-    <string name="appEnjoymentDialogTitle">Îți place Asil?</string>
+    <string name="appEnjoymentDialogTitle">Îți place Kahf?</string>
     <string name="appEnjoymentDialogMessage">Ne-ar plăcea să știm ce crezi.</string>
     <string name="appEnjoymentDialogPositiveButton">Îmi place</string>
     <string name="appEnjoymentDialogNegativeButton">Mai trebuie îmbunătățită</string>
@@ -334,15 +334,15 @@
 
     <!-- Clear Notification -->
     <string name="clearNotificationTitle">Ștergerea datelor setată la „manual”</string>
-    <string name="clearNotificationDescription">Personalizează Asil pentru a șterge automat datele de navigare după fiecare sesiune.</string>
+    <string name="clearNotificationDescription">Personalizează Kahf pentru a șterge automat datele de navigare după fiecare sesiune.</string>
 
     <!-- Privacy Protection Notification -->
     <string name="privacyProtectionNotificationDefaultTitle">Îți protejăm confidențialitatea</string>
     <string name="privacyProtectionNotificationReportTitle">Raportul tău privind confidențialitatea</string>
-    <string name="privacyProtectionNotificationDefaultDescription">Utilizând aplicația Asil, datele tale sunt protejate prin blocarea cookie-urilor de urmărire și criptarea conexiunilor.</string>
-    <string name="privacyProtectionNotificationUpgadeDescription" instruction="Placeholder is a the number of connections we have protected">Ți-ai protejat datele, securizând %1$d conexiuni necriptate, în timpul utilizării Asil.</string>
-    <string name="privacyProtectionNotificationTrackerDescription" instruction="Placeholder is the numer of trackers blocked">Ți-ai protejat datele, blocând %1$d cookie-uri de urmărire, în timpul utilizării Asil.</string>
-    <string name="privacyProtectionNotificationBothDescription" instruction="%1$d is the number of trackers blocked and %2$d is the number of unencrypted connections">Ți-ai protejat datele blocând %1$d cookie-uri de urmărire și securizând %2$d conexiuni necriptate în timpul utilizării Asil.</string>
+    <string name="privacyProtectionNotificationDefaultDescription">Utilizând aplicația Kahf, datele tale sunt protejate prin blocarea cookie-urilor de urmărire și criptarea conexiunilor.</string>
+    <string name="privacyProtectionNotificationUpgadeDescription" instruction="Placeholder is a the number of connections we have protected">Ți-ai protejat datele, securizând %1$d conexiuni necriptate, în timpul utilizării Kahf.</string>
+    <string name="privacyProtectionNotificationTrackerDescription" instruction="Placeholder is the numer of trackers blocked">Ți-ai protejat datele, blocând %1$d cookie-uri de urmărire, în timpul utilizării Kahf.</string>
+    <string name="privacyProtectionNotificationBothDescription" instruction="%1$d is the number of trackers blocked and %2$d is the number of unencrypted connections">Ți-ai protejat datele blocând %1$d cookie-uri de urmărire și securizând %2$d conexiuni necriptate în timpul utilizării Kahf.</string>
     <string name="privacyProtectionNotificationLaunchButton">Reluare navigare</string>
 
     <!-- Authentication -->
@@ -354,7 +354,7 @@
     <string name="authenticationDialogPasswordHint">Parolă</string>
 
     <!-- User-facing label for when a user selects text and might want to search for that text -->
-    <string name="systemTextSearchMessage">Căutare Asil</string>
+    <string name="systemTextSearchMessage">Căutare Kahf</string>
 
     <!-- App feedback disambiguation -->
     <string name="feedbackActivityTitle">Trimitere feedback</string>
@@ -373,8 +373,8 @@
     <string name="websiteNotLoadingTitleShort">Probleme privind încărcarea site-ului web</string>
     <string name="websiteNotLoadingSubtitle">Ce site este defect?</string>
 
-    <string name="searchNotGoodEnoughTitleLong">Căutarea Asil nu este suficient de bună</string>
-    <string name="searchNotGoodEnoughTitleShort">Probleme privind funcția de căutare a Asil</string>
+    <string name="searchNotGoodEnoughTitleLong">Căutarea Kahf nu este suficient de bună</string>
+    <string name="searchNotGoodEnoughTitleShort">Probleme privind funcția de căutare a Kahf</string>
     <string name="searchNotGoodEnoughSubtitle">Ce funcție de căutare putem adăuga sau îmbunătăți?</string>
     <string name="searchNotGoodEnoughSubReasonTechnicalSearches">Căutare privind programarea/tehnica</string>
     <string name="searchNotGoodEnoughSubReasonGoogleLayout">Aspectul ar trebui să semene mai mult cu Google</string>
@@ -435,8 +435,8 @@
     <!-- System Search-->
     <string name="systemSearchDeviceAppLabel">De pe acest dispozitiv</string>
     <string name="systemSearchAppNotFound">Aplicația nu a fost găsită</string>
-    <string name="systemSearchOnboardingText">Mulțumim pentru că ai ales Asil!\nAcum, când utilizezi căutarea sau aplicația noastră, căutările tale sunt protejate.</string>
-    <string name="systemSearchOnboardingFeaturesIntroText">De asemenea, aplicația Asil:</string>
+    <string name="systemSearchOnboardingText">Mulțumim pentru că ai ales Kahf!\nAcum, când utilizezi căutarea sau aplicația noastră, căutările tale sunt protejate.</string>
+    <string name="systemSearchOnboardingFeaturesIntroText">De asemenea, aplicația Kahf:</string>
     <string name="systemSearchOnboardingFeatureOneText">Blochează instrumentele de urmărire nesigure.</string>
     <string name="systemSearchOnboardingFeatureTwoText">Forțează criptarea pe site-uri web.</string>
     <string name="systemSearchOnboardingFeatureThreeText">Șterge datele cu o singură atingere.</string>
@@ -460,12 +460,12 @@
     <string name="daxDialogAppTpRetentionSecondaryButtonText">Nu acum</string>
 
     <!-- New Onboarding Experience -->
-    <string name="onboardingWelcomeTitle">"Bine ai venit la Asil!"</string>
+    <string name="onboardingWelcomeTitle">"Bine ai venit la Kahf!"</string>
     <string name="onboardingDaxText"><![CDATA[Internetul poate fi cam terifiant.<br/><br/>Nu te îngrijora! Căutarea și navigarea în mod confidențial sunt mai ușoare decât crezi.]]></string>
     <string name="onboardingLetsDoItButton">Să Începem!</string>
     <string name="daxIntroCtaText"><![CDATA[Apoi, încearcă să vizitezi unul din site-urile tale preferate! <br/><br/>Voi bloca urmăritorii ca să nu te mai spioneze. Voi îmbunătăți, de asemenea, securitatea conexiunii tale, dacă este posibil. 🔒]]></string>
     <string name="daxEndCtaText"><![CDATA[Ai ghicit!<br/><br/>Reține: de fiecare dată când navighezi cu mine, o reclamă terifiantă își pierde aripile. 👍]]></string>
-    <string name="daxSerpCtaText">Căutările Asil sunt anonime. Întotdeauna. 🙌</string>
+    <string name="daxSerpCtaText">Căutările Kahf sunt anonime. Întotdeauna. 🙌</string>
     <plurals name="daxTrackersBlockedCtaText">
         <item quantity="one"><![CDATA[ și <b>%1$d altul</b> încercau să te urmărească aici. <br/><br/>I-am blocat!<br/><br/> ☝️ Poți verifica bara de adrese pentru a vedea cine încearcă să te urmărească atunci când vizitezi un nou site.️]]></item>
         <item quantity="few"><![CDATA[ și <b>%1$d alții</b> încercau să te urmărească aici. <br/><br/>I-am blocat!<br/><br/> ☝️ Poți verifica bara de adrese pentru a vedea cine încearcă să te urmărească atunci când vizitezi un nou site.️]]></item>
@@ -481,7 +481,7 @@
     <string name="daxMainNetworkOwnedCtaText" instruction="%1$s is the name of a company, %2$s is the website where the tracking is happening, %3$s is the name of the company showing in %1$s">Atenție! Deoarece %1$s deține %2$s, nu îi pot împiedica să îți vadă activitatea aici.&lt;br/&gt;&lt;br/&gt;Dar navighează cu mine și pot reduce ceea ce %3$s cunoaște despre tine în general, blocând instrumentele lor de urmărire pe o mulțime de alte site-uri.</string>
 
     <!-- Onboarding DDG Feature Options -->
-    <string name="onboardingFeatureOptionsTitle">Ce te aduce la Asil?</string>
+    <string name="onboardingFeatureOptionsTitle">Ce te aduce la Kahf?</string>
     <string name="onboardingFeatureOptionsContinue">Continuă</string>
     <string name="onboardingFeatureOptionsSkip">Omite acest pas</string>
     <!-- smartling.character_limit = 28 -->
@@ -582,7 +582,7 @@
     <string name="dosErrorMessage">Conexiunea a fost anulată. Acest site web ar putea dăuna dispozitivului tău.</string>
 
     <!-- Precise Location -->
-    <string name="preciseLocationSystemDialogTitle">Activezi locația dispozitivului pentru browserul de confidențialitate Asil?</string>
+    <string name="preciseLocationSystemDialogTitle">Activezi locația dispozitivului pentru browserul de confidențialitate Kahf?</string>
     <string name="preciseLocationSystemDialogSubtitle" instruction="%1$s and %2$s are both the name of the website requesting the location">%1$s solicită locația dispozitivului tău. Mai întâi va trebui să permiți aplicației să trimită locația dispozitivului, apoi %2$s poate cere permisiunea.</string>
     <string name="preciseLocationSystemDialogAllow">Activare</string>
     <string name="preciseLocationSystemDialogDeny">Poate mai târziu</string>
@@ -594,7 +594,7 @@
     <string name="preciseLocationSiteDialogAllowOnce">Numai pentru această sesiune</string>
     <string name="preciseLocationSiteDialogDenyAlways">Respinge întotdeauna</string>
     <string name="preciseLocationSiteDialogDenyOnce">Respinge pentru această sesiune</string>
-    <string name="preciseLocationFeatureDescription">Site-urile pe care le vizitezi pot solicita să îți cunoască locația dispozitivului. Acestea nu vor putea să-l acceseze până când nu acorzi în mod explicit permisiunea. Asil utilizează locația ta doar în mod anonim pentru a furniza rezultate de căutare locale.</string>
+    <string name="preciseLocationFeatureDescription">Site-urile pe care le vizitezi pot solicita să îți cunoască locația dispozitivului. Acestea nu vor putea să-l acceseze până când nu acorzi în mod explicit permisiunea. Kahf utilizează locația ta doar în mod anonim pentru a furniza rezultate de căutare locale.</string>
     <string name="preciseLocationToggleText">Site-urile îmi pot cere locația</string>
     <string name="preciseLocationEmptyListHint">Niciun site web nu a acordat permisiunea de a accesa locația</string>
     <string name="preciseLocationNoSystemPermission">Pentru a gestiona permisiunile de acces la locație pe care le-ai acordat site-urilor individuale, activează locația pentru această aplicație în Setări Android.</string>
@@ -610,7 +610,7 @@
 
     <!--  Global Privacy Control-->
     <string name="globalPrivacyControlActivityTitle">Global Privacy Control (GPC)</string>
-    <string name="globalPrivacyControlDescription"><![CDATA[Asil blochează automat mai multe instrumente de urmărire. Cu Global Privacy Control (GPC) poți solicita, de asemenea, site-urilor web participante să restricționeze vânzarea sau partajarea datelor tale cu caracter personal cu alte companii. <u><a href=\"\">Află mai multe</a><u/>]]></string>
+    <string name="globalPrivacyControlDescription"><![CDATA[Kahf blochează automat mai multe instrumente de urmărire. Cu Global Privacy Control (GPC) poți solicita, de asemenea, site-urilor web participante să restricționeze vânzarea sau partajarea datelor tale cu caracter personal cu alte companii. <u><a href=\"\">Află mai multe</a><u/>]]></string>
     <string name="globalPrivacyControlSetting">Global Privacy Control (GPC)</string>
     <string name="globalPrivacyControlToggle">Global Privacy Control (GPC)</string>
     <string name="disabled">Dezactivat</string>
@@ -671,11 +671,11 @@
     <string name="settingsAccessibility">Accesibilitate</string>
     <string name="accessibilityActivityTitle">Accesibilitate</string>
     <string name="accessibilityFontSizeTitle">Dimensiune text</string>
-    <string name="accessibilityFontSizeHint">Trage butonul culisant până ce poți citi în mod confortabil. Site-urile pe care le vizitezi în Asil se vor adapta la aceasta.</string>
+    <string name="accessibilityFontSizeHint">Trage butonul culisant până ce poți citi în mod confortabil. Site-urile pe care le vizitezi în Kahf se vor adapta la aceasta.</string>
     <string name="accessibilityForceZoomTitle">Aplică zoom-ul manual pe pagină</string>
     <string name="accessibilityForceZoomSubtitle">Ciupește și mărește pe orice site, chiar și pe cele care nu acceptă acest lucru</string>
     <string name="accessibilityTextSizeOverrideTitle">Gestionează dimensiunea textului</string>
-    <string name="accessibilityTextSizeOverrideSubtitle">Textul de pe site-urile pe care le vizualizezi în Asil se vor ajusta pentru a se potrivi cu setarea de mai jos</string>
+    <string name="accessibilityTextSizeOverrideSubtitle">Textul de pe site-urile pe care le vizualizezi în Kahf se vor ajusta pentru a se potrivi cu setarea de mai jos</string>
 
     <!-- Privacy Policy -->
     <string name="settingsPrivacyPolicyAsil">Confidențialitate</string>
@@ -686,7 +686,7 @@
 
     <!-- MacOs Settings -->
     <string name="macos_settings_description">Răsfoiește în mod privat, cu aplicația noastră pentru Mac</string>
-    <string name="macos_settings_title">Aplicația Asil pentru Mac</string>
+    <string name="macos_settings_title">Aplicația Kahf pentru Mac</string>
 
     <!-- Downloads -->
     <string name="downloadsMenuItem">Descărcări</string>
@@ -748,7 +748,7 @@
     <string name="downloadsNotifyMeSubtitle">Primește o notificare când s-au finalizat descărcările.</string>
 
     <!-- Windows Settings -->
-    <string name="windows_settings_title">Aplicația Asil pentru Windows</string>
+    <string name="windows_settings_title">Aplicația Kahf pentru Windows</string>
     <string name="windows_settings_description">Navighează în mod privat cu aplicația noastră pentru Windows</string>
     <string name="windows_settings_description_ready">Descărcare disponibilă</string>
     <string name="windows_settings_description_list">Ești pe listă!</string>
@@ -773,7 +773,7 @@
     <string name="deleteSavedSiteConfirmationDialogDelete">Ștergere</string>
 
     <!-- Private voice search -->
-    <string name="accessibilityVoiceSearchSubtitle">Adaugă opțiunea de Căutare vocală privată în bara de adrese.Sunetul nu este stocat sau partajat cu nimeni, inclusiv cu Asil.</string>
+    <string name="accessibilityVoiceSearchSubtitle">Adaugă opțiunea de Căutare vocală privată în bara de adrese.Sunetul nu este stocat sau partajat cu nimeni, inclusiv cu Kahf.</string>
     <string name="accessibilityVoiceSearchTitle">Căutare vocală privată</string>
 
     <!-- Uploading an image from the camera or choosing to use existing image -->
@@ -781,8 +781,8 @@
     <string name="imageCaptureCameraGalleryDisambiguationTitle">Încarcă o imagine</string>
     <string name="imageCaptureCameraGalleryDisambiguationGalleryOption">Alege fișierul</string>
     <string name="imageCaptureCameraGalleryDisambiguationCameraOption">Fă o fotografie</string>
-    <string name="imageCaptureCameraPermissionDeniedTitle">Permite ca Asil să solicite accesul la cameră pe acest dispozitiv</string>
-    <string name="imageCaptureCameraPermissionDeniedMessage">Site-urile îți pot utiliza camera numai dacă permiți ca Asil să solicite accesul.</string>
+    <string name="imageCaptureCameraPermissionDeniedTitle">Permite ca Kahf să solicite accesul la cameră pe acest dispozitiv</string>
+    <string name="imageCaptureCameraPermissionDeniedMessage">Site-urile îți pot utiliza camera numai dacă permiți ca Kahf să solicite accesul.</string>
     <string name="imageCaptureCameraPermissionDeniedPositiveButton">Deschide Setări</string>
     <string name="imageCaptureCameraPermissionDeniedNegativeButton">Anulare</string>
 
@@ -790,4 +790,21 @@
     <string name="settingsAutofillLoginsSetting">Parole</string>
     <string name="autofillLoginSavedSnackbarMessage">Parolă salvată</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Parolă actualizată</string>
+
+    <string name="safegaze_popup_report_title">Vă rugăm să raportați orice erori sau sugestii prin acest formular</string>
+    <string name="safegaze_popup_support_title">Sprijiniți acest proiect</string>
+    <string name="safegaze_popup_woman_title">Sunt femeie</string>
+    <string name="safegaze_popup_man_title">Sunt bărbat</string>
+    <string name="safegaze_popup_comingsoon_title">În curând disponibil</string>
+    <string name="safegaze_popup_gendermode_title">Modul de gen</string>
+    <string name="safegaze_popup_sinfulacts_title">Acțiuni păcătoase evitate</string>
+    <string name="safegaze_popup_thispage_title">Această pagină</string>
+    <string name="safegaze_popup_lifetime_title">Durata de viață</string>
+    <string name="safegaze_popup_alwayspurify_title">Curățați întotdeauna</string>
+    <string name="safegaze_popup_neverpurify_title">Niciodată să nu purificați</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Intensitatea estomparii imaginii</string>
+    <string name="safegaze_popup_takecontrol_title">Îmbunătățiți-vă experiența online cu SafeGaze, extensia noastră de purificare a imaginilor care protejează vederea dvs. de conținutul inadecvat.</string>
+    <string name="safegaze_popup_turnon_title">Activați SafeGaze</string>
+
 </resources>

@@ -78,6 +78,9 @@
         <meta-data
             android:name="android.webkit.WebView.EnableSafeBrowsing"
             android:value="false" />
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
 
         <!-- Renamed to allow for the introduction of custom icons without breaking existing shortcuts -->
         <activity
@@ -452,6 +455,20 @@
             android:label="@string/downloadsActivityTitle"
             android:parentActivityName=".BrowserActivity" />
 
+        <activity
+            android:name="org.halalz.kahftube.view.ProfilePageActivity"
+            android:exported="false"
+            android:label="@string/profile"
+            android:theme="@style/Theme.KahfTube"
+            android:parentActivityName=".BrowserActivity" />
+
+        <activity
+            android:name="org.halalz.kahftube.view.PreferencePageActivity"
+            android:exported="false"
+            android:label="@string/preference"
+            android:theme="@style/Theme.KahfTube"
+            android:parentActivityName=".BrowserActivity" />
+
         <service
             android:name="com.duckduckgo.app.job.AppConfigurationJobService"
             android:exported="false"
@@ -518,6 +535,15 @@
         <receiver
             android:name=".remotemessage.SharePromoLinkRMFBroadCastReceiver"
             android:exported="false" />
+
+        <service
+            android:name="com.duckduckgo.app.dns.DnsOverVpnService"
+            android:exported="true"
+            android:permission="android.permission.BIND_VPN_SERVICE" >
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
 
     </application>
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2023 Asil
+  ~ Copyright (c) 2023 Kahf
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 <!-- smartling.entity_escaping = false -->
 <!-- smartling.instruction_attributes = instruction -->
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="appName" translatable="false">Asil Browser</string>
-    <string name="appDescription" translatable="false">Asil Browser</string>
+    <string name="appName" translatable="false">Kahf Browser</string>
+    <string name="appDescription" translatable="false">Kahf Browser</string>
     <string name="asilLogoDescription">شعار أصيل</string>
     <string name="asilPrivacySimplified">الخصوصية، ببساطة</string>
     <string name="yes">نعم</string>
@@ -98,7 +98,7 @@
     <string name="unableToOpenLink">غير قادر على فتح هذا النوع من الروابط</string>
 
     <!-- Tabs -->
-    <string name="homeTab" translatable="false">Asil</string> <!-- No translation needed -->
+    <string name="homeTab" translatable="false">Kahf</string> <!-- No translation needed -->
     <string name="tabActivityTitle">التبويبات</string>
     <string name="tabsMenuItem">التبويبات</string>
     <string name="newTabMenuItem">تبويب جديد</string>
@@ -800,5 +800,22 @@
     <string name="ads_and_other_creepy_things_blocked">تم حظر الإعلانات وأشياء مخيفة أخرى</string>
     <string name="if_this_site_appears_broken_try_shields_down">إذا بدا هذا الموقع معطلاً، جرب تعطيل الدروع</string>
     <string name="_0">0</string>
+
+    <string name="safegaze_popup_report_title">الرجاء الإبلاغ عن أي علل أو اقتراحات إلى هذا النموذج</string>
+    <string name="safegaze_popup_support_title">دعم هذا المشروع</string>
+    <string name="safegaze_popup_woman_title">أنا امرأة</string>
+    <string name="safegaze_popup_man_title">أنا رجل</string>
+    <string name="safegaze_popup_comingsoon_title">قريباً</string>
+    <string name="safegaze_popup_gendermode_title">وضع الجنس</string>
+    <string name="safegaze_popup_sinfulacts_title">الأعمال الخاطئة المتجنبة</string>
+    <string name="safegaze_popup_thispage_title">هذه الصفحة</string>
+    <string name="safegaze_popup_lifetime_title">مدى الحياة</string>
+    <string name="safegaze_popup_alwayspurify_title">تنقية دائمة</string>
+    <string name="safegaze_popup_neverpurify_title">لا تنقية أبدًا</string>
+    <string name="safegaze_popup_safegazeup_title">سيف جيز أب</string>
+    <string name="safegaze_popup_imageblur_title">شدة ضبابية الصورة</string>
+    <string name="safegaze_popup_takecontrol_title">قم بتعزيز تجربتك عبر الإنترنت مع SafeGaze ، ملحق تنقية الصور الذي يحمي رؤيتك من المحتوى غير الملائم.</string>
+    <string name="safegaze_popup_turnon_title">تشغيل SafeGaze</string>
+
 
 </resources>

@@ -1,1 +1,1 @@
-# Welcome to Asil Browser: A Shariah Compliance Browser
+# Welcome to Kahf Browser: A Shariah Compliance Browser

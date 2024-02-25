@@ -15,7 +15,7 @@ class ObjectDetectionHelper(val context: Context) {
     /**
      * ML Kit Object Detection function.
      */
-    fun runObjectDetectionWithCustomModel(bitmap: Bitmap): MutableList<Detection> {
+    private fun runObjectDetectionWithCustomModel(bitmap: Bitmap): MutableList<Detection> {
 
         // Step 1: create TFLite's TensorImage object
         val image = TensorImage.fromBitmap(bitmap)
