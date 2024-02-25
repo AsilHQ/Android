@@ -514,6 +514,8 @@ class BrowserTabFragment :
 
     private lateinit var sharedPreferences: SharedPreferences
 
+    private lateinit var editor: SharedPreferences.Editor
+
     private val findInPage
         get() = omnibar.findInPage
 
@@ -746,6 +748,7 @@ class BrowserTabFragment :
         decorator = BrowserTabFragmentDecorator()
         safeGazeInterface = SafeGazeJsInterface(requireContext())
         sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
+        editor = sharedPreferences.edit()
         voiceSearchLauncher.registerResultsCallback(this, requireActivity(), BROWSER) {
             when (it) {
                 is VoiceSearchLauncher.Event.VoiceRecognitionSuccess -> {
@@ -924,7 +927,6 @@ class BrowserTabFragment :
     }
 
     private fun handleSafeGazeOpenView(view: View){
-        val editor = sharedPreferences.edit()
         val thisPageCounter = view.findViewById<TextView>(R.id.this_page_counter_text_view)
         val lifeTimeCounter = view.findViewById<TextView>(R.id.lifetime_counter_text_view)
         val switch = view.findViewById<SwitchCompat>(R.id.safe_gaze_open_switch_view)
@@ -979,7 +981,6 @@ class BrowserTabFragment :
     }
 
     private fun handleSafeGazeCloseView(view: View){
-        val editor = sharedPreferences.edit()
         val safeGazeOpenImageView = view.findViewById<AppCompatImageView>(R.id.safe_gaze_on_image_view)
         val urlTextView = view.findViewById<TextView>(R.id.url_text_view)
         val reportTextView = view.findViewById<TextView>(R.id.report_text_view)
@@ -1089,8 +1090,6 @@ class BrowserTabFragment :
     }
 
     private fun saveProgressToSharedPreferences(progress: Int) {
-
-        val editor = sharedPreferences.edit()
         editor.putInt("safe_gaze_blur_progress", progress)
         editor.apply()
     }
@@ -1101,7 +1100,6 @@ class BrowserTabFragment :
         val displayMetrics = DisplayMetrics()
 
         windowManager.defaultDisplay.getMetrics(displayMetrics)
-
         return displayMetrics.widthPixels
     }
 
