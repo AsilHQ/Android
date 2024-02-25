@@ -746,9 +746,7 @@ class BrowserTabFragment :
         removeDaxDialogFromActivity()
         renderer = BrowserTabFragmentRenderer()
         decorator = BrowserTabFragmentDecorator()
-        safeGazeInterface = SafeGazeJsInterface(requireContext())
-        sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
-        editor = sharedPreferences.edit()
+        initSafeGazeAndSharedPref()
         voiceSearchLauncher.registerResultsCallback(this, requireActivity(), BROWSER) {
             when (it) {
                 is VoiceSearchLauncher.Event.VoiceRecognitionSuccess -> {
@@ -777,6 +775,19 @@ class BrowserTabFragment :
                 }
             }
             pendingUploadTask = null
+        }
+    }
+
+    private fun initSafeGazeAndSharedPref() {
+        safeGazeInterface = SafeGazeJsInterface(requireContext())
+        sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
+        editor = sharedPreferences.edit()
+        editor.putBoolean("safe_gaze_init", true)
+        editor.apply()
+        if (sharedPreferences.getBoolean("safe_gaze_init",false)){
+            safeGazeInterface.updateBlur(30f)
+            editor.putInt("safe_gaze_blur_progress", 30)
+            editor.apply()
         }
     }
 
