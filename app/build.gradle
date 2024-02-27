@@ -16,14 +16,14 @@ ext {
 
 android {
     defaultConfig {
-        applicationId "org.halalz.asil"
+        applicationId "org.halalz.kahfbrowser"
         minSdk min_sdk
         targetSdk target_sdk
         compileSdk compile_sdk
-        versionCode 130
-        versionName "1.3.0"
+        versionCode 131
+        versionName "1.3.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        archivesBaseName = "kahf-$versionName"
+        archivesBaseName = "kahf_browser-$versionName"
         vectorDrawables.useSupportLibrary = true
         javaCompileOptions {
             annotationProcessorOptions {
