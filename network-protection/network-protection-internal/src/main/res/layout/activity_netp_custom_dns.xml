@@ -97,7 +97,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:enabled="false"
-                    app:buttonSize="large"
+                    app:customButtonSize="large"
                     android:text="@string/netpCustomDnsApply"/>
         </LinearLayout>
     </ScrollView>

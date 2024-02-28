@@ -174,7 +174,6 @@ import com.duckduckgo.app.cta.ui.*
 import com.duckduckgo.app.cta.ui.DaxDialogCta.*
 import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.app.dns.DnsOverVpnService
-import com.duckduckgo.app.downloads.DownloadsFileActions
 import com.duckduckgo.app.fire.fireproofwebsite.data.FireproofWebsiteEntity
 import com.duckduckgo.app.fire.fireproofwebsite.data.website
 import com.duckduckgo.app.global.model.PrivacyShield.UNKNOWN
@@ -313,12 +312,8 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.json.JSONObject
-import timber.log.Timber
 
 @InjectWith(FragmentScope::class)
 class BrowserTabFragment :
@@ -1404,10 +1399,9 @@ class BrowserTabFragment :
 
         viewModel.command.observe(
             viewLifecycleOwner,
-            Observer {
-                processCommand(it)
-            },
-        )
+        ) {
+            processCommand(it)
+        }
 
         viewModel.survey.observe(
             viewLifecycleOwner,

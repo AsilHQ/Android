@@ -33,15 +33,6 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
-import android.net.http.SslError.SSL_UNTRUSTED
-import android.webkit.HttpAuthHandler
-import android.webkit.RenderProcessGoneDetail
-import android.webkit.SslErrorHandler
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -50,7 +41,6 @@ import androidx.fragment.app.FragmentActivity
 import com.bumptech.glide.Glide
 import com.duckduckgo.adclick.api.AdClickManager
 import com.duckduckgo.anrs.api.CrashLogger
-import com.duckduckgo.app.accessibility.AccessibilityManager
 import com.duckduckgo.app.browser.R.string
 import com.duckduckgo.app.browser.WebViewErrorResponse.BAD_URL
 import com.duckduckgo.app.browser.WebViewErrorResponse.CONNECTION
@@ -122,7 +112,7 @@ class BrowserWebViewClient @Inject constructor(
     private val pixel: Pixel,
     private val crashLogger: CrashLogger,
     private val jsPlugins: PluginPoint<JsInjectorPlugin>,
-    private val context: Context
+    private val context: Context,
     private val currentTimeProvider: CurrentTimeProvider,
     private val shouldSendPageLoadedPixel: PageLoadedHandler,
     private val optimizeTrackerEvaluationRCWrapper: OptimizeTrackerEvaluationRCWrapper,

@@ -421,7 +421,7 @@ class BrowserTabViewModel @Inject constructor(
         object DismissFindInPage : Command()
         class ShowFileChooser(
             val filePathCallback: ValueCallback<Array<Uri>>,
-            val fileChooserParams: FileChooserParams,
+            val fileChooserParams: FileChooserRequestedParams,
         ) : Command()
 
         class ShowExistingImageOrCameraChooser(
