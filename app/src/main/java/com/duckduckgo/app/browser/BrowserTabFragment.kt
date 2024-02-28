@@ -1118,6 +1118,7 @@ class BrowserTabFragment :
             toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), VISIBLE)
             toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), GONE)
             switch.isChecked = true
+            webView?.reload()
         }
     }
 
@@ -1148,7 +1149,7 @@ class BrowserTabFragment :
             editor.apply()
             toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), VISIBLE)
             toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), GONE)
-
+            webView?.reload()
         }
     }
 
