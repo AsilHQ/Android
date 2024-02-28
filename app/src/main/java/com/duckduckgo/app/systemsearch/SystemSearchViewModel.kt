@@ -24,6 +24,7 @@ import com.duckduckgo.app.autocomplete.api.AutoComplete
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteResult
 import com.duckduckgo.app.bookmarks.ui.EditSavedSiteDialogFragment
 import com.duckduckgo.app.browser.favorites.FavoritesQuickAccessAdapter
+import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.app.global.SingleLiveEvent
 import com.duckduckgo.app.onboarding.store.AppStage
 import com.duckduckgo.app.onboarding.store.UserStageStore
@@ -45,8 +46,8 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
@@ -70,6 +71,7 @@ class SystemSearchViewModel @Inject constructor(
     private val savedSitesRepository: SavedSitesRepository,
     private val appSettingsPreferencesStore: SettingsDataStore,
     private val dispatchers: DispatcherProvider,
+    @AppCoroutineScope private val appCoroutineScope: CoroutineScope,
 ) : ViewModel(), EditSavedSiteDialogFragment.EditSavedSiteListener {
 
     data class OnboardingViewState(
@@ -91,6 +93,7 @@ class SystemSearchViewModel @Inject constructor(
         object LaunchDuckDuckGo : Command()
         data class LaunchBrowser(val query: String) : Command()
         data class LaunchEditDialog(val savedSite: SavedSite) : Command()
+        data class DeleteFavoriteConfirmation(val savedSite: SavedSite) : Command()
         data class DeleteSavedSiteConfirmation(val savedSite: SavedSite) : Command()
         data class LaunchDeviceApplication(val deviceApp: DeviceApp) : Command()
         data class ShowAppNotFoundMessage(val appName: String) : Command()
@@ -322,6 +325,11 @@ class SystemSearchViewModel @Inject constructor(
 
     fun onDeleteQuickAccessItemRequested(it: FavoritesQuickAccessAdapter.QuickAccessFavorite) {
         hideQuickAccessItem(it)
+        command.value = Command.DeleteFavoriteConfirmation(it.favorite)
+    }
+
+    fun onDeleteSavedSiteRequested(it: FavoritesQuickAccessAdapter.QuickAccessFavorite) {
+        hideQuickAccessItem(it)
         command.value = Command.DeleteSavedSiteConfirmation(it.favorite)
     }
 
@@ -339,21 +347,28 @@ class SystemSearchViewModel @Inject constructor(
     override fun onBookmarkEdited(
         bookmark: Bookmark,
         oldFolderId: String,
+        updateFavorite: Boolean,
     ) {
         viewModelScope.launch(dispatchers.io()) {
-            savedSitesRepository.updateBookmark(bookmark, oldFolderId)
+            savedSitesRepository.updateBookmark(bookmark, oldFolderId, updateFavorite)
         }
     }
 
-    fun deleteSavedSiteSnackbarDismissed(savedSite: SavedSite) {
+    fun deleteFavoriteSnackbarDismissed(savedSite: SavedSite) {
         when (savedSite) {
             is SavedSite.Favorite -> {
-                viewModelScope.launch(dispatchers.io() + NonCancellable) {
+                appCoroutineScope.launch(dispatchers.io()) {
                     savedSitesRepository.delete(savedSite)
                 }
             }
 
             else -> throw IllegalArgumentException("Illegal SavedSite to delete received")
+        }
+    }
+
+    fun deleteSavedSiteSnackbarDismissed(savedSite: SavedSite) {
+        appCoroutineScope.launch(dispatchers.io()) {
+            savedSitesRepository.delete(savedSite, true)
         }
     }
 

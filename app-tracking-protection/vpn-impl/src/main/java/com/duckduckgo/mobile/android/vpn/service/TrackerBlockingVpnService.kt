@@ -24,9 +24,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
 import android.net.VpnService
-import android.os.*
+import android.os.Binder
+import android.os.Build
+import android.os.IBinder
+import android.os.Parcel
+import android.os.ParcelFileDescriptor
 import android.system.OsConstants.AF_INET6
+import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.duckduckgo.anrs.api.CrashLogger
 import com.duckduckgo.anrs.api.CrashLogger.Crash
@@ -65,7 +71,15 @@ import java.util.concurrent.Executors
 import javax.inject.Inject
 import kotlin.properties.Delegates
 import kotlin.system.exitProcess
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import logcat.LogPriority.ERROR
 import logcat.LogPriority.WARN
 import logcat.asLog
@@ -136,13 +150,17 @@ class TrackerBlockingVpnService : VpnService(), CoroutineScope by MainScope(), V
 
     @Inject lateinit var crashLogger: CrashLogger
 
+    @Inject lateinit var dnsChangeCallback: DnsChangeCallback
+
     private val alwaysOnStateJob = ConflatedJob()
 
     private val serviceDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
-    private var vpnNetworkStack: VpnNetworkStack by VpnNetworkStackDelegate(provider = {
-        runBlocking { vpnNetworkStackProvider.provideNetworkStack() }
-    },)
+    private var vpnNetworkStack: VpnNetworkStack by VpnNetworkStackDelegate(
+        provider = {
+            runBlocking { vpnNetworkStackProvider.provideNetworkStack() }
+        },
+    )
 
     private val vpnStateServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(
@@ -279,6 +297,9 @@ class TrackerBlockingVpnService : VpnService(), CoroutineScope by MainScope(), V
             vpnNetworkStack.onCreateVpnWithErrorReporting()
             logcat { "VPN log: NEW network ${vpnNetworkStack.name}" }
         }
+        dnsChangeCallback.unregister()
+        // cancel previous monitor
+        alwaysOnStateJob.cancel()
 
         vpnServiceStateStatsDao.insert(createVpnState(state = ENABLING))
 
@@ -315,7 +336,7 @@ class TrackerBlockingVpnService : VpnService(), CoroutineScope by MainScope(), V
         }
         activeTun = nullTun
 
-        vpnNetworkStack.onPrepareVpn().getOrNull().also {
+        val tunnelConfig = vpnNetworkStack.onPrepareVpn().getOrNull().also {
             if (it != null) {
                 activeTun = createTunnelInterface(it)
                 activeTun?.let { tun ->
@@ -364,6 +385,19 @@ class TrackerBlockingVpnService : VpnService(), CoroutineScope by MainScope(), V
         // lastly set the VPN state to enabled
         vpnServiceStateStatsDao.insert(createVpnState(state = ENABLED))
 
+        // This is something temporary while we confirm whether we're able to fix the moto g issues with appTP
+        // see https://app.asana.com/0/488551667048375/1203410036713941/f for more info
+        tunnelConfig?.let { config ->
+            // TODO this is temporary hack until we know this approach works for moto g. If it does we'll spend time making it better/more permanent
+            if (config.dns.map { it.hostAddress }.contains("10.11.12.1")) {
+                // noop whenever NetP is enabled
+            } else if (config.dns.isNotEmpty()) {
+                // just temporary pixel to know quantify how many users would be impacted
+                deviceShieldPixels.reportMotoGFix()
+                dnsChangeCallback.register()
+            }
+        }
+
         alwaysOnStateJob += launch { monitorVpnAlwaysOnState() }
         if (isAlwaysOnTriggered) {
             logcat { "VPN log: VPN was always on triggered" }
@@ -383,7 +417,7 @@ class TrackerBlockingVpnService : VpnService(), CoroutineScope by MainScope(), V
                 addDnsServer("10.0.0.1")
                 // just so that we can connect to our BE
                 // TODO should we protect all comms with our controller BE? other VPNs do that
-                safelyAddDisallowedApps(listOf("com.duckduckgo.mobile.android", "com.duckduckgo.mobile.android.debug"))
+                safelyAddDisallowedApps(listOf(this@TrackerBlockingVpnService.packageName))
                 setBlocking(true)
                 setMtu(1280)
                 prepare(this@TrackerBlockingVpnService)
@@ -411,7 +445,9 @@ class TrackerBlockingVpnService : VpnService(), CoroutineScope by MainScope(), V
                 allowFamily(AF_INET6)
             }
 
-            val dnsToConfigure = checkAndReturnDns(tunnelConfig.dns)
+            val tunnelDns = checkAndReturnDns(tunnelConfig.dns)
+            val customDns = checkAndReturnDns(tunnelConfig.customDns).filterIsInstance<Inet4Address>()
+            val dnsToConfigure = customDns.ifEmpty { tunnelDns }
 
             // TODO: eventually routes will be set by remote config
             if (appBuildConfig.isPerformanceTest && appBuildConfig.isInternalBuild()) {
@@ -501,9 +537,6 @@ class TrackerBlockingVpnService : VpnService(), CoroutineScope by MainScope(), V
         return tunInterface
     }
 
-    /**
-     * @return the DNS configured in the Android System
-     */
     private fun checkAndReturnDns(originalDns: Set<InetAddress>): Set<InetAddress> {
         // private extension function, this is purposely here to limit visibility
         fun Set<InetAddress>.containsIpv4(): Boolean {
@@ -513,16 +546,12 @@ class TrackerBlockingVpnService : VpnService(), CoroutineScope by MainScope(), V
             return false
         }
 
-        val dns = mutableSetOf<InetAddress>().apply {
-            addAll(originalDns)
-        }
-
-        if (!dns.containsIpv4()) {
+        if (!originalDns.containsIpv4()) {
             // never allow IPv6-only DNS
             logcat(WARN) { "VPN log: No IPv4 DNS found" }
         }
 
-        return dns.toSet()
+        return originalDns
     }
 
     private fun Builder.safelyAddDisallowedApps(apps: List<String>) {
@@ -569,6 +598,8 @@ class TrackerBlockingVpnService : VpnService(), CoroutineScope by MainScope(), V
         vpnStateServiceReference?.let {
             runCatching { unbindService(vpnStateServiceConnection).also { vpnStateServiceReference = null } }
         }
+
+        dnsChangeCallback.unregister()
 
         stopForeground(true)
         stopSelf()
@@ -625,6 +656,7 @@ class TrackerBlockingVpnService : VpnService(), CoroutineScope by MainScope(), V
     /**
      * @return `true` if the start was initiated correctly, otherwise `false`
      */
+    @SuppressLint("NewApi")
     private fun notifyVpnStart(): Boolean {
         val emptyNotification = VpnEnabledNotificationContentPlugin.VpnEnabledNotificationContent.EMPTY
         var vpnNotification: VpnEnabledNotificationContentPlugin.VpnEnabledNotificationContent = emptyNotification
@@ -639,9 +671,11 @@ class TrackerBlockingVpnService : VpnService(), CoroutineScope by MainScope(), V
             }
         }
 
-        startForeground(
+        ServiceCompat.startForeground(
+            this,
             VPN_FOREGROUND_SERVICE_ID,
             VpnEnabledNotificationBuilder.buildVpnEnabledNotification(applicationContext, vpnNotification),
+            FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
         )
 
         return vpnNotification != emptyNotification
@@ -755,9 +789,6 @@ class TrackerBlockingVpnService : VpnService(), CoroutineScope by MainScope(), V
 
             for (service in manager.getRunningServices(Int.MAX_VALUE)) {
                 if (TrackerBlockingVpnService::class.java.name == service.service.className) {
-                    if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M) {
-                        return service.started
-                    }
                     return true
                 }
             }

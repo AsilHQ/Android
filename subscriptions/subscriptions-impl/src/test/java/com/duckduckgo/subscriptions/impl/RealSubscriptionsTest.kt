@@ -18,6 +18,9 @@ package com.duckduckgo.subscriptions.impl
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.duckduckgo.common.test.CoroutineTestRule
+import com.duckduckgo.subscriptions.api.Product
+import com.duckduckgo.subscriptions.api.Subscriptions.EntitlementStatus.Found
+import com.duckduckgo.subscriptions.api.Subscriptions.EntitlementStatus.NotFound
 import com.duckduckgo.subscriptions.impl.services.Entitlement
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
@@ -56,17 +59,35 @@ class RealSubscriptionsTest {
     }
 
     @Test
-    fun whenSubscriptionDataHasEntitlementThenReturnTrue() = runTest {
+    fun whenSubscriptionDataHasEntitlementThenReturnFound() = runTest {
         whenever(mockSubscriptionsManager.getSubscriptionData()).thenReturn(
-            SubscriptionsData.Success("email", "externalId", listOf(Entitlement("id", "name", "product"))),
+            SubscriptionsData.Success("email", "externalId", listOf(Entitlement("id", "name", Product.NetP.value))),
         )
-        assertTrue(subscriptions.hasEntitlement("product"))
+
+        subscriptions.getEntitlementStatus(Product.NetP).also {
+            assertTrue(it.isSuccess)
+            assertEquals(Found, it.getOrNull())
+        }
     }
 
     @Test
-    fun whenSubscriptionDataFailsThenReturnFalse() = runTest {
+    fun whenSubscriptionDataHasNoEntitlementThenReturnNotFound() = runTest {
+        whenever(mockSubscriptionsManager.getSubscriptionData()).thenReturn(
+            SubscriptionsData.Success("email", "externalId", listOf(Entitlement("id", "name", Product.NetP.value))),
+        )
+
+        subscriptions.getEntitlementStatus(Product.ITR).also {
+            assertTrue(it.isSuccess)
+            assertEquals(NotFound, it.getOrNull())
+        }
+    }
+
+    @Test
+    fun whenSubscriptionDataFailsThenReturnFailure() = runTest {
         whenever(mockSubscriptionsManager.getSubscriptionData()).thenReturn(SubscriptionsData.Failure("error"))
 
-        assertFalse(subscriptions.hasEntitlement("product"))
+        subscriptions.getEntitlementStatus(Product.NetP).also {
+            assertTrue(it.isFailure)
+        }
     }
 }

@@ -19,13 +19,13 @@ package com.duckduckgo.app.settings
 import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.duckduckgo.anvil.annotations.ContributeToActivityStarter
 import com.duckduckgo.anvil.annotations.InjectWith
 import com.duckduckgo.app.about.AboutScreenNoParams
 import com.duckduckgo.app.accessibility.AccessibilityScreenNoParams
@@ -50,6 +50,7 @@ import com.duckduckgo.app.widget.AddWidgetLauncher
 import com.duckduckgo.appbuildconfig.api.AppBuildConfig
 import com.duckduckgo.autoconsent.impl.ui.AutoconsentSettingsActivity
 import com.duckduckgo.autofill.api.AutofillScreens.AutofillSettingsScreenNoParams
+import com.duckduckgo.browser.api.ui.BrowserScreens.SettingsScreenNoParams
 import com.duckduckgo.common.ui.DuckDuckGoActivity
 import com.duckduckgo.common.ui.view.gone
 import com.duckduckgo.common.ui.view.listitem.CheckListItem
@@ -57,7 +58,6 @@ import com.duckduckgo.common.ui.view.listitem.TwoLineListItem
 import com.duckduckgo.common.ui.view.show
 import com.duckduckgo.common.ui.viewbinding.viewBinding
 import com.duckduckgo.common.utils.plugins.PluginPoint
-import com.duckduckgo.di.DaggerMap
 import com.duckduckgo.di.scopes.ActivityScope
 import com.duckduckgo.internal.features.api.InternalFeaturePlugin
 import com.duckduckgo.macos.api.MacOsScreenWithEmptyParams
@@ -75,6 +75,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @InjectWith(ActivityScope::class)
+@ContributeToActivityStarter(SettingsScreenNoParams::class)
 class SettingsActivity : DuckDuckGoActivity() {
 
     private val viewModel: SettingsViewModel by bindViewModel()
@@ -96,7 +97,10 @@ class SettingsActivity : DuckDuckGoActivity() {
     lateinit var globalActivityStarter: GlobalActivityStarter
 
     @Inject
-    lateinit var proSettingsPlugin: DaggerMap<Int, ProSettingsPlugin>
+    lateinit var _proSettingsPlugin: PluginPoint<ProSettingsPlugin>
+    private val proSettingsPlugin by lazy {
+        _proSettingsPlugin.getPlugins()
+    }
 
     private val viewsPrivacy
         get() = binding.includeSettings.contentSettingsPrivacy
@@ -162,10 +166,8 @@ class SettingsActivity : DuckDuckGoActivity() {
         if (proSettingsPlugin.isEmpty()) {
             viewsPro.gone()
         } else {
-            proSettingsPlugin.keys.toSortedSet().forEach {
-                proSettingsPlugin[it]?.let { plugin ->
-                    viewsPro.addView(plugin.getView(this))
-                }
+            proSettingsPlugin.forEach { plugin ->
+                viewsPro.addView(plugin.getView(this))
             }
         }
     }
@@ -323,13 +325,8 @@ class SettingsActivity : DuckDuckGoActivity() {
         }
     }
 
-    @Suppress("NewApi") // we use appBuildConfig
     private fun launchDefaultAppScreen() {
-        if (appBuildConfig.sdkInt >= Build.VERSION_CODES.N) {
-            launchDefaultAppActivity()
-        } else {
-            throw IllegalStateException("Unable to launch default app activity on this OS")
-        }
+        launchDefaultAppActivity()
     }
 
     private fun launchAutofillSettings() {

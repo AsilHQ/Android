@@ -73,6 +73,7 @@ class RealSecureStorageTest {
         notesIv = expectedEncryptedIv,
         domainTitle = "test",
         lastUpdatedInMillis = 1000L,
+        lastUsedInMillis = null,
     )
 
     @Before
@@ -249,6 +250,13 @@ class RealSecureStorageTest {
             assertTrue(this.awaitItem().isEmpty())
             this.cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun whenMassDeletingCredentialsBulkDeletionFunctionOnSecureStorageRepoUsed() = runTest {
+        val idsToDelete = listOf(1L, 2L, 3L)
+        testee.deleteWebSiteLoginDetailsWithCredentials(idsToDelete)
+        verify(secureStorageRepository).deleteWebsiteLoginCredentials(idsToDelete)
     }
 
     private fun setUpNoSecureStorageRepository() {

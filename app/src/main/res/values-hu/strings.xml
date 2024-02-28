@@ -152,7 +152,7 @@
     <string name="settingsFireButton">Tűz gomb</string>
 
     <!-- Private Search -->
-    <string name="privateSearchActivityTitle">privát keresés</string>
+    <string name="privateSearchActivityTitle">Privát Keresés</string>
     <string name="privateSearchTitle">A Private Search engedélyezve van</string>
     <string name="privateSearchDescription">A Kahf Private Search az alapértelmezett keresőmotor, így nyomon követés nélkül kereshetsz az interneten.</string>
     <string name="privateSearchHeadingSearchSettings">Keresési beállítások</string>
@@ -496,7 +496,6 @@
     <string name="onboardingFeatureOptionOneClickDataClearing">Egykattintásos adattörlés</string>
 
     <!-- Download Confirmation -->
-    <string name="downloadConfirmationContinue">Mentés a Letöltések közé</string>
     <string name="downloadConfirmationSaveFileTitle" instruction="Placeholder is the name of a file">%1$s mentése</string>
     <string name="downloadConfirmationKeepBothFilesText">Mindkettő megtartása</string>
     <string name="downloadConfirmationReplaceOldFileText">Lecserél</string>
@@ -803,4 +802,22 @@
     <string name="safegaze_popup_takecontrol_title">Javítsa online élményét a SafeGaze segítségével, képfeljavító bővítményünkkel, amely védi látását a nem megfelelő tartalomtól.</string>
     <string name="safegaze_popup_turnon_title">Kapcsolja be a SafeGaze funkciót</string>
 
+
+    <!-- Bookmarks -->
+    <string name="searchBookmarks">Könyvjelzők keresése</string>
+    <string name="deleteFolder" instruction="%1$s is the folder name">"Törlöd a(z) %1$s mappát?"</string>
+    <string name="deleteBookmark" instruction="%1$s is the bookmark name">"Törlöd a(z) %1$s könyvjelzőt?"</string>
+    <string name="bookmarkAddedInBookmarks" instruction="%1$s is the folder name">Könyvjelző hozzáadva a(z) %1$s mappához</string>
+    <string name="addToFavorites">Hozzáadás a kedvencekhez</string>
+    <string name="editBookmark">Könyvjelző szerkesztése</string>
+    <string name="importBookmarksDescription">Ha a könyvjelzőid egy másik böngészőben vannak mentve,\nimportálhatod azokat a DuckDuckGo alkalmazásba.</string>
+    <string name="importBookmarks">Könyvjelzők importálása</string>
+    <string name="noResultsFor" instruction="%1$s is the search term">Nincs találat erre: „%1$s”</string>
+    <string name="removeFromFavorites">Eltávolítás a kedvencek közül</string>
+    <string name="addToFavoritesMenu">Hozzáadás a kedvencekhez</string>
+    <plurals name="bookmarkFolderDeleteMessage">
+        <item quantity="one">Biztos, hogy törölni akarod ezt a mappát és annak %1$d elemét?</item>
+        <item quantity="other">Biztos, hogy törölni akarod ezt a mappát és annak %1$d elemét?</item>
+    </plurals>
+    <string name="deleteBookmarkConfirmationDescription" instruction="Placeholder is the name of the bookmark">Biztosan törlöd a(z) &lt;b&gt;%1$s&lt;/b&gt; könyvjelzőjét?</string>
 </resources>

@@ -16,6 +16,7 @@
 
 package com.duckduckgo.app.global.api
 
+import com.duckduckgo.app.browser.WebViewPixelName
 import com.duckduckgo.app.pixels.AppPixelName
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.app.statistics.pixels.Pixel.StatisticsPixelName
@@ -26,8 +27,8 @@ import com.duckduckgo.common.utils.plugins.pixel.PixelParamRemovalPlugin
 import com.duckduckgo.common.utils.plugins.pixel.PixelParamRemovalPlugin.PixelParameter
 import com.duckduckgo.common.utils.plugins.pixel.PixelParamRemovalPlugin.PixelParameter.APP_VERSION
 import com.duckduckgo.common.utils.plugins.pixel.PixelParamRemovalPlugin.PixelParameter.ATB
+import com.duckduckgo.common.utils.plugins.pixel.PixelParamRemovalPlugin.PixelParameter.OS_VERSION
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.voice.impl.VoiceSearchPixelNames
 import com.squareup.anvil.annotations.ContributesMultibinding
 import javax.inject.Inject
 import okhttp3.Interceptor
@@ -51,11 +52,15 @@ class PixelParamRemovalInterceptor @Inject constructor(
         val url = chain.request().url.newBuilder().apply {
             val atbs = pixels.filter { it.second.contains(ATB) }.map { it.first }
             val versions = pixels.filter { it.second.contains(APP_VERSION) }.map { it.first }
+            val oses = pixels.filter { it.second.contains(OS_VERSION) }.map { it.first }
             if (atbs.any { pixel.startsWith(it) }) {
                 removeAllQueryParameters(AppUrl.ParamKey.ATB)
             }
             if (versions.any { pixel.startsWith(it) }) {
                 removeAllQueryParameters(Pixel.PixelParameter.APP_VERSION)
+            }
+            if (oses.any { pixel.startsWith(it) }) {
+                removeAllQueryParameters(Pixel.PixelParameter.OS_VERSION)
             }
         }.build()
 
@@ -76,7 +81,7 @@ object PixelInterceptorPixelsRequiringDataCleaning : PixelParamRemovalPlugin {
         return listOf(
             AppPixelName.EMAIL_COPIED_TO_CLIPBOARD.pixelName to PixelParameter.removeAll(),
             StatisticsPixelName.BROWSER_DAILY_ACTIVE_FEATURE_STATE.pixelName to PixelParameter.removeAll(),
-            VoiceSearchPixelNames.VOICE_SEARCH_ERROR.pixelName to PixelParameter.removeAll(),
+            WebViewPixelName.WEB_PAGE_LOADED.pixelName to PixelParameter.removeAll(),
         )
     }
 }

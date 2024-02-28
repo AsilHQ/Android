@@ -46,6 +46,12 @@ class CredentialsSyncDataPersister @Inject constructor(
     private val appBuildConfig: AppBuildConfig,
     private val credentialsSyncFeatureListener: CredentialsSyncFeatureListener,
 ) : SyncableDataPersister {
+    override fun onSyncEnabled() {
+        if (isLocalDataDirty()) {
+            onSyncDisabled()
+        }
+    }
+
     override fun onSuccess(
         changes: SyncChangesResponse,
         conflictResolution: SyncConflictResolution,
@@ -116,7 +122,10 @@ class CredentialsSyncDataPersister @Inject constructor(
             Timber.d("Sync-autofill-Persist: merging completed, no entries to merge")
             Success(false)
         } else {
-            strategies[conflictResolution]?.processEntries(credentials, credentialsSyncStore.clientModifiedSince)
+            strategies[conflictResolution]?.processEntries(
+                credentials,
+                credentialsSyncStore.clientModifiedSince,
+            )
                 ?: SyncMergeResult.Error(
                     reason = "Merge Strategy not found",
                 )
@@ -132,6 +141,10 @@ class CredentialsSyncDataPersister @Inject constructor(
         credentialsSyncStore.startTimeStamp = "0"
         credentialsSyncStore.clientModifiedSince = "0"
         credentialsSyncFeatureListener.onSyncDisabled()
+    }
+
+    private fun isLocalDataDirty(): Boolean {
+        return credentialsSyncStore.serverModifiedSince != "0"
     }
 
     private class Adapters {

@@ -20,7 +20,6 @@ import android.Manifest.permission.READ_PHONE_STATE
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.widget.PopupMenu
@@ -39,9 +38,9 @@ import com.duckduckgo.di.scopes.ActivityScope
 import com.duckduckgo.feature.toggles.api.Toggle
 import com.duckduckgo.navigation.api.GlobalActivityStarter
 import com.duckduckgo.networkprotection.api.NetworkProtectionState
+import com.duckduckgo.networkprotection.impl.configuration.WgTunnelConfig
 import com.duckduckgo.networkprotection.impl.connectionclass.ConnectionQualityStore
 import com.duckduckgo.networkprotection.impl.connectionclass.asConnectionQuality
-import com.duckduckgo.networkprotection.impl.store.NetworkProtectionRepository
 import com.duckduckgo.networkprotection.internal.databinding.ActivityNetpInternalSettingsBinding
 import com.duckduckgo.networkprotection.internal.feature.NetPEnvironmentSettingActivity.Companion.NetPEnvironmentSettingScreen
 import com.duckduckgo.networkprotection.internal.feature.snooze.VpnDisableOnCall
@@ -55,8 +54,6 @@ import com.duckduckgo.networkprotection.store.NetPGeoswitchingRepository
 import com.duckduckgo.networkprotection.store.NetPGeoswitchingRepository.UserPreferredLocation
 import com.duckduckgo.networkprotection.store.remote_config.NetPServerRepository
 import com.google.android.material.snackbar.Snackbar
-import com.wireguard.crypto.Key
-import com.wireguard.crypto.KeyPair
 import java.io.FileInputStream
 import java.text.SimpleDateFormat
 import java.util.*
@@ -79,7 +76,7 @@ class NetPInternalSettingsActivity : DuckDuckGoActivity() {
 
     @Inject lateinit var serverRepository: NetPServerRepository
 
-    @Inject lateinit var netpRepository: NetworkProtectionRepository
+    @Inject lateinit var wgTunnelConfig: WgTunnelConfig
 
     @Inject lateinit var dispatcherProvider: DispatcherProvider
 
@@ -147,17 +144,18 @@ class NetPInternalSettingsActivity : DuckDuckGoActivity() {
                 binding.overrideMtuSelector.isEnabled = isEnabled
                 binding.overrideMtuSelector.setSecondaryText("MTU size: ${netPInternalMtuProvider.getMtu()}")
                 binding.overrideServerBackendSelector.isEnabled = isEnabled
-                binding.overrideServerBackendSelector.setSecondaryText("${serverRepository.getSelectedServer()?.name ?: AUTOMATIC}")
+                binding.overrideServerBackendSelector.setSecondaryText(serverRepository.getSelectedServer()?.name ?: AUTOMATIC)
                 binding.forceRekey.isEnabled = isEnabled
                 if (isEnabled) {
-                    netpRepository.clientInterface?.tunnelCidrSet?.joinToString(", ")?.let {
+                    val wgConfig = wgTunnelConfig.getWgConfig()
+                    wgConfig?.`interface`?.addresses?.joinToString(", ") { it.toString() }?.let {
                         binding.internalIp.show()
                         binding.internalIp.setSecondaryText(it)
                     } ?: binding.internalIp.gone()
-                    netpRepository.privateKey?.let {
-                        "Device Public key: ${KeyPair(Key.fromBase64(it)).publicKey.toBase64()}".run {
-                            if (netpRepository.lastPrivateKeyUpdateTimeInMillis != -1L) {
-                                this + "\nLast updated ${formatter.format(netpRepository.lastPrivateKeyUpdateTimeInMillis)}"
+                    wgConfig?.`interface`?.keyPair?.let { keys ->
+                        "Device Public key: ${keys.publicKey.toBase64()}".run {
+                            if (wgTunnelConfig.getWgConfigCreatedAt() != -1L) {
+                                this + "\nLast updated ${formatter.format(wgTunnelConfig.getWgConfigCreatedAt())}"
                             } else {
                                 this
                             }
@@ -182,14 +180,10 @@ class NetPInternalSettingsActivity : DuckDuckGoActivity() {
 
     private fun setupConfigSection() {
         fun hasPhoneStatePermission(): Boolean {
-            return if (appBuildConfig.sdkInt >= Build.VERSION_CODES.M) {
-                ContextCompat.checkSelfPermission(
-                    this,
-                    READ_PHONE_STATE,
-                ) == PackageManager.PERMISSION_GRANTED
-            } else {
-                true
-            }
+            return ContextCompat.checkSelfPermission(
+                this,
+                READ_PHONE_STATE,
+            ) == PackageManager.PERMISSION_GRANTED
         }
 
         lifecycleScope.launch {

@@ -116,7 +116,7 @@
     <string name="autofillManagementScreenTitle">Paroles</string>
     <string name="credentialManagementNoLoginsSavedTitle">Vēl nav saglabāta neviena parole</string>
     <string name="credentialManagementAutofillToggleLabel">Saglabāt un automātiski aizpildīt paroles</string>
-    <string name="credentialManagementAutofillToggleSubtitle">Paroles tiek droši glabātas tavā ierīcē.</string>
+    <string name="credentialManagementAutofillToggleSubtitle">Paroles tiek droši glabātas tavā ierīcē</string>
     <string name="saveLoginDialogSubtitle">Paroles tiek droši glabātas tavā ierīcē.</string>
     <string name="autofillManagementAddLogin">Pievienot paroli</string>
     <string name="credentialManagementEditLoginTitleHint">Nosaukums</string>
@@ -132,5 +132,34 @@
     <string name="managementDisabledModeTitle">Aizsargā savu ierīci, lai saglabātu paroles</string>
     <string name="managementDisabledModeSubtitle">Lai aizsargātu tavus pieteikšanās datus, ir nepieciešama ierīces bloķēšanas figūra, PIN kods vai biometriskā aizsardzība.</string>
     <string name="credentialManagementEditTitle">Paroles rediģēšana</string>
+
+    <string name="credentials_limit_warning"><b>Sinhronizācija pārtraukta</b>\nPārsniegts pieteikšanās datu ierobežojums. Izdzēsiet dažus, lai atsāktu sinhronizāciju.\n\n<annotation type="manage_logins">Pārvaldīt pieteikšanās datus</annotation></string>
+    <string name="credentials_limit_warning_notif"><b>Paroļu sinhronizācija ir pārtraukta</b>\nIr pārsniegts paroļu sinhronizācijas ierobežojums. Mēģini izdzēst dažas paroles. Kamēr šī problēma nebūs atrisināta, paroles netiks dublētas.</string>
+
+    <string name="saveLoginDialogNeverForThisSite">Nekad nejautāt par šo vietni</string>
+    <string name="credentialManagementInstructionNeverForThisSite">Ja atiestatīsi izslēgtās vietnes, tev tiks piedāvāts saglabāt savus pieteikšanās datus, kad nākamreiz tajās pierakstīsies.</string>
+    <string name="credentialManagementClearNeverForThisSiteList">Atiestatīt izslēgtās vietnes</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogTitle">Atiestatīt izslēgtās vietnes?</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogPositiveButton">Atiestatīt</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogNegativeButton">Atcelt</string>
+
+    <string name="credentialManagementDeleteAllPasswordsMenu">Dzēst visas paroles</string>
+    <plurals name="credentialManagementDeleteAllPasswordsConfirmationTitle" instruction="Placeholder is a number representing how many passwords will be deleted">
+        <item quantity="zero">Vai tiešām vēlies dzēst %1$d paroles?</item>
+        <item quantity="one">Vai tiešām vēlies dzēst %1$d paroli?</item>
+        <item quantity="other">Vai tiešām vēlies dzēst %1$d paroles?</item>
+    </plurals>
+
+    <string name="credentialManagementDeletePasswordConfirmationMessage">Parole tiks dzēsta no visām sinhronizētajām ierīcēm. Pārliecinies, vai joprojām varēsi piekļūt savam kontam.</string>
+    <string name="credentialManagementDeleteAllPasswordsConfirmationMessage">Paroles tiks dzēstas no visām sinhronizētajām ierīcēm. Pārliecinies, vai joprojām varēsi piekļūt savam kontam.</string>
+
+    <plurals name="credentialManagementDeleteAllPasswordsSnackbarConfirmation" instruction="Placeholder is a number representing how many passwords were deleted">
+        <item quantity="zero">%1$d paroles izdzēstas</item>
+        <item quantity="one">%1$d parole izdzēsta</item>
+        <item quantity="other">%1$d paroles izdzēstas</item>
+    </plurals>
+
+    <string name="autofill_auth_text_for_delete_all">Autentificējies, lai apstiprinātu, ka vēlies dzēst visas paroles</string>
+    <string name="autofill_title_text_for_delete_all">Dzēst visas paroles</string>
 
 </resources>

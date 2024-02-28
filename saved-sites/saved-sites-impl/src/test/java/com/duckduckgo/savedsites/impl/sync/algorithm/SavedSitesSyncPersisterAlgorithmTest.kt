@@ -33,6 +33,8 @@ import com.duckduckgo.sync.api.engine.SyncableDataPersister.SyncConflictResoluti
 import com.duckduckgo.sync.api.engine.SyncableDataPersister.SyncConflictResolution.LOCAL_WINS
 import com.duckduckgo.sync.api.engine.SyncableDataPersister.SyncConflictResolution.REMOTE_WINS
 import com.duckduckgo.sync.api.engine.SyncableDataPersister.SyncConflictResolution.TIMESTAMP
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import org.junit.Before
@@ -43,8 +45,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
-import org.threeten.bp.OffsetDateTime
-import org.threeten.bp.ZoneOffset
 
 @RunWith(AndroidJUnit4::class)
 class SavedSitesSyncPersisterAlgorithmTest {
@@ -101,7 +101,7 @@ class SavedSitesSyncPersisterAlgorithmTest {
         )
         algorithm.processEntries(someEntries, DEDUPLICATION, threeHoursAgo)
 
-        verify(deduplicationStrategy).processBookmarkFolder(folder)
+        verify(deduplicationStrategy).processBookmarkFolder(folder, listOf(bookmark.id))
         verify(deduplicationStrategy).processBookmark(bookmark, folder.id)
 
         verifyNoInteractions(remoteStrategy)
@@ -129,7 +129,7 @@ class SavedSitesSyncPersisterAlgorithmTest {
         )
         algorithm.processEntries(someEntries, TIMESTAMP, threeHoursAgo)
 
-        verify(timestampStrategy).processBookmarkFolder(folder)
+        verify(timestampStrategy).processBookmarkFolder(folder, listOf(bookmark.id))
         verify(timestampStrategy).processBookmark(bookmark, folder.id)
 
         verifyNoInteractions(remoteStrategy)
@@ -157,7 +157,7 @@ class SavedSitesSyncPersisterAlgorithmTest {
         )
         algorithm.processEntries(someEntries, REMOTE_WINS, threeHoursAgo)
 
-        verify(remoteStrategy).processBookmarkFolder(folder)
+        verify(remoteStrategy).processBookmarkFolder(folder, listOf(bookmark.id))
         verify(remoteStrategy).processBookmark(bookmark, folder.id)
 
         verifyNoInteractions(timestampStrategy)
@@ -190,7 +190,7 @@ class SavedSitesSyncPersisterAlgorithmTest {
         val success = result as Success
         assertFalse(success.orphans)
 
-        verify(localStrategy).processBookmarkFolder(folder)
+        verify(localStrategy).processBookmarkFolder(folder, listOf(bookmark.id))
         verify(localStrategy).processBookmark(bookmark, folder.id)
 
         verifyNoInteractions(timestampStrategy)
@@ -219,28 +219,28 @@ class SavedSitesSyncPersisterAlgorithmTest {
         assertTrue(success.orphans)
     }
 
-    private fun fromSavedSite(savedSite: SavedSite): SyncBookmarkEntry {
-        return SyncBookmarkEntry(
+    private fun fromSavedSite(savedSite: SavedSite): SyncSavedSitesResponseEntry {
+        return SyncSavedSitesResponseEntry(
             id = savedSite.id,
             title = savedSite.title,
             page = SyncBookmarkPage(savedSite.url),
             folder = null,
             deleted = null,
-            client_last_modified = savedSite.lastModified ?: DatabaseDateFormatter.iso8601(),
+            last_modified = savedSite.lastModified ?: DatabaseDateFormatter.iso8601(),
         )
     }
 
     private fun fromBookmarkFolder(
         bookmarkFolder: BookmarkFolder,
         children: List<String>,
-    ): SyncBookmarkEntry {
-        return SyncBookmarkEntry(
+    ): SyncSavedSitesResponseEntry {
+        return SyncSavedSitesResponseEntry(
             id = bookmarkFolder.id,
             title = bookmarkFolder.name,
-            folder = SyncFolderChildren(children),
+            folder = SyncSavedSiteResponseFolder(children),
             page = null,
             deleted = null,
-            client_last_modified = bookmarkFolder.lastModified ?: DatabaseDateFormatter.iso8601(),
+            last_modified = bookmarkFolder.lastModified ?: DatabaseDateFormatter.iso8601(),
         )
     }
 

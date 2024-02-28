@@ -16,9 +16,7 @@
 
 package com.duckduckgo.savedsites.impl.sync
 
-import com.duckduckgo.common.utils.formatters.time.DatabaseDateFormatter
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.savedsites.api.SavedSitesRepository
 import com.duckduckgo.savedsites.impl.sync.algorithm.SavedSitesSyncPersisterAlgorithm
 import com.duckduckgo.sync.api.engine.SyncChangesResponse
 import com.duckduckgo.sync.api.engine.SyncDataValidationResult
@@ -34,17 +32,21 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import javax.inject.Inject
-import org.threeten.bp.OffsetDateTime
 import timber.log.Timber
 
 @ContributesMultibinding(scope = AppScope::class, boundType = SyncableDataPersister::class)
 class SavedSitesSyncPersister @Inject constructor(
-    private val savedSitesRepository: SavedSitesRepository,
     private val savedSitesSyncStore: SavedSitesSyncStore,
+    private val savedSitesSyncRepository: SyncSavedSitesRepository,
     private val algorithm: SavedSitesSyncPersisterAlgorithm,
     private val savedSitesFormFactorSyncMigration: SavedSitesFormFactorSyncMigration,
     private val savedSitesSyncState: SavedSitesSyncFeatureListener,
 ) : SyncableDataPersister {
+    override fun onSyncEnabled() {
+        if (isLocalDataDirty()) {
+            onSyncDisabled()
+        }
+    }
 
     override fun onSuccess(
         changes: SyncChangesResponse,
@@ -55,6 +57,7 @@ class SavedSitesSyncPersister @Inject constructor(
             savedSitesSyncState.onSuccess(changes)
             val result = process(changes, conflictResolution)
             Timber.d("Sync-Bookmarks: merging bookmarks finished with $result")
+
             result
         } else {
             Success(false)
@@ -73,6 +76,7 @@ class SavedSitesSyncPersister @Inject constructor(
         savedSitesSyncStore.startTimeStamp = "0"
         savedSitesFormFactorSyncMigration.onFormFactorFavouritesDisabled()
         savedSitesSyncState.onSyncDisabled()
+        savedSitesSyncRepository.removeMetadata()
     }
 
     fun process(
@@ -81,8 +85,14 @@ class SavedSitesSyncPersister @Inject constructor(
     ): SyncMergeResult {
         val result = when (val validation = validateChanges(changes)) {
             is SyncDataValidationResult.Error -> SyncMergeResult.Error(reason = validation.reason)
-            is SyncDataValidationResult.Success -> processEntries(validation.data, conflictResolution)
-            else -> Success(false)
+            is SyncDataValidationResult.Success -> {
+                processEntries(validation.data, conflictResolution)
+            }
+
+            else -> {
+                // this is a 304 from the BE, we don't acknowledge the response
+                Success()
+            }
         }
 
         if (result is Success) {
@@ -90,6 +100,10 @@ class SavedSitesSyncPersister @Inject constructor(
         }
 
         return result
+    }
+
+    private fun isLocalDataDirty(): Boolean {
+        return savedSitesSyncStore.serverModifiedSince != "0"
     }
 
     private fun validateChanges(changes: SyncChangesResponse): SyncDataValidationResult<SyncBookmarkEntries> {
@@ -124,22 +138,18 @@ class SavedSitesSyncPersister @Inject constructor(
             algorithm.processEntries(bookmarks, conflictResolution, savedSitesSyncStore.clientModifiedSince)
         }
 
-        // it's possible that there were entities present in the device before the first sync
-        // we need to make sure that those entities are sent to the BE after all new data has been stored
-        // we do that by updating the modifiedSince date to a newer date that the last sync
+        // we need to update the metadata of the entities
+        savedSitesSyncRepository.addResponseMetadata(bookmarks.entries)
+
         if (conflictResolution == DEDUPLICATION) {
-            val modifiedSince = OffsetDateTime.now().plusSeconds(1)
-            savedSitesRepository.getEntitiesModifiedBefore(savedSitesSyncStore.startTimeStamp).forEach {
-                savedSitesRepository.updateModifiedSince(it, DatabaseDateFormatter.iso8601(modifiedSince))
-                Timber.d("Sync-Bookmarks: updating $it modifiedSince to $modifiedSince")
-            }
+            savedSitesSyncRepository.setLocalEntitiesForNextSync(savedSitesSyncStore.startTimeStamp)
         }
 
         return result
     }
 
     private fun pruneDeletedObjects() {
-        savedSitesRepository.pruneDeleted()
+        savedSitesSyncRepository.pruneDeleted()
     }
 
     private class Adapters {
@@ -157,6 +167,6 @@ data class SyncBookmarkRemoteUpdates(
 )
 
 data class SyncBookmarkEntries(
-    val entries: List<SyncBookmarkEntry>,
+    val entries: List<SyncSavedSitesResponseEntry>,
     val last_modified: String,
 )

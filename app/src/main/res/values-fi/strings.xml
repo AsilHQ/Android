@@ -496,7 +496,6 @@
     <string name="onboardingFeatureOptionOneClickDataClearing">Yhden latauksen tyhjennys</string>
 
     <!-- Download Confirmation -->
-    <string name="downloadConfirmationContinue">Tallenna latauksiin</string>
     <string name="downloadConfirmationSaveFileTitle" instruction="Placeholder is the name of a file">Tallenna %1$s</string>
     <string name="downloadConfirmationKeepBothFilesText">Pidä molemmat</string>
     <string name="downloadConfirmationReplaceOldFileText">Korvaa</string>
@@ -803,4 +802,22 @@
     <string name="safegaze_popup_takecontrol_title">Paranna verkko-ostokokemustasi SafeGaze, kuvanpuhdistuslaajennuksellamme, joka suojaa näköäsi epäasianmukaiselta sisällöltä.</string>
     <string name="safegaze_popup_turnon_title">Ota SafeGaze käyttöön</string>
 
+
+    <!-- Bookmarks -->
+    <string name="searchBookmarks">Hae kirjanmerkkejä</string>
+    <string name="deleteFolder" instruction="%1$s is the folder name">"Poistetaanko %1$s?"</string>
+    <string name="deleteBookmark" instruction="%1$s is the bookmark name">"Poista %1$s kirjanmerkki?"</string>
+    <string name="bookmarkAddedInBookmarks" instruction="%1$s is the folder name">Kirjanmerkki lisätty kansioon %1$s</string>
+    <string name="addToFavorites">Lisää suosikkeihin</string>
+    <string name="editBookmark">Muokkaa kirjanmerkkiä</string>
+    <string name="importBookmarksDescription">Jos kirjanmerkkisi on tallennettu toiseen selaimeen, voit\ntuoda ne takaisin DuckDuckGo-selaimeen.</string>
+    <string name="importBookmarks">Kirjanmerkkien tuominen</string>
+    <string name="noResultsFor" instruction="%1$s is the search term">Ei tuloksia haulla \'%1$s\'</string>
+    <string name="removeFromFavorites">Poista suosikeista</string>
+    <string name="addToFavoritesMenu">Lisää suosikkeihin</string>
+    <plurals name="bookmarkFolderDeleteMessage">
+        <item quantity="one">Haluatko varmasti poistaa tämän kansion ja %1$d kohteen?</item>
+        <item quantity="other">Haluatko varmasti poistaa tämän kansion ja %1$d kohdetta?</item>
+    </plurals>
+    <string name="deleteBookmarkConfirmationDescription" instruction="Placeholder is the name of the bookmark">Haluatko varmasti poistaa kirjanmerkin &lt;b&gt;%1$s&lt;/b&gt;?</string>
 </resources>
