@@ -333,8 +333,6 @@ class BrowserTabFragment :
 
     private val supervisorJob = SupervisorJob()
 
-    private lateinit var popupWindow: PopupWindow
-
     override val coroutineContext: CoroutineContext
         get() = supervisorJob + dispatchers.main()
 
@@ -544,7 +542,7 @@ class BrowserTabFragment :
     private lateinit var safeGazeInterface: SafeGazeJsInterface
 
     private val viewModel: BrowserTabViewModel by lazy {
-        val viewModel = ViewModelProvider(this, viewModelFactory).get(BrowserTabViewModel::class.java)
+        val viewModel = ViewModelProvider(this, viewModelFactory)[BrowserTabViewModel::class.java]
         viewModel.loadData(tabId, initialUrl, skipHome, favoritesOnboarding)
         launchDownloadMessagesJob()
         viewModel
@@ -621,7 +619,7 @@ class BrowserTabFragment :
     }
 
     private val errorSnackbar: Snackbar by lazy {
-        binding.browserLayout.makeSnackbarWithNoBottomInset(R.string.crashedWebViewErrorMessage, Snackbar.LENGTH_INDEFINITE)
+        binding.browserLayout.makeSnackbarWithNoBottomInset(string.crashedWebViewErrorMessage, Snackbar.LENGTH_INDEFINITE)
             .setBehavior(NonDismissibleBehavior())
     }
 
@@ -644,7 +642,7 @@ class BrowserTabFragment :
         }
     }
 
-    private val autoconsentCallback = object : AutoconsentCallback {
+    private val autoConsentCallback = object : AutoconsentCallback {
         override fun onFirstPopUpHandled() { }
 
         override fun onPopUpHandled(isCosmetic: Boolean) {
@@ -770,7 +768,7 @@ class BrowserTabFragment :
     }
 
     private val ctaViewStateObserver = Observer<CtaViewState> {
-        it?.let { renderer.renderCtaViewState(it) }
+        it.let { renderer.renderCtaViewState(it) }
     }
 
     private var alertDialog: DaxAlertDialog? = null
@@ -931,6 +929,7 @@ class BrowserTabFragment :
         handleKahfIconClick()
     }
 
+    @SuppressLint("InflateParams")
     private fun handleKahfIconClick(){
         kahfDnsdIcon.setOnClickListener {
             val popupView = LayoutInflater.from(context).inflate(R.layout.kahf_dns_pop_up, null)
@@ -964,11 +963,11 @@ class BrowserTabFragment :
 
                 if (DnsOverVpnService.isVpnRunning(connectivityManager)){
                     switch.isChecked = true
-                    dnsText.text = resources.getString(R.string.kahf_dns_up)
+                    dnsText.text = resources.getString(string.kahf_dns_up)
                     switch.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
                 }else{
                     switch.isChecked = false
-                    dnsText.text = resources.getString(R.string.kahf_dns_down)
+                    dnsText.text = resources.getString(string.kahf_dns_down)
                     switch.trackTintList = ColorStateList.valueOf(Color.WHITE)
                 }
 
@@ -980,10 +979,10 @@ class BrowserTabFragment :
                     }
                     if (DnsOverVpnService.isVpnRunning(connectivityManager)){
                         disconnectVpn()
-                        dnsText.text = resources.getString(R.string.kahf_dns_down)
+                        dnsText.text = resources.getString(string.kahf_dns_down)
                     }else{
                         connectVpn()
-                        dnsText.text = resources.getString(R.string.kahf_dns_up)
+                        dnsText.text = resources.getString(string.kahf_dns_up)
                     }
                 }
             }
@@ -1067,11 +1066,6 @@ class BrowserTabFragment :
                     Timber.d("response: $response")
                     val responseJSONObject = JSONObject(response)
                     val dataObject = responseJSONObject.getJSONObject("data")
-                    val id = dataObject.getInt("id")
-                    val name = dataObject.getString("name")
-                    val email = dataObject.getString("email")
-
-                    // Parse token
                     val token = responseJSONObject.getString("token")
                     Timber.d("response token: $token")
                     SharedPreferenceManager(requireContext()).setValue(KeyString.TOKEN, token)
@@ -1446,10 +1440,10 @@ class BrowserTabFragment :
     private fun downloadSucceeded(command: DownloadCommand.ShowDownloadSuccessMessage) {
         val downloadSucceededSnackbar = view?.makeSnackbarWithNoBottomInset(getString(command.messageId, command.fileName), Snackbar.LENGTH_LONG)
             ?.apply {
-                this.setAction(R.string.downloadsDownloadFinishedActionName) {
+                this.setAction(string.downloadsDownloadFinishedActionName) {
                     val result = downloadsFileActions.openFile(requireActivity(), File(command.filePath))
                     if (!result) {
-                        view.makeSnackbarWithNoBottomInset(getString(R.string.downloadsCannotOpenFileErrorMessage), Snackbar.LENGTH_LONG).show()
+                        view.makeSnackbarWithNoBottomInset(getString(string.downloadsCannotOpenFileErrorMessage), Snackbar.LENGTH_LONG).show()
                     }
                 }
             }
@@ -1864,7 +1858,7 @@ class BrowserTabFragment :
             val clip: ClipData = ClipData.newPlainText("Alias", alias)
             clipboard?.setPrimaryClip(clip)
             binding.rootView.makeSnackbarWithNoBottomInset(
-                getString(R.string.aliasToClipboardMessage),
+                getString(string.aliasToClipboardMessage),
                 Snackbar.LENGTH_LONG,
             ).show()
         }
@@ -1906,7 +1900,7 @@ class BrowserTabFragment :
         val binding = ContentSystemLocationPermissionDialogBinding.inflate(layoutInflater)
 
         val originUrl = domain.websiteFromGeoLocationsApiOrigin()
-        val subtitle = getString(R.string.preciseLocationSystemDialogSubtitle, originUrl, originUrl)
+        val subtitle = getString(string.preciseLocationSystemDialogSubtitle, originUrl, originUrl)
         binding.systemPermissionDialogSubtitle.text = subtitle
 
         val dialog = CustomAlertDialogBuilder(requireActivity())
@@ -1951,11 +1945,11 @@ class BrowserTabFragment :
 
         val domain = locationPermission.origin
         val title = domain.websiteFromGeoLocationsApiOrigin()
-        binding.sitePermissionDialogTitle.text = getString(R.string.preciseLocationSiteDialogTitle, title)
+        binding.sitePermissionDialogTitle.text = getString(string.preciseLocationSiteDialogTitle, title)
         binding.sitePermissionDialogSubtitle.text = if (title == DDG_DOMAIN) {
-            getString(R.string.preciseLocationDDGDialogSubtitle)
+            getString(string.preciseLocationDDGDialogSubtitle)
         } else {
-            getString(R.string.preciseLocationSiteDialogSubtitle)
+            getString(string.preciseLocationSiteDialogSubtitle)
         }
 
         val dialog = MaterialAlertDialogBuilder(requireActivity())
@@ -2000,14 +1994,14 @@ class BrowserTabFragment :
         // Snackbar is global and it should appear only the foreground fragment
         if (!errorSnackbar.view.isAttachedToWindow && isVisible) {
             errorSnackbar.setText(command.textResId)
-            errorSnackbar.setAction(R.string.crashedWebViewErrorAction) { command.action() }.show()
+            errorSnackbar.setAction(string.crashedWebViewErrorAction) { command.action() }.show()
         }
     }
 
     private fun showDomainHasLocationPermission(domain: String) {
         val snackbar =
             binding.rootView.makeSnackbarWithNoBottomInset(
-                getString(R.string.preciseLocationSnackbarMessage, domain.websiteFromGeoLocationsApiOrigin()),
+                getString(string.preciseLocationSnackbarMessage, domain.websiteFromGeoLocationsApiOrigin()),
                 Snackbar.LENGTH_SHORT,
             )
         snackbar.view.setOnClickListener {
@@ -2087,7 +2081,7 @@ class BrowserTabFragment :
                     }
 
                     else -> {
-                        showToast(R.string.unableToOpenLink)
+                        showToast(string.unableToOpenLink)
                     }
                 }
             } else {
@@ -2115,7 +2109,7 @@ class BrowserTabFragment :
             Timber.i("Exactly one app available for intent: $appTitle")
             launchExternalAppDialog(context) { context.startActivity(intent) }
         } else {
-            val title = getString(R.string.openExternalApp)
+            val title = getString(string.openExternalApp)
             val intentChooser = Intent.createChooser(intent, title)
             launchExternalAppDialog(context) { context.startActivity(intentChooser) }
         }
@@ -2134,9 +2128,9 @@ class BrowserTabFragment :
 
         if (isShowing != true) {
             loginDetectionDialog = TextAlertDialogBuilder(context)
-                .setTitle(getString(R.string.fireproofWebsiteLoginDialogTitle, fireproofWebsite.website()))
-                .setMessage(R.string.fireproofWebsiteLoginDialogDescription)
-                .setPositiveButton(R.string.fireproofWebsiteLoginDialogPositive).setNegativeButton(R.string.fireproofWebsiteLoginDialogNegative)
+                .setTitle(getString(string.fireproofWebsiteLoginDialogTitle, fireproofWebsite.website()))
+                .setMessage(string.fireproofWebsiteLoginDialogDescription)
+                .setPositiveButton(string.fireproofWebsiteLoginDialogPositive).setNegativeButton(string.fireproofWebsiteLoginDialogNegative)
                 .addEventListener(
                     object : TextAlertDialogBuilder.EventListener() {
                         override fun onPositiveButtonClicked() {
@@ -2170,8 +2164,8 @@ class BrowserTabFragment :
 
         if (isShowing != true) {
             automaticFireproofDialog = StackedAlertDialogBuilder(context)
-                .setTitle(R.string.automaticFireproofWebsiteLoginDialogTitle)
-                .setMessage(getString(R.string.automaticFireproofWebsiteLoginDialogDescription))
+                .setTitle(string.automaticFireproofWebsiteLoginDialogTitle)
+                .setMessage(getString(string.automaticFireproofWebsiteLoginDialogDescription))
                 .setStackedButtons(AutomaticFireproofDialogOptions.asOptions())
                 .addEventListener(
                     object : StackedAlertDialogBuilder.EventListener() {
@@ -2203,10 +2197,10 @@ class BrowserTabFragment :
 
     private fun askToDisableLoginDetection(context: Context) {
         TextAlertDialogBuilder(context)
-            .setTitle(getString(R.string.disableLoginDetectionDialogTitle))
-            .setMessage(R.string.disableLoginDetectionDialogDescription)
-            .setPositiveButton(R.string.disableLoginDetectionDialogPositive)
-            .setNegativeButton(R.string.disableLoginDetectionDialogNegative)
+            .setTitle(getString(string.disableLoginDetectionDialogTitle))
+            .setMessage(string.disableLoginDetectionDialogDescription)
+            .setPositiveButton(string.disableLoginDetectionDialogPositive)
+            .setNegativeButton(string.disableLoginDetectionDialogNegative)
             .addEventListener(
                 object : TextAlertDialogBuilder.EventListener() {
                     override fun onPositiveButtonClicked() {
@@ -2233,8 +2227,8 @@ class BrowserTabFragment :
 
         if (isShowing != true) {
             alertDialog = StackedAlertDialogBuilder(context)
-                .setTitle(R.string.launchingExternalApp)
-                .setMessage(getString(R.string.confirmOpenExternalApp))
+                .setTitle(string.launchingExternalApp)
+                .setMessage(getString(string.confirmOpenExternalApp))
                 .setStackedButtons(LaunchInExternalAppOptions.asOptions())
                 .addEventListener(
                     object : StackedAlertDialogBuilder.EventListener() {
@@ -2298,10 +2292,10 @@ class BrowserTabFragment :
         }
 
         val authDialogBinding = HttpAuthenticationBinding.inflate(layoutInflater)
-        authDialogBinding.httpAuthInformationText.text = getString(R.string.authenticationDialogMessage, request.site)
+        authDialogBinding.httpAuthInformationText.text = getString(string.authenticationDialogMessage, request.site)
         CustomAlertDialogBuilder(requireActivity())
-            .setPositiveButton(R.string.authenticationDialogPositiveButton)
-            .setNegativeButton(R.string.authenticationDialogNegativeButton)
+            .setPositiveButton(string.authenticationDialogPositiveButton)
+            .setNegativeButton(string.authenticationDialogNegativeButton)
             .setView(authDialogBinding)
             .addEventListener(
                 object : CustomAlertDialogBuilder.EventListener() {
@@ -2380,11 +2374,11 @@ class BrowserTabFragment :
 
     private fun createQuickAccessItemHolder(
         recyclerView: RecyclerView,
-        apapter: FavoritesQuickAccessAdapter,
+        adapter: FavoritesQuickAccessAdapter,
     ): ItemTouchHelper {
         return ItemTouchHelper(
             QuickAccessDragTouchItemListener(
-                apapter,
+                adapter,
                 object : QuickAccessDragTouchItemListener.DragDropListener {
                     override fun onListChanged(listElements: List<QuickAccessFavorite>) {
                         viewModel.onQuickAccessListChanged(listElements)
@@ -2592,7 +2586,7 @@ class BrowserTabFragment :
             )
             configureWebViewForAutofill(it)
             printInjector.addJsInterface(it) { viewModel.printFromWebView() }
-            autoconsent.addJsInterface(it, autoconsentCallback)
+            autoconsent.addJsInterface(it, autoConsentCallback)
             contentScopeScripts.register(
                 it,
                 object : JsMessageCallback() {
@@ -2747,7 +2741,7 @@ class BrowserTabFragment :
             delay(delay)
             val snackbar = binding.browserLayout.makeSnackbarWithNoBottomInset(messageResourceId, Snackbar.LENGTH_LONG)
             if (includeShortcutToViewCredential) {
-                snackbar.setAction(R.string.autofillSnackbarAction) {
+                snackbar.setAction(string.autofillSnackbarAction) {
                     context?.let {
                         globalActivityStarter.start(it, AutofillSettingsScreenDirectlyViewCredentialsParams(loginCredentials))
                     }
@@ -2962,7 +2956,7 @@ class BrowserTabFragment :
         binding.rootView.makeSnackbarWithNoBottomInset(
             message,
             Snackbar.LENGTH_LONG,
-        ).setAction(R.string.fireproofWebsiteSnackbarAction) {
+        ).setAction(string.fireproofWebsiteSnackbarAction) {
             viewModel.undoDelete(savedSite)
         }
             .addCallback(
@@ -2982,19 +2976,19 @@ class BrowserTabFragment :
 
     private fun fireproofWebsiteConfirmation(entity: FireproofWebsiteEntity) {
         binding.rootView.makeSnackbarWithNoBottomInset(
-            HtmlCompat.fromHtml(getString(R.string.fireproofWebsiteSnackbarConfirmation, entity.website()), FROM_HTML_MODE_LEGACY),
+            HtmlCompat.fromHtml(getString(string.fireproofWebsiteSnackbarConfirmation, entity.website()), FROM_HTML_MODE_LEGACY),
             Snackbar.LENGTH_LONG,
-        ).setAction(R.string.fireproofWebsiteSnackbarAction) {
+        ).setAction(string.fireproofWebsiteSnackbarAction) {
             viewModel.onFireproofWebsiteSnackbarUndoClicked(entity)
         }.show()
     }
 
     private fun removeFireproofWebsiteConfirmation(entity: FireproofWebsiteEntity) {
         binding.rootView.makeSnackbarWithNoBottomInset(
-            getString(R.string.fireproofDeleteConfirmationMessage),
+            getString(string.fireproofDeleteConfirmationMessage),
             Snackbar.LENGTH_LONG,
         ).apply {
-            setAction(R.string.fireproofWebsiteSnackbarAction) {
+            setAction(string.fireproofWebsiteSnackbarAction) {
                 viewModel.onRemoveFireproofWebsiteSnackbarUndoClicked(entity)
             }
             show()
@@ -3003,14 +2997,14 @@ class BrowserTabFragment :
 
     private fun privacyProtectionEnabledConfirmation(domain: String) {
         binding.rootView.makeSnackbarWithNoBottomInset(
-            HtmlCompat.fromHtml(getString(R.string.privacyProtectionEnabledConfirmationMessage, domain), FROM_HTML_MODE_LEGACY),
+            HtmlCompat.fromHtml(getString(string.privacyProtectionEnabledConfirmationMessage, domain), FROM_HTML_MODE_LEGACY),
             Snackbar.LENGTH_LONG,
         ).show()
     }
 
     private fun privacyProtectionDisabledConfirmation(domain: String) {
         binding.rootView.makeSnackbarWithNoBottomInset(
-            HtmlCompat.fromHtml(getString(R.string.privacyProtectionDisabledConfirmationMessage, domain), FROM_HTML_MODE_LEGACY),
+            HtmlCompat.fromHtml(getString(string.privacyProtectionDisabledConfirmationMessage, domain), FROM_HTML_MODE_LEGACY),
             Snackbar.LENGTH_LONG,
         ).show()
     }
@@ -3089,7 +3083,7 @@ class BrowserTabFragment :
     private fun showKeyboard() {
         if (!isHidden) {
             Timber.v("Keyboard now showing")
-            omnibar.omnibarTextInput.postDelayed(KEYBOARD_DELAY) { omnibar.omnibarTextInput?.showKeyboard() }
+            omnibar.omnibarTextInput.postDelayed(KEYBOARD_DELAY) { omnibar.omnibarTextInput.showKeyboard() }
         }
     }
 
@@ -3279,14 +3273,14 @@ class BrowserTabFragment :
         inputAction: String,
     ) {
         context?.let {
-            val cameraString = getString(R.string.imageCaptureCameraGalleryDisambiguationCameraOption)
+            val cameraString = getString(string.imageCaptureCameraGalleryDisambiguationCameraOption)
             val cameraIcon = com.duckduckgo.mobile.android.R.drawable.ic_camera_24
 
-            val galleryString = getString(R.string.imageCaptureCameraGalleryDisambiguationGalleryOption)
+            val galleryString = getString(string.imageCaptureCameraGalleryDisambiguationGalleryOption)
             val galleryIcon = com.duckduckgo.mobile.android.R.drawable.ic_image_24
 
             ActionBottomSheetDialog.Builder(it)
-                .setTitle(getString(R.string.imageCaptureCameraGalleryDisambiguationTitle))
+                .setTitle(getString(string.imageCaptureCameraGalleryDisambiguationTitle))
                 .setPrimaryItem(galleryString, galleryIcon)
                 .setSecondaryItem(cameraString, cameraIcon)
                 .addEventListener(
@@ -3335,7 +3329,7 @@ class BrowserTabFragment :
                     downloadFile(requestUserConfirmation = true)
                 } else {
                     Timber.i("Write external storage permission refused")
-                    omnibar.toolbar.makeSnackbarWithNoBottomInset(R.string.permissionRequiredToDownload, Snackbar.LENGTH_LONG).show()
+                    omnibar.toolbar.makeSnackbarWithNoBottomInset(string.permissionRequiredToDownload, Snackbar.LENGTH_LONG).show()
                 }
             }
 
@@ -3418,9 +3412,9 @@ class BrowserTabFragment :
         cta: Cta,
     ) {
         TextAlertDialogBuilder(context)
-            .setTitle(R.string.hideTipsTitle)
-            .setMessage(getString(R.string.hideTipsText))
-            .setPositiveButton(R.string.hideTipsButton)
+            .setTitle(string.hideTipsTitle)
+            .setMessage(getString(string.hideTipsText))
+            .setPositiveButton(string.hideTipsButton)
             .setNegativeButton(android.R.string.no)
             .addEventListener(
                 object : TextAlertDialogBuilder.EventListener() {
@@ -3554,7 +3548,6 @@ class BrowserTabFragment :
 
         fun updateToolbarActionsVisibility(viewState: BrowserViewState) {
             tabsButton.isVisible = viewState.showTabsButton
-            // fireMenuButton.isVisible = viewState.fireButton is HighlightableButton.Visible
             menuButton.isVisible = viewState.showMenuButton is HighlightableButton.Visible
 
             val targetView = if (viewState.showMenuButton.isHighlighted()) {
@@ -4184,7 +4177,7 @@ class BrowserTabFragment :
             }
 
             if (viewState.showNumberMatches) {
-                findInPage.findInPageMatches.text = getString(R.string.findInPageMatches, viewState.activeMatchIndex, viewState.numberMatches)
+                findInPage.findInPageMatches.text = getString(string.findInPageMatches, viewState.activeMatchIndex, viewState.numberMatches)
                 findInPage.findInPageMatches.show()
             } else {
                 findInPage.findInPageMatches.hide()
@@ -4194,7 +4187,7 @@ class BrowserTabFragment :
         private fun goFullScreen() {
             binding.webViewFullScreenContainer.show()
             activity?.toggleFullScreen()
-            showToast(R.string.fullScreenMessage, Toast.LENGTH_SHORT)
+            showToast(string.fullScreenMessage, Toast.LENGTH_SHORT)
         }
 
         private fun exitFullScreen() {
