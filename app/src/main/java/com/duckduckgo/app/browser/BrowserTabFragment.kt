@@ -257,6 +257,11 @@ import com.duckduckgo.common.ui.viewbinding.viewBinding
 import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.FragmentViewModelFactory
+import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
+import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
+import com.duckduckgo.common.utils.SAFE_GAZE_INTERFACE
+import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
+import com.duckduckgo.common.utils.SAFE_GAZE_REPORT_URL
 import com.duckduckgo.common.utils.extensions.dpToPx
 import com.duckduckgo.common.utils.extensions.html
 import com.duckduckgo.common.utils.extensions.websiteFromGeoLocationsApiOrigin
@@ -795,7 +800,7 @@ class BrowserTabFragment :
         renderer = BrowserTabFragmentRenderer()
         decorator = BrowserTabFragmentDecorator()
         safeGazeInterface = SafeGazeJsInterface(requireContext())
-        sharedPreferences = requireContext().getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
+        sharedPreferences = requireContext().getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
         editor = sharedPreferences.edit()
         initSafeGazeAndKhfDns()
         voiceSearchLauncher.registerResultsCallback(this, requireActivity(), BROWSER) {
@@ -863,7 +868,7 @@ class BrowserTabFragment :
     private fun initSafeGazeAndKhfDns() {
         if (!sharedPreferences.getBoolean("safe_gaze_and_dns_init",false)){
             safeGazeInterface.updateBlur(30f)
-            editor.putInt("safe_gaze_blur_progress", 30)
+            editor.putInt(SAFE_GAZE_BLUR_PROGRESS, 30)
             editor.apply()
             connectVpn()
         }
@@ -1095,7 +1100,7 @@ class BrowserTabFragment :
             startActivity(Intent.createChooser(shareIntent, "Share via"))
         }
         handleProgressBar(view, blurImageView)
-        loadImageWithBlur(sharedPreferences.getInt("safe_gaze_blur_progress", 0), blurImageView)
+        loadImageWithBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0), blurImageView)
         reportTextView.setOnClickListener {
             val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -1113,7 +1118,7 @@ class BrowserTabFragment :
         lifeTimeCounter.text = sharedPreferences.getInt("all_time_censored_count", 0).toString()
 
         switch.setOnCheckedChangeListener { _, _ ->
-            editor.putBoolean("safe_gaze_active", false)
+            editor.putBoolean(SAFE_GAZE_ACTIVE, false)
             editor.apply()
             toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), VISIBLE)
             toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), GONE)
@@ -1139,13 +1144,12 @@ class BrowserTabFragment :
         val urlTextView = view.findViewById<TextView>(R.id.url_text_view)
         val reportTextView = view.findViewById<TextView>(R.id.report_text_view)
         reportTextView.setOnClickListener {
-            val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(SAFE_GAZE_REPORT_URL))
             startActivity(intent)
         }
         urlTextView.text = viewModel.url
         safeGazeOpenImageView.setOnClickListener{
-            editor.putBoolean("safe_gaze_active", true)
+            editor.putBoolean(SAFE_GAZE_ACTIVE, true)
             editor.apply()
             toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), VISIBLE)
             toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), GONE)
@@ -1157,9 +1161,9 @@ class BrowserTabFragment :
     private fun handleProgressBar(view: View, imageView: ImageView) {
         val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
         val iconImageView: ImageView = view.findViewById(R.id.icon_image_view)
-        val progress = sharedPreferences.getInt("safe_gaze_blur_progress", 0)
+        val progress = sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0)
         progressBar.progress = progress
-        updateViewsPosition(iconImageView, sharedPreferences.getInt("safe_gaze_blur_progress", 0))
+        updateViewsPosition(iconImageView, sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0))
         progressBar.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
@@ -1184,7 +1188,7 @@ class BrowserTabFragment :
         var currentLayout: View
         val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         safeGazeIcon.setOnClickListener {
-            safeGazeInterface.updateBlur(sharedPreferences.getInt("safe_gaze_blur_progress", 0).toFloat())
+            safeGazeInterface.updateBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0).toFloat())
             val iconRect = Rect()
             safeGazeIcon.getGlobalVisibleRect(iconRect)
             val x = iconRect.left
@@ -1195,7 +1199,7 @@ class BrowserTabFragment :
             }
 
             safeGazeIcon.post {
-                if (sharedPreferences.getBoolean("safe_gaze_active", true)) {
+                if (sharedPreferences.getBoolean(SAFE_GAZE_ACTIVE, true)) {
                     currentLayout = popupView.findViewById(R.id.open_view)
                     popupView.findViewById<View>(R.id.close_view).visibility = GONE
                     currentLayout.visibility = VISIBLE
@@ -1244,7 +1248,7 @@ class BrowserTabFragment :
     }
 
     private fun saveProgressToSharedPreferences(progress: Int) {
-        editor.putInt("safe_gaze_blur_progress", progress)
+        editor.putInt(SAFE_GAZE_BLUR_PROGRESS, progress)
         editor.apply()
     }
 
@@ -2504,7 +2508,7 @@ class BrowserTabFragment :
             it.webViewClient = browserWebViewClient
             browserWebViewClient.activity = requireActivity()
             it.webChromeClient = browserWebChromeClient
-            it.addJavascriptInterface(SafeGazeJsInterface(requireContext(), webView!!), "SafeGazeInterface")
+            it.addJavascriptInterface(SafeGazeJsInterface(requireContext(), webView!!), SAFE_GAZE_INTERFACE)
             it.addJavascriptInterface(
                 KahfTubeInterface(
                     requireContext(),

@@ -72,6 +72,8 @@ import com.duckduckgo.browser.api.JsInjectorPlugin
 import com.duckduckgo.common.utils.CurrentTimeProvider
 import com.duckduckgo.common.ui.view.dialog.TextAlertDialogBuilder
 import com.duckduckgo.common.utils.DispatcherProvider
+import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
+import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import com.duckduckgo.common.utils.plugins.PluginPoint
 import com.duckduckgo.cookies.api.CookieManagerProvider
 import com.duckduckgo.privacy.config.api.AmpLinks
@@ -274,11 +276,9 @@ class BrowserWebViewClient @Inject constructor(
     }
 
     private fun handleSafeGaze(webView: WebView) {
-        val sharedPreferences = context.getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
-        val isSafeGazeActive = sharedPreferences.getBoolean("safe_gaze_active", true)
-        println("Safe gaze active value -> $isSafeGazeActive")
+        val sharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
+        val isSafeGazeActive = sharedPreferences.getBoolean(SAFE_GAZE_ACTIVE, true)
         if (isSafeGazeActive) {
-            println("Injected")
             val jsCode = readAssetFile(context.assets, "safe_gaze.js")
             webView.evaluateJavascript("javascript:(function() { $jsCode })()", null)
         }

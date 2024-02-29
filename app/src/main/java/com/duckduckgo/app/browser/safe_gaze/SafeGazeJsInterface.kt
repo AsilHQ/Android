@@ -11,6 +11,7 @@ import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.duckduckgo.app.browser.DuckDuckGoWebView
 import com.duckduckgo.app.safegaze.ondeviceobjectdetection.ObjectDetectionHelper
+import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 
 class SafeGazeJsInterface(
     private val context: Context,
@@ -18,7 +19,7 @@ class SafeGazeJsInterface(
 ) {
 
     private val preferences: SharedPreferences =
-        context.getSharedPreferences("safe_gaze_preferences", Context.MODE_PRIVATE)
+        context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
 
     private val objectDetectionHelper = ObjectDetectionHelper(context)
 
