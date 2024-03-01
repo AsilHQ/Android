@@ -593,9 +593,6 @@ class BrowserTabFragment :
     private val kahfDnsdIcon: AppCompatImageView
         get() = omnibar.kahfDnsIcon
 
-    // private val fireMenuButton: ViewGroup
-    //     get() = omnibar.fireIconMenu
-
     private val menuButton: ViewGroup
         get() = omnibar.browserMenu
 

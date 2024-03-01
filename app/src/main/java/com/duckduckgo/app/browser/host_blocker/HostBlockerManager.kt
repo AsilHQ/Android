@@ -17,6 +17,7 @@
 package com.duckduckgo.app.browser.host_blocker
 
 import android.content.Context
+import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -27,25 +28,22 @@ object HostBlockerManager {
         val localHostFile = File("${context.filesDir}/hosts.txt")
         if (localHostFile.parentFile?.exists() == false) {
             localHostFile.parentFile?.mkdirs()
-            println("HostBlockerManager: Parent directory created for custom file path.")
+            Timber.d("HostBlockerManager: Parent directory created for custom file path.")
         }
 
         val remoteHostFileURL = URL("https://storage.asil.co/hosts.txt")
 
         try {
-            println("HostBlockerManager: Attempting to download host file from $remoteHostFileURL")
+            Timber.d("HostBlockerManager: Attempting to download host file from $remoteHostFileURL")
 
             val remoteHostFileData = remoteHostFileURL.readBytes()
-            println("HostBlockerManager: Host file downloaded successfully.")
+            Timber.d("HostBlockerManager: Host file downloaded successfully.")
 
             FileOutputStream(localHostFile).use { fos ->
                 fos.write(remoteHostFileData)
-                println("HostBlockerManager: Host file overwritten to custom location.")
             }
-
-            println("HostBlockerManager: Host file downloaded and overwritten successfully.")
         } catch (e: IOException) {
-            println("HostBlockerManager: Error writing to the local host file: $e")
+            Timber.d("HostBlockerManager: Error writing to the local host file: $e")
         }
     }
 
