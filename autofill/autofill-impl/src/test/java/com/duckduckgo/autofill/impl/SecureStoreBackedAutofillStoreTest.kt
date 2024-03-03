@@ -18,13 +18,13 @@ package com.duckduckgo.autofill.impl
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.duckduckgo.autofill.api.CredentialUpdateExistingCredentialsDialog.CredentialUpdateType
+import com.duckduckgo.autofill.api.ExistingCredentialMatchDetector.ContainsCredentialsResult
+import com.duckduckgo.autofill.api.ExistingCredentialMatchDetector.ContainsCredentialsResult.ExactMatch
+import com.duckduckgo.autofill.api.ExistingCredentialMatchDetector.ContainsCredentialsResult.NoMatch
+import com.duckduckgo.autofill.api.ExistingCredentialMatchDetector.ContainsCredentialsResult.UrlOnlyMatch
+import com.duckduckgo.autofill.api.ExistingCredentialMatchDetector.ContainsCredentialsResult.UsernameMatch
+import com.duckduckgo.autofill.api.ExistingCredentialMatchDetector.ContainsCredentialsResult.UsernameMissing
 import com.duckduckgo.autofill.api.domain.app.LoginCredentials
-import com.duckduckgo.autofill.api.store.AutofillStore.ContainsCredentialsResult
-import com.duckduckgo.autofill.api.store.AutofillStore.ContainsCredentialsResult.ExactMatch
-import com.duckduckgo.autofill.api.store.AutofillStore.ContainsCredentialsResult.NoMatch
-import com.duckduckgo.autofill.api.store.AutofillStore.ContainsCredentialsResult.UrlOnlyMatch
-import com.duckduckgo.autofill.api.store.AutofillStore.ContainsCredentialsResult.UsernameMatch
-import com.duckduckgo.autofill.api.store.AutofillStore.ContainsCredentialsResult.UsernameMissing
 import com.duckduckgo.autofill.impl.encoding.TestUrlUnicodeNormalizer
 import com.duckduckgo.autofill.impl.securestorage.SecureStorage
 import com.duckduckgo.autofill.impl.securestorage.WebsiteLoginDetails
@@ -33,11 +33,13 @@ import com.duckduckgo.autofill.impl.urlmatcher.AutofillDomainNameUrlMatcher
 import com.duckduckgo.autofill.impl.urlmatcher.AutofillUrlMatcher
 import com.duckduckgo.autofill.store.AutofillPrefsStore
 import com.duckduckgo.autofill.store.LastUpdatedTimeProvider
+import com.duckduckgo.autofill.sync.CredentialsFixtures.toLoginCredentials
 import com.duckduckgo.autofill.sync.CredentialsSyncMetadata
 import com.duckduckgo.autofill.sync.SyncCredentialsListener
 import com.duckduckgo.autofill.sync.inMemoryAutofillDatabase
 import com.duckduckgo.common.test.CoroutineTestRule
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
@@ -445,6 +447,22 @@ class SecureStoreBackedAutofillStoreTest {
         assertEquals(originalCredentials.password, reinsertedCredentials.password)
     }
 
+    @Test
+    fun whenUpdatingCredentialsByDefaultLastUpdatedTimestampGetsUpdated() = runTest {
+        setupTesteeWithAutofillAvailable()
+        val saved = storeCredentials(id = 1, domain = "example.com", username = "username", password = "password")
+        val updated = testee.updateCredentials(saved)!!
+        assertEquals(UPDATED_INITIAL_LAST_UPDATED, updated.lastUpdatedMillis)
+    }
+
+    @Test
+    fun whenUpdatingCredentialsAndSpecifyNotToUpdateLastUpdatedTimestampThenNotUpdated() = runTest {
+        setupTesteeWithAutofillAvailable()
+        val saved = storeCredentials(id = 1, domain = "example.com", username = "username", password = "password")
+        val updated = testee.updateCredentials(saved, refreshLastUpdatedTimestamp = false)!!
+        assertEquals(DEFAULT_INITIAL_LAST_UPDATED, updated.lastUpdatedMillis)
+    }
+
     private fun List<LoginCredentials>.assertHasNoLoginCredentials(
         url: String,
         username: String,
@@ -483,7 +501,11 @@ class SecureStoreBackedAutofillStoreTest {
             autofillPrefsStore = autofillPrefsStore,
             dispatcherProvider = coroutineTestRule.testDispatcherProvider,
             autofillUrlMatcher = autofillUrlMatcher,
-            syncCredentialsListener = SyncCredentialsListener(CredentialsSyncMetadata(inMemoryAutofillDatabase().credentialsSyncDao())),
+            syncCredentialsListener = SyncCredentialsListener(
+                CredentialsSyncMetadata(inMemoryAutofillDatabase().credentialsSyncDao()),
+                coroutineTestRule.testDispatcherProvider,
+                coroutineTestRule.testScope,
+            ),
         )
     }
 
@@ -514,10 +536,10 @@ class SecureStoreBackedAutofillStoreTest {
         password: String,
         lastUpdatedTimeMillis: Long = DEFAULT_INITIAL_LAST_UPDATED,
         notes: String = "notes",
-    ) {
+    ): LoginCredentials {
         val details = WebsiteLoginDetails(domain = domain, username = username, id = id, lastUpdatedMillis = lastUpdatedTimeMillis)
         val credentials = WebsiteLoginDetailsWithCredentials(details, password, notes)
-        secureStore.addWebsiteLoginDetailsWithCredentials(credentials)
+        return secureStore.addWebsiteLoginDetailsWithCredentials(credentials).toLoginCredentials()
     }
 
     private class FakeSecureStore(val canAccessSecureStorage: Boolean) : SecureStorage {
@@ -533,6 +555,10 @@ class SecureStoreBackedAutofillStoreTest {
             )
             credentials.add(credentialWithId)
             return credentialWithId
+        }
+
+        override suspend fun addWebsiteLoginDetailsWithCredentials(credentials: List<WebsiteLoginDetailsWithCredentials>) {
+            credentials.forEach { addWebsiteLoginDetailsWithCredentials(it) }
         }
 
         override suspend fun websiteLoginDetailsForDomain(domain: String): Flow<List<WebsiteLoginDetails>> {
@@ -585,6 +611,19 @@ class SecureStoreBackedAutofillStoreTest {
         override suspend fun deleteWebsiteLoginDetailsWithCredentials(id: Long) {
             credentials.removeAll { it.details.id == id }
         }
+
+        override suspend fun deleteWebSiteLoginDetailsWithCredentials(ids: List<Long>) {
+            credentials.removeAll { ids.contains(it.details.id) }
+        }
+
+        override suspend fun addToNeverSaveList(domain: String) {
+        }
+
+        override suspend fun clearNeverSaveList() {
+        }
+
+        override suspend fun neverSaveListCount(): Flow<Int> = emptyFlow()
+        override suspend fun isInNeverSaveList(domain: String): Boolean = false
 
         override fun canAccessSecureStorage(): Boolean = canAccessSecureStorage
     }

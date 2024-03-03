@@ -16,6 +16,8 @@
 
 package com.duckduckgo.securestorage.store
 
+import com.duckduckgo.securestorage.store.db.NeverSavedSiteEntity
+import com.duckduckgo.securestorage.store.db.NeverSavedSitesDao
 import com.duckduckgo.securestorage.store.db.WebsiteLoginCredentialsDao
 import com.duckduckgo.securestorage.store.db.WebsiteLoginCredentialsEntity
 import kotlinx.coroutines.flow.Flow
@@ -30,6 +32,8 @@ interface SecureStorageRepository {
 
     suspend fun addWebsiteLoginCredential(websiteLoginCredentials: WebsiteLoginCredentialsEntity): WebsiteLoginCredentialsEntity?
 
+    suspend fun addWebsiteLoginCredentials(list: List<WebsiteLoginCredentialsEntity>)
+
     suspend fun websiteLoginCredentialsForDomain(domain: String): Flow<List<WebsiteLoginCredentialsEntity>>
 
     suspend fun getWebsiteLoginCredentialsForId(id: Long): WebsiteLoginCredentialsEntity?
@@ -39,14 +43,30 @@ interface SecureStorageRepository {
     suspend fun updateWebsiteLoginCredentials(websiteLoginCredentials: WebsiteLoginCredentialsEntity): WebsiteLoginCredentialsEntity?
 
     suspend fun deleteWebsiteLoginCredentials(id: Long)
+
+    suspend fun deleteWebsiteLoginCredentials(ids: List<Long>)
+
+    suspend fun addToNeverSaveList(domain: String)
+
+    suspend fun clearNeverSaveList()
+
+    suspend fun neverSaveListCount(): Flow<Int>
+
+    suspend fun isInNeverSaveList(domain: String): Boolean
 }
 
-class RealSecureStorageRepository constructor(
+class RealSecureStorageRepository(
     private val websiteLoginCredentialsDao: WebsiteLoginCredentialsDao,
+    private val neverSavedSitesDao: NeverSavedSitesDao,
 ) : SecureStorageRepository {
+
     override suspend fun addWebsiteLoginCredential(websiteLoginCredentials: WebsiteLoginCredentialsEntity): WebsiteLoginCredentialsEntity? {
         val newCredentialId = websiteLoginCredentialsDao.insert(websiteLoginCredentials)
         return websiteLoginCredentialsDao.getWebsiteLoginCredentialsById(newCredentialId)
+    }
+
+    override suspend fun addWebsiteLoginCredentials(list: List<WebsiteLoginCredentialsEntity>) {
+        websiteLoginCredentialsDao.insert(list)
     }
 
     override suspend fun websiteLoginCredentialsForDomain(domain: String): Flow<List<WebsiteLoginCredentialsEntity>> {
@@ -71,5 +91,25 @@ class RealSecureStorageRepository constructor(
 
     override suspend fun deleteWebsiteLoginCredentials(id: Long) {
         websiteLoginCredentialsDao.delete(id)
+    }
+
+    override suspend fun deleteWebsiteLoginCredentials(ids: List<Long>) {
+        websiteLoginCredentialsDao.delete(ids)
+    }
+
+    override suspend fun addToNeverSaveList(domain: String) {
+        neverSavedSitesDao.insert(NeverSavedSiteEntity(domain = domain))
+    }
+
+    override suspend fun clearNeverSaveList() {
+        neverSavedSitesDao.clear()
+    }
+
+    override suspend fun neverSaveListCount(): Flow<Int> {
+        return neverSavedSitesDao.count()
+    }
+
+    override suspend fun isInNeverSaveList(domain: String): Boolean {
+        return neverSavedSitesDao.isInNeverSaveList(domain)
     }
 }

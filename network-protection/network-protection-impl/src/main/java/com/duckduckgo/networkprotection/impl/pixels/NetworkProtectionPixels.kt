@@ -25,12 +25,12 @@ import com.duckduckgo.networkprotection.impl.cohort.NetpCohortStore
 import com.duckduckgo.networkprotection.impl.pixels.NetworkProtectionPixelNames.*
 import com.squareup.anvil.annotations.ContributesBinding
 import dagger.SingleInstanceIn
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Qualifier
-import org.threeten.bp.Instant
-import org.threeten.bp.ZoneId
-import org.threeten.bp.ZoneOffset
-import org.threeten.bp.format.DateTimeFormatter
 
 interface NetworkProtectionPixels {
     /**
@@ -191,13 +191,6 @@ interface NetworkProtectionPixels {
      * daily -> fire only once a day no matter how many times we call this fun
      * count -> fire a pixel on every call
      */
-    fun reportWhatIsAVpnScreenShown()
-
-    /**
-     * This fun will fire two pixels
-     * daily -> fire only once a day no matter how many times we call this fun
-     * count -> fire a pixel on every call
-     */
     fun reportFaqsShown()
 
     /**
@@ -298,6 +291,11 @@ interface NetworkProtectionPixels {
      */
     fun reportTunnelFailureRecovered()
     fun reportVpnSnoozedCanceled()
+
+    fun reportFailureRecoveryStarted()
+    fun reportFailureRecoveryFailed()
+    fun reportFailureRecoveryCompletedWithServerHealthy()
+    fun reportFailureRecoveryCompletedWithServerUnhealthy()
 }
 
 @ContributesBinding(AppScope::class)
@@ -438,11 +436,6 @@ class RealNetworkProtectionPixel @Inject constructor(
         firePixel(NETP_EXCLUSION_LIST_LAUNCH_BREAKAGE_REPORT)
     }
 
-    override fun reportWhatIsAVpnScreenShown() {
-        tryToFireDailyPixel(NETP_INFO_VPN_SHOWN_DAILY)
-        firePixel(NETP_INFO_VPN_SHOWN)
-    }
-
     override fun reportFaqsShown() {
         tryToFireDailyPixel(NETP_FAQS_SHOWN_DAILY)
         firePixel(NETP_FAQS_SHOWN)
@@ -523,6 +516,26 @@ class RealNetworkProtectionPixel @Inject constructor(
     override fun reportVpnSnoozedCanceled() {
         tryToFireDailyPixel(VPN_SNOOZE_CANCELED_DAILY)
         firePixel(VPN_SNOOZE_CANCELED)
+    }
+
+    override fun reportFailureRecoveryStarted() {
+        firePixel(NETP_FAILURE_RECOVERY_STARTED)
+        tryToFireDailyPixel(NETP_FAILURE_RECOVERY_STARTED_DAILY)
+    }
+
+    override fun reportFailureRecoveryFailed() {
+        firePixel(NETP_FAILURE_RECOVERY_FAILED)
+        tryToFireDailyPixel(NETP_FAILURE_RECOVERY_FAILED_DAILY)
+    }
+
+    override fun reportFailureRecoveryCompletedWithServerHealthy() {
+        firePixel(NETP_FAILURE_RECOVERY_COMPLETED_SERVER_HEALTHY)
+        tryToFireDailyPixel(NETP_FAILURE_RECOVERY_COMPLETED_SERVER_HEALTHY_DAILY)
+    }
+
+    override fun reportFailureRecoveryCompletedWithServerUnhealthy() {
+        firePixel(NETP_FAILURE_RECOVERY_COMPLETED_SERVER_UNHEALTHY)
+        tryToFireDailyPixel(NETP_FAILURE_RECOVERY_COMPLETED_SERVER_UNHEALTHY_DAILY)
     }
 
     private fun firePixel(

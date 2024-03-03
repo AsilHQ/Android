@@ -20,7 +20,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.duckduckgo.common.test.CoroutineTestRule
 import com.duckduckgo.common.test.FileUtilities
 import com.duckduckgo.common.utils.formatters.time.DatabaseDateFormatter
-import com.duckduckgo.savedsites.api.SavedSitesRepository
 import com.duckduckgo.savedsites.impl.sync.algorithm.SavedSitesSyncPersisterAlgorithm
 import com.duckduckgo.sync.api.engine.FeatureSyncError.COLLECTION_LIMIT_REACHED
 import com.duckduckgo.sync.api.engine.SyncChangesResponse
@@ -48,19 +47,19 @@ class SavedSitesSyncPersisterTest {
     @get:Rule
     var coroutinesTestRule = CoroutineTestRule()
 
-    private val repository: SavedSitesRepository = mock()
     private val store: SavedSitesSyncStore = mock()
     private val persisterAlgorithm: SavedSitesSyncPersisterAlgorithm = mock()
     private val savedSitesFormFactorSyncMigration: SavedSitesFormFactorSyncMigration = mock()
     private val savedSitesSyncFeatureListener: SavedSitesSyncFeatureListener = mock()
+    private val syncSavedSitesRepository: SyncSavedSitesRepository = mock()
 
     private lateinit var syncPersister: SavedSitesSyncPersister
 
     @Before
     fun setup() {
         syncPersister = SavedSitesSyncPersister(
-            repository,
             store,
+            syncSavedSitesRepository,
             persisterAlgorithm,
             savedSitesFormFactorSyncMigration,
             savedSitesSyncFeatureListener,
@@ -91,7 +90,6 @@ class SavedSitesSyncPersisterTest {
         whenever(store.serverModifiedSince).thenReturn(DatabaseDateFormatter.iso8601())
         whenever(store.startTimeStamp).thenReturn(DatabaseDateFormatter.iso8601())
         whenever(store.clientModifiedSince).thenReturn(DatabaseDateFormatter.iso8601())
-        whenever(repository.getEntitiesModifiedBefore(any())).thenReturn(emptyList())
 
         val updatesJSON = FileUtilities.loadText(javaClass.classLoader!!, "json/merger_first_get.json")
         val validChanges = SyncChangesResponse(BOOKMARKS, updatesJSON)
@@ -141,6 +139,11 @@ class SavedSitesSyncPersisterTest {
     @Test
     fun whenOnSyncDisabledTheNotifyListener() {
         syncPersister.onSyncDisabled()
+        verify(store).serverModifiedSince = "0"
+        verify(store).clientModifiedSince = "0"
+        verify(store).startTimeStamp = "0"
+        verify(savedSitesFormFactorSyncMigration).onFormFactorFavouritesDisabled()
         verify(savedSitesSyncFeatureListener).onSyncDisabled()
+        verify(syncSavedSitesRepository).removeMetadata()
     }
 }

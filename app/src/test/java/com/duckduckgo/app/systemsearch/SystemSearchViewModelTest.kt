@@ -37,6 +37,7 @@ import com.duckduckgo.common.test.InstantSchedulersRule
 import com.duckduckgo.savedsites.api.SavedSitesRepository
 import com.duckduckgo.savedsites.api.models.SavedSite.Favorite
 import io.reactivex.Observable
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.*
 import org.junit.*
@@ -44,6 +45,7 @@ import org.junit.Assert.*
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.*
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("EXPERIMENTAL_API_USAGE")
 class SystemSearchViewModelTest {
 
@@ -84,6 +86,7 @@ class SystemSearchViewModelTest {
             mocksavedSitesRepository,
             mockSettingsStore,
             coroutineRule.testDispatcherProvider,
+            coroutineRule.testScope,
         )
         testee.command.observeForever(commandObserver)
     }
@@ -318,10 +321,20 @@ class SystemSearchViewModelTest {
     }
 
     @Test
-    fun whenQuickAccessItemDeleteRequestedThenShowDeleteConfirmation() {
+    fun whenQuickAccessItemDeleteRequestedThenShowDeleteFavoriteConfirmation() {
         val quickAccessItem = QuickAccessFavorite(Favorite("favorite1", "title", "http://example.com", "timestamp", 0))
 
         testee.onDeleteQuickAccessItemRequested(quickAccessItem)
+
+        verify(commandObserver, atLeastOnce()).onChanged(commandCaptor.capture())
+        assertEquals(Command.DeleteFavoriteConfirmation(quickAccessItem.favorite), commandCaptor.lastValue)
+    }
+
+    @Test
+    fun whenSavedSiteDeleteRequestedThenShowDeleteSavedSiteConfirmation() {
+        val quickAccessItem = QuickAccessFavorite(Favorite("favorite1", "title", "http://example.com", "timestamp", 0))
+
+        testee.onDeleteSavedSiteRequested(quickAccessItem)
 
         verify(commandObserver, atLeastOnce()).onChanged(commandCaptor.capture())
         assertEquals(Command.DeleteSavedSiteConfirmation(quickAccessItem.favorite), commandCaptor.lastValue)
@@ -348,6 +361,7 @@ class SystemSearchViewModelTest {
             mocksavedSitesRepository,
             mockSettingsStore,
             coroutineRule.testDispatcherProvider,
+            coroutineRule.testScope,
         )
 
         val viewState = testee.resultsViewState.value as QuickAccessItems
@@ -371,6 +385,7 @@ class SystemSearchViewModelTest {
             mocksavedSitesRepository,
             mockSettingsStore,
             coroutineRule.testDispatcherProvider,
+            coroutineRule.testScope,
         )
 
         val viewState = testee.resultsViewState.value as QuickAccessItems
@@ -382,12 +397,21 @@ class SystemSearchViewModelTest {
     }
 
     @Test
-    fun whenQuickAccessDeletedThenRepositoryDeletesSavedSite() = runTest {
+    fun whenQuickAccessDeletedThenRepositoryDeletesFavorite() = runTest {
+        val savedSite = Favorite("favorite1", "title", "http://example.com", "timestamp", 0)
+
+        testee.deleteFavoriteSnackbarDismissed(savedSite)
+
+        verify(mocksavedSitesRepository).delete(savedSite)
+    }
+
+    @Test
+    fun whenAssociatedBookmarkDeletedThenRepositoryDeletesBookmark() = runTest {
         val savedSite = Favorite("favorite1", "title", "http://example.com", "timestamp", 0)
 
         testee.deleteSavedSiteSnackbarDismissed(savedSite)
 
-        verify(mocksavedSitesRepository).delete(savedSite)
+        verify(mocksavedSitesRepository).delete(savedSite, true)
     }
 
     @Test
@@ -412,6 +436,7 @@ class SystemSearchViewModelTest {
             mocksavedSitesRepository,
             mockSettingsStore,
             coroutineRule.testDispatcherProvider,
+            coroutineRule.testScope,
         )
 
         val viewState = testee.resultsViewState.value as SystemSearchViewModel.Suggestions.QuickAccessItems

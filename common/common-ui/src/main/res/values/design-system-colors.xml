@@ -179,7 +179,7 @@
     <color name="yellow">#FFB652</color>
     <color name="blue">#1A73E9</color>
     <color name="grey">#F3F5F9</color>
-
+    <color name="photonBlack">#000000</color>
     <!-- Legacy colors -->
     <!-- WebView -->
     <color name="webViewScrollbarTrackColor">#ff333333</color>
@@ -196,6 +196,7 @@
     <color name="paleBrownishGray">#d0d0d0</color>
     <color name="brownishGrayTwo">#666666</color>
     <color name="cornflowerBlue">#678fff</color>
+    <color name="cornflowerBlue_10">#1A678fff</color>
     <color name="cornflowerDark">#5078e9</color>
     <color name="translucentDark">#b000</color>
     <color name="light_blue">#F2F5F9</color>

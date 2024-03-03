@@ -116,7 +116,7 @@
     <string name="autofillManagementScreenTitle">Parole</string>
     <string name="credentialManagementNoLoginsSavedTitle">Nici o parolă nu a fost salvată încă</string>
     <string name="credentialManagementAutofillToggleLabel">Salvează și completează automat parolele</string>
-    <string name="credentialManagementAutofillToggleSubtitle">Parolele sunt stocate în siguranță pe dispozitivul tău.</string>
+    <string name="credentialManagementAutofillToggleSubtitle">Parolele sunt stocate în siguranță pe dispozitivul tău</string>
     <string name="saveLoginDialogSubtitle">Parolele sunt stocate în siguranță pe dispozitivul tău.</string>
     <string name="autofillManagementAddLogin">Adaugă parola</string>
     <string name="credentialManagementEditLoginTitleHint">Titlu</string>
@@ -132,5 +132,34 @@
     <string name="managementDisabledModeTitle">Securizează-ți dispozitivul pentru a salva parolele</string>
     <string name="managementDisabledModeSubtitle">Este necesar un model de blocare a dispozitivului, un cod PIN sau date biometrice pentru a-ți proteja parolele.</string>
     <string name="credentialManagementEditTitle">Editează parola</string>
+
+    <string name="credentials_limit_warning"><b>Sincronizare întreruptă</b>\nLimita de conectări a fost depășită. Șterge câteva pentru a relua sincronizarea.\n\n<annotation type="manage_logins">Gestionează conectările</annotation></string>
+    <string name="credentials_limit_warning_notif"><b>Sincronizarea parolelor este întreruptă</b>\nAi depășit limita de sincronizare a parolelor. Încearcă să ștergi câteva parole. Până la rezolvarea acestei probleme, nu se va efectua backupul pentru parolele tale.</string>
+
+    <string name="saveLoginDialogNeverForThisSite">Nu solicita niciodată pentru acest site</string>
+    <string name="credentialManagementInstructionNeverForThisSite">Dacă resetezi site-urile excluse, ți se va solicita să îți salvezi parola data viitoare când te conectezi la oricare dintre aceste site-uri.</string>
+    <string name="credentialManagementClearNeverForThisSiteList">Resetează site-urile excluse</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogTitle">Resetezi site-urile excluse?</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogPositiveButton">Resetează</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogNegativeButton">Anulare</string>
+
+    <string name="credentialManagementDeleteAllPasswordsMenu">Șterge toate parolele</string>
+    <plurals name="credentialManagementDeleteAllPasswordsConfirmationTitle" instruction="Placeholder is a number representing how many passwords will be deleted">
+        <item quantity="one">Sigur dorești să ștergi %1$d parolă?</item>
+        <item quantity="few">Sigur dorești să ștergi %1$d parole?</item>
+        <item quantity="other">Sigur dorești să ștergi această %1$d de parole?</item>
+    </plurals>
+
+    <string name="credentialManagementDeletePasswordConfirmationMessage">Parola ta va fi ștearsă de pe toate dispozitivele sincronizate. Asigură-te că ai în continuare posibilitatea de a-ți accesa contul.</string>
+    <string name="credentialManagementDeleteAllPasswordsConfirmationMessage">Parolele tale vor fi șterse de pe toate dispozitivele sincronizate. Asigură-te că ai în continuare posibilitatea de a-ți accesa conturile.</string>
+
+    <plurals name="credentialManagementDeleteAllPasswordsSnackbarConfirmation" instruction="Placeholder is a number representing how many passwords were deleted">
+        <item quantity="one">%1$d parolă ștearsă</item>
+        <item quantity="few">%1$d parole șterse</item>
+        <item quantity="other">%1$d de parole șterse</item>
+    </plurals>
+
+    <string name="autofill_auth_text_for_delete_all">Autentifică-te pentru a confirma că dorești să ștergi toate parolele</string>
+    <string name="autofill_title_text_for_delete_all">Șterge toate parolele</string>
 
 </resources>

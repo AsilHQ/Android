@@ -116,7 +116,7 @@
     <string name="autofillManagementScreenTitle">Adgangskoder</string>
     <string name="credentialManagementNoLoginsSavedTitle">Ingen adgangskoder gemt endnu</string>
     <string name="credentialManagementAutofillToggleLabel">Gem og udfyld adgangskoder automatisk</string>
-    <string name="credentialManagementAutofillToggleSubtitle">Adgangskoder gemmes sikkert på din enhed.</string>
+    <string name="credentialManagementAutofillToggleSubtitle">Adgangskoder gemmes sikkert på din enhed</string>
     <string name="saveLoginDialogSubtitle">Adgangskoder gemmes sikkert på din enhed.</string>
     <string name="autofillManagementAddLogin">Tilføj adgangskode</string>
     <string name="credentialManagementEditLoginTitleHint">Titel</string>
@@ -132,5 +132,32 @@
     <string name="managementDisabledModeTitle">Beskyt din enhed for at gemme adgangskoder</string>
     <string name="managementDisabledModeSubtitle">Der kræves et låsemønster, en pinkode eller biometri for at beskytte dine adgangskoder.</string>
     <string name="credentialManagementEditTitle">Rediger adgangskode</string>
+
+    <string name="credentials_limit_warning"><b>Synkronisering sat på pause</b>\nGrænse for logins overskredet. Slet nogle for at genoptage synkroniseringen.\n\n<annotation type="manage_logins">Administrer logins</annotation></string>
+    <string name="credentials_limit_warning_notif"><b>Synkronisering af adgangskoder sat på pause</b>\nDu har overskredet grænsen for synkronisering af adgangskoder. Prøv at slette nogle adgangskoder. Dine adgangskoder vil ikke blive sikkerhedskopieret, før dette er løst.</string>
+
+    <string name="saveLoginDialogNeverForThisSite">Spørg aldrig på dette websted</string>
+    <string name="credentialManagementInstructionNeverForThisSite">Hvis du nulstiller ekskluderede websteder, vil du blive bedt om at gemme din adgangskode, næste gang du logger ind på en af disse sider.</string>
+    <string name="credentialManagementClearNeverForThisSiteList">Nulstil ekskluderede websteder</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogTitle">Nulstil ekskluderede websteder?</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogPositiveButton">Nulstil</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogNegativeButton">Annuller</string>
+
+    <string name="credentialManagementDeleteAllPasswordsMenu">Slet alle adgangskoder</string>
+    <plurals name="credentialManagementDeleteAllPasswordsConfirmationTitle" instruction="Placeholder is a number representing how many passwords will be deleted">
+        <item quantity="one">Er du sikker på, at du vil slette %1$d adgangskode?</item>
+        <item quantity="other">Er du sikker på, at du vil slette %1$d adgangskoder?</item>
+    </plurals>
+
+    <string name="credentialManagementDeletePasswordConfirmationMessage">Din adgangskode slettes fra alle synkroniserede enheder. Husk at sikre, at du stadig har adgang til din konto.</string>
+    <string name="credentialManagementDeleteAllPasswordsConfirmationMessage">Dine adgangskoder slettes fra alle synkroniserede enheder. Husk at sikre, at du stadig har adgang til dine konti.</string>
+
+    <plurals name="credentialManagementDeleteAllPasswordsSnackbarConfirmation" instruction="Placeholder is a number representing how many passwords were deleted">
+        <item quantity="one">%1$d adgangskode slettet</item>
+        <item quantity="other">%1$d adgangskoder slettet</item>
+    </plurals>
+
+    <string name="autofill_auth_text_for_delete_all">Bekræft, at du vil slette alle adgangskoder</string>
+    <string name="autofill_title_text_for_delete_all">Slet alle adgangskoder</string>
 
 </resources>

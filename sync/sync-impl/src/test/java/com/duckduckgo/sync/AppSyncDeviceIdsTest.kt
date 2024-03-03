@@ -102,12 +102,14 @@ class AppSyncDeviceIdsTest {
 
     private fun getFakeSyncStore(): SyncStore {
         return object : SyncStore {
+            override var syncingDataEnabled = true
             override var userId: String? = "testUserId"
             override var deviceName: String? = "testDeviceName"
             override var deviceId: String? = "deviceId"
             override var token: String? = "token"
             override var primaryKey: String? = "primaryKey"
             override var secretKey: String? = "secretKey"
+            override fun isEncryptionSupported() = true
 
             override fun isSignedInFlow() = emptyFlow<Boolean>()
 
@@ -132,12 +134,15 @@ class AppSyncDeviceIdsTest {
 
     private fun getFakeEmptySyncStore(): SyncStore {
         return object : SyncStore {
+            override var syncingDataEnabled = true
             override var userId: String? = null
             override var deviceName: String? = null
             override var deviceId: String? = null
             override var token: String? = null
             override var primaryKey: String? = null
             override var secretKey: String? = null
+            override fun isEncryptionSupported() = true
+
             override fun isSignedInFlow() = emptyFlow<Boolean>()
 
             override fun isSignedIn(): Boolean = false

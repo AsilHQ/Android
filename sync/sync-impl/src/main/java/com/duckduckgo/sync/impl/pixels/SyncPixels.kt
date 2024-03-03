@@ -16,136 +16,240 @@
 
 package com.duckduckgo.sync.impl.pixels
 
+import android.content.SharedPreferences
+import androidx.core.content.edit
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.di.scopes.AppScope
-import com.duckduckgo.sync.api.engine.*
 import com.duckduckgo.sync.impl.Result.Error
+import com.duckduckgo.sync.impl.pixels.SyncPixelName.SYNC_DAILY
+import com.duckduckgo.sync.impl.pixels.SyncPixelName.SYNC_DAILY_SUCCESS_RATE_PIXEL
 import com.duckduckgo.sync.impl.stats.SyncStatsRepository
+import com.duckduckgo.sync.store.SharedPrefsProvider
 import com.squareup.anvil.annotations.ContributesBinding
+import dagger.SingleInstanceIn
+import java.time.Instant
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import javax.inject.Inject
 
 interface SyncPixels {
-    fun fireStatsPixel()
 
-    fun fireOrphanPresentPixel(feature: String)
+    /**
+     * Fired once per day, for all users with sync enabled
+     * Sent during the first sync of the day
+     */
+    fun fireDailyPixel()
 
-    fun firePersisterErrorPixel(feature: String, mergeError: SyncMergeResult.Error)
+    /**
+     * Fired once per day, for all users with sync enabled
+     * It carries the daily stats for errors and sync count
+     */
+    fun fireDailySuccessRatePixel()
 
-    fun fireEncryptFailurePixel()
+    /**
+     * Fired after a sync operation has found timestamp conflict
+     */
+    fun fireTimestampConflictPixel(feature: String)
 
-    fun fireDecryptFailurePixel()
+    /**
+     * Fired when adding new device to existing account
+     */
+    fun fireLoginPixel()
 
-    fun fireCountLimitPixel(feature: String)
+    /**
+     * Fired when user sets up a sync account from connect flow
+     */
+    fun fireSignupConnectPixel()
 
-    fun fireSyncAttemptErrorPixel(
-        feature: String,
-        result: Error,
-    )
+    /**
+     * Fired when user sets up a sync account directly.
+     */
+    fun fireSignupDirectPixel()
 
     fun fireSyncAccountErrorPixel(
         result: Error,
+        type: SyncAccountOperation,
     )
 }
 
 @ContributesBinding(AppScope::class)
+@SingleInstanceIn(AppScope::class)
 class RealSyncPixels @Inject constructor(
     private val pixel: Pixel,
     private val statsRepository: SyncStatsRepository,
+    private val sharedPrefsProvider: SharedPrefsProvider,
 ) : SyncPixels {
-    override fun fireStatsPixel() {
-        val dailyStats = statsRepository.getDailyStats()
-        pixel.fire(
-            SyncPixelName.SYNC_SUCCESS_RATE,
-            mapOf(
-                SyncPixelParameters.RATE to dailyStats.successRate.toString(),
-            ),
-        )
-        pixel.fire(
-            SyncPixelName.SYNC_DAILY_ATTEMPTS,
-            mapOf(
-                SyncPixelParameters.ATTEMPTS to dailyStats.attempts.toString(),
-            ),
-        )
+
+    private val preferences: SharedPreferences by lazy {
+        sharedPrefsProvider.getSharedPrefs(SYNC_PIXELS_PREF_FILE)
     }
 
-    override fun fireOrphanPresentPixel(feature: String) {
-        pixel.fire(
-            SyncPixelName.SYNC_ORPHAN_PRESENT,
-            mapOf(
-                SyncPixelParameters.FEATURE to feature,
-            ),
-        )
+    override fun fireDailyPixel() {
+        tryToFireDailyPixel(SYNC_DAILY)
     }
 
-    override fun firePersisterErrorPixel(feature: String, mergeError: SyncMergeResult.Error) {
+    override fun fireDailySuccessRatePixel() {
+        val dailyStats = statsRepository.getYesterdayDailyStats()
+        val payload = mapOf(
+            SyncPixelParameters.COUNT to dailyStats.attempts,
+            SyncPixelParameters.DATE to dailyStats.date,
+        ).plus(dailyStats.apiErrorStats).plus(dailyStats.operationErrorStats)
+        tryToFireDailyPixel(SYNC_DAILY_SUCCESS_RATE_PIXEL, payload)
+    }
+
+    override fun fireTimestampConflictPixel(feature: String) {
         pixel.fire(
-            SyncPixelName.SYNC_PERSISTER_FAILURE,
-            mapOf(
-                SyncPixelParameters.FEATURE to feature,
-                SyncPixelParameters.ERROR_CODE to mergeError.code.toString(),
-                SyncPixelParameters.ERROR_REASON to mergeError.reason,
-            ),
+            String.format(Locale.US, SyncPixelName.SYNC_TIMESTAMP_RESOLUTION_TRIGGERED.pixelName, feature),
         )
     }
 
-    override fun fireEncryptFailurePixel() {
-        // pixel.fire(SyncPixelName.SYNC_ENCRYPT_FAILURE)
+    override fun fireLoginPixel() {
+        pixel.fire(SyncPixelName.SYNC_LOGIN)
     }
 
-    override fun fireDecryptFailurePixel() {
-        // pixel.fire(SyncPixelName.SYNC_DECRYPT_FAILURE)
+    override fun fireSignupConnectPixel() {
+        pixel.fire(SyncPixelName.SYNC_SIGNUP_CONNECT)
     }
 
-    override fun fireCountLimitPixel(feature: String) {
-        pixel.fire(
-            SyncPixelName.SYNC_COUNT_LIMIT,
-            mapOf(
-                SyncPixelParameters.FEATURE to feature,
-            ),
-        )
+    override fun fireSignupDirectPixel() {
+        pixel.fire(SyncPixelName.SYNC_SIGNUP_DIRECT)
     }
 
-    override fun fireSyncAttemptErrorPixel(
-        feature: String,
+    override fun fireSyncAccountErrorPixel(
         result: Error,
+        type: SyncAccountOperation,
     ) {
+        when (type) {
+            SyncAccountOperation.SIGNUP -> fireSignupErrorPixel(result)
+            SyncAccountOperation.LOGIN -> fireLoginErrorPixel(result)
+            SyncAccountOperation.LOGOUT -> fireLogoutErrorPixel(result)
+            SyncAccountOperation.UPDATE_DEVICE -> fireUpdateDeviceErrorPixel(result)
+            SyncAccountOperation.REMOVE_DEVICE -> fireRemoveDeviceErrorPixel(result)
+            SyncAccountOperation.DELETE_ACCOUNT -> fireDeleteAccountErrorPixel(result)
+            SyncAccountOperation.USER_SIGNED_IN -> fireAlreadySignedInErrorPixel(result)
+            SyncAccountOperation.CREATE_PDF -> fireSaveRecoveryPdfErrorPixel(result)
+            SyncAccountOperation.GENERIC -> fireSyncAccountErrorPixel(result)
+        }
+    }
+
+    private fun fireSyncAccountErrorPixel(result: Error) {
+        result.fireAddingErrorAsParams(SyncPixelName.SYNC_ACCOUNT_FAILURE)
+    }
+
+    private fun fireSignupErrorPixel(result: Error) {
+        result.fireAddingErrorAsParams(SyncPixelName.SYNC_SIGN_UP_FAILURE)
+    }
+
+    private fun fireLoginErrorPixel(result: Error) {
+        result.fireAddingErrorAsParams(SyncPixelName.SYNC_LOGIN_FAILURE)
+    }
+
+    private fun fireLogoutErrorPixel(result: Error) {
+        result.fireAddingErrorAsParams(SyncPixelName.SYNC_LOGOUT_FAILURE)
+    }
+
+    private fun fireUpdateDeviceErrorPixel(result: Error) {
+        result.fireAddingErrorAsParams(SyncPixelName.SYNC_UPDATE_DEVICE_FAILURE)
+    }
+
+    private fun fireRemoveDeviceErrorPixel(result: Error) {
+        result.fireAddingErrorAsParams(SyncPixelName.SYNC_REMOVE_DEVICE_FAILURE)
+    }
+
+    private fun fireDeleteAccountErrorPixel(result: Error) {
+        result.fireAddingErrorAsParams(SyncPixelName.SYNC_DELETE_ACCOUNT_FAILURE)
+    }
+
+    private fun fireAlreadySignedInErrorPixel(result: Error) {
+        result.fireAddingErrorAsParams(SyncPixelName.SYNC_USER_SIGNED_IN_FAILURE)
+    }
+
+    private fun fireSaveRecoveryPdfErrorPixel(result: Error) {
+        result.fireAddingErrorAsParams(SyncPixelName.SYNC_CREATE_PDF_FAILURE)
+    }
+
+    private fun Error.fireAddingErrorAsParams(pixelName: SyncPixelName) {
         pixel.fire(
-            SyncPixelName.SYNC_ATTEMPT_FAILURE,
+            pixelName,
             mapOf(
-                SyncPixelParameters.FEATURE to feature,
-                SyncPixelParameters.ERROR_CODE to result.code.toString(),
-                SyncPixelParameters.ERROR_REASON to result.reason,
+                SyncPixelParameters.ERROR_CODE to this.code.toString(),
+                SyncPixelParameters.ERROR_REASON to this.reason,
             ),
         )
     }
 
-    override fun fireSyncAccountErrorPixel(result: Error) {
-        pixel.fire(
-            SyncPixelName.SYNC_ACCOUNT_FAILURE,
-            mapOf(
-                SyncPixelParameters.ERROR_CODE to result.code.toString(),
-                SyncPixelParameters.ERROR_REASON to result.reason,
-            ),
-        )
+    private fun tryToFireDailyPixel(
+        pixel: SyncPixelName,
+        payload: Map<String, String> = emptyMap(),
+    ) {
+        val now = getUtcIsoLocalDate()
+        val timestamp = preferences.getString(pixel.name.appendTimestampSuffix(), null)
+
+        // check if pixel was already sent in the current day
+        if (timestamp == null || now > timestamp) {
+            this.pixel.fire(pixel, payload)
+                .also { preferences.edit { putString(pixel.name.appendTimestampSuffix(), now) } }
+        }
+    }
+
+    private fun getUtcIsoLocalDate(): String {
+        // returns YYYY-MM-dd
+        return Instant.now().atOffset(java.time.ZoneOffset.UTC).format(DateTimeFormatter.ISO_LOCAL_DATE)
+    }
+
+    private fun String.appendTimestampSuffix(): String {
+        return "${this}_timestamp"
+    }
+
+    companion object {
+        private const val SYNC_PIXELS_PREF_FILE = "com.duckduckgo.sync.pixels.v1"
     }
 }
 
+enum class SyncAccountOperation {
+    GENERIC,
+    SIGNUP,
+    LOGIN,
+    LOGOUT,
+    UPDATE_DEVICE,
+    REMOVE_DEVICE,
+    DELETE_ACCOUNT,
+    USER_SIGNED_IN,
+    CREATE_PDF,
+}
+
+// https://app.asana.com/0/72649045549333/1205649300615861
 enum class SyncPixelName(override val pixelName: String) : Pixel.PixelName {
-    SYNC_SUCCESS_RATE("m_sync_daily_success_rate"),
-    SYNC_DAILY_ATTEMPTS("m_sync_daily_attempts"),
-    SYNC_ORPHAN_PRESENT("m_sync_orphan_present"),
-    SYNC_ENCRYPT_FAILURE("m_sync_encrypt_failure"),
-    SYNC_DECRYPT_FAILURE("m_sync_decrypt_failure"),
-    SYNC_COUNT_LIMIT("m_sync_count_limit"),
-    SYNC_ATTEMPT_FAILURE("m_sync_attempt_failure"),
+    SYNC_DAILY("m_sync_daily"),
+    SYNC_DAILY_SUCCESS_RATE_PIXEL("m_sync_success_rate_daily"),
+    SYNC_TIMESTAMP_RESOLUTION_TRIGGERED("m_sync_%s_local_timestamp_resolution_triggered"),
+    SYNC_LOGIN("m_sync_login"),
+    SYNC_SIGNUP_DIRECT("m_sync_signup_direct"),
+    SYNC_SIGNUP_CONNECT("m_sync_signup_connect"),
     SYNC_ACCOUNT_FAILURE("m_sync_account_failure"),
-    SYNC_PERSISTER_FAILURE("m_sync_persister_failure"),
+    SYNC_SIGN_UP_FAILURE("m_sync_signup_error"),
+    SYNC_LOGIN_FAILURE("m_sync_login_error"),
+    SYNC_LOGOUT_FAILURE("m_sync_logout_error"),
+    SYNC_UPDATE_DEVICE_FAILURE("m_update_device_error"),
+    SYNC_REMOVE_DEVICE_FAILURE("m_remove_device_error"),
+    SYNC_DELETE_ACCOUNT_FAILURE("m_delete_account_error"),
+    SYNC_USER_SIGNED_IN_FAILURE("m_login_existing_account_error"),
+    SYNC_CREATE_PDF_FAILURE("m_sync_create_recovery_pdf_error"),
 }
 
 object SyncPixelParameters {
-    const val ATTEMPTS = "attempts"
-    const val RATE = "rate"
-    const val FEATURE = "feature"
+    const val COUNT = "sync_count"
+    const val DATE = "date"
+    const val OBJECT_LIMIT_EXCEEDED_COUNT = "%s_object_limit_exceeded_count"
+    const val REQUEST_SIZE_LIMIT_EXCEEDED_COUNT = "%s_request_size_limit_exceeded_count"
+    const val VALIDATION_ERROR_COUNT = "%s_validation_error"
+    const val TOO_MANY_REQUESTS = "%s_too_many_requests_count"
+    const val DATA_ENCRYPT_ERROR = "encrypt_error_count"
+    const val DATA_DECRYPT_ERROR = "decrypt_error_count"
+    const val DATA_PERSISTER_ERROR_PARAM = "%s_persister_error_count"
+    const val DATA_PROVIDER_ERROR_PARAM = "%s_provider_error_count"
+    const val TIMESTAMP_CONFLICT = "%s_local_timestamp_resolution_triggered"
+    const val ORPHANS_PRESENT = "%s_orphans_present"
     const val ERROR_CODE = "code"
     const val ERROR_REASON = "reason"
 }

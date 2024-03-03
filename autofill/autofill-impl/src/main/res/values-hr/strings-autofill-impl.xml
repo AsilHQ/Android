@@ -116,7 +116,7 @@
     <string name="autofillManagementScreenTitle">Lozinke</string>
     <string name="credentialManagementNoLoginsSavedTitle">Još nema spremljenih lozinki</string>
     <string name="credentialManagementAutofillToggleLabel">Spremi i automatski popuni lozinke</string>
-    <string name="credentialManagementAutofillToggleSubtitle">Lozinke su sigurno pohranjene na tvom uređaju.</string>
+    <string name="credentialManagementAutofillToggleSubtitle">Lozinke su sigurno pohranjene na tvom uređaju</string>
     <string name="saveLoginDialogSubtitle">Lozinke su sigurno pohranjene na tvom uređaju.</string>
     <string name="autofillManagementAddLogin">Dodaj lozinku</string>
     <string name="credentialManagementEditLoginTitleHint">Naslov</string>
@@ -132,5 +132,36 @@
     <string name="managementDisabledModeTitle">Osiguraj svoj uređaj za spremanje lozinki</string>
     <string name="managementDisabledModeSubtitle">Uzorak za zaključavanje uređaja, PIN ili biometrija potrebni su za zaštitu tvojih lozinki.</string>
     <string name="credentialManagementEditTitle">Uredi lozinku</string>
+
+    <string name="credentials_limit_warning"><b>Sinkronizacija pauzirana</b>\nOgraničenje prijava premašeno. Izbriši neke za nastavak sinkronizacije.\n\n<annotation type="manage_logins">upravljanje prijavama</annotation></string>
+    <string name="credentials_limit_warning_notif"><b>Sinkronizacija lozinki je pauzirana</b>\nPremašeno je ograničenje sinkronizacije lozinki. Pokušaj izbrisati neke lozinke. Dok se to ne riješi, tvoje se lozinke neće sigurnosno kopirati.</string>
+
+    <string name="saveLoginDialogNeverForThisSite">Nikada ne traži za ovu web lokaciju</string>
+    <string name="credentialManagementInstructionNeverForThisSite">Ako resetiraš isključene web lokacije, od tebe će se zatražiti da spremiš svoju lozinku sljedeći put kad se prijaviš na bilo koju od ovih lokacija.</string>
+    <string name="credentialManagementClearNeverForThisSiteList">Resetiraj isključene web lokacije</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogTitle">Resetiraj isključene web lokacije?</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogPositiveButton">Resetiraj</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogNegativeButton">Odustani</string>
+
+    <string name="credentialManagementDeleteAllPasswordsMenu">Izbriši sve lozinke</string>
+    <plurals name="credentialManagementDeleteAllPasswordsConfirmationTitle" instruction="Placeholder is a number representing how many passwords will be deleted">
+        <item quantity="one">Sigurno želiš izbrisati %1$d lozinku?</item>
+        <item quantity="few">Sigurno želiš izbrisati %1$d lozinke?</item>
+        <item quantity="many">Sigurno želiš izbrisati %1$d lozinki?</item>
+        <item quantity="other">Sigurno želiš izbrisati %1$d lozinki?</item>
+    </plurals>
+
+    <string name="credentialManagementDeletePasswordConfirmationMessage">Tvoja lozinka bit će izbrisana sa svih sinkroniziranih uređaja. Uvjeri se da i dalje imaš način pristupa svom računu.</string>
+    <string name="credentialManagementDeleteAllPasswordsConfirmationMessage">Tvoje lozinke bit će izbrisane sa svih sinkroniziranih uređaja. Uvjeri se da i dalje imaš način pristupa svojim računima.</string>
+
+    <plurals name="credentialManagementDeleteAllPasswordsSnackbarConfirmation" instruction="Placeholder is a number representing how many passwords were deleted">
+        <item quantity="one">Izbrisana je %1$d lozinka</item>
+        <item quantity="few">Izbrisane su %1$d lozinke</item>
+        <item quantity="many">Izbrisano je %1$d lozinki</item>
+        <item quantity="other">Izbrisano je %1$d lozinki</item>
+    </plurals>
+
+    <string name="autofill_auth_text_for_delete_all">Izvrši autentifikaciju i time potvrdi da želiš izbrisati sve lozinke</string>
+    <string name="autofill_title_text_for_delete_all">Izbriši sve lozinke</string>
 
 </resources>

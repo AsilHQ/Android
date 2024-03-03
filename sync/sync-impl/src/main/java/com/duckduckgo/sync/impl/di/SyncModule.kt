@@ -21,19 +21,28 @@ import androidx.room.Room
 import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.AppScope
+import com.duckduckgo.sync.api.favicons.FaviconsFetchingPrompt
+import com.duckduckgo.sync.api.favicons.FaviconsFetchingStore
 import com.duckduckgo.sync.crypto.SyncLib
 import com.duckduckgo.sync.crypto.SyncNativeLib
 import com.duckduckgo.sync.impl.AppQREncoder
 import com.duckduckgo.sync.impl.QREncoder
+import com.duckduckgo.sync.impl.SyncAccountRepository
 import com.duckduckgo.sync.impl.engine.AppSyncStateRepository
 import com.duckduckgo.sync.impl.engine.SyncStateRepository
+import com.duckduckgo.sync.impl.error.RealSyncApiErrorRepository
+import com.duckduckgo.sync.impl.error.RealSyncOperationErrorRepository
+import com.duckduckgo.sync.impl.error.SyncApiErrorRepository
+import com.duckduckgo.sync.impl.error.SyncOperationErrorRepository
+import com.duckduckgo.sync.impl.favicons.SyncFaviconFetchingStore
+import com.duckduckgo.sync.impl.favicons.SyncFaviconsFetchingPrompt
 import com.duckduckgo.sync.impl.internal.AppSyncInternalEnvDataStore
 import com.duckduckgo.sync.impl.internal.SyncInternalEnvDataStore
 import com.duckduckgo.sync.impl.stats.RealSyncStatsRepository
 import com.duckduckgo.sync.impl.stats.SyncStatsRepository
-import com.duckduckgo.sync.store.EncryptedSharedPrefsProvider
 import com.duckduckgo.sync.store.SharedPrefsProvider
 import com.duckduckgo.sync.store.SyncDatabase
+import com.duckduckgo.sync.store.SyncSharedPrefsProvider
 import com.duckduckgo.sync.store.SyncSharedPrefsStore
 import com.duckduckgo.sync.store.SyncStore
 import com.journeyapps.barcodescanner.BarcodeEncoder
@@ -68,7 +77,7 @@ object SyncStoreModule {
     @Provides
     @SingleInstanceIn(AppScope::class)
     fun provideSharedPrefsProvider(context: Context): SharedPrefsProvider {
-        return EncryptedSharedPrefsProvider(context)
+        return SyncSharedPrefsProvider(context)
     }
 
     @Provides
@@ -100,10 +109,39 @@ object SyncStoreModule {
     }
 
     @Provides
+    fun provideSyncApiErrorRepository(syncDatabase: SyncDatabase): SyncApiErrorRepository {
+        return RealSyncApiErrorRepository(syncDatabase.syncApiErrorsDao())
+    }
+
+    @Provides
+    fun provideSyncOperationErrorRepository(syncDatabase: SyncDatabase): SyncOperationErrorRepository {
+        return RealSyncOperationErrorRepository(syncDatabase.syncOperationErrorsDao())
+    }
+
+    @Provides
     @SingleInstanceIn(AppScope::class)
     fun provideSyncStatsRepository(
         syncStateRepository: SyncStateRepository,
+        syncApiErrorRepository: SyncApiErrorRepository,
+        syncOperationErrorRepository: SyncOperationErrorRepository,
     ): SyncStatsRepository {
-        return RealSyncStatsRepository(syncStateRepository)
+        return RealSyncStatsRepository(syncStateRepository, syncApiErrorRepository, syncOperationErrorRepository)
+    }
+
+    @Provides
+    @SingleInstanceIn(AppScope::class)
+    fun provideSyncFaviconsFetchingStore(
+        context: Context,
+    ): FaviconsFetchingStore {
+        return SyncFaviconFetchingStore(context)
+    }
+
+    @Provides
+    @SingleInstanceIn(AppScope::class)
+    fun provideSyncFaviconsFetchingPrompt(
+        faviconFetchingStore: FaviconsFetchingStore,
+        syncAccountRepository: SyncAccountRepository,
+    ): FaviconsFetchingPrompt {
+        return SyncFaviconsFetchingPrompt(faviconFetchingStore, syncAccountRepository)
     }
 }

@@ -22,6 +22,10 @@ plugins {
 
 apply from: "$rootProject.projectDir/gradle/android-library.gradle"
 
+ext {
+    autofillDisableAuthRequirementBuildFlag = "autofill-disable-auth-requirement"
+}
+
 dependencies {
     implementation project(path: ':app-build-config-api')
     implementation project(path: ':privacy-config-api')
@@ -61,9 +65,6 @@ dependencies {
 
     implementation "net.zetetic:android-database-sqlcipher:_"
 
-    implementation "com.jakewharton.threetenabp:threetenabp:_"
-    testImplementation "org.threeten:threetenbp:_"
-
     // Testing dependencies
     testImplementation "org.mockito.kotlin:mockito-kotlin:_"
     testImplementation Testing.junit4
@@ -97,5 +98,23 @@ android {
         }
     }
     namespace 'com.duckduckgo.autofill.impl'
+    compileOptions {
+        coreLibraryDesugaringEnabled = true
+    }
+    defaultConfig {
+        if (project.hasProperty("$autofillDisableAuthRequirementBuildFlag")) {
+            buildConfigField "boolean", "AUTH_REQUIRED", "false"
+        } else {
+            buildConfigField "boolean", "AUTH_REQUIRED", "true"
+        }
+    }
 }
 
+tasks.register('installForAutofillTesting', Exec) {
+    commandLine "$rootDir/gradlew", ':app:installInternalRelease', "-P$autofillDisableAuthRequirementBuildFlag"
+}
+
+tasks.register('autofillTestLocal', Exec) {
+    commandLine 'maestro', 'test', '--include-tags', 'autofillNoAuthTests', "$rootDir/.maestro"
+    dependsOn 'installForAutofillTesting'
+}

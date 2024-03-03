@@ -27,6 +27,9 @@ android {
         generateDaggerFactories = true // default is false
     }
     namespace 'com.duckduckgo.downloads.impl'
+    compileOptions {
+        coreLibraryDesugaringEnabled = true
+    }
 }
 
 dependencies {
@@ -36,6 +39,7 @@ dependencies {
     implementation project(path: ':browser-api')
     implementation project(path: ':di')
     implementation project(path: ':common-utils')
+    implementation project(path: ':common-ui')
     implementation project(path: ':statistics')
     implementation project(path: ':app-build-config-api')
     implementation project(path: ':downloads-store')
@@ -62,9 +66,6 @@ dependencies {
         // conflicts with mockito due to direct inclusion of byte buddy
         exclude group: "org.jetbrains.kotlinx", module: "kotlinx-coroutines-debug"
     }
-
-    implementation "com.jakewharton.threetenabp:threetenabp:_"
-    testImplementation "org.threeten:threetenbp:_"
 
     implementation JakeWharton.timber
 

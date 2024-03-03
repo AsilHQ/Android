@@ -27,7 +27,6 @@ import com.duckduckgo.common.ui.DuckDuckGoActivity
 import com.duckduckgo.common.ui.view.dialog.CustomAlertDialogBuilder
 import com.duckduckgo.common.ui.view.dialog.TextAlertDialogBuilder
 import com.duckduckgo.common.ui.view.makeSnackbarWithNoBottomInset
-import com.duckduckgo.common.ui.view.show
 import com.duckduckgo.common.ui.viewbinding.viewBinding
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.plugins.*
@@ -38,6 +37,9 @@ import com.duckduckgo.sync.impl.ConnectedDevice
 import com.duckduckgo.sync.impl.PermissionRequest
 import com.duckduckgo.sync.impl.R
 import com.duckduckgo.sync.impl.ShareAction
+import com.duckduckgo.sync.impl.auth.DeviceAuthenticator
+import com.duckduckgo.sync.impl.auth.DeviceAuthenticator.AuthConfiguration
+import com.duckduckgo.sync.impl.auth.DeviceAuthenticator.AuthResult.Success
 import com.duckduckgo.sync.impl.databinding.ActivitySyncBinding
 import com.duckduckgo.sync.impl.databinding.DialogEditDeviceBinding
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command
@@ -50,16 +52,18 @@ import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.CheckIfUserHasS
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.IntroCreateAccount
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.IntroRecoverSyncData
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.RecoveryCodePDFSuccess
+import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.ShowDeviceUnsupported
+import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.ShowError
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.ShowRecoveryCode
-import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.ShowTextCode
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.SyncWithAnotherDevice
+import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.SetupFlows
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.ViewState
 import com.duckduckgo.sync.impl.ui.setup.ConnectFlowContract
-import com.duckduckgo.sync.impl.ui.setup.LoginContract
 import com.duckduckgo.sync.impl.ui.setup.SetupAccountActivity.Companion.Screen.RECOVERY_CODE
 import com.duckduckgo.sync.impl.ui.setup.SetupAccountActivity.Companion.Screen.RECOVERY_INTRO
 import com.duckduckgo.sync.impl.ui.setup.SetupAccountActivity.Companion.Screen.SYNC_INTRO
 import com.duckduckgo.sync.impl.ui.setup.SyncIntroContract
+import com.duckduckgo.sync.impl.ui.setup.SyncWithAnotherDeviceContract
 import com.google.android.material.snackbar.Snackbar
 import javax.inject.*
 import kotlinx.coroutines.flow.launchIn
@@ -71,6 +75,9 @@ import timber.log.*
 class SyncActivity : DuckDuckGoActivity() {
     private val binding: ActivitySyncBinding by viewBinding()
     private val viewModel: SyncActivityViewModel by bindViewModel()
+
+    @Inject
+    lateinit var deviceAuthenticator: DeviceAuthenticator
 
     private val syncedDevicesAdapter = SyncedDevicesAdapter(
         object : ConnectedDeviceClickListener {
@@ -115,7 +122,7 @@ class SyncActivity : DuckDuckGoActivity() {
         }
     }
 
-    private val loginFlow = registerForActivityResult(LoginContract()) { resultOk ->
+    private val syncWithAnotherDeviceFlow = registerForActivityResult(SyncWithAnotherDeviceContract()) { resultOk ->
         if (resultOk) {
             viewModel.onDeviceConnected()
         }
@@ -190,12 +197,8 @@ class SyncActivity : DuckDuckGoActivity() {
             viewModel.onDeleteAccountClicked()
         }
 
-        binding.viewSyncEnabled.scanQrCodeItem.setOnClickListener {
+        binding.viewSyncEnabled.syncAnotherDeviceItem.setOnClickListener {
             viewModel.onAddAnotherDevice()
-        }
-
-        binding.viewSyncEnabled.showTextCodeItem.setOnClickListener {
-            viewModel.onShowTextCodeClicked()
         }
     }
 
@@ -217,14 +220,36 @@ class SyncActivity : DuckDuckGoActivity() {
 
     private fun processCommand(it: Command) {
         when (it) {
-            is SyncWithAnotherDevice -> connectFlow.launch(null)
-            is IntroCreateAccount -> syncIntroLauncher.launch(SYNC_INTRO)
-            is IntroRecoverSyncData -> syncIntroLauncher.launch(RECOVERY_INTRO)
-            is ShowRecoveryCode -> syncIntroLauncher.launch(RECOVERY_CODE)
-            is AskTurnOffSync -> askTurnOffsync(it.device)
+            is SyncWithAnotherDevice -> {
+                authenticate {
+                    connectFlow.launch(null)
+                }
+            }
+
+            is IntroCreateAccount -> {
+                authenticate {
+                    syncIntroLauncher.launch(SYNC_INTRO)
+                }
+            }
+
+            is IntroRecoverSyncData -> {
+                authenticate {
+                    syncIntroLauncher.launch(RECOVERY_INTRO)
+                }
+            }
+
+            is ShowRecoveryCode -> {
+                authenticate {
+                    syncIntroLauncher.launch(RECOVERY_CODE)
+                }
+            }
+
+            is AskTurnOffSync -> askTurnOffSync(it.device)
             is AskDeleteAccount -> askDeleteAccount()
             is RecoveryCodePDFSuccess -> {
-                shareAction.shareFile(this@SyncActivity, it.recoveryCodePDFFile)
+                authenticate {
+                    shareAction.shareFile(this@SyncActivity, it.recoveryCodePDFFile)
+                }
             }
 
             is CheckIfUserHasStoragePermission -> {
@@ -235,9 +260,25 @@ class SyncActivity : DuckDuckGoActivity() {
 
             is AskRemoveDevice -> askRemoveDevice(it.device)
             is AskEditDevice -> askEditDevice(it.device)
-            is ShowTextCode -> startActivity(ShowCodeActivity.intent(this))
-            is AddAnotherDevice -> loginFlow.launch(null)
+            is AddAnotherDevice -> {
+                authenticate {
+                    syncWithAnotherDeviceFlow.launch(null)
+                }
+            }
+            is ShowError -> showError(it)
+            is ShowDeviceUnsupported -> {
+                startActivity(DeviceUnsupportedActivity.intent(this))
+                finish()
+            }
         }
+    }
+
+    private fun showError(it: ShowError) {
+        TextAlertDialogBuilder(this)
+            .setTitle(R.string.sync_dialog_error_title)
+            .setMessage(getString(it.message) + "\n" + it.reason)
+            .setPositiveButton(R.string.sync_dialog_error_ok)
+            .show()
     }
 
     private fun askEditDevice(device: ConnectedDevice) {
@@ -276,10 +317,10 @@ class SyncActivity : DuckDuckGoActivity() {
 
     private fun askDeleteAccount() {
         TextAlertDialogBuilder(this)
-            .setTitle(R.string.turn_off_sync_dialog_title)
-            .setMessage(getString(R.string.turn_off_sync_dialog_content))
-            .setPositiveButton(R.string.turn_off_sync_dialog_primary_button)
-            .setNegativeButton(R.string.turn_off_sync_dialog_secondary_button)
+            .setTitle(R.string.sync_delete_server_data_dialog_title)
+            .setMessage(getString(R.string.sync_delete_server_data_dialog_content))
+            .setPositiveButton(R.string.sync_delete_server_data_dialog_primary_button)
+            .setNegativeButton(R.string.sync_delete_server_data_dialog_secondary_button)
             .setDestructiveButtons(true)
             .addEventListener(
                 object : TextAlertDialogBuilder.EventListener() {
@@ -294,7 +335,7 @@ class SyncActivity : DuckDuckGoActivity() {
             ).show()
     }
 
-    private fun askTurnOffsync(device: ConnectedDevice) {
+    private fun askTurnOffSync(device: ConnectedDevice) {
         TextAlertDialogBuilder(this)
             .setTitle(R.string.turn_off_sync_dialog_title)
             .setMessage(getString(R.string.turn_off_sync_dialog_content))
@@ -317,12 +358,26 @@ class SyncActivity : DuckDuckGoActivity() {
         binding.viewSwitcher.displayedChild = if (viewState.showAccount) 1 else 0
 
         if (viewState.showAccount) {
-            if (viewState.loginQRCode != null) {
-                binding.viewSyncEnabled.qrCodeImageView.show()
-                binding.viewSyncEnabled.qrCodeImageView.setImageBitmap(viewState.loginQRCode)
+            syncedDevicesAdapter.updateData(viewState.syncedDevices)
+        } else {
+            with(binding.viewSyncDisabled) {
+                syncSetupWithAnotherDevice.isEnabled = !viewState.disabledSetupFlows.contains(SetupFlows.CreateAccountFlow)
+                syncSetupSyncThisDevice.isEnabled = !viewState.disabledSetupFlows.contains(SetupFlows.CreateAccountFlow)
+                syncSetupRecoverData.isEnabled = !viewState.disabledSetupFlows.contains(SetupFlows.SignInFlow)
             }
         }
+    }
 
-        syncedDevicesAdapter.updateData(viewState.syncedDevices)
+    private fun authenticate(onSuccess: () -> Unit) {
+        if (deviceAuthenticator.hasValidDeviceAuthentication()) {
+            deviceAuthenticator.authenticate(config = AuthConfiguration(), fragmentActivity = this) {
+                when (it) {
+                    Success -> onSuccess()
+                    else -> { }
+                }
+            }
+        } else {
+            onSuccess()
+        }
     }
 }

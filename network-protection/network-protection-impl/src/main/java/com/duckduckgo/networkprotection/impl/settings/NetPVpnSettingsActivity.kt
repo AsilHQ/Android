@@ -27,18 +27,21 @@ import com.duckduckgo.common.ui.DuckDuckGoActivity
 import com.duckduckgo.common.ui.viewbinding.viewBinding
 import com.duckduckgo.common.utils.extensions.launchAlwaysOnSystemSettings
 import com.duckduckgo.common.utils.extensions.launchIgnoreBatteryOptimizationSettings
+import com.duckduckgo.common.utils.plugins.PluginPoint
 import com.duckduckgo.di.scopes.ActivityScope
 import com.duckduckgo.navigation.api.GlobalActivityStarter
 import com.duckduckgo.networkprotection.impl.R
 import com.duckduckgo.networkprotection.impl.databinding.ActivityNetpVpnSettingsBinding
 import com.duckduckgo.networkprotection.impl.settings.NetPVpnSettingsViewModel.RecommendedSettings
 import com.duckduckgo.networkprotection.impl.settings.NetPVpnSettingsViewModel.ViewState
-import com.duckduckgo.networkprotection.impl.settings.geoswitching.NetpGeoswitchingScreenNoParams
 import javax.inject.Inject
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-@InjectWith(ActivityScope::class)
+@InjectWith(
+    scope = ActivityScope::class,
+    delayGeneration = true, // VpnSettingPlugin can be contributed from other modules
+)
 @ContributeToActivityStarter(NetPVpnSettingsScreenNoParams::class)
 class NetPVpnSettingsActivity : DuckDuckGoActivity() {
 
@@ -47,6 +50,9 @@ class NetPVpnSettingsActivity : DuckDuckGoActivity() {
 
     @Inject
     lateinit var globalActivityStarter: GlobalActivityStarter
+
+    @Inject
+    lateinit var vpnRemoteSettings: PluginPoint<VpnSettingPlugin>
 
     private val binding: ActivityNetpVpnSettingsBinding by viewBinding()
     private val viewModel: NetPVpnSettingsViewModel by bindViewModel()
@@ -57,6 +63,7 @@ class NetPVpnSettingsActivity : DuckDuckGoActivity() {
         setupToolbar(binding.toolbar)
 
         setupUiElements()
+        setupRemoteSettings()
         observeViewModel()
 
         lifecycle.addObserver(viewModel)
@@ -97,8 +104,6 @@ class NetPVpnSettingsActivity : DuckDuckGoActivity() {
     }
 
     private fun renderViewState(viewState: ViewState) {
-        val geoSwitchingSubtitle = viewState.preferredLocation ?: getString(R.string.netpVpnSettingGeoswitchingDefault)
-        binding.geoswitching.setSecondaryText(geoSwitchingSubtitle)
         binding.excludeLocalNetworks.quietlySetIsChecked(viewState.excludeLocalNetworks) { _, isChecked ->
             viewModel.onExcludeLocalRoutes(isChecked)
         }
@@ -108,17 +113,26 @@ class NetPVpnSettingsActivity : DuckDuckGoActivity() {
     }
 
     private fun setupUiElements() {
+        binding.vpnNotifications.setClickListener {
+            globalActivityStarter.start(this, NetPNotificationSettingsScreenNoParams)
+        }
+
         binding.excludeLocalNetworks.setOnCheckedChangeListener { _, isChecked ->
             viewModel.onExcludeLocalRoutes(isChecked)
         }
 
         binding.alwaysOn.setOnClickListener {
-            this.launchAlwaysOnSystemSettings(appBuildConfig.sdkInt)
+            this.launchAlwaysOnSystemSettings()
         }
+    }
 
-        binding.geoswitching.setOnClickListener {
-            globalActivityStarter.start(this, NetpGeoswitchingScreenNoParams)
-        }
+    private fun setupRemoteSettings() {
+        vpnRemoteSettings.getPlugins()
+            .map { it.getView(this) }
+            .filterNotNull()
+            .forEach { remoteViewPlugin ->
+                binding.vpnSettingsContent.addView(remoteViewPlugin)
+            }
     }
 }
 

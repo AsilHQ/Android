@@ -6,7 +6,9 @@ import com.duckduckgo.subscriptions.impl.Subscription
 import com.duckduckgo.subscriptions.impl.SubscriptionStatus.AutoRenewable
 import com.duckduckgo.subscriptions.impl.SubscriptionsConstants
 import com.duckduckgo.subscriptions.impl.SubscriptionsManager
+import com.duckduckgo.subscriptions.impl.pixels.SubscriptionPixelSender
 import com.duckduckgo.subscriptions.impl.ui.SubscriptionSettingsViewModel.Command.FinishSignOut
+import com.duckduckgo.subscriptions.impl.ui.SubscriptionSettingsViewModel.Command.GoToPortal
 import com.duckduckgo.subscriptions.impl.ui.SubscriptionSettingsViewModel.SubscriptionDuration.Monthly
 import com.duckduckgo.subscriptions.impl.ui.SubscriptionSettingsViewModel.SubscriptionDuration.Yearly
 import kotlinx.coroutines.test.runTest
@@ -15,6 +17,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 class SubscriptionSettingsViewModelTest {
@@ -23,11 +26,12 @@ class SubscriptionSettingsViewModelTest {
     val coroutineTestRule: CoroutineTestRule = CoroutineTestRule()
 
     private val subscriptionsManager: SubscriptionsManager = mock()
+    private val pixelSender: SubscriptionPixelSender = mock()
     private lateinit var viewModel: SubscriptionSettingsViewModel
 
     @Before
     fun before() {
-        viewModel = SubscriptionSettingsViewModel(subscriptionsManager, coroutineTestRule.testDispatcherProvider)
+        viewModel = SubscriptionSettingsViewModel(subscriptionsManager, coroutineTestRule.testDispatcherProvider, pixelSender)
     }
 
     @Test
@@ -46,6 +50,7 @@ class SubscriptionSettingsViewModelTest {
                 startedAt = 1234,
                 expiresOrRenewsAt = 1701694623000,
                 status = AutoRenewable,
+                platform = "android",
             ),
         )
 
@@ -63,6 +68,7 @@ class SubscriptionSettingsViewModelTest {
                 startedAt = 1234,
                 expiresOrRenewsAt = 1701694623000,
                 status = AutoRenewable,
+                platform = "android",
             ),
         )
 
@@ -80,6 +86,7 @@ class SubscriptionSettingsViewModelTest {
                 startedAt = 1234,
                 expiresOrRenewsAt = 1701694623000,
                 status = AutoRenewable,
+                platform = "android",
             ),
         )
 
@@ -87,5 +94,34 @@ class SubscriptionSettingsViewModelTest {
         viewModel.viewState.test {
             assertEquals(Yearly, awaitItem().duration)
         }
+    }
+
+    @Test
+    fun whenGoToStripeIfNoUrlThenDoNothing() = runTest {
+        whenever(subscriptionsManager.getPortalUrl()).thenReturn(null)
+
+        viewModel.commands().test {
+            viewModel.goToStripe()
+            expectNoEvents()
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenGoToStripeIfNoUrlThenDoSendCommandWithUrl() = runTest {
+        whenever(subscriptionsManager.getPortalUrl()).thenReturn("example.com")
+
+        viewModel.commands().test {
+            viewModel.goToStripe()
+            val value = awaitItem() as GoToPortal
+            assertEquals("example.com", value.url)
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenRemoveFromDeviceThenPixelIsSent() = runTest {
+        viewModel.removeFromDevice()
+        verify(pixelSender).reportSubscriptionSettingsRemoveFromDeviceClick()
     }
 }

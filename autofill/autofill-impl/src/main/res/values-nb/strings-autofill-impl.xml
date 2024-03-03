@@ -116,7 +116,7 @@
     <string name="autofillManagementScreenTitle">Passord</string>
     <string name="credentialManagementNoLoginsSavedTitle">Ingen passord er lagret ennå</string>
     <string name="credentialManagementAutofillToggleLabel">Lagre og fyll ut passord automatisk</string>
-    <string name="credentialManagementAutofillToggleSubtitle">Passord lagres på enheten din på en sikker måte.</string>
+    <string name="credentialManagementAutofillToggleSubtitle">Passord lagres på enheten din på en sikker måte</string>
     <string name="saveLoginDialogSubtitle">Passord lagres på enheten din på en sikker måte.</string>
     <string name="autofillManagementAddLogin">Legg til passord</string>
     <string name="credentialManagementEditLoginTitleHint">Tittel</string>
@@ -132,5 +132,32 @@
     <string name="managementDisabledModeTitle">Sikre enheten din for å lagre passord</string>
     <string name="managementDisabledModeSubtitle">Det kreves et låsemønster, en PIN-kode eller biometri for å beskytte passordene dine.</string>
     <string name="credentialManagementEditTitle">Rediger passordet</string>
+
+    <string name="credentials_limit_warning"><b>Synkronisering er satt på pause</b>\nGrensen for pålogginger er overskredet. Slett noen for å gjenoppta synkroniseringen.\n\n<annotation type="manage_logins">Administrer pålogginger</annotation></string>
+    <string name="credentials_limit_warning_notif"><b>Synkronisering av passord er satt på pause</b>\nDu har overskredet grensen for passordsynkronisering. Prøv å slette noen passord. Inntil dette er løst, blir ikke passordene sikkerhetskopiert.</string>
+
+    <string name="saveLoginDialogNeverForThisSite">Aldri spør for dette nettstedet</string>
+    <string name="credentialManagementInstructionNeverForThisSite">Hvis du tilbakestiller ekskluderte nettsteder, blir du bedt om å lagre passordet ditt neste gang du logger på disse nettstedene.</string>
+    <string name="credentialManagementClearNeverForThisSiteList">Tilbakestill ekskluderte nettsteder</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogTitle">Vil du tilbakestille ekskluderte nettsteder?</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogPositiveButton">Tilbakestill</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogNegativeButton">Avbryt</string>
+
+    <string name="credentialManagementDeleteAllPasswordsMenu">Slett alle passord</string>
+    <plurals name="credentialManagementDeleteAllPasswordsConfirmationTitle" instruction="Placeholder is a number representing how many passwords will be deleted">
+        <item quantity="one">Er du sikker på at du vil slette %1$d passord?</item>
+        <item quantity="other">Er du sikker på at du vil slette %1$d passord?</item>
+    </plurals>
+
+    <string name="credentialManagementDeletePasswordConfirmationMessage">Passordet ditt blir slettet fra alle synkroniserte enheter. Sørg for at du fortsatt har tilgang til kontoen din.</string>
+    <string name="credentialManagementDeleteAllPasswordsConfirmationMessage">Passordene dine slettes fra alle synkroniserte enheter. Sørg for at du fortsatt har tilgang til kontoene dine.</string>
+
+    <plurals name="credentialManagementDeleteAllPasswordsSnackbarConfirmation" instruction="Placeholder is a number representing how many passwords were deleted">
+        <item quantity="one">%1$d passord er slettet</item>
+        <item quantity="other">%1$d passord er slettet</item>
+    </plurals>
+
+    <string name="autofill_auth_text_for_delete_all">Godkjenn for å bekrefte at du vil slette alle passord</string>
+    <string name="autofill_title_text_for_delete_all">Slett alle passord</string>
 
 </resources>

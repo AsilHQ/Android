@@ -18,6 +18,10 @@ package com.duckduckgo.app.statistics.pixels
 
 import android.annotation.SuppressLint
 import com.duckduckgo.app.statistics.api.PixelSender
+import com.duckduckgo.app.statistics.api.PixelSender.SendPixelResult.PIXEL_IGNORED
+import com.duckduckgo.app.statistics.api.PixelSender.SendPixelResult.PIXEL_SENT
+import com.duckduckgo.app.statistics.pixels.Pixel.PixelType
+import com.duckduckgo.app.statistics.pixels.Pixel.PixelType.COUNT
 import com.duckduckgo.di.scopes.AppScope
 import com.squareup.anvil.annotations.ContributesBinding
 import io.reactivex.schedulers.Schedulers
@@ -31,7 +35,6 @@ interface Pixel {
     }
 
     enum class StatisticsPixelName(override val pixelName: String) : PixelName {
-        APPLICATION_CRASH_GLOBAL("m_d_ac_g"),
         BROWSER_DAILY_ACTIVE_FEATURE_STATE("m_browser_feature_daily_active_user_d"),
     }
 
@@ -84,16 +87,36 @@ interface Pixel {
         const val FIRE_ANIMATION_NONE = "fann"
     }
 
+    enum class PixelType {
+
+        /**
+         * Pixel is a every-occurrence pixel. Sent every time fire() is invoked.
+         */
+        COUNT,
+
+        /**
+         * Pixel is a first-in-day pixel. Subsequent attempts to fire such pixel on a given calendar day (UTC) will be ignored.
+         */
+        DAILY,
+
+        /**
+         * Pixel is a once-ever pixel. Subsequent attempts to fire such pixel will be ignored.
+         */
+        UNIQUE,
+    }
+
     fun fire(
         pixel: PixelName,
         parameters: Map<String, String> = emptyMap(),
         encodedParameters: Map<String, String> = emptyMap(),
+        type: PixelType = COUNT,
     )
 
     fun fire(
         pixelName: String,
         parameters: Map<String, String> = emptyMap(),
         encodedParameters: Map<String, String> = emptyMap(),
+        type: PixelType = COUNT,
     )
 
     fun enqueueFire(
@@ -117,8 +140,9 @@ class RxBasedPixel @Inject constructor(
         pixel: Pixel.PixelName,
         parameters: Map<String, String>,
         encodedParameters: Map<String, String>,
+        type: PixelType,
     ) {
-        fire(pixel.pixelName, parameters, encodedParameters)
+        fire(pixel.pixelName, parameters, encodedParameters, type)
     }
 
     @SuppressLint("CheckResult")
@@ -126,12 +150,18 @@ class RxBasedPixel @Inject constructor(
         pixelName: String,
         parameters: Map<String, String>,
         encodedParameters: Map<String, String>,
+        type: PixelType,
     ) {
         pixelSender
-            .sendPixel(pixelName, parameters, encodedParameters)
+            .sendPixel(pixelName, parameters, encodedParameters, type)
             .subscribeOn(Schedulers.io())
             .subscribe(
-                { Timber.v("Pixel sent: $pixelName with params: $parameters $encodedParameters") },
+                { result ->
+                    when (result) {
+                        PIXEL_SENT -> Timber.v("Pixel sent: $pixelName with params: $parameters $encodedParameters")
+                        PIXEL_IGNORED -> Timber.v("Pixel ignored: $pixelName with params: $parameters $encodedParameters")
+                    }
+                },
                 {
                     Timber.w(
                         it,

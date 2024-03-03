@@ -116,7 +116,7 @@
     <string name="autofillManagementScreenTitle">Passwords</string>
     <string name="credentialManagementNoLoginsSavedTitle">No passwords saved yet</string>
     <string name="credentialManagementAutofillToggleLabel">Save and autofill passwords</string>
-    <string name="credentialManagementAutofillToggleSubtitle">Passwords are stored securely on your device.</string>
+    <string name="credentialManagementAutofillToggleSubtitle">Passwords are stored securely on your device</string>
     <string name="saveLoginDialogSubtitle">Passwords are stored securely on your device.</string>
     <string name="autofillManagementAddLogin">Add Password</string>
     <string name="credentialManagementEditLoginTitleHint">Title</string>
@@ -132,5 +132,31 @@
     <string name="managementDisabledModeTitle">Secure your device to save passwords</string>
     <string name="managementDisabledModeSubtitle">A device lock pattern, PIN, or biometrics is required to protect your passwords.</string>
     <string name="credentialManagementEditTitle">Edit Password</string>
+
+    <string name="credentials_limit_warning"><b>Sync Paused</b>\nLogins limit exceeded. Delete some to resume syncing.\n\n<annotation type="manage_logins">Manage Logins</annotation></string>
+    <string name="credentials_limit_warning_notif"><b>Passwords Sync is Paused</b>\nYou have exceeded the passwords sync limit. Try deleting some passwords. Until this is resolved your passwords will not be backed up.</string>
+
+    <string name="saveLoginDialogNeverForThisSite">Never Ask for This Site</string>
+    <string name="credentialManagementInstructionNeverForThisSite">If you reset excluded sites, you will be prompted to save your password next time you sign in to any of these sites.</string>
+    <string name="credentialManagementClearNeverForThisSiteList">Reset Excluded Sites</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogTitle">Reset Excluded Sites?</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogPositiveButton">Reset</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogNegativeButton">Cancel</string>
+
+    <string name="credentialManagementDeleteAllPasswordsMenu">Delete All Passwords</string>
+    <plurals name="credentialManagementDeleteAllPasswordsConfirmationTitle" instruction="Placeholder is a number representing how many passwords will be deleted">
+        <item quantity="other">Are you sure you want to delete %1$d passwords?</item>
+    </plurals>
+
+    <string name="credentialManagementDeletePasswordConfirmationMessage">Your password will be deleted from all synced devices. Make sure you still have a way to access your account.</string>
+    <string name="credentialManagementDeleteAllPasswordsConfirmationMessage">Your passwords will be deleted from all synced devices. Make sure you still have a way to access your accounts.</string>
+
+    <plurals name="credentialManagementDeleteAllPasswordsSnackbarConfirmation" instruction="Placeholder is a number representing how many passwords were deleted">
+        <item quantity="one">%1$d password deleted</item>
+        <item quantity="other">%1$d passwords deleted</item>
+    </plurals>
+
+    <string name="autofill_auth_text_for_delete_all">Authenticate to confirm you want to delete all passwords</string>
+    <string name="autofill_title_text_for_delete_all">Delete All Passwords</string>
 
 </resources>

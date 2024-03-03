@@ -53,6 +53,15 @@ interface SecureStorage {
     ): WebsiteLoginDetailsWithCredentials?
 
     /**
+     * This method adds a list of raw plaintext [WebsiteLoginDetailsWithCredentials] into the [SecureStorage].
+     * If [canAccessSecureStorage] is false when this is invoked, nothing will be done.
+     *
+     * @throws [SecureStorageException] if something went wrong while trying to perform the action. See type to get more info on the cause.
+     */
+    @Throws(SecureStorageException::class)
+    suspend fun addWebsiteLoginDetailsWithCredentials(credentials: List<WebsiteLoginDetailsWithCredentials>)
+
+    /**
      * This method returns all [WebsiteLoginDetails] with the [domain] stored in the [SecureStorage].
      * Only L1 encrypted data is returned by these function. This is best use when the need is only to access non-sensitive data.
      * If [canAccessSecureStorage] is false when this is invoked, an empty flow will be emitted.
@@ -122,6 +131,32 @@ interface SecureStorage {
      * If [canAccessSecureStorage] is false when this is invoked, nothing will be done.
      */
     suspend fun deleteWebsiteLoginDetailsWithCredentials(id: Long)
+
+    /**
+     * This method removes all existing [WebsiteLoginDetailsWithCredentials] with the given [ids] from the [SecureStorage].
+     * If [canAccessSecureStorage] is false when this is invoked, nothing will be done.
+     */
+    suspend fun deleteWebSiteLoginDetailsWithCredentials(ids: List<Long>)
+
+    /**
+     * Adds a [domain] to the list of sites for which we'll never ask to save credentials for.
+     */
+    suspend fun addToNeverSaveList(domain: String)
+
+    /**
+     * Checks if a [domain] is in the list of sites for which we'll never ask to save credentials for.
+     */
+    suspend fun isInNeverSaveList(domain: String): Boolean
+
+    /**
+     * Clears the list of sites for which we'll never ask to save credentials for.
+     */
+    suspend fun clearNeverSaveList()
+
+    /**
+     * Returns the number of sites for which we'll never ask to save credentials for.
+     */
+    suspend fun neverSaveListCount(): Flow<Int>
 }
 
 @ContributesBinding(AppScope::class)
@@ -144,6 +179,13 @@ class RealSecureStorage @Inject constructor(
         return withContext(dispatchers.io()) {
             val savedCredential = secureStorageRepository?.addWebsiteLoginCredential(websiteLoginDetailsWithCredentials.toDataEntity())
             return@withContext savedCredential?.toCredentials()
+        }
+    }
+
+    @Throws(SecureStorageException::class)
+    override suspend fun addWebsiteLoginDetailsWithCredentials(credentials: List<WebsiteLoginDetailsWithCredentials>) {
+        withContext(dispatchers.io()) {
+            secureStorageRepository?.addWebsiteLoginCredentials(credentials.map { it.toDataEntity() })
         }
     }
 
@@ -217,6 +259,36 @@ class RealSecureStorage @Inject constructor(
             secureStorageRepository?.deleteWebsiteLoginCredentials(id)
         }
 
+    override suspend fun deleteWebSiteLoginDetailsWithCredentials(ids: List<Long>) {
+        return withContext(dispatchers.io()) {
+            secureStorageRepository?.deleteWebsiteLoginCredentials(ids)
+        }
+    }
+
+    override suspend fun addToNeverSaveList(domain: String) {
+        withContext(dispatchers.io()) {
+            secureStorageRepository?.addToNeverSaveList(domain)
+        }
+    }
+
+    override suspend fun clearNeverSaveList() {
+        withContext(dispatchers.io()) {
+            secureStorageRepository?.clearNeverSaveList()
+        }
+    }
+
+    override suspend fun neverSaveListCount(): Flow<Int> {
+        return withContext(dispatchers.io()) {
+            secureStorageRepository?.neverSaveListCount() ?: flowOf(0)
+        }
+    }
+
+    override suspend fun isInNeverSaveList(domain: String): Boolean {
+        return withContext(dispatchers.io()) {
+            secureStorageRepository?.isInNeverSaveList(domain) ?: false
+        }
+    }
+
     private fun WebsiteLoginDetailsWithCredentials.toDataEntity(): WebsiteLoginCredentialsEntity {
         val encryptedPassword = encryptData(password)
         val encryptedNotes = encryptData(notes)
@@ -230,6 +302,7 @@ class RealSecureStorage @Inject constructor(
             notesIv = encryptedNotes?.iv,
             domainTitle = details.domainTitle,
             lastUpdatedInMillis = details.lastUpdatedMillis,
+            lastUsedInMillis = details.lastUsedInMillis,
         )
     }
 
@@ -247,6 +320,7 @@ class RealSecureStorage @Inject constructor(
             id = id,
             domainTitle = domainTitle,
             lastUpdatedMillis = lastUpdatedInMillis,
+            lastUsedInMillis = lastUsedInMillis,
         )
 
     // only encrypt when there's data

@@ -26,6 +26,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.duckduckgo.app.bookmarks.db.*
 import com.duckduckgo.app.browser.cookies.db.AuthCookieAllowedDomainEntity
 import com.duckduckgo.app.browser.cookies.db.AuthCookiesAllowedDomainsDao
+import com.duckduckgo.app.browser.pageloadpixel.PageLoadedPixelDao
+import com.duckduckgo.app.browser.pageloadpixel.PageLoadedPixelEntity
 import com.duckduckgo.app.browser.rating.db.*
 import com.duckduckgo.app.cta.db.DismissedCtaDao
 import com.duckduckgo.app.cta.model.DismissedCta
@@ -66,7 +68,7 @@ import com.duckduckgo.savedsites.store.SavedSitesRelationsDao
 
 @Database(
     exportSchema = true,
-    version = 49,
+    version = 52,
     entities = [
         TdsTracker::class,
         TdsEntity::class,
@@ -93,6 +95,7 @@ import com.duckduckgo.savedsites.store.SavedSitesRelationsDao
         UserEventEntity::class,
         LocationPermissionEntity::class,
         PixelEntity::class,
+        PageLoadedPixelEntity::class,
         WebTrackerBlocked::class,
         AuthCookieAllowedDomainEntity::class,
         Entity::class,
@@ -139,6 +142,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun locationPermissionsDao(): LocationPermissionsDao
     abstract fun userEventsDao(): UserEventsDao
     abstract fun pixelDao(): PendingPixelDao
+
+    abstract fun pageLoadedPixelDao(): PageLoadedPixelDao
     abstract fun authCookiesAllowedDomainsDao(): AuthCookiesAllowedDomainsDao
     abstract fun webTrackersBlockedDao(): WebTrackersBlockedDao
 
@@ -615,6 +620,27 @@ class MigrationsProvider(val context: Context, val settingsDataStore: SettingsDa
         }
     }
 
+    private val MIGRATION_49_TO_50: Migration = object : Migration(49, 50) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL(
+                "CREATE TABLE IF NOT EXISTS `page_loaded_pixel_entity` (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "appVersion TEXT NOT NULL, elapsedTime INTEGER NOT NULL, webviewVersion TEXT NOT NULL)",
+            )
+        }
+    }
+
+    private val MIGRATION_50_TO_51: Migration = object : Migration(50, 51) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE `page_loaded_pixel_entity` ADD COLUMN `trackerOptimizationEnabled` INTEGER NOT NULL DEFAULT 0")
+        }
+    }
+
+    private val MIGRATION_51_TO_52: Migration = object : Migration(51, 52) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE `page_loaded_pixel_entity` ADD COLUMN `cpmEnabled` INTEGER NOT NULL DEFAULT 0")
+        }
+    }
+
     val BOOKMARKS_DB_ON_CREATE = object : RoomDatabase.Callback() {
         override fun onCreate(database: SupportSQLiteDatabase) {
             database.execSQL(
@@ -689,6 +715,9 @@ class MigrationsProvider(val context: Context, val settingsDataStore: SettingsDa
             MIGRATION_46_TO_47,
             MIGRATION_47_TO_48,
             MIGRATION_48_TO_49,
+            MIGRATION_49_TO_50,
+            MIGRATION_50_TO_51,
+            MIGRATION_51_TO_52,
         )
 
     @Deprecated(

@@ -17,7 +17,7 @@
 package com.duckduckgo.sync.impl.ui
 
 import android.content.Context
-import android.graphics.Bitmap
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.duckduckgo.anvil.annotations.ContributesViewModel
@@ -28,12 +28,16 @@ import com.duckduckgo.sync.api.SyncStateMonitor
 import com.duckduckgo.sync.api.engine.SyncEngine
 import com.duckduckgo.sync.api.engine.SyncEngine.SyncTrigger.FEATURE_READ
 import com.duckduckgo.sync.impl.ConnectedDevice
-import com.duckduckgo.sync.impl.QREncoder
 import com.duckduckgo.sync.impl.R
 import com.duckduckgo.sync.impl.RecoveryCodePDF
 import com.duckduckgo.sync.impl.Result.Error
 import com.duckduckgo.sync.impl.Result.Success
 import com.duckduckgo.sync.impl.SyncAccountRepository
+import com.duckduckgo.sync.impl.SyncFeatureToggle
+import com.duckduckgo.sync.impl.onFailure
+import com.duckduckgo.sync.impl.onSuccess
+import com.duckduckgo.sync.impl.pixels.SyncAccountOperation
+import com.duckduckgo.sync.impl.pixels.SyncPixels
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.AskDeleteAccount
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.AskEditDevice
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.AskRemoveDevice
@@ -41,9 +45,11 @@ import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.AskTurnOffSync
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.CheckIfUserHasStoragePermission
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.IntroCreateAccount
 import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.RecoveryCodePDFSuccess
-import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.ShowRecoveryCode
+import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.ShowDeviceUnsupported
+import com.duckduckgo.sync.impl.ui.SyncActivityViewModel.Command.ShowError
 import com.duckduckgo.sync.impl.ui.SyncDeviceListItem.LoadingItem
 import com.duckduckgo.sync.impl.ui.SyncDeviceListItem.SyncedDevice
+import com.duckduckgo.sync.impl.ui.setup.SaveRecoveryCodeViewModel.Command
 import java.io.File
 import javax.inject.*
 import kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST
@@ -60,17 +66,20 @@ import kotlinx.coroutines.withContext
 
 @ContributesViewModel(ActivityScope::class)
 class SyncActivityViewModel @Inject constructor(
-    private val qrEncoder: QREncoder,
     private val recoveryCodePDF: RecoveryCodePDF,
     private val syncAccountRepository: SyncAccountRepository,
     private val syncStateMonitor: SyncStateMonitor,
     private val syncEngine: SyncEngine,
     private val dispatchers: DispatcherProvider,
+    private val syncFeatureToggle: SyncFeatureToggle,
+    private val syncPixels: SyncPixels,
 ) : ViewModel() {
 
     private val command = Channel<Command>(1, DROP_OLDEST)
     private val viewState = MutableStateFlow(ViewState())
-    fun commands(): Flow<Command> = command.receiveAsFlow()
+    fun commands(): Flow<Command> = command.receiveAsFlow().onStart {
+        checkIfDeviceSupported()
+    }
 
     fun viewState(): Flow<ViewState> =
         viewState.onStart {
@@ -93,12 +102,16 @@ class SyncActivityViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private suspend fun signedInState(): ViewState {
-        val qrBitmap = withContext(dispatchers.io()) {
-            val recoveryCode = syncAccountRepository.getRecoveryCode() ?: return@withContext null
-            qrEncoder.encodeAsBitmap(recoveryCode, R.dimen.qrSizeLarge, R.dimen.qrSizeLarge)
-        } ?: return signedOutState()
+    private suspend fun checkIfDeviceSupported() {
+        val isSupported = withContext(dispatchers.io()) {
+            syncAccountRepository.isSyncSupported()
+        }
+        if (!isSupported) {
+            command.send(ShowDeviceUnsupported)
+        }
+    }
 
+    private fun signedInState(): ViewState {
         val connectedDevices = viewState.value.syncedDevices
         val syncedDevices = connectedDevices.ifEmpty {
             val thisDevice = syncAccountRepository.getThisConnectedDevice() ?: return signedOutState()
@@ -107,8 +120,8 @@ class SyncActivityViewModel @Inject constructor(
 
         return ViewState(
             showAccount = syncAccountRepository.isSignedIn(),
-            loginQRCode = qrBitmap,
             syncedDevices = syncedDevices,
+            disabledSetupFlows = disabledSetupFlows(),
         )
     }
 
@@ -126,16 +139,20 @@ class SyncActivityViewModel @Inject constructor(
 
     data class ViewState(
         val showAccount: Boolean = false,
-        val loginQRCode: Bitmap? = null,
         val syncedDevices: List<SyncDeviceListItem> = emptyList(),
+        val disabledSetupFlows: List<SetupFlows> = emptyList(),
     )
+
+    sealed class SetupFlows {
+        data object SignInFlow : SetupFlows()
+        data object CreateAccountFlow : SetupFlows()
+    }
 
     sealed class Command {
         object SyncWithAnotherDevice : Command()
         object AddAnotherDevice : Command()
         object IntroCreateAccount : Command()
         object IntroRecoverSyncData : Command()
-        object ShowTextCode : Command()
         object ShowRecoveryCode : Command()
         data class AskTurnOffSync(val device: ConnectedDevice) : Command()
         object AskDeleteAccount : Command()
@@ -143,6 +160,8 @@ class SyncActivityViewModel @Inject constructor(
         data class RecoveryCodePDFSuccess(val recoveryCodePDFFile: File) : Command()
         data class AskRemoveDevice(val device: ConnectedDevice) : Command()
         data class AskEditDevice(val device: ConnectedDevice) : Command()
+        data class ShowError(@StringRes val message: Int, val reason: String = "") : Command()
+        object ShowDeviceUnsupported : Command()
     }
 
     fun onSyncWithAnotherDevice() {
@@ -183,12 +202,6 @@ class SyncActivityViewModel @Inject constructor(
         }
     }
 
-    fun onShowTextCodeClicked() {
-        viewModelScope.launch {
-            command.send(Command.ShowTextCode)
-        }
-    }
-
     private suspend fun fetchRemoteDevices() {
         viewState.value = viewState.value.showDeviceListItemLoading()
         val result = withContext(dispatchers.io()) {
@@ -205,9 +218,10 @@ class SyncActivityViewModel @Inject constructor(
     fun onTurnOffSyncConfirmed(connectedDevice: ConnectedDevice) {
         viewModelScope.launch(dispatchers.io()) {
             viewState.value = viewState.value.hideAccount()
-            when (syncAccountRepository.logout(connectedDevice.deviceId)) {
+            when (val result = syncAccountRepository.logout(connectedDevice.deviceId)) {
                 is Error -> {
                     viewState.value = viewState.value.showAccount()
+                    command.send(ShowError(R.string.sync_turn_off_error, result.reason))
                 }
 
                 is Success -> {
@@ -234,9 +248,10 @@ class SyncActivityViewModel @Inject constructor(
     fun onDeleteAccountConfirmed() {
         viewModelScope.launch(dispatchers.io()) {
             viewState.value = viewState.value.hideAccount()
-            when (syncAccountRepository.deleteAccount()) {
+            when (val result = syncAccountRepository.deleteAccount()) {
                 is Error -> {
                     viewState.value = viewState.value.showAccount()
+                    command.send(ShowError(R.string.sync_turn_off_error, result.reason))
                 }
 
                 is Success -> {
@@ -258,9 +273,18 @@ class SyncActivityViewModel @Inject constructor(
 
     fun generateRecoveryCode(viewContext: Context) {
         viewModelScope.launch(dispatchers.io()) {
-            val recoveryCodeB64 = syncAccountRepository.getRecoveryCode() ?: return@launch
-            val generateRecoveryCodePDF = recoveryCodePDF.generateAndStoreRecoveryCodePDF(viewContext, recoveryCodeB64)
-            command.send(RecoveryCodePDFSuccess(generateRecoveryCodePDF))
+            syncAccountRepository.getRecoveryCode().onSuccess { recoveryCodeB64 ->
+                kotlin.runCatching {
+                    recoveryCodePDF.generateAndStoreRecoveryCodePDF(viewContext, recoveryCodeB64)
+                }.onSuccess { generateRecoveryCodePDF ->
+                    command.send(RecoveryCodePDFSuccess(generateRecoveryCodePDF))
+                }.onFailure {
+                    syncPixels.fireSyncAccountErrorPixel(Error(reason = it.message.toString()), type = SyncAccountOperation.CREATE_PDF)
+                    command.send(ShowError(R.string.sync_recovery_pdf_error))
+                }
+            }.onFailure {
+                command.send(ShowError(R.string.sync_recovery_pdf_error))
+            }
         }
     }
 
@@ -280,9 +304,10 @@ class SyncActivityViewModel @Inject constructor(
         viewModelScope.launch(dispatchers.io()) {
             val oldList = viewState.value.syncedDevices
             viewState.value = viewState.value.showDeviceListItemLoading(device)
-            when (syncAccountRepository.logout(device.deviceId)) {
+            when (val result = syncAccountRepository.logout(device.deviceId)) {
                 is Error -> {
                     viewState.value = viewState.value.setDevices(oldList)
+                    command.send(ShowError(R.string.sync_remove_device_error, result.reason))
                 }
 
                 is Success -> fetchRemoteDevices()
@@ -294,9 +319,10 @@ class SyncActivityViewModel @Inject constructor(
         viewModelScope.launch(dispatchers.io()) {
             val oldList = viewState.value.syncedDevices
             viewState.value = viewState.value.showDeviceListItemLoading(editedConnectedDevice)
-            when (syncAccountRepository.renameDevice(editedConnectedDevice)) {
+            when (val result = syncAccountRepository.renameDevice(editedConnectedDevice)) {
                 is Error -> {
                     viewState.value = viewState.value.setDevices(oldList)
+                    command.send(ShowError(R.string.sync_edit_device_error, result.reason))
                 }
 
                 is Success -> fetchRemoteDevices()
@@ -320,7 +346,15 @@ class SyncActivityViewModel @Inject constructor(
         }
     }
 
-    private fun signedOutState(): ViewState = ViewState()
+    private fun disabledSetupFlows(): List<SetupFlows> {
+        if (!syncFeatureToggle.allowSetupFlows()) return listOf(SetupFlows.SignInFlow, SetupFlows.CreateAccountFlow)
+        if (!syncFeatureToggle.allowCreateAccount()) return listOf(SetupFlows.CreateAccountFlow)
+        return emptyList()
+    }
+
+    private fun signedOutState(): ViewState = ViewState(
+        disabledSetupFlows = disabledSetupFlows(),
+    )
     private fun ViewState.setDevices(devices: List<SyncDeviceListItem>) = copy(syncedDevices = devices)
     private fun ViewState.hideDeviceListItemLoading() = copy(syncedDevices = syncedDevices.filterNot { it is LoadingItem })
     private fun ViewState.showDeviceListItemLoading() = copy(syncedDevices = syncedDevices + LoadingItem)
