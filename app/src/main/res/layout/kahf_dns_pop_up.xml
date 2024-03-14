@@ -50,7 +50,7 @@
                 app:layout_constraintTop_toTopOf="@id/dns_pop_up_top_view"
                 app:layout_constraintBottom_toBottomOf="@id/dns_pop_up_top_view"
                 android:layout_marginStart="20dp"
-                android:src="@drawable/kahf_dns_icon"/>
+                android:src="@drawable/kahf_dns_black_logo"/>
 
             <TextView
                 android:id="@+id/kahf_dns_text_view"
