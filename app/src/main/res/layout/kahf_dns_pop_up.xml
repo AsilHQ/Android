@@ -101,7 +101,7 @@
                 app:switchTextAppearance="@style/SwitchTextAppearance"
                 app:thumbTint="#FFFFFF"
                 app:track="@drawable/track_selector"
-                app:trackTint="#C474FF" />
+                />
 
             <TextView
                 android:id="@+id/kahf_dns_state_text_view"
@@ -111,6 +111,7 @@
                 android:paddingBottom="0dp"
                 android:text="@string/kahf_dns_up"
                 android:textColor="@color/black"
+                android:textStyle="bold"
                 android:textFontWeight="700"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

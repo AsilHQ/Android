@@ -933,6 +933,7 @@ class BrowserTabFragment :
             val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             val switch = popupView.findViewById<SwitchCompat>(R.id.kahf_dns_toggle_button)
             val dnsText = popupView.findViewById<TextView>(R.id.kahf_dns_state_text_view)
+            val protectionTextView = popupView.findViewById<TextView>(R.id.verify_connection_text_view)
             val iconRect = Rect()
             kahfDnsdIcon.getGlobalVisibleRect(iconRect)
             val y = iconRect.top
@@ -951,6 +952,12 @@ class BrowserTabFragment :
                     newPopUpPosition,
                     (y + omnibar.toolbar.height) - 20,
                 )
+                protectionTextView.setOnClickListener {
+                    val url = "https://check.kahfdns.com"
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = Uri.parse(url)
+                    startActivity(intent)
+                }
                 val pointerArrow =
                     popupView.findViewById<ImageView>(R.id.pointer_arrow_kahf_dns_image_view)
                 val pointerArrowParams =
@@ -967,13 +974,9 @@ class BrowserTabFragment :
                     dnsText.text = resources.getString(string.kahf_dns_down)
                     switch.trackTintList = ColorStateList.valueOf(Color.WHITE)
                 }
-
+                handleTrackTint(switch.isChecked, switch)
                 switch.setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) {
-                        switch.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
-                    } else {
-                        switch.trackTintList = ColorStateList.valueOf(Color.WHITE)
-                    }
+                    handleTrackTint(isChecked, switch)
                     if (DnsOverVpnService.isVpnRunning(connectivityManager)){
                         disconnectVpn()
                         dnsText.text = resources.getString(string.kahf_dns_down)
@@ -987,6 +990,13 @@ class BrowserTabFragment :
     }
 
 
+    private fun handleTrackTint(isChecked: Boolean, switch: SwitchCompat){
+        if (isChecked) {
+            switch.trackTintList = ColorStateList.valueOf(0xFFC474FF.toInt())
+        } else {
+            switch.trackTintList = ColorStateList.valueOf(0xFFE1E1E1.toInt())
+        }
+    }
     @SuppressLint("SetJavaScriptEnabled")
     private fun prepareHeadlessKahfTubeWebView() {
         //showEmailAccessForKahfTubeDialog()
