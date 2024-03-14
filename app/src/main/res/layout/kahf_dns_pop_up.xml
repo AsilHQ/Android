@@ -19,7 +19,7 @@
         android:id="@+id/popupLayout"
         android:layout_width="275dp"
         android:layout_height="match_parent"
-        android:background="@drawable/safe_gaze_card_view_background"
+        android:background="@drawable/kahf_dns_pop_up_background"
         app:cardCornerRadius="10dp"
         app:cardElevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -32,24 +32,35 @@
             android:layout_height="match_parent"
             android:background="@drawable/safe_gaze_card_view_background">
 
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/kahf_dns_text_image_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/kahf_dns_toggle_button"
+                android:layout_marginTop="25dp"
+                android:src="@drawable/kahf_dns_text"/>
+
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/kahf_dns_toggle_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="50dp"
                 android:checked="true"
                 android:textAllCaps="false"
                 android:textSize="15sp"
+                android:layout_marginTop="25dp"
                 android:thumb="@drawable/thumb_selector"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/kahf_dns_text_image_view"
                 app:showText="false"
                 app:switchTextAppearance="@style/SwitchTextAppearance"
-                app:thumbTint="#E0E0E0"
+                app:thumbTint="#FFFFFF"
                 app:track="@drawable/track_selector"
-                app:trackTint="#11B9CD" />
+                app:trackTint="#C474FF" />
 
             <TextView
                 android:id="@+id/kahf_dns_state_text_view"
@@ -64,6 +75,20 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/kahf_dns_toggle_button" />
+            
+            <TextView
+                android:id="@+id/protected_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/kahf_dns_state_text_view"
+                android:textAlignment="center"
+                android:layout_marginTop="15dp"
+                android:textSize="11sp"
+                style="@style/Typography.DuckDuckGo.Body1.Bold"
+                android:textColor="@color/black"
+                android:text="@string/kahf_dns_protect_dummy_text"/>
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
