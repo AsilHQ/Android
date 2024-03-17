@@ -259,12 +259,16 @@ import com.duckduckgo.common.utils.CHECK_KAHF_DNS_URL
 import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.FragmentViewModelFactory
+import com.duckduckgo.common.utils.KAHF_BROWSER_URL
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
+import com.duckduckgo.common.utils.SAFE_GAZE_ALL_TIME_CENSORED_COUNT
 import com.duckduckgo.common.utils.SAFE_GAZE_AND_DNS_INIT
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_INTERFACE
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import com.duckduckgo.common.utils.SAFE_GAZE_REPORT_URL
+import com.duckduckgo.common.utils.SAFE_GAZE_SESSION_CENSORED_COUNT
+import com.duckduckgo.common.utils.SUPPORT_SAFE_GAZE_URL
 import com.duckduckgo.common.utils.extensions.dpToPx
 import com.duckduckgo.common.utils.extensions.html
 import com.duckduckgo.common.utils.extensions.websiteFromGeoLocationsApiOrigin
@@ -1094,26 +1098,24 @@ class BrowserTabFragment :
             shareCardImageView.setOnClickListener {
                 val shareIntent = Intent(Intent.ACTION_SEND)
                 shareIntent.type = "text/plain"
-                shareIntent.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=org.halalz.kahfbrowser")
+                shareIntent.putExtra(Intent.EXTRA_TEXT, KAHF_BROWSER_URL)
                 startActivity(Intent.createChooser(shareIntent, "Share via"))
             }
             handleProgressBar(view, blurImageView)
             loadImageWithBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0), blurImageView)
             reportTextViewOpen.setOnClickListener {
-                val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(SAFE_GAZE_REPORT_URL))
                 startActivity(intent)
             }
             supportThisProjectButton.setOnClickListener {
-                val url = "https://www.patreon.com/SafeGaze"
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(SUPPORT_SAFE_GAZE_URL))
                 if (intent.resolveActivity(requireActivity().packageManager) != null) {
                     startActivity(intent)
                 }
             }
             urlOpenTextView.text = viewModel.url
-            thisPageCounterTextView.text = sharedPreferences.getInt("session_censored_count", 0).toString()
-            lifetimeCounterTextView.text = sharedPreferences.getInt("all_time_censored_count", 0).toString()
+            thisPageCounterTextView.text = sharedPreferences.getInt(SAFE_GAZE_SESSION_CENSORED_COUNT, 0).toString()
+            lifetimeCounterTextView.text = sharedPreferences.getInt(SAFE_GAZE_ALL_TIME_CENSORED_COUNT, 0).toString()
 
             safeGazeOpenSwitchView.setOnCheckedChangeListener { _, _ ->
                 editor.putBoolean(SAFE_GAZE_ACTIVE, false)
