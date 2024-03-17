@@ -11,6 +11,7 @@ import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.duckduckgo.app.browser.DuckDuckGoWebView
 import com.duckduckgo.app.safegaze.ondeviceobjectdetection.ObjectDetectionHelper
+import com.duckduckgo.common.utils.SAFE_GAZE_ALL_TIME_CENSORED_COUNT
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import com.duckduckgo.common.utils.SAFE_GAZE_SESSION_CENSORED_COUNT
@@ -102,11 +103,11 @@ class SafeGazeJsInterface(
     }
 
     private fun saveAllTimeCounterValue(value: Int) {
-        preferences.edit().putInt(SAFE_GAZE_SESSION_CENSORED_COUNT, value).apply()
+        preferences.edit().putInt(SAFE_GAZE_ALL_TIME_CENSORED_COUNT, value).apply()
     }
 
     private fun getAllTimeCounter(): Int {
-        return preferences.getInt(SAFE_GAZE_SESSION_CENSORED_COUNT, 0)
+        return preferences.getInt(SAFE_GAZE_ALL_TIME_CENSORED_COUNT, 0)
     }
 
     private fun saveSessionCounterValue(value: Int) {
