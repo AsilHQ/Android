@@ -11,6 +11,7 @@ import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.duckduckgo.app.browser.DuckDuckGoWebView
 import com.duckduckgo.app.safegaze.ondeviceobjectdetection.ObjectDetectionHelper
+import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import com.duckduckgo.common.utils.SAFE_GAZE_SESSION_CENSORED_COUNT
 
@@ -71,7 +72,7 @@ class SafeGazeJsInterface(
 
     @JavascriptInterface
     fun sendMessage(message: String) {
-        updateBlur(preferences.getInt("safe_gaze_blur_progress", 0).toFloat())
+        updateBlur(preferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0).toFloat())
         if (message.startsWith("coreML/-/")){
             val parts = message.split("/-/")
             val imageUrl = if (parts.size >= 2) parts[1] else ""
