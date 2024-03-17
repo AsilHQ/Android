@@ -18,6 +18,7 @@ import com.duckduckgo.app.kahftube.SharedPreferenceManager
 import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
 import com.duckduckgo.app.kahftube.model.ChannelModel
 import com.duckduckgo.app.kahftube.utils.CustomDialog
+import com.duckduckgo.common.utils.KAHF_TUBE_INTERFACE
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import org.halalz.kahftube.extentions.desktopSite
@@ -196,7 +197,7 @@ class ProfilePageActivity : AppCompatActivity() {
                         }
                     },
                 ),
-                "KahfTubeInterface",
+                KAHF_TUBE_INTERFACE,
             )
             loadUrl("https://m.youtube.com/feed/channels")
         }
