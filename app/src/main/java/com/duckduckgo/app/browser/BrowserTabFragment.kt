@@ -70,7 +70,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.AnyThread
 import androidx.annotation.StringRes
-import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -130,6 +129,8 @@ import com.duckduckgo.app.browser.databinding.HttpAuthenticationBinding
 import com.duckduckgo.app.browser.databinding.IncludeOmnibarToolbarBinding
 import com.duckduckgo.app.browser.databinding.IncludeQuickAccessItemsBinding
 import com.duckduckgo.app.browser.databinding.PopupWindowBrowserMenuBinding
+import com.duckduckgo.app.browser.databinding.SafeGazePopUpCloseBinding
+import com.duckduckgo.app.browser.databinding.SafeGazePopUpOpenBinding
 import com.duckduckgo.app.browser.downloader.BlobConverterInjector
 import com.duckduckgo.app.browser.favicon.FaviconManager
 import com.duckduckgo.app.browser.favicon.setting.FaviconPromptSheet
@@ -1086,45 +1087,40 @@ class BrowserTabFragment :
     }
 
     private fun handleSafeGazeOpenView(view: View){
-        val thisPageCounter = view.findViewById<TextView>(R.id.this_page_counter_text_view)
-        val lifeTimeCounter = view.findViewById<TextView>(R.id.lifetime_counter_text_view)
-        val switch = view.findViewById<SwitchCompat>(R.id.safe_gaze_open_switch_view)
-        val urlTextView = view.findViewById<TextView>(R.id.url_open_text_view)
-        val supportButton = view.findViewById<AppCompatButton>(R.id.support_this_project_button)
-        val reportTextView = view.findViewById<TextView>(R.id.report_text_view_open)
-        val blurImageView = view.findViewById<AppCompatImageView>(R.id.blur_image_view)
-        val shareImageView = view.findViewById<AppCompatImageView>(R.id.share_card_view)
-        shareImageView.setOnClickListener {
-            val shareIntent = Intent(Intent.ACTION_SEND)
-            shareIntent.type = "text/plain"
-            shareIntent.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=org.halalz.kahfbrowser")
-            startActivity(Intent.createChooser(shareIntent, "Share via"))
-        }
-        handleProgressBar(view, blurImageView)
-        loadImageWithBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0), blurImageView)
-        reportTextView.setOnClickListener {
-            val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            startActivity(intent)
-        }
-        supportButton.setOnClickListener {
-            val url = "https://www.patreon.com/SafeGaze"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            if (intent.resolveActivity(requireActivity().packageManager) != null) {
+        val safeGazeOpenViewPopUpBinding = SafeGazePopUpOpenBinding.bind(view)
+        safeGazeOpenViewPopUpBinding.apply {
+            shareCardImageView.setOnClickListener {
+                val shareIntent = Intent(Intent.ACTION_SEND)
+                shareIntent.type = "text/plain"
+                shareIntent.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=org.halalz.kahfbrowser")
+                startActivity(Intent.createChooser(shareIntent, "Share via"))
+            }
+            handleProgressBar(view, blurImageView)
+            loadImageWithBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0), blurImageView)
+            reportTextViewOpen.setOnClickListener {
+                val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 startActivity(intent)
             }
-        }
-        urlTextView.text = viewModel.url
-        thisPageCounter.text = sharedPreferences.getInt("session_censored_count", 0).toString()
-        lifeTimeCounter.text = sharedPreferences.getInt("all_time_censored_count", 0).toString()
+            supportThisProjectButton.setOnClickListener {
+                val url = "https://www.patreon.com/SafeGaze"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                if (intent.resolveActivity(requireActivity().packageManager) != null) {
+                    startActivity(intent)
+                }
+            }
+            urlOpenTextView.text = viewModel.url
+            thisPageCounterTextView.text = sharedPreferences.getInt("session_censored_count", 0).toString()
+            lifetimeCounterTextView.text = sharedPreferences.getInt("all_time_censored_count", 0).toString()
 
-        switch.setOnCheckedChangeListener { _, _ ->
-            editor.putBoolean(SAFE_GAZE_ACTIVE, false)
-            editor.apply()
-            toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), VISIBLE)
-            toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), GONE)
-            switch.isChecked = true
-            webView?.reload()
+            safeGazeOpenSwitchView.setOnCheckedChangeListener { _, _ ->
+                editor.putBoolean(SAFE_GAZE_ACTIVE, false)
+                editor.apply()
+                toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), VISIBLE)
+                toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), GONE)
+                safeGazeOpenSwitchView.isChecked = true
+                webView?.reload()
+            }
         }
     }
 
@@ -1141,20 +1137,20 @@ class BrowserTabFragment :
     }
 
     private fun handleSafeGazeCloseView(view: View){
-        val safeGazeOpenImageView = view.findViewById<AppCompatImageView>(R.id.safe_gaze_on_image_view)
-        val urlTextView = view.findViewById<TextView>(R.id.url_text_view)
-        val reportTextView = view.findViewById<TextView>(R.id.report_text_view)
-        reportTextView.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(SAFE_GAZE_REPORT_URL))
-            startActivity(intent)
-        }
-        urlTextView.text = viewModel.url
-        safeGazeOpenImageView.setOnClickListener{
-            editor.putBoolean(SAFE_GAZE_ACTIVE, true)
-            editor.apply()
-            toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), VISIBLE)
-            toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), GONE)
-            webView?.reload()
+        val safeGazeOpenViewPopUpBinding = SafeGazePopUpCloseBinding.bind(view)
+        safeGazeOpenViewPopUpBinding.apply {
+            reportTextView.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(SAFE_GAZE_REPORT_URL))
+                startActivity(intent)
+            }
+            urlTextView.text = viewModel.url
+            safeGazeOnImageView.setOnClickListener{
+                editor.putBoolean(SAFE_GAZE_ACTIVE, true)
+                editor.apply()
+                toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), VISIBLE)
+                toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), GONE)
+                webView?.reload()
+            }
         }
     }
 
