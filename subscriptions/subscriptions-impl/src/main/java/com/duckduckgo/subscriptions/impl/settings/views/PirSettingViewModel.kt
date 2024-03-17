@@ -23,9 +23,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.duckduckgo.common.utils.DispatcherProvider
-import com.duckduckgo.subscriptions.impl.SubscriptionsManager
+import com.duckduckgo.subscriptions.api.Product.PIR
+import com.duckduckgo.subscriptions.api.Subscriptions
+import com.duckduckgo.subscriptions.api.Subscriptions.EntitlementStatus.Found
+import com.duckduckgo.subscriptions.api.Subscriptions.EntitlementStatus.NotFound
+import com.duckduckgo.subscriptions.impl.pixels.SubscriptionPixelSender
 import com.duckduckgo.subscriptions.impl.settings.views.PirSettingViewModel.Command.OpenPir
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -35,9 +40,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 @SuppressLint("NoLifecycleObserver") // we don't observe app lifecycle
-class PirSettingViewModel(
-    private val subscriptionsManager: SubscriptionsManager,
+class PirSettingViewModel @Inject constructor(
+    private val subscriptions: Subscriptions,
     private val dispatcherProvider: DispatcherProvider,
+    private val pixelSender: SubscriptionPixelSender,
 ) : ViewModel(), DefaultLifecycleObserver {
 
     sealed class Command {
@@ -52,14 +58,17 @@ class PirSettingViewModel(
     val viewState = _viewState.asStateFlow()
 
     fun onPir() {
+        pixelSender.reportAppSettingsPirClick()
         sendCommand(OpenPir)
     }
 
     override fun onResume(owner: LifecycleOwner) {
         super.onResume(owner)
         viewModelScope.launch(dispatcherProvider.io()) {
-            subscriptionsManager.hasSubscription.collect {
-                _viewState.emit(viewState.value.copy(hasSubscription = it))
+            subscriptions.getEntitlementStatus(PIR).also {
+                if (it.isSuccess) {
+                    _viewState.emit(viewState.value.copy(hasSubscription = it.getOrDefault(NotFound) == Found))
+                }
             }
         }
     }
@@ -72,13 +81,12 @@ class PirSettingViewModel(
 
     @Suppress("UNCHECKED_CAST")
     class Factory @Inject constructor(
-        private val subscriptionsManager: SubscriptionsManager,
-        private val dispatcherProvider: DispatcherProvider,
+        private val pirSettingViewModel: Provider<PirSettingViewModel>,
     ) : ViewModelProvider.NewInstanceFactory() {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return with(modelClass) {
                 when {
-                    isAssignableFrom(PirSettingViewModel::class.java) -> PirSettingViewModel(subscriptionsManager, dispatcherProvider)
+                    isAssignableFrom(PirSettingViewModel::class.java) -> pirSettingViewModel.get()
                     else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
                 }
             } as T

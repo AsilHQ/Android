@@ -496,7 +496,6 @@
     <string name="onboardingFeatureOptionOneClickDataClearing">Ühe klõpsuga kustutamine</string>
 
     <!-- Download Confirmation -->
-    <string name="downloadConfirmationContinue">Salvesta allalaadimistesse</string>
     <string name="downloadConfirmationSaveFileTitle" instruction="Placeholder is the name of a file">Salvesta %1$s</string>
     <string name="downloadConfirmationKeepBothFilesText">Jäta mõlemad alles</string>
     <string name="downloadConfirmationReplaceOldFileText">Asenda</string>
@@ -803,4 +802,22 @@
     <string name="safegaze_popup_takecontrol_title">Parandage oma veebikogemust SafeGaze\'iga, meie pildi puhastuslaiendiga, mis kaitseb teie nägemist sobimatu sisu eest.</string>
     <string name="safegaze_popup_turnon_title">Lülitage SafeGaze sisse</string>
 
+
+    <!-- Bookmarks -->
+    <string name="searchBookmarks">Otsi järjehoidjaid</string>
+    <string name="deleteFolder" instruction="%1$s is the folder name">"Kas kustutada %1$s?"</string>
+    <string name="deleteBookmark" instruction="%1$s is the bookmark name">"Kas kustutada järjehoidja %1$s?"</string>
+    <string name="bookmarkAddedInBookmarks" instruction="%1$s is the folder name">Järjehoidja lisati kausta %1$s</string>
+    <string name="addToFavorites">Lisa lemmikutesse</string>
+    <string name="editBookmark">Redigeeri järjehoidjat</string>
+    <string name="importBookmarksDescription">Kui sinu järjehoidjad on salvestatud mõnes teises brauseris,\nsaad need importida DuckDuckGosse.</string>
+    <string name="importBookmarks">Impordi järjehoidjaid</string>
+    <string name="noResultsFor" instruction="%1$s is the search term">Päringule „%1$s” ei leitud tulemusi</string>
+    <string name="removeFromFavorites">Eemalda lemmikutest</string>
+    <string name="addToFavoritesMenu">Lisa lemmikutesse</string>
+    <plurals name="bookmarkFolderDeleteMessage">
+        <item quantity="one">Kas soovid kindlasti kustutada selle kausta ja %1$d üksuse?</item>
+        <item quantity="other">Kas soovid kindlasti kustutada selle kausta ja %1$d üksust?</item>
+    </plurals>
+    <string name="deleteBookmarkConfirmationDescription" instruction="Placeholder is the name of the bookmark">Kas soovid järjehoidja &lt;b&gt;%1$s&lt;/b&gt; kindlasti kustutada?</string>
 </resources>

@@ -20,19 +20,25 @@ import app.cash.turbine.test
 import com.duckduckgo.app.browser.favicon.FaviconManager
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.app.statistics.pixels.Pixel.PixelName
+import com.duckduckgo.app.statistics.pixels.Pixel.PixelType.COUNT
 import com.duckduckgo.autofill.api.domain.app.LoginCredentials
 import com.duckduckgo.autofill.api.email.EmailManager
-import com.duckduckgo.autofill.api.store.AutofillStore
 import com.duckduckgo.autofill.impl.deviceauth.DeviceAuthenticator
 import com.duckduckgo.autofill.impl.pixel.AutofillPixelNames.AUTOFILL_ENABLE_AUTOFILL_TOGGLE_MANUALLY_DISABLED
 import com.duckduckgo.autofill.impl.pixel.AutofillPixelNames.AUTOFILL_ENABLE_AUTOFILL_TOGGLE_MANUALLY_ENABLED
+import com.duckduckgo.autofill.impl.pixel.AutofillPixelNames.AUTOFILL_NEVER_SAVE_FOR_THIS_SITE_CONFIRMATION_PROMPT_CONFIRMED
+import com.duckduckgo.autofill.impl.pixel.AutofillPixelNames.AUTOFILL_NEVER_SAVE_FOR_THIS_SITE_CONFIRMATION_PROMPT_DISMISSED
+import com.duckduckgo.autofill.impl.pixel.AutofillPixelNames.AUTOFILL_NEVER_SAVE_FOR_THIS_SITE_CONFIRMATION_PROMPT_DISPLAYED
 import com.duckduckgo.autofill.impl.pixel.AutofillPixelNames.MENU_ACTION_AUTOFILL_PRESSED
 import com.duckduckgo.autofill.impl.pixel.AutofillPixelNames.SETTINGS_AUTOFILL_MANAGEMENT_OPENED
+import com.duckduckgo.autofill.impl.store.InternalAutofillStore
+import com.duckduckgo.autofill.impl.store.NeverSavedSiteRepository
 import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.Command
 import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.Command.ExitCredentialMode
 import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.Command.ExitListMode
 import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.Command.ExitLockedMode
 import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.Command.LaunchDeviceAuth
+import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.Command.OfferUserUndoMassDeletion
 import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.Command.ShowCredentialMode
 import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.Command.ShowDeviceUnsupportedMode
 import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.Command.ShowDisabledMode
@@ -41,6 +47,9 @@ import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsVie
 import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.Command.ShowUserUsernameCopied
 import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.CredentialMode
 import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.CredentialMode.EditingExisting
+import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.ListModeCommand
+import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.ListModeCommand.LaunchDeleteAllPasswordsConfirmation
+import com.duckduckgo.autofill.impl.ui.credential.management.AutofillSettingsViewModel.ListModeCommand.PromptUserToAuthenticateMassDeletion
 import com.duckduckgo.autofill.impl.ui.credential.management.searching.CredentialListFilter
 import com.duckduckgo.autofill.impl.ui.credential.management.viewing.duckaddress.DuckAddressIdentifier
 import com.duckduckgo.autofill.impl.ui.credential.management.viewing.duckaddress.RealDuckAddressIdentifier
@@ -52,6 +61,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -69,16 +80,17 @@ class AutofillSettingsViewModelTest {
     @get:Rule
     val coroutineTestRule: CoroutineTestRule = CoroutineTestRule()
 
-    private val mockStore: AutofillStore = mock()
+    private val mockStore: InternalAutofillStore = mock()
     private val emailManager: EmailManager = mock()
     private val duckAddressStatusRepository: DuckAddressStatusRepository = mock()
     private val clipboardInteractor: AutofillClipboardInteractor = mock()
     private val pixel: Pixel = mock()
     private val deviceAuthenticator: DeviceAuthenticator = mock()
-    private val credentialListFilter: CredentialListFilter = mock()
+    private val credentialListFilter: CredentialListFilter = TestFilterPassthrough()
     private val faviconManager: FaviconManager = mock()
     private val webUrlIdentifier: WebUrlIdentifier = mock()
     private val duckAddressIdentifier: DuckAddressIdentifier = RealDuckAddressIdentifier()
+    private val neverSavedSiteRepository: NeverSavedSiteRepository = mock()
     private val testee = AutofillSettingsViewModel(
         autofillStore = mockStore,
         clipboardInteractor = clipboardInteractor,
@@ -92,6 +104,7 @@ class AutofillSettingsViewModelTest {
         duckAddressStatusRepository = duckAddressStatusRepository,
         duckAddressIdentifier = duckAddressIdentifier,
         syncEngine = mock(),
+        neverSavedSiteRepository = neverSavedSiteRepository,
     )
 
     @Before
@@ -100,6 +113,8 @@ class AutofillSettingsViewModelTest {
 
         runTest {
             whenever(mockStore.getAllCredentials()).thenReturn(emptyFlow())
+            whenever(neverSavedSiteRepository.neverSaveListCount()).thenReturn(emptyFlow())
+            whenever(deviceAuthenticator.isAuthenticationRequiredForAutofill()).thenReturn(true)
         }
     }
 
@@ -558,7 +573,7 @@ class AutofillSettingsViewModelTest {
         whenever(mockStore.autofillEnabled).thenReturn(false)
         configureDeviceToHaveValidAuthentication(true)
 
-        testee.observeCredentials()
+        testee.onViewCreated()
         testee.viewState.test {
             assertEquals(false, this.awaitItem().autofillEnabled)
             cancelAndIgnoreRemainingEvents()
@@ -570,7 +585,7 @@ class AutofillSettingsViewModelTest {
         whenever(mockStore.autofillEnabled).thenReturn(true)
         configureDeviceToHaveValidAuthentication(true)
 
-        testee.observeCredentials()
+        testee.onViewCreated()
         testee.viewState.test {
             assertEquals(true, this.awaitItem().autofillEnabled)
             cancelAndIgnoreRemainingEvents()
@@ -581,7 +596,7 @@ class AutofillSettingsViewModelTest {
     fun whenSearchQueryChangesEmptyThenShouldShowEnableToggle() = runTest {
         testee.onSearchQueryChanged("")
 
-        testee.observeCredentials()
+        testee.onViewCreated()
         testee.viewState.test {
             assertEquals(true, this.awaitItem().showAutofillEnabledToggle)
             cancelAndIgnoreRemainingEvents()
@@ -592,7 +607,7 @@ class AutofillSettingsViewModelTest {
     fun whenSearchQueryChangesNonEmptyThenShouldNotShowEnableToggle() = runTest {
         testee.onSearchQueryChanged("foo")
 
-        testee.observeCredentials()
+        testee.onViewCreated()
         testee.viewState.test {
             assertEquals(false, this.awaitItem().showAutofillEnabledToggle)
             cancelAndIgnoreRemainingEvents()
@@ -604,7 +619,7 @@ class AutofillSettingsViewModelTest {
         val launchedFromBrowser = false
         val directLinkToCredentials = true
         testee.sendLaunchPixel(launchedFromBrowser, directLinkToCredentials)
-        verify(pixel, never()).fire(any<PixelName>(), any(), any())
+        verify(pixel, never()).fire(any<PixelName>(), any(), any(), eq(COUNT))
     }
 
     @Test
@@ -612,7 +627,7 @@ class AutofillSettingsViewModelTest {
         val launchedFromBrowser = true
         val directLinkToCredentials = true
         testee.sendLaunchPixel(launchedFromBrowser, directLinkToCredentials)
-        verify(pixel, never()).fire(any<PixelName>(), any(), any())
+        verify(pixel, never()).fire(any<PixelName>(), any(), any(), eq(COUNT))
     }
 
     @Test
@@ -620,7 +635,7 @@ class AutofillSettingsViewModelTest {
         val launchedFromBrowser = true
         val directLinkToCredentials = false
         testee.sendLaunchPixel(launchedFromBrowser, directLinkToCredentials)
-        verify(pixel).fire(eq(MENU_ACTION_AUTOFILL_PRESSED), any(), any())
+        verify(pixel).fire(eq(MENU_ACTION_AUTOFILL_PRESSED), any(), any(), eq(COUNT))
     }
 
     @Test
@@ -628,11 +643,129 @@ class AutofillSettingsViewModelTest {
         val launchedFromBrowser = false
         val directLinkToCredentials = false
         testee.sendLaunchPixel(launchedFromBrowser, directLinkToCredentials)
-        verify(pixel).fire(eq(SETTINGS_AUTOFILL_MANAGEMENT_OPENED), any(), any())
+        verify(pixel).fire(eq(SETTINGS_AUTOFILL_MANAGEMENT_OPENED), any(), any(), eq(COUNT))
+    }
+
+    @Test
+    fun whenUserFirstChoosesToResetNeverSavedSiteListThenCorrectPixelFired() = runTest {
+        testee.onResetNeverSavedSitesInitialSelection()
+        verify(pixel).fire(AUTOFILL_NEVER_SAVE_FOR_THIS_SITE_CONFIRMATION_PROMPT_DISPLAYED)
+    }
+
+    @Test
+    fun whenUserConfirmsTheyWantToResetNeverSavedSiteListThenRepositoryCleared() = runTest {
+        testee.onUserConfirmationToClearNeverSavedSites()
+        verify(neverSavedSiteRepository).clearNeverSaveList()
+    }
+
+    @Test
+    fun whenUserConfirmsTheyWantToResetNeverSavedSiteListThenCorrectPixelFired() = runTest {
+        testee.onUserConfirmationToClearNeverSavedSites()
+        verify(pixel).fire(AUTOFILL_NEVER_SAVE_FOR_THIS_SITE_CONFIRMATION_PROMPT_CONFIRMED)
+    }
+
+    @Test
+    fun whenUserDismissesPromptToResetNeverSavedSiteListThenCorrectPixelFired() = runTest {
+        testee.onUserCancelledFromClearNeverSavedSitesPrompt()
+        verify(pixel).fire(AUTOFILL_NEVER_SAVE_FOR_THIS_SITE_CONFIRMATION_PROMPT_DISMISSED)
+    }
+
+    @Test
+    fun whenDeleteAllFirstCalledWithNoSavedLoginsThenNoCommandSentToShowConfirmationDialog() = runTest {
+        configureStoreToHaveThisManyCredentialsStored(0)
+        testee.onViewCreated()
+        testee.onDeleteAllPasswordsInitialSelection()
+        testee.commandsListView.test {
+            awaitItem().verifyDoesNotHaveCommandToShowDeleteAllConfirmation()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenDeleteAllFirstCalledWithOneSavedLoginThenCommandSentToShowConfirmationDialog() = runTest {
+        configureStoreToHaveThisManyCredentialsStored(1)
+        testee.onViewCreated()
+        testee.onDeleteAllPasswordsInitialSelection()
+        testee.commandsListView.test {
+            awaitItem().verifyHasCommandToShowDeleteAllConfirmation(1)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenDeleteAllPasswordsConfirmedButNoPasswordsSavedThenDoesNotIssueCommandToShowUndoSnackbar() = runTest {
+        whenever(mockStore.deleteAllCredentials()).thenReturn(emptyList())
+        testee.onDeleteAllPasswordsConfirmed()
+        testee.commandsListView.test {
+            awaitItem().verifyHasCommandToAuthenticateMassDeletion()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenDeleteAllPasswordsConfirmedWithPasswordsSavedThenDoesIssueCommandToShowUndoSnackbar() = runTest {
+        testee.onDeleteAllPasswordsConfirmed()
+        testee.commandsListView.test {
+            awaitItem().verifyHasCommandToAuthenticateMassDeletion()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenAuthenticationSucceedsToMassDeletePasswordsThenDoesIssueCommandToShowUndoSnackbar() = runTest {
+        whenever(mockStore.deleteAllCredentials()).thenReturn(listOf(someCredentials()))
+        testee.onAuthenticatedToDeleteAllPasswords()
+        testee.commands.test {
+            awaitItem().verifyDoesHaveCommandToShowUndoDeletionSnackbar(1)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun whenDeleteAllFirstCalledWithManySavedLoginThenCommandSentToShowConfirmationDialog() = runTest {
+        configureStoreToHaveThisManyCredentialsStored(100)
+        testee.onViewCreated()
+        testee.onDeleteAllPasswordsInitialSelection()
+        testee.commandsListView.test {
+            awaitItem().verifyHasCommandToShowDeleteAllConfirmation(100)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    private fun List<ListModeCommand>.verifyHasCommandToShowDeleteAllConfirmation(expectedNumberOfCredentialsToDelete: Int) {
+        val confirmationCommand = this.firstOrNull { it is LaunchDeleteAllPasswordsConfirmation }
+        assertNotNull(confirmationCommand)
+        assertEquals(expectedNumberOfCredentialsToDelete, (confirmationCommand as LaunchDeleteAllPasswordsConfirmation).numberToDelete)
+    }
+
+    private fun List<ListModeCommand>.verifyDoesNotHaveCommandToShowDeleteAllConfirmation() {
+        val confirmationCommand = this.firstOrNull { it is LaunchDeleteAllPasswordsConfirmation }
+        assertNull(confirmationCommand)
+    }
+
+    private fun List<Command>.verifyDoesHaveCommandToShowUndoDeletionSnackbar(expectedNumberOfCredentialsToDelete: Int) {
+        val confirmationCommand = this.firstOrNull { it is OfferUserUndoMassDeletion }
+        assertNotNull(confirmationCommand)
+        assertEquals(expectedNumberOfCredentialsToDelete, (confirmationCommand as OfferUserUndoMassDeletion).credentials.size)
+    }
+
+    private fun List<ListModeCommand>.verifyHasCommandToAuthenticateMassDeletion() {
+        val command = this.firstOrNull { it is PromptUserToAuthenticateMassDeletion }
+        assertNotNull(command)
+        assertTrue((command as PromptUserToAuthenticateMassDeletion).authConfiguration.requireUserAction)
+    }
+
+    private fun List<Command>.verifyDoesNotHaveCommandToShowUndoDeletionSnackbar() {
+        val confirmationCommand = this.firstOrNull { it is OfferUserUndoMassDeletion }
+        assertNull(confirmationCommand)
     }
 
     private suspend fun configureStoreToHaveThisManyCredentialsStored(value: Int) {
         whenever(mockStore.getCredentialCount()).thenReturn(flowOf(value))
+
+        val credentialList = mutableListOf<LoginCredentials>()
+        repeat(value) { credentialList.add(someCredentials()) }
+        whenever(mockStore.getAllCredentials()).thenReturn(flowOf(credentialList))
     }
 
     private fun configureDeviceToHaveValidAuthentication(hasValidAuth: Boolean) {
@@ -658,5 +791,14 @@ class AutofillSettingsViewModelTest {
 
     private fun Command.assertCommandType(expectedType: KClass<out Command>) {
         assertTrue(String.format("Unexpected command type: %s", this::class.simpleName), this::class == expectedType)
+    }
+}
+
+private class TestFilterPassthrough : CredentialListFilter {
+    override suspend fun filter(
+        originalList: List<LoginCredentials>,
+        query: String,
+    ): List<LoginCredentials> {
+        return originalList
     }
 }

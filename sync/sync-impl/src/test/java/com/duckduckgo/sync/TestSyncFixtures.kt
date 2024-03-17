@@ -54,7 +54,7 @@ object TestSyncFixtures {
     const val protectedEncryptionKey = "protectedEncryptionKey"
     const val encryptedRecoveryCode = "encrypted_recovery_code"
     val accountKeys = AccountKeys(
-        result = 0L,
+        result = 0,
         userId = userId,
         password = password,
         primaryKey = primaryKey,
@@ -63,7 +63,7 @@ object TestSyncFixtures {
         passwordHash = hashedPassword,
     )
     val accountKeysFailed = AccountKeys(
-        result = 9L,
+        result = 9,
         userId = userId,
         password = password,
         primaryKey = "",
@@ -114,11 +114,11 @@ object TestSyncFixtures {
     val jsonConnectKey = "{\"connect\":{\"device_id\":\"$deviceId\",\"secret_key\":\"$primaryKey\"}}"
     val jsonRecoveryKeyEncoded = jsonRecoveryKey.encodeB64()
     val jsonConnectKeyEncoded = jsonConnectKey.encodeB64()
-    val connectKeys = ConnectKeys(0L, publicKey = primaryKey, secretKey = secretKey)
-    val validLoginKeys = LoginKeys(result = 0L, passwordHash = hashedPassword, stretchedPrimaryKey = stretchedPrimaryKey, primaryKey = primaryKey)
-    val failedLoginKeys = LoginKeys(result = 9L, passwordHash = "", stretchedPrimaryKey = "", primaryKey = "")
-    val decryptedSecretKey = DecryptResult(result = 0L, decryptedData = secretKey)
-    val invalidDecryptedSecretKey = DecryptResult(result = 9L, decryptedData = "")
+    val connectKeys = ConnectKeys(0, publicKey = primaryKey, secretKey = secretKey)
+    val validLoginKeys = LoginKeys(result = 0, passwordHash = hashedPassword, stretchedPrimaryKey = stretchedPrimaryKey, primaryKey = primaryKey)
+    val failedLoginKeys = LoginKeys(result = 9, passwordHash = "", stretchedPrimaryKey = "", primaryKey = "")
+    val decryptedSecretKey = DecryptResult(result = 0, decryptedData = secretKey)
+    val invalidDecryptedSecretKey = DecryptResult(result = 9, decryptedData = "")
     val loginResponseBody = LoginResponse(
         token = token,
         protected_encryption_key = protectedEncryptionKey,
@@ -161,6 +161,7 @@ object TestSyncFixtures {
     val connectKey = ConnectKey(encryptedRecoveryCode)
     const val keysNotFoundErr = "connection_keys_not_found"
     const val keysNotFoundCode = 404
+    const val keysGoneCode = 410
     val connectSuccess = Result.Success(true)
     val connectError = Result.Error(code = invalidCodeErr, reason = invalidMessageErr)
     val connectResponse = Response.success<Void>(null)
@@ -180,6 +181,7 @@ object TestSyncFixtures {
     )
     val connectDeviceSuccess = Result.Success(encryptedRecoveryCode)
     val connectDeviceKeysNotFoundError = Result.Error(code = keysNotFoundCode, reason = keysNotFoundErr)
+    val connectDeviceKeysGoneError = Result.Error(code = keysGoneCode, reason = keysNotFoundErr)
 
     val firstSyncWithBookmarksAndFavorites = "{\"bookmarks\":{\"updates\":[{\"client_last_modified\":\"timestamp\"" +
         ",\"folder\":{\"children\":[\"bookmark1\"]},\"id\":\"favorites_root\",\"title\":\"Favorites\"},{\"client_last_modified\"" +

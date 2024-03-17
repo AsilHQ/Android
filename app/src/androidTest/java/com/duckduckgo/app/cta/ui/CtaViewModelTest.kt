@@ -38,6 +38,7 @@ import com.duckduckgo.app.privacy.model.HttpsStatus
 import com.duckduckgo.app.privacy.model.TestEntity
 import com.duckduckgo.app.settings.db.SettingsDataStore
 import com.duckduckgo.app.statistics.pixels.Pixel
+import com.duckduckgo.app.statistics.pixels.Pixel.PixelType.COUNT
 import com.duckduckgo.app.survey.api.SurveyRepository
 import com.duckduckgo.app.survey.model.Survey
 import com.duckduckgo.app.survey.model.Survey.Status.SCHEDULED
@@ -50,8 +51,6 @@ import com.duckduckgo.app.trackerdetection.model.TrackingEvent
 import com.duckduckgo.app.widget.ui.WidgetCapabilities
 import com.duckduckgo.common.test.CoroutineTestRule
 import com.duckduckgo.common.test.InstantSchedulersRule
-import com.duckduckgo.common.ui.store.AppTheme
-import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.drop
@@ -112,9 +111,6 @@ class CtaViewModelTest {
     private lateinit var mockTabRepository: TabRepository
 
     @Mock
-    private lateinit var mockAppTheme: AppTheme
-
-    @Mock
     private lateinit var mockSurveyRepository: SurveyRepository
 
     private val requiredDaxOnboardingCtas: List<CtaId> = listOf(
@@ -154,7 +150,6 @@ class CtaViewModelTest {
             tabRepository = mockTabRepository,
             dispatchers = coroutineRule.testDispatcherProvider,
             duckDuckGoUrlDetector = DuckDuckGoUrlDetectorImpl(),
-            appTheme = mockAppTheme,
             surveyRepository = mockSurveyRepository,
         )
     }
@@ -202,32 +197,32 @@ class CtaViewModelTest {
     @Test
     fun whenCtaShownAndCtaIsDaxAndCanNotSendPixelThenPixelIsNotFired() {
         testee.onCtaShown(DaxBubbleCta.DaxIntroCta(mockOnboardingStore, mockAppInstallStore))
-        verify(mockPixel, never()).fire(eq(SURVEY_CTA_SHOWN), any(), any())
+        verify(mockPixel, never()).fire(eq(SURVEY_CTA_SHOWN), any(), any(), eq(COUNT))
     }
 
     @Test
     fun whenCtaShownAndCtaIsDaxAndCanSendPixelThenPixelIsFired() {
         whenever(mockOnboardingStore.onboardingDialogJourney).thenReturn("s:0")
         testee.onCtaShown(DaxBubbleCta.DaxEndCta(mockOnboardingStore, mockAppInstallStore))
-        verify(mockPixel, never()).fire(eq(SURVEY_CTA_SHOWN), any(), any())
+        verify(mockPixel, never()).fire(eq(SURVEY_CTA_SHOWN), any(), any(), eq(COUNT))
     }
 
     @Test
     fun whenCtaShownAndCtaIsNotDaxThenPixelIsFired() {
         testee.onCtaShown(HomePanelCta.Survey(Survey("abc", "http://example.com", 1, SCHEDULED)))
-        verify(mockPixel).fire(eq(SURVEY_CTA_SHOWN), any(), any())
+        verify(mockPixel).fire(eq(SURVEY_CTA_SHOWN), any(), any(), eq(COUNT))
     }
 
     @Test
     fun whenCtaLaunchedPixelIsFired() {
         testee.onUserClickCtaOkButton(HomePanelCta.Survey(Survey("abc", "http://example.com", 1, SCHEDULED)))
-        verify(mockPixel).fire(eq(SURVEY_CTA_LAUNCHED), any(), any())
+        verify(mockPixel).fire(eq(SURVEY_CTA_LAUNCHED), any(), any(), eq(COUNT))
     }
 
     @Test
     fun whenCtaDismissedPixelIsFired() = runTest {
         testee.onUserDismissedCta(HomePanelCta.Survey(Survey("abc", "http://example.com", 1, SCHEDULED)))
-        verify(mockPixel).fire(eq(SURVEY_CTA_DISMISSED), any(), any())
+        verify(mockPixel).fire(eq(SURVEY_CTA_DISMISSED), any(), any(), eq(COUNT))
     }
 
     @Test
@@ -262,7 +257,7 @@ class CtaViewModelTest {
     @Test
     fun whenHideTipsForeverThenPixelIsFired() = runTest {
         testee.hideTipsForever(HomePanelCta.AddWidgetAuto)
-        verify(mockPixel).fire(eq(ONBOARDING_DAX_ALL_CTA_HIDDEN), any(), any())
+        verify(mockPixel).fire(eq(ONBOARDING_DAX_ALL_CTA_HIDDEN), any(), any(), eq(COUNT))
     }
 
     @Test
@@ -464,16 +459,6 @@ class CtaViewModelTest {
         val value = testee.refreshCta(coroutineRule.testDispatcher, isBrowserShowing = true, site = site)
 
         assertTrue(value is DaxDialogCta.DaxNoSerpCta)
-    }
-
-    @Test
-    fun whenRefreshCtaWhileBrowsingAndAutoconsentPresentThenReturnOtherCta() = runTest {
-        givenDaxOnboardingActive()
-        testee.enableAutoconsentCta()
-        val site = site(url = "http://www.wikipedia.com")
-        val value = testee.refreshCta(coroutineRule.testDispatcher, isBrowserShowing = true, site = site)
-
-        assertTrue(value is DaxDialogCta.DaxAutoconsentCta)
     }
 
     @Test

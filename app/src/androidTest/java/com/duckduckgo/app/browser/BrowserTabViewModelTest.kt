@@ -103,12 +103,14 @@ import com.duckduckgo.app.onboarding.store.AppStage
 import com.duckduckgo.app.onboarding.store.OnboardingStore
 import com.duckduckgo.app.onboarding.store.UserStageStore
 import com.duckduckgo.app.pixels.AppPixelName
+import com.duckduckgo.app.pixels.remoteconfig.AndroidBrowserConfigFeature
 import com.duckduckgo.app.privacy.db.NetworkLeaderboardDao
 import com.duckduckgo.app.privacy.db.UserAllowListRepository
 import com.duckduckgo.app.privacy.model.TestEntity
 import com.duckduckgo.app.settings.db.SettingsDataStore
 import com.duckduckgo.app.statistics.api.StatisticsUpdater
 import com.duckduckgo.app.statistics.pixels.Pixel
+import com.duckduckgo.app.statistics.pixels.Pixel.PixelType.COUNT
 import com.duckduckgo.app.surrogates.SurrogateResponse
 import com.duckduckgo.app.survey.api.SurveyRepository
 import com.duckduckgo.app.survey.model.Survey
@@ -128,18 +130,23 @@ import com.duckduckgo.autofill.api.passwordgeneration.AutomaticSavedLoginsMonito
 import com.duckduckgo.autofill.impl.AutofillFireproofDialogSuppressor
 import com.duckduckgo.common.test.CoroutineTestRule
 import com.duckduckgo.common.test.InstantSchedulersRule
-import com.duckduckgo.common.ui.store.AppTheme
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.device.DeviceInfo
 import com.duckduckgo.downloads.api.DownloadStateListener
 import com.duckduckgo.downloads.api.FileDownloader
 import com.duckduckgo.downloads.api.FileDownloader.PendingFileDownload
 import com.duckduckgo.feature.toggles.api.FeatureToggle
+import com.duckduckgo.feature.toggles.api.Toggle
 import com.duckduckgo.privacy.config.api.*
 import com.duckduckgo.privacy.config.impl.features.gpc.RealGpc
 import com.duckduckgo.privacy.config.impl.features.gpc.RealGpc.Companion.GPC_HEADER
 import com.duckduckgo.privacy.config.impl.features.gpc.RealGpc.Companion.GPC_HEADER_VALUE
 import com.duckduckgo.privacy.config.store.features.gpc.GpcRepository
+import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupExperimentExternalPixels
+import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupManager
+import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupUiEvent
+import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupViewState
+import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsToggleUsageListener
 import com.duckduckgo.remote.messaging.api.Content
 import com.duckduckgo.remote.messaging.api.RemoteMessage
 import com.duckduckgo.remote.messaging.api.RemoteMessagingRepository
@@ -151,6 +158,7 @@ import com.duckduckgo.site.permissions.api.SitePermissionsManager.SitePermission
 import com.duckduckgo.site.permissions.api.SitePermissionsManager.SitePermissions
 import com.duckduckgo.sync.api.engine.SyncEngine
 import com.duckduckgo.sync.api.engine.SyncEngine.SyncTrigger.FEATURE_READ
+import com.duckduckgo.sync.api.favicons.FaviconsFetchingPrompt
 import com.duckduckgo.voice.api.VoiceSearchAvailability
 import com.duckduckgo.voice.api.VoiceSearchAvailabilityPixelLogger
 import dagger.Lazy
@@ -168,6 +176,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -385,8 +394,6 @@ class BrowserTabViewModelTest {
 
     private val favoriteListFlow = Channel<List<Favorite>>()
 
-    private val mockAppTheme: AppTheme = mock()
-
     private val autofillCapabilityChecker: FakeCapabilityChecker = FakeCapabilityChecker(enabled = false)
 
     private val autofillFireproofDialogSuppressor: AutofillFireproofDialogSuppressor = mock()
@@ -400,6 +407,20 @@ class BrowserTabViewModelTest {
     private val mockSyncEngine: SyncEngine = mock()
 
     private val cameraHardwareChecker: CameraHardwareChecker = mock()
+
+    private val androidBrowserConfig: AndroidBrowserConfigFeature = mock()
+
+    private val mockToggle: Toggle = mock()
+
+    private val mockPrivacyProtectionsPopupManager: PrivacyProtectionsPopupManager = mock()
+
+    private val mockPrivacyProtectionsToggleUsageListener: PrivacyProtectionsToggleUsageListener = mock()
+
+    private val privacyProtectionsPopupExperimentExternalPixels: PrivacyProtectionsPopupExperimentExternalPixels = mock {
+        runBlocking { whenever(mock.getPixelParams()).thenReturn(emptyMap()) }
+    }
+
+    private val mockFaviconFetchingPrompt: FaviconsFetchingPrompt = mock()
 
     @Before
     fun before() {
@@ -425,6 +446,7 @@ class BrowserTabViewModelTest {
         whenever(mockSavedSitesRepository.getBookmarks()).thenReturn(bookmarksListFlow.consumeAsFlow())
         whenever(mockRemoteMessagingRepository.messageFlow()).thenReturn(remoteMessageFlow.consumeAsFlow())
         whenever(mockSettingsDataStore.automaticFireproofSetting).thenReturn(AutomaticFireproofSetting.ASK_EVERY_TIME)
+        whenever(androidBrowserConfig.screenLock()).thenReturn(mockToggle)
 
         remoteMessagingModel = givenRemoteMessagingModel(mockRemoteMessagingRepository, mockPixel, coroutineRule.testDispatcherProvider)
 
@@ -440,7 +462,6 @@ class BrowserTabViewModelTest {
             tabRepository = mockTabRepository,
             dispatchers = coroutineRule.testDispatcherProvider,
             duckDuckGoUrlDetector = DuckDuckGoUrlDetectorImpl(),
-            appTheme = mockAppTheme,
             surveyRepository = mockSurveyRepository,
         )
 
@@ -469,6 +490,7 @@ class BrowserTabViewModelTest {
         whenever(mockContentBlocking.isAnException(anyString())).thenReturn(false)
         whenever(fireproofDialogsEventHandler.event).thenReturn(fireproofDialogsEventHandlerLiveData)
         whenever(cameraHardwareChecker.hasCameraHardware()).thenReturn(true)
+        whenever(mockPrivacyProtectionsPopupManager.viewState).thenReturn(flowOf(PrivacyProtectionsPopupViewState.Gone))
 
         testee = BrowserTabViewModel(
             statisticsUpdater = mockStatisticsUpdater,
@@ -523,6 +545,11 @@ class BrowserTabViewModelTest {
             device = mockDeviceInfo,
             sitePermissionsManager = mockSitePermissionsManager,
             cameraHardwareChecker = cameraHardwareChecker,
+            androidBrowserConfig = androidBrowserConfig,
+            privacyProtectionsPopupManager = mockPrivacyProtectionsPopupManager,
+            privacyProtectionsToggleUsageListener = mockPrivacyProtectionsToggleUsageListener,
+            privacyProtectionsPopupExperimentExternalPixels = privacyProtectionsPopupExperimentExternalPixels,
+            faviconsFetchingPrompt = mockFaviconFetchingPrompt,
         )
 
         testee.loadData("abc", null, false, false)
@@ -673,7 +700,7 @@ class BrowserTabViewModelTest {
         val folderId = "folder1"
         val bookmark =
             Bookmark(id = UUID.randomUUID().toString(), title = "A title", url = "www.example.com", parentId = folderId, lastModified = "timestamp")
-        testee.onBookmarkEdited(bookmark, folderId)
+        testee.onBookmarkEdited(bookmark, folderId, false)
         verify(mockSavedSitesRepository).updateBookmark(bookmark, folderId)
     }
 
@@ -700,7 +727,7 @@ class BrowserTabViewModelTest {
         val bookmark =
             Bookmark(id = UUID.randomUUID().toString(), title = "A title", url = "www.example.com", lastModified = "timestamp")
 
-        testee.onDeleteSavedSiteSnackbarDismissed(bookmark)
+        testee.onDeleteFavoriteSnackbarDismissed(bookmark)
 
         verify(mockFaviconManager).deletePersistedFavicon(bookmark.url)
         verify(mockSavedSitesRepository).delete(bookmark)
@@ -738,7 +765,6 @@ class BrowserTabViewModelTest {
         testee.onFavoriteMenuClicked()
         verify(mockSavedSitesRepository).insertFavorite(title = title, url = url)
         verify(mockCommandObserver, atLeastOnce()).onChanged(commandCaptor.capture())
-        assertTrue(commandCaptor.lastValue is Command.ShowSavedSiteAddedConfirmation)
     }
 
     @Test
@@ -752,7 +778,7 @@ class BrowserTabViewModelTest {
     fun whenDeleteQuickAccessItemCalledWithFavoriteThenRepositoryUpdated() = runTest {
         val savedSite = Favorite(UUID.randomUUID().toString(), "title", "http://example.com", lastModified = "timestamp", 0)
 
-        testee.onDeleteSavedSiteSnackbarDismissed(savedSite)
+        testee.onDeleteFavoriteSnackbarDismissed(savedSite)
 
         verify(mockSavedSitesRepository).delete(savedSite)
     }
@@ -761,9 +787,18 @@ class BrowserTabViewModelTest {
     fun whenDeleteQuickAccessItemCalledWithBookmarkThenRepositoryUpdated() = runTest {
         val savedSite = Bookmark(UUID.randomUUID().toString(), "title", "http://example.com", lastModified = "timestamp")
 
-        testee.onDeleteSavedSiteSnackbarDismissed(savedSite)
+        testee.onDeleteFavoriteSnackbarDismissed(savedSite)
 
         verify(mockSavedSitesRepository).delete(savedSite)
+    }
+
+    @Test
+    fun whenDeleteSavedSiteCalledThenRepositoryUpdated() = runTest {
+        val savedSite = Favorite(UUID.randomUUID().toString(), "title", "http://example.com", lastModified = "timestamp", 0)
+
+        testee.onDeleteSavedSiteSnackbarDismissed(savedSite)
+
+        verify(mockSavedSitesRepository).delete(savedSite, true)
     }
 
     @Test
@@ -1477,7 +1512,7 @@ class BrowserTabViewModelTest {
         givenOneActiveTabSelected()
         givenInvalidatedGlobalLayout()
 
-        testee.onRefreshRequested()
+        testee.onRefreshRequested(triggeredByUser = true)
 
         assertCommandIssued<Command.OpenInNewTab> {
             assertNull(sourceTabId)
@@ -1489,7 +1524,7 @@ class BrowserTabViewModelTest {
         givenOneActiveTabSelected()
         givenInvalidatedGlobalLayout()
 
-        testee.onRefreshRequested()
+        testee.onRefreshRequested(triggeredByUser = true)
 
         runTest {
             verify(mockTabRepository).deleteTabAndSelectSource(selectedTabLiveData.value!!.tabId)
@@ -1498,7 +1533,7 @@ class BrowserTabViewModelTest {
 
     @Test
     fun whenRefreshRequestedWithBrowserGlobalLayoutThenRefresh() {
-        testee.onRefreshRequested()
+        testee.onRefreshRequested(triggeredByUser = true)
         assertCommandIssued<NavigationCommand.Refresh>()
     }
 
@@ -1506,7 +1541,7 @@ class BrowserTabViewModelTest {
     fun whenRefreshRequestedWithQuerySearchThenFireQueryChangePixelZero() {
         loadUrl("query")
 
-        testee.onRefreshRequested()
+        testee.onRefreshRequested(triggeredByUser = true)
 
         verify(mockPixel).fire("rq_0")
     }
@@ -1515,7 +1550,7 @@ class BrowserTabViewModelTest {
     fun whenRefreshRequestedWithUrlThenDoNotFireQueryChangePixel() {
         loadUrl("https://example.com")
 
-        testee.onRefreshRequested()
+        testee.onRefreshRequested(triggeredByUser = true)
 
         verify(mockPixel, never()).fire("rq_0")
     }
@@ -3789,8 +3824,8 @@ class BrowserTabViewModelTest {
         loadUrl("www.example.com", isBrowserShowing = true)
         testee.onFavoriteMenuClicked()
         verify(mockCommandObserver, atLeastOnce()).onChanged(commandCaptor.capture())
-        assertTrue(commandCaptor.lastValue is Command.DeleteSavedSiteConfirmation)
-        val command = commandCaptor.lastValue as Command.DeleteSavedSiteConfirmation
+        assertTrue(commandCaptor.lastValue is Command.DeleteFavoriteConfirmation)
+        val command = commandCaptor.lastValue as Command.DeleteFavoriteConfirmation
         assertEquals("www.example.com", command.savedSite.url)
         assertEquals("title", command.savedSite.title)
     }
@@ -4497,20 +4532,6 @@ class BrowserTabViewModelTest {
     }
 
     @Test
-    fun whenOnPermissionsQueryThenSendCommand() = runTest {
-        val url = "someUrl"
-        loadUrl(url)
-        whenever(mockSitePermissionsManager.getPermissionsQueryResponse(eq(url), any(), any())).thenReturn(SitePermissionQueryResponse.Granted)
-        testee.onPermissionsQuery("myFeature", "myMethod", "myId", JSONObject("""{ "name":"somePermission"}"""))
-        assertCommandIssued<Command.OnPermissionsQueryResponse> {
-            assertEquals("granted", this.jsCallbackData.params.getString("state"))
-            assertEquals("myFeature", this.jsCallbackData.featureName)
-            assertEquals("myMethod", this.jsCallbackData.method)
-            assertEquals("myId", this.jsCallbackData.id)
-        }
-    }
-
-    @Test
     fun whenNewTabOpenedAndFavouritesPresentThenSyncTriggered() = runTest {
         val favoriteSite = Favorite(id = UUID.randomUUID().toString(), title = "", url = "www.example.com", position = 0, lastModified = "timestamp")
         favoriteListFlow.send(listOf(favoriteSite))
@@ -4544,10 +4565,10 @@ class BrowserTabViewModelTest {
     }
 
     @Test
-    fun whenOnShowFileChooserWithImageSpecificTypeThenExistingFileChooserCommandSent() {
+    fun whenOnShowFileChooserWithImageSpecificTypeThenImageOrCameraChooserCommandSent() {
         val params = buildFileChooserParams(arrayOf("image/png"))
         testee.showFileChooser(mockFileChooserCallback, params)
-        assertCommandIssued<Command.ShowFileChooser>()
+        assertCommandIssued<Command.ShowExistingImageOrCameraChooser>()
     }
 
     @Test
@@ -4555,6 +4576,78 @@ class BrowserTabViewModelTest {
         val params = buildFileChooserParams(arrayOf("application/pdf"))
         testee.showFileChooser(mockFileChooserCallback, params)
         assertCommandIssued<Command.ShowFileChooser>()
+    }
+
+    @Test
+    fun whenOnShowFileChooserWithFileExtensionTypesThenFileChooserCommandSentWithUpdatedValues() {
+        val fileExtensionTypes = arrayOf(".doc", ".docx", ".pdf")
+        val expectedMimeTypes =
+            arrayOf("application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/pdf")
+        val params = buildFileChooserParams(fileExtensionTypes)
+
+        testee.showFileChooser(mockFileChooserCallback, params)
+
+        verify(mockCommandObserver, atLeastOnce()).onChanged(commandCaptor.capture())
+        val issuedCommand = commandCaptor.allValues.find { it is Command.ShowFileChooser }
+        assertNotNull(issuedCommand)
+        assertArrayEquals(
+            expectedMimeTypes,
+            (issuedCommand as Command.ShowFileChooser).fileChooserParams.acceptMimeTypes.toTypedArray(),
+        )
+    }
+
+    @Test
+    fun whenOnShowFileChooserWithFileExtensionTypesAndImageMimeTypeThenImageOrCameraChooserCommandSentWithUpdatedValues() {
+        val fileExtensionTypes = arrayOf("image/jpeg", "image/pjpeg", ".jpeg", ".jpg")
+        val expectedMimeTypes = arrayOf("image/jpeg", "image/pjpeg")
+        val params = buildFileChooserParams(fileExtensionTypes)
+
+        testee.showFileChooser(mockFileChooserCallback, params)
+
+        verify(mockCommandObserver, atLeastOnce()).onChanged(commandCaptor.capture())
+        val issuedCommand = commandCaptor.allValues.find { it is Command.ShowExistingImageOrCameraChooser }
+        assertNotNull(issuedCommand)
+        assertArrayEquals(
+            expectedMimeTypes,
+            (issuedCommand as Command.ShowExistingImageOrCameraChooser).fileChooserParams.acceptMimeTypes.toTypedArray(),
+        )
+    }
+
+    @Test
+    fun whenOnShowFileChooserWithImageWildcardedTypeOnlyAndCaptureEnabledThenShowImageCameraCommandSent() {
+        val params = buildFileChooserParams(acceptTypes = arrayOf("image/*"), captureEnabled = true)
+
+        testee.showFileChooser(mockFileChooserCallback, params)
+
+        assertCommandIssued<Command.ShowImageCamera>()
+    }
+
+    @Test
+    fun whenOnShowFileChooserWithVideoWildcardedTypeOnlyAndCaptureEnabledThenShowVideoCameraCommandSent() {
+        val params = buildFileChooserParams(acceptTypes = arrayOf("video/*"), captureEnabled = true)
+
+        testee.showFileChooser(mockFileChooserCallback, params)
+
+        assertCommandIssued<Command.ShowVideoCamera>()
+    }
+
+    @Test
+    fun whenOnShowFileChooserWithImageWildcardedTypeOnlyAndCaptureEnabledButCameraHardwareUnavailableThenShowFileChooserCommandSent() {
+        whenever(cameraHardwareChecker.hasCameraHardware()).thenReturn(false)
+        val params = buildFileChooserParams(acceptTypes = arrayOf("image/*"), captureEnabled = true)
+
+        testee.showFileChooser(mockFileChooserCallback, params)
+
+        assertCommandIssued<Command.ShowFileChooser>()
+    }
+
+    @Test
+    fun whenOnShowFileChooserWithAudioWildcardedTypeOnlyAndCaptureEnabledThenShowSoundRecorderCommandSent() {
+        val params = buildFileChooserParams(acceptTypes = arrayOf("audio/*"), captureEnabled = true)
+
+        testee.showFileChooser(mockFileChooserCallback, params)
+
+        assertCommandIssued<Command.ShowSoundRecorder>()
     }
 
     @Test
@@ -4578,6 +4671,226 @@ class BrowserTabViewModelTest {
         assertEquals(BAD_URL, browserViewState().browserError)
         testee.resetBrowserError()
         assertEquals(OMITTED, browserViewState().browserError)
+    }
+
+    @Test
+    fun whenProcessJsCallbackMessageWebShareSendCommand() = runTest {
+        val url = "someUrl"
+        loadUrl(url)
+        testee.processJsCallbackMessage("myFeature", "webShare", "myId", JSONObject("""{ "my":"object"}"""))
+        assertCommandIssued<Command.WebShareRequest> {
+            assertEquals("object", this.data.params.getString("my"))
+            assertEquals("myFeature", this.data.featureName)
+            assertEquals("webShare", this.data.method)
+            assertEquals("myId", this.data.id)
+        }
+    }
+
+    @Test
+    fun whenProcessJsCallbackMessagePermissionsQuerySendCommand() = runTest {
+        val url = "someUrl"
+        loadUrl(url)
+        whenever(mockSitePermissionsManager.getPermissionsQueryResponse(eq(url), any(), any())).thenReturn(SitePermissionQueryResponse.Granted)
+        testee.processJsCallbackMessage("myFeature", "permissionsQuery", "myId", JSONObject("""{ "name":"somePermission"}"""))
+        assertCommandIssued<Command.SendResponseToJs> {
+            assertEquals("granted", this.data.params.getString("state"))
+            assertEquals("myFeature", this.data.featureName)
+            assertEquals("permissionsQuery", this.data.method)
+            assertEquals("myId", this.data.id)
+        }
+    }
+
+    @Test
+    fun whenProcessJsCallbackMessageScreenLockNotEnabledDoNotSendCommand() = runTest {
+        whenever(mockToggle.isEnabled()).thenReturn(false)
+        testee.processJsCallbackMessage("myFeature", "screenLock", "myId", JSONObject("""{ "my":"object"}"""))
+        assertCommandNotIssued<Command.ScreenLock>()
+    }
+
+    @Test
+    fun whenProcessJsCallbackMessageScreenLockEnabledSendCommand() = runTest {
+        whenever(mockToggle.isEnabled()).thenReturn(true)
+        testee.processJsCallbackMessage("myFeature", "screenLock", "myId", JSONObject("""{ "my":"object"}"""))
+        assertCommandIssued<Command.ScreenLock> {
+            assertEquals("object", this.data.params.getString("my"))
+            assertEquals("myFeature", this.data.featureName)
+            assertEquals("screenLock", this.data.method)
+            assertEquals("myId", this.data.id)
+        }
+    }
+
+    @Test
+    fun whenProcessJsCallbackMessageScreenUnlockNotEnabledDoNotSendCommand() = runTest {
+        whenever(mockToggle.isEnabled()).thenReturn(false)
+        testee.processJsCallbackMessage("myFeature", "screenUnlock", "myId", JSONObject("""{ "my":"object"}"""))
+        assertCommandNotIssued<Command.ScreenUnlock>()
+    }
+
+    @Test
+    fun whenProcessJsCallbackMessageScreenUnlockEnabledSendCommand() = runTest {
+        whenever(mockToggle.isEnabled()).thenReturn(true)
+        testee.processJsCallbackMessage("myFeature", "screenUnlock", "myId", JSONObject("""{ "my":"object"}"""))
+        assertCommandIssued<Command.ScreenUnlock>()
+    }
+
+    @Test
+    fun whenPrivacyProtectionMenuClickedThenListenerIsInvoked() = runTest {
+        loadUrl("http://www.example.com/home.html")
+        testee.onPrivacyProtectionMenuClicked()
+        verify(mockPrivacyProtectionsToggleUsageListener).onPrivacyProtectionsToggleUsed()
+    }
+
+    @Test
+    fun whenPageIsChangedThenPrivacyProtectionsPopupManagerIsNotified() = runTest {
+        updateUrl(
+            originalUrl = "example.com",
+            currentUrl = "example2.com",
+            isBrowserShowing = true,
+        )
+
+        verify(mockPrivacyProtectionsPopupManager).onPageLoaded(
+            url = "example2.com",
+            httpErrorCodes = emptyList(),
+            hasBrowserError = false,
+        )
+    }
+
+    @Test
+    fun whenPageIsChangedWithWebViewErrorResponseThenPrivacyProtectionsPopupManagerIsNotified() = runTest {
+        testee.onReceivedError(WebViewErrorResponse.BAD_URL, "example2.com")
+
+        updateUrl(
+            originalUrl = "example.com",
+            currentUrl = "example2.com",
+            isBrowserShowing = true,
+        )
+
+        verify(mockPrivacyProtectionsPopupManager).onPageLoaded(
+            url = "example2.com",
+            httpErrorCodes = emptyList(),
+            hasBrowserError = true,
+        )
+    }
+
+    @Test
+    fun whenPageIsChangedWithHttpErrorThenPrivacyProtectionsPopupManagerIsNotified() = runTest {
+        testee.recordHttpErrorCode(statusCode = 404, url = "example2.com")
+
+        updateUrl(
+            originalUrl = "example.com",
+            currentUrl = "example2.com",
+            isBrowserShowing = true,
+        )
+
+        verify(mockPrivacyProtectionsPopupManager).onPageLoaded(
+            url = "example2.com",
+            httpErrorCodes = listOf(404),
+            hasBrowserError = false,
+        )
+    }
+
+    @Test
+    fun whenPrivacyProtectionsPopupUiEventIsReceivedThenItIsPassedToPrivacyProtectionsPopupManager() = runTest {
+        PrivacyProtectionsPopupUiEvent.entries.forEach { event ->
+            testee.onPrivacyProtectionsPopupUiEvent(event)
+            verify(mockPrivacyProtectionsPopupManager).onUiEvent(event)
+        }
+    }
+
+    @Test
+    fun whenRefreshIsTriggeredByUserThenPrivacyProtectionsPopupManagerIsNotified() = runTest {
+        testee.onRefreshRequested(triggeredByUser = false)
+        verify(mockPrivacyProtectionsPopupManager, never()).onPageRefreshTriggeredByUser()
+        testee.onRefreshRequested(triggeredByUser = true)
+        verify(mockPrivacyProtectionsPopupManager).onPageRefreshTriggeredByUser()
+    }
+
+    @Test
+    fun whenPrivacyProtectionsAreToggledThenCorrectPixelsAreSent() = runTest {
+        val params = mapOf("test_key" to "test_value")
+        whenever(privacyProtectionsPopupExperimentExternalPixels.getPixelParams()).thenReturn(params)
+        whenever(mockUserAllowListRepository.isDomainInUserAllowList("www.example.com")).thenReturn(false)
+        loadUrl("http://www.example.com/home.html")
+        testee.onPrivacyProtectionMenuClicked()
+        whenever(mockUserAllowListRepository.isDomainInUserAllowList("www.example.com")).thenReturn(true)
+        testee.onPrivacyProtectionMenuClicked()
+
+        verify(mockPixel).fire(AppPixelName.BROWSER_MENU_ALLOWLIST_ADD, params, type = COUNT)
+        verify(mockPixel).fire(AppPixelName.BROWSER_MENU_ALLOWLIST_REMOVE, params, type = COUNT)
+        verify(privacyProtectionsPopupExperimentExternalPixels).tryReportProtectionsToggledFromBrowserMenu(protectionsEnabled = false)
+        verify(privacyProtectionsPopupExperimentExternalPixels).tryReportProtectionsToggledFromBrowserMenu(protectionsEnabled = true)
+    }
+
+    @Test
+    fun whenHomeShownAndFaviconPromptShouldShowAndFavouritesIsNotEmptyThenShowFaviconsPromptCommandSent() = runTest {
+        whenever(mockFaviconFetchingPrompt.shouldShow()).thenReturn(true)
+        testee.ctaViewState.value =
+            ctaViewState().copy(
+                favorites = listOf(
+                    QuickAccessFavorite(
+                        Favorite(
+                            UUID.randomUUID().toString(),
+                            "title",
+                            "http://example.com",
+                            lastModified = "timestamp",
+                            1,
+                        ),
+                    ),
+                ),
+            )
+
+        testee.onHomeShown()
+
+        assertCommandIssued<Command.ShowFaviconsPrompt>()
+    }
+
+    @Test
+    fun whenHomeShownAndFaviconPromptShouldShowAndFavouritesIsEmptyThenShowFaviconsPromptCommandNotSent() = runTest {
+        whenever(mockFaviconFetchingPrompt.shouldShow()).thenReturn(true)
+        testee.ctaViewState.value =
+            ctaViewState().copy(
+                favorites = emptyList(),
+            )
+
+        testee.onHomeShown()
+
+        assertCommandNotIssued<Command.ShowFaviconsPrompt>()
+    }
+
+    @Test
+    fun whenHomeShownAndFaviconPromptShouldNotShowAndFavouritesIsNotEmptyThenShowFaviconsPromptCommandNotSent() = runTest {
+        whenever(mockFaviconFetchingPrompt.shouldShow()).thenReturn(false)
+        testee.ctaViewState.value =
+            ctaViewState().copy(
+                favorites = listOf(
+                    QuickAccessFavorite(
+                        Favorite(
+                            UUID.randomUUID().toString(),
+                            "title",
+                            "http://example.com",
+                            lastModified = "timestamp",
+                            1,
+                        ),
+                    ),
+                ),
+            )
+
+        testee.onHomeShown()
+
+        assertCommandNotIssued<Command.ShowFaviconsPrompt>()
+    }
+
+    @Test
+    fun whenHomeShownAndFaviconPromptShouldNotShowAndFavouritesEmptyThenShowFaviconsPromptCommandNotSent() = runTest {
+        whenever(mockFaviconFetchingPrompt.shouldShow()).thenReturn(false)
+        testee.ctaViewState.value =
+            ctaViewState().copy(
+                favorites = emptyList(),
+            )
+
+        testee.onHomeShown()
+
+        assertCommandNotIssued<Command.ShowFaviconsPrompt>()
     }
 
     private fun aCredential(): LoginCredentials {
@@ -4843,11 +5156,14 @@ class BrowserTabViewModelTest {
         return nav
     }
 
-    private fun buildFileChooserParams(acceptTypes: Array<String>): FileChooserParams {
+    private fun buildFileChooserParams(
+        acceptTypes: Array<String>,
+        captureEnabled: Boolean = false,
+    ): FileChooserParams {
         return object : FileChooserParams() {
             override fun getAcceptTypes(): Array<String> = acceptTypes
             override fun getMode(): Int = 0
-            override fun isCaptureEnabled(): Boolean = false
+            override fun isCaptureEnabled(): Boolean = captureEnabled
             override fun getTitle(): CharSequence? = null
             override fun getFilenameHint(): String? = null
             override fun createIntent(): Intent = Intent()

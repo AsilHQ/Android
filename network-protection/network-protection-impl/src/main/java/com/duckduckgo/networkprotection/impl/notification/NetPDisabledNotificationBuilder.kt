@@ -22,12 +22,10 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
-import com.duckduckgo.di.scopes.VpnScope
+import com.duckduckgo.di.scopes.AppScope
 import com.duckduckgo.networkprotection.impl.R
 import com.squareup.anvil.annotations.ContributesBinding
 import java.text.DateFormat
@@ -44,26 +42,26 @@ interface NetPDisabledNotificationBuilder {
     ): Notification
 
     fun buildDisabledByVpnNotification(context: Context): Notification
+
+    fun buildUnsafeWifiWithoutVpnNotification(context: Context): Notification
 }
 
-@ContributesBinding(VpnScope::class)
+@ContributesBinding(AppScope::class)
 class RealNetPDisabledNotificationBuilder @Inject constructor(
     private val netPNotificationActions: NetPNotificationActions,
 ) : NetPDisabledNotificationBuilder {
     private val defaultDateTimeFormatter = SimpleDateFormat.getTimeInstance(DateFormat.SHORT)
 
     private fun registerChannel(context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = NotificationManagerCompat.from(context)
-            if (notificationManager.getNotificationChannel(NETP_ALERTS_CHANNEL_ID) == null) {
-                val channel = NotificationChannel(
-                    NETP_ALERTS_CHANNEL_ID,
-                    NETP_ALERTS_CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_DEFAULT,
-                )
-                channel.description = NETP_ALERTS_CHANNEL_DESCRIPTION
-                notificationManager.createNotificationChannel(channel)
-            }
+        val notificationManager = NotificationManagerCompat.from(context)
+        if (notificationManager.getNotificationChannel(NETP_ALERTS_CHANNEL_ID) == null) {
+            val channel = NotificationChannel(
+                NETP_ALERTS_CHANNEL_ID,
+                NETP_ALERTS_CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_DEFAULT,
+            )
+            channel.description = NETP_ALERTS_CHANNEL_DESCRIPTION
+            notificationManager.createNotificationChannel(channel)
         }
     }
 
@@ -72,9 +70,9 @@ class RealNetPDisabledNotificationBuilder @Inject constructor(
 
         return NotificationCompat.Builder(context, NETP_ALERTS_CHANNEL_ID)
             .setSmallIcon(com.duckduckgo.mobile.android.R.drawable.notification_logo)
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.netpNotificationDisabled)))
+            .setContentTitle(context.getString(R.string.netp_name))
             .setContentIntent(getPendingIntent(context))
-            .setCustomContentView(RemoteViews(context.packageName, R.layout.notification_netp_disabled))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
             .addAction(netPNotificationActions.getEnableNetpNotificationAction(context))
@@ -131,13 +129,28 @@ class RealNetPDisabledNotificationBuilder @Inject constructor(
 
         return NotificationCompat.Builder(context, NETP_ALERTS_CHANNEL_ID)
             .setSmallIcon(com.duckduckgo.mobile.android.R.drawable.notification_logo)
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.netpNotificationDisabledByVpn)))
+            .setContentTitle(context.getString(R.string.netp_name))
             .setContentIntent(getPendingIntent(context))
-            .setCustomContentView(RemoteViews(context.packageName, R.layout.notification_netp_disabled_by_vpn))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
             .addAction(netPNotificationActions.getEnableNetpNotificationAction(context))
             .addAction(netPNotificationActions.getReportIssueNotificationAction(context))
+            .setAutoCancel(false)
+            .build()
+    }
+
+    override fun buildUnsafeWifiWithoutVpnNotification(context: Context): Notification {
+        registerChannel(context)
+
+        return NotificationCompat.Builder(context, NETP_ALERTS_CHANNEL_ID)
+            .setSmallIcon(com.duckduckgo.mobile.android.R.drawable.notification_logo)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.netpUnsafeWifi)))
+            .setContentTitle(context.getString(R.string.netp_name))
+            .setContentIntent(getPendingIntent(context))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .addAction(netPNotificationActions.getEnableNetpNotificationAction(context))
             .setAutoCancel(false)
             .build()
     }

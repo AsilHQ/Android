@@ -23,14 +23,15 @@ import android.net.Uri
 import android.net.http.SslCertificate
 import android.os.Message
 import android.print.PrintAttributes
+import android.provider.MediaStore
 import android.util.Patterns
 import android.view.ContextMenu
 import android.view.MenuItem
 import android.view.View
 import android.webkit.GeolocationPermissions
+import android.webkit.MimeTypeMap
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
-import android.webkit.WebChromeClient
 import android.webkit.WebChromeClient.FileChooserParams
 import android.webkit.WebView
 import androidx.annotation.AnyThread
@@ -100,6 +101,7 @@ import com.duckduckgo.app.location.GeoLocationPermissions
 import com.duckduckgo.app.location.data.LocationPermissionType
 import com.duckduckgo.app.location.data.LocationPermissionsRepository
 import com.duckduckgo.app.pixels.AppPixelName
+import com.duckduckgo.app.pixels.remoteconfig.AndroidBrowserConfigFeature
 import com.duckduckgo.app.privacy.db.NetworkLeaderboardDao
 import com.duckduckgo.app.privacy.db.UserAllowListRepository
 import com.duckduckgo.app.settings.db.SettingsDataStore
@@ -107,6 +109,7 @@ import com.duckduckgo.app.statistics.api.StatisticsUpdater
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.app.statistics.pixels.Pixel.PixelParameter
 import com.duckduckgo.app.statistics.pixels.Pixel.PixelParameter.FAVORITE_MENU_ITEM_STATE
+import com.duckduckgo.app.statistics.pixels.Pixel.PixelType.COUNT
 import com.duckduckgo.app.surrogates.SurrogateResponse
 import com.duckduckgo.app.survey.model.Survey
 import com.duckduckgo.app.survey.notification.SurveyNotificationScheduler
@@ -136,6 +139,11 @@ import com.duckduckgo.downloads.api.FileDownloader
 import com.duckduckgo.downloads.api.FileDownloader.PendingFileDownload
 import com.duckduckgo.js.messaging.api.JsCallbackData
 import com.duckduckgo.privacy.config.api.*
+import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupExperimentExternalPixels
+import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupManager
+import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupUiEvent
+import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupViewState
+import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsToggleUsageListener
 import com.duckduckgo.remote.messaging.api.RemoteMessage
 import com.duckduckgo.savedsites.api.SavedSitesRepository
 import com.duckduckgo.savedsites.api.models.BookmarkFolder
@@ -147,6 +155,7 @@ import com.duckduckgo.site.permissions.api.SitePermissionsManager.SitePermission
 import com.duckduckgo.site.permissions.api.SitePermissionsManager.SitePermissions
 import com.duckduckgo.sync.api.engine.SyncEngine
 import com.duckduckgo.sync.api.engine.SyncEngine.SyncTrigger.FEATURE_READ
+import com.duckduckgo.sync.api.favicons.FaviconsFetchingPrompt
 import com.duckduckgo.voice.api.VoiceSearchAvailability
 import com.duckduckgo.voice.api.VoiceSearchAvailabilityPixelLogger
 import com.jakewharton.rxrelay2.PublishRelay
@@ -216,6 +225,11 @@ class BrowserTabViewModel @Inject constructor(
     private val sitePermissionsManager: SitePermissionsManager,
     private val syncEngine: SyncEngine,
     private val cameraHardwareChecker: CameraHardwareChecker,
+    private val androidBrowserConfig: AndroidBrowserConfigFeature,
+    private val privacyProtectionsPopupManager: PrivacyProtectionsPopupManager,
+    private val privacyProtectionsToggleUsageListener: PrivacyProtectionsToggleUsageListener,
+    private val privacyProtectionsPopupExperimentExternalPixels: PrivacyProtectionsPopupExperimentExternalPixels,
+    private val faviconsFetchingPrompt: FaviconsFetchingPrompt,
 ) : WebViewClientListener,
     EditSavedSiteListener,
     DeleteBookmarkListener,
@@ -275,6 +289,7 @@ class BrowserTabViewModel @Inject constructor(
         val canPrintPage: Boolean = false,
         val showAutofill: Boolean = false,
         val browserError: WebViewErrorResponse = OMITTED,
+        val privacyProtectionsPopupViewState: PrivacyProtectionsPopupViewState = PrivacyProtectionsPopupViewState.Gone,
     )
 
     sealed class HighlightableButton {
@@ -343,6 +358,11 @@ class BrowserTabViewModel @Inject constructor(
         val callback: GeolocationPermissions.Callback,
     )
 
+    data class FileChooserRequestedParams(
+        val filePickingMode: Int,
+        val acceptMimeTypes: List<String>,
+    )
+
     sealed class Command {
         class OpenInNewTab(
             val query: String,
@@ -371,6 +391,7 @@ class BrowserTabViewModel @Inject constructor(
         class ShowSavedSiteAddedConfirmation(val savedSiteChangedViewState: SavedSiteChangedViewState) : Command()
         class ShowEditSavedSiteDialog(val savedSiteChangedViewState: SavedSiteChangedViewState) : Command()
         class DeleteSavedSiteConfirmation(val savedSite: SavedSite) : Command()
+        class DeleteFavoriteConfirmation(val savedSite: SavedSite) : Command()
 
         class ShowFireproofWebSiteConfirmation(val fireproofWebsiteEntity: FireproofWebsiteEntity) : Command()
         class DeleteFireproofConfirmation(val fireproofWebsiteEntity: FireproofWebsiteEntity) : Command()
@@ -400,11 +421,25 @@ class BrowserTabViewModel @Inject constructor(
         object DismissFindInPage : Command()
         class ShowFileChooser(
             val filePathCallback: ValueCallback<Array<Uri>>,
-            val fileChooserParams: FileChooserParams,
+            val fileChooserParams: FileChooserRequestedParams,
         ) : Command()
+
         class ShowExistingImageOrCameraChooser(
             val filePathCallback: ValueCallback<Array<Uri>>,
-            val fileChooserParams: FileChooserParams,
+            val fileChooserParams: FileChooserRequestedParams,
+            val inputAction: String,
+        ) : Command()
+        class ShowImageCamera(
+            val filePathCallback: ValueCallback<Array<Uri>>,
+            val fileChooserParams: FileChooserRequestedParams,
+        ) : Command()
+        class ShowVideoCamera(
+            val filePathCallback: ValueCallback<Array<Uri>>,
+            val fileChooserParams: FileChooserRequestedParams,
+        ) : Command()
+        class ShowSoundRecorder(
+            val filePathCallback: ValueCallback<Array<Uri>>,
+            val fileChooserParams: FileChooserRequestedParams,
         ) : Command()
 
         class HandleNonHttpAppLink(
@@ -505,7 +540,11 @@ class BrowserTabViewModel @Inject constructor(
             val url: String,
         ) : Command()
 
-        class OnPermissionsQueryResponse(val jsCallbackData: JsCallbackData) : Command()
+        data class SendResponseToJs(val data: JsCallbackData) : Command()
+        data class WebShareRequest(val data: JsCallbackData) : Command()
+        data class ScreenLock(val data: JsCallbackData) : Command()
+        object ScreenUnlock : Command()
+        data object ShowFaviconsPrompt : Command()
     }
 
     sealed class NavigationCommand : Command() {
@@ -716,7 +755,8 @@ class BrowserTabViewModel @Inject constructor(
             }
             .map { bookmarks ->
                 val bookmark = bookmarks.firstOrNull { it.url == url }
-                browserViewState.value = currentBrowserViewState().copy(bookmark = bookmark)
+                val isFavorite = currentBrowserViewState().favorite != null
+                browserViewState.value = currentBrowserViewState().copy(bookmark = bookmark?.copy(isFavorite = isFavorite))
             }
             .flowOn(dispatchers.main())
             .launchIn(viewModelScope)
@@ -744,6 +784,12 @@ class BrowserTabViewModel @Inject constructor(
                 .flowOn(dispatchers.io())
                 .launchIn(viewModelScope)
         }
+
+        privacyProtectionsPopupManager.viewState
+            .onEach { popupViewState ->
+                browserViewState.value = currentBrowserViewState().copy(privacyProtectionsPopupViewState = popupViewState)
+            }
+            .launchIn(viewModelScope)
     }
 
     fun loadData(
@@ -1145,7 +1191,7 @@ class BrowserTabViewModel @Inject constructor(
         }
     }
 
-    fun onRefreshRequested() {
+    fun onRefreshRequested(triggeredByUser: Boolean) {
         val omnibarContent = currentOmnibarViewState().omnibarText
         if (!Patterns.WEB_URL.matcher(omnibarContent).matches()) {
             fireQueryChangedPixel(currentOmnibarViewState().omnibarText)
@@ -1155,6 +1201,10 @@ class BrowserTabViewModel @Inject constructor(
             recoverTabWithQuery(url.orEmpty())
         } else {
             command.value = NavigationCommand.Refresh
+        }
+
+        if (triggeredByUser) {
+            privacyProtectionsPopupManager.onPageRefreshTriggeredByUser()
         }
     }
 
@@ -1365,6 +1415,11 @@ class BrowserTabViewModel @Inject constructor(
         isLinkOpenedInNewTab = false
 
         automaticSavedLoginsMonitor.clearAutoSavedLoginId(tabId)
+
+        site?.run {
+            val hasBrowserError = currentBrowserViewState().browserError != OMITTED
+            privacyProtectionsPopupManager.onPageLoaded(url, httpErrorCodeEvents, hasBrowserError)
+        }
     }
 
     private fun setAdClickActiveTabData(url: String?) {
@@ -1421,7 +1476,7 @@ class BrowserTabViewModel @Inject constructor(
         val favorite = getFavorite(url)
         withContext(dispatchers.main()) {
             browserViewState.value = currentBrowserViewState().copy(
-                bookmark = bookmark,
+                bookmark = bookmark?.copy(isFavorite = favorite != null),
                 favorite = favorite,
             )
         }
@@ -1838,6 +1893,13 @@ class BrowserTabViewModel @Inject constructor(
         }
     }
 
+    override fun pageHasHttpResources(page: Uri) {
+        if (site?.domainMatchesUrl(page) == true) {
+            site?.hasHttpResources = true
+            onSiteChanged()
+        }
+    }
+
     override fun onCertificateReceived(certificate: SslCertificate?) {
         site?.certificate = certificate
     }
@@ -1883,11 +1945,51 @@ class BrowserTabViewModel @Inject constructor(
         filePathCallback: ValueCallback<Array<Uri>>,
         fileChooserParams: FileChooserParams,
     ) {
-        if (fileChooserParams.acceptTypes.contains("image/*") && cameraHardwareChecker.hasCameraHardware()) {
-            command.value = ShowExistingImageOrCameraChooser(filePathCallback, fileChooserParams)
-        } else {
-            command.value = ShowFileChooser(filePathCallback, fileChooserParams)
+        val mimeTypes = convertAcceptTypesToMimeTypes(fileChooserParams.acceptTypes)
+        val fileChooserRequestedParams = FileChooserRequestedParams(fileChooserParams.mode, mimeTypes)
+        val cameraHardwareAvailable = cameraHardwareChecker.hasCameraHardware()
+
+        command.value = when {
+            fileChooserParams.isCaptureEnabled -> {
+                when {
+                    acceptsOnly("image/", fileChooserParams.acceptTypes) && cameraHardwareAvailable ->
+                        ShowImageCamera(filePathCallback, fileChooserRequestedParams)
+                    acceptsOnly("video/", fileChooserParams.acceptTypes) && cameraHardwareAvailable ->
+                        ShowVideoCamera(filePathCallback, fileChooserRequestedParams)
+                    acceptsOnly("audio/", fileChooserParams.acceptTypes) ->
+                        ShowSoundRecorder(filePathCallback, fileChooserRequestedParams)
+                    else ->
+                        ShowFileChooser(filePathCallback, fileChooserRequestedParams)
+                }
+            }
+            fileChooserParams.acceptTypes.any { it.startsWith("image/") && cameraHardwareAvailable } ->
+                ShowExistingImageOrCameraChooser(filePathCallback, fileChooserRequestedParams, MediaStore.ACTION_IMAGE_CAPTURE)
+            fileChooserParams.acceptTypes.any { it.startsWith("video/") && cameraHardwareAvailable } ->
+                ShowExistingImageOrCameraChooser(filePathCallback, fileChooserRequestedParams, MediaStore.ACTION_VIDEO_CAPTURE)
+            else ->
+                ShowFileChooser(filePathCallback, fileChooserRequestedParams)
         }
+    }
+
+    private fun acceptsOnly(type: String, acceptTypes: Array<String>): Boolean {
+        return acceptTypes.filter { it.startsWith(type) }.size == acceptTypes.size
+    }
+
+    private fun convertAcceptTypesToMimeTypes(acceptTypes: Array<String>): List<String> {
+        val mimeTypeMap = MimeTypeMap.getSingleton()
+        val mimeTypes = mutableSetOf<String>()
+        acceptTypes.forEach { type ->
+            // Attempt to convert any identified file extensions into corresponding MIME types.
+            val fileExtension = MimeTypeMap.getFileExtensionFromUrl(type)
+            if (fileExtension.isNotEmpty()) {
+                mimeTypeMap.getMimeTypeFromExtension(type.substring(1))?.let {
+                    mimeTypes.add(it)
+                }
+            } else {
+                mimeTypes.add(type)
+            }
+        }
+        return mimeTypes.toList()
     }
 
     private fun currentGlobalLayoutState(): GlobalLayoutViewState = globalLayoutState.value!!
@@ -1990,7 +2092,7 @@ class BrowserTabViewModel @Inject constructor(
             val favorite = currentBrowserViewState().favorite
             if (favorite != null) {
                 pixel.fire(AppPixelName.MENU_ACTION_REMOVE_FAVORITE_PRESSED.pixelName)
-                onDeleteSavedSiteRequested(favorite)
+                onDeleteFavoriteRequested(favorite)
             } else {
                 val buttonHighlighted = currentBrowserViewState().addFavorite.isHighlighted()
                 pixel.fire(
@@ -2038,9 +2140,6 @@ class BrowserTabViewModel @Inject constructor(
                             favorites = hiddenIds.value.favorites - favorite.id,
                         ),
                     )
-                }
-                withContext(dispatchers.main()) {
-                    command.value = ShowSavedSiteAddedConfirmation(SavedSiteChangedViewState(it, null))
                 }
             }
         }
@@ -2141,9 +2240,10 @@ class BrowserTabViewModel @Inject constructor(
     override fun onBookmarkEdited(
         bookmark: Bookmark,
         oldFolderId: String,
+        updateFavorite: Boolean,
     ) {
         viewModelScope.launch(dispatchers.io()) {
-            savedSitesRepository.updateBookmark(bookmark, oldFolderId)
+            savedSitesRepository.updateBookmark(bookmark, oldFolderId, updateFavorite)
         }
     }
 
@@ -2183,11 +2283,15 @@ class BrowserTabViewModel @Inject constructor(
             } else {
                 addToAllowList(domain)
             }
+
+            privacyProtectionsToggleUsageListener.onPrivacyProtectionsToggleUsed()
         }
     }
 
     private suspend fun addToAllowList(domain: String) {
-        pixel.fire(AppPixelName.BROWSER_MENU_ALLOWLIST_ADD)
+        val pixelParams = privacyProtectionsPopupExperimentExternalPixels.getPixelParams()
+        pixel.fire(AppPixelName.BROWSER_MENU_ALLOWLIST_ADD, pixelParams, type = COUNT)
+        privacyProtectionsPopupExperimentExternalPixels.tryReportProtectionsToggledFromBrowserMenu(protectionsEnabled = false)
         userAllowListRepository.addDomainToUserAllowList(domain)
         withContext(dispatchers.main()) {
             command.value = ShowPrivacyProtectionDisabledConfirmation(domain)
@@ -2196,7 +2300,9 @@ class BrowserTabViewModel @Inject constructor(
     }
 
     private suspend fun removeFromAllowList(domain: String) {
-        pixel.fire(AppPixelName.BROWSER_MENU_ALLOWLIST_REMOVE)
+        val pixelParams = privacyProtectionsPopupExperimentExternalPixels.getPixelParams()
+        pixel.fire(AppPixelName.BROWSER_MENU_ALLOWLIST_REMOVE, pixelParams, type = COUNT)
+        privacyProtectionsPopupExperimentExternalPixels.tryReportProtectionsToggledFromBrowserMenu(protectionsEnabled = true)
         userAllowListRepository.removeDomainFromUserAllowList(domain)
         withContext(dispatchers.main()) {
             command.value = ShowPrivacyProtectionEnabledConfirmation(domain)
@@ -2322,6 +2428,10 @@ class BrowserTabViewModel @Inject constructor(
         } else {
             command.value = NavigationCommand.Refresh
         }
+    }
+
+    fun onPrivacyProtectionsPopupUiEvent(event: PrivacyProtectionsPopupUiEvent) {
+        privacyProtectionsPopupManager.onUiEvent(event)
     }
 
     private fun initializeViewStates() {
@@ -2644,7 +2754,7 @@ class BrowserTabViewModel @Inject constructor(
         appLinksHandler.updatePreviousUrl(null)
     }
 
-    fun clearPreviousAppLink() {
+    private fun clearPreviousAppLink() {
         browserViewState.value = currentBrowserViewState().copy(
             previousAppLink = null,
         )
@@ -2832,24 +2942,38 @@ class BrowserTabViewModel @Inject constructor(
         fileDownloader.enqueueDownload(pendingFileDownload)
     }
 
-    fun onDeleteSavedSiteSnackbarDismissed(savedSite: SavedSite) {
+    fun onDeleteFavoriteSnackbarDismissed(savedSite: SavedSite) {
         delete(savedSite)
     }
 
-    private fun delete(savedSite: SavedSite) {
-        viewModelScope.launch(dispatchers.io() + NonCancellable) {
-            if (savedSite is Bookmark) {
+    fun onDeleteSavedSiteSnackbarDismissed(savedSite: SavedSite) {
+        delete(savedSite, true)
+    }
+
+    private fun delete(
+        savedSite: SavedSite,
+        deleteBookmark: Boolean = false,
+    ) {
+        appCoroutineScope.launch(dispatchers.io()) {
+            if (savedSite is Bookmark || deleteBookmark) {
                 faviconManager.deletePersistedFavicon(savedSite.url)
             }
-            savedSitesRepository.delete(savedSite)
+            savedSitesRepository.delete(savedSite, deleteBookmark)
         }
     }
 
-    fun onDeleteSavedSiteRequested(savedSite: SavedSite) {
-        hide(savedSite)
+    fun onDeleteFavoriteRequested(savedSite: SavedSite) {
+        hide(savedSite, DeleteFavoriteConfirmation(savedSite))
     }
 
-    private fun hide(savedSite: SavedSite) {
+    fun onDeleteSavedSiteRequested(savedSite: SavedSite) {
+        hide(savedSite, DeleteSavedSiteConfirmation(savedSite))
+    }
+
+    private fun hide(
+        savedSite: SavedSite,
+        deleteCommand: Command,
+    ) {
         viewModelScope.launch(dispatchers.io()) {
             when (savedSite) {
                 is Bookmark -> {
@@ -2866,7 +2990,7 @@ class BrowserTabViewModel @Inject constructor(
                 }
             }
             withContext(dispatchers.main()) {
-                command.value = DeleteSavedSiteConfirmation(savedSite)
+                command.value = deleteCommand
             }
         }
     }
@@ -3066,16 +3190,102 @@ class BrowserTabViewModel @Inject constructor(
         )
     }
 
-    fun onPermissionsQuery(featureName: String, method: String, id: String, data: JSONObject) {
+    fun processJsCallbackMessage(
+        featureName: String,
+        method: String,
+        id: String?,
+        data: JSONObject?,
+    ) {
+        when (method) {
+            "webShare" -> if (id != null && data != null) {
+                webShare(featureName, method, id, data)
+            }
+
+            "permissionsQuery" -> if (id != null && data != null) {
+                permissionsQuery(featureName, method, id, data)
+            }
+
+            "screenLock" -> if (id != null && data != null) {
+                screenLock(featureName, method, id, data)
+            }
+
+            "screenUnlock" -> screenUnlock()
+            else -> {
+                // NOOP
+            }
+        }
+    }
+
+    private fun webShare(
+        featureName: String,
+        method: String,
+        id: String,
+        data: JSONObject,
+    ) {
+        viewModelScope.launch(dispatchers.main()) {
+            command.value = WebShareRequest(JsCallbackData(data, featureName, method, id))
+        }
+    }
+
+    private fun permissionsQuery(
+        featureName: String,
+        method: String,
+        id: String,
+        data: JSONObject,
+    ) {
         val response = if (url == null) {
             getDataForPermissionState(featureName, method, id, SitePermissionQueryResponse.Denied)
         } else {
-            val permissionState = sitePermissionsManager.getPermissionsQueryResponse(url!!, tabId, data.getString("name"))
+            val permissionState = sitePermissionsManager.getPermissionsQueryResponse(url!!, tabId, data.optString("name"))
             getDataForPermissionState(featureName, method, id, permissionState)
         }
 
         viewModelScope.launch(dispatchers.main()) {
-            command.value = OnPermissionsQueryResponse(response)
+            command.value = SendResponseToJs(response)
+        }
+    }
+
+    private fun screenLock(
+        featureName: String,
+        method: String,
+        id: String,
+        data: JSONObject,
+    ) {
+        viewModelScope.launch(dispatchers.main()) {
+            if (androidBrowserConfig.screenLock().isEnabled()) {
+                withContext(dispatchers.main()) {
+                    command.value = ScreenLock(JsCallbackData(data, featureName, method, id))
+                }
+            }
+        }
+    }
+
+    private fun screenUnlock() {
+        viewModelScope.launch(dispatchers.main()) {
+            if (androidBrowserConfig.screenLock().isEnabled()) {
+                withContext(dispatchers.main()) {
+                    command.value = ScreenUnlock
+                }
+            }
+        }
+    }
+
+    fun onHomeShown() {
+        clearPreviousAppLink()
+        viewModelScope.launch(dispatchers.io()) {
+            if (faviconsFetchingPrompt.shouldShow() && currentCtaViewState().favorites.isNotEmpty()) {
+                withContext(dispatchers.main()) {
+                    command.value = ShowFaviconsPrompt
+                }
+            }
+        }
+    }
+
+    fun onFaviconsFetchingEnabled(
+        fetchingEnabled: Boolean,
+    ) {
+        viewModelScope.launch(dispatchers.io()) {
+            faviconsFetchingPrompt.onPromptAnswered(fetchingEnabled)
         }
     }
 

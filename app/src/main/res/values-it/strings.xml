@@ -496,7 +496,6 @@
     <string name="onboardingFeatureOptionOneClickDataClearing">Dati eliminabili con un clic</string>
 
     <!-- Download Confirmation -->
-    <string name="downloadConfirmationContinue">Salva in Download</string>
     <string name="downloadConfirmationSaveFileTitle" instruction="Placeholder is the name of a file">Salva %1$s</string>
     <string name="downloadConfirmationKeepBothFilesText">Conserva entrambi</string>
     <string name="downloadConfirmationReplaceOldFileText">Sostituisci</string>
@@ -803,4 +802,22 @@
     <string name="safegaze_popup_takecontrol_title">Migliora la tua esperienza online con SafeGaze, la nostra estensione di purificazione delle immagini che protegge la tua visione dal contenuto inappropriato.</string>
     <string name="safegaze_popup_turnon_title">Attiva SafeGaze</string>
 
+
+    <!-- Bookmarks -->
+    <string name="searchBookmarks">Cerca segnalibri</string>
+    <string name="deleteFolder" instruction="%1$s is the folder name">"Eliminare %1$s?"</string>
+    <string name="deleteBookmark" instruction="%1$s is the bookmark name">"Eliminare segnalibro %1$s?"</string>
+    <string name="bookmarkAddedInBookmarks" instruction="%1$s is the folder name">Segnalibro aggiunto in %1$s</string>
+    <string name="addToFavorites">Aggiungi ai Preferiti</string>
+    <string name="editBookmark">Modifica segnalibro</string>
+    <string name="importBookmarksDescription">Se i segnalibri vengono salvati in un altro browser,\nè possibile importarli in DuckDuckGo.</string>
+    <string name="importBookmarks">Importa segnalibri</string>
+    <string name="noResultsFor" instruction="%1$s is the search term">Nessun risultato per \"%1$s\"</string>
+    <string name="removeFromFavorites">Rimuovi dai preferiti</string>
+    <string name="addToFavoritesMenu">Aggiungi ai Preferiti</string>
+    <plurals name="bookmarkFolderDeleteMessage">
+        <item quantity="one">Vuoi davvero eliminare questa cartella e %1$d elemento?</item>
+        <item quantity="other">Vuoi davvero eliminare questa cartella e %1$d elementi?</item>
+    </plurals>
+    <string name="deleteBookmarkConfirmationDescription" instruction="Placeholder is the name of the bookmark">Eliminare il tuo segnalibro per &lt;b&gt;%1$s&lt;/b&gt;?</string>
 </resources>

@@ -20,6 +20,7 @@ import com.duckduckgo.autofill.impl.securestorage.SecureStorage
 import com.duckduckgo.autofill.impl.securestorage.WebsiteLoginDetails
 import com.duckduckgo.autofill.impl.securestorage.WebsiteLoginDetailsWithCredentials
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 
 internal class FakeSecureStorage : SecureStorage {
@@ -41,6 +42,10 @@ internal class FakeSecureStorage : SecureStorage {
         }
         entities.add(newLogin)
         return newLogin
+    }
+
+    override suspend fun addWebsiteLoginDetailsWithCredentials(credentials: List<WebsiteLoginDetailsWithCredentials>) {
+        credentials.forEach { addWebsiteLoginDetailsWithCredentials(it) }
     }
 
     override suspend fun websiteLoginDetailsForDomain(domain: String): Flow<List<WebsiteLoginDetails>> {
@@ -80,4 +85,17 @@ internal class FakeSecureStorage : SecureStorage {
             entities.remove(it)
         }
     }
+
+    override suspend fun deleteWebSiteLoginDetailsWithCredentials(ids: List<Long>) {
+        entities.removeAll { ids.contains(it.details.id) }
+    }
+
+    override suspend fun addToNeverSaveList(domain: String) {
+    }
+
+    override suspend fun clearNeverSaveList() {
+    }
+
+    override suspend fun neverSaveListCount(): Flow<Int> = emptyFlow()
+    override suspend fun isInNeverSaveList(domain: String): Boolean = false
 }

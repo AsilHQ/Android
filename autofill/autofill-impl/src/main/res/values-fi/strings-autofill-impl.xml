@@ -116,7 +116,7 @@
     <string name="autofillManagementScreenTitle">Salasanat</string>
     <string name="credentialManagementNoLoginsSavedTitle">Salasanoja ei ole vielä tallennettu</string>
     <string name="credentialManagementAutofillToggleLabel">Tallenna ja täytä salasanat automaattisesti</string>
-    <string name="credentialManagementAutofillToggleSubtitle">Salasanat tallennetaan laitteellesi turvallisesti.</string>
+    <string name="credentialManagementAutofillToggleSubtitle">Salasanat tallennetaan laitteellesi turvallisesti</string>
     <string name="saveLoginDialogSubtitle">Salasanat tallennetaan laitteellesi turvallisesti.</string>
     <string name="autofillManagementAddLogin">Lisää salasana</string>
     <string name="credentialManagementEditLoginTitleHint">Otsikko</string>
@@ -132,5 +132,32 @@
     <string name="managementDisabledModeTitle">Suojaa laitteesi salasanojen tallentamiseksi</string>
     <string name="managementDisabledModeSubtitle">Salasanojen suojaamiseen tarvitaan laitteen lukituskuvio, PIN-koodi tai biometriset tiedot.</string>
     <string name="credentialManagementEditTitle">Muokkaa salasanaa</string>
+
+    <string name="credentials_limit_warning"><b>Synkronointi keskeytetty</b>\nKirjautumisten enimmäismäärä ylitetty. Poista jotain jatkaaksesi synkronointia.\n\n<annotation type="manage_logins">Hallitse kirjautumisia</annotation></string>
+    <string name="credentials_limit_warning_notif"><b>Salasanojen synkronointi on keskeytetty</b>\nOlet ylittänyt salasanojen synkronointirajan. Yritä poistaa joitakin salasanoja. Salasanojasi ei varmuuskopioida ennen kuin tämä ongelma on ratkaistu.</string>
+
+    <string name="saveLoginDialogNeverForThisSite">Älä kysy enää tällä sivustolla</string>
+    <string name="credentialManagementInstructionNeverForThisSite">Jos nollaat poissuljetut sivustot, sinua pyydetään tallentamaan salasanasi, kun seuraavan kerran kirjaudut sisään jollekin näistä sivustoista.</string>
+    <string name="credentialManagementClearNeverForThisSiteList">Nollaa poissuljetut sivustot</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogTitle">Nollataanko poissuljetut sivustot?</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogPositiveButton">Nollaa</string>
+    <string name="credentialManagementClearNeverForThisSiteDialogNegativeButton">Peruuta</string>
+
+    <string name="credentialManagementDeleteAllPasswordsMenu">Poista kaikki salasanat</string>
+    <plurals name="credentialManagementDeleteAllPasswordsConfirmationTitle" instruction="Placeholder is a number representing how many passwords will be deleted">
+        <item quantity="one">Haluatko varmasti poistaa %1$d salasanan?</item>
+        <item quantity="other">Haluatko varmasti poistaa %1$d salasanaa?</item>
+    </plurals>
+
+    <string name="credentialManagementDeletePasswordConfirmationMessage">Salasanasi poistetaan kaikista synkronoiduista laitteista. Varmista, että pääset yhä käyttämään tiliäsi.</string>
+    <string name="credentialManagementDeleteAllPasswordsConfirmationMessage">Salasanasi poistetaan kaikista synkronoiduista laitteista. Varmista, että pääset yhä käyttämään tilejäsi.</string>
+
+    <plurals name="credentialManagementDeleteAllPasswordsSnackbarConfirmation" instruction="Placeholder is a number representing how many passwords were deleted">
+        <item quantity="one">%1$d salasana poistettu</item>
+        <item quantity="other">%1$d salasanaa poistettu</item>
+    </plurals>
+
+    <string name="autofill_auth_text_for_delete_all">Vahvista, että haluat poistaa kaikki salasanat.</string>
+    <string name="autofill_title_text_for_delete_all">Poista kaikki salasanat</string>
 
 </resources>

@@ -20,8 +20,8 @@ android {
         minSdk min_sdk
         targetSdk target_sdk
         compileSdk compile_sdk
-        versionCode 131
-        versionName "1.3.1"
+        versionCode 134
+        versionName "1.3.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         archivesBaseName = "kahf_browser-$versionName"
         vectorDrawables.useSupportLibrary = true
@@ -67,6 +67,7 @@ android {
     }
 
     compileOptions {
+        coreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -220,6 +221,9 @@ dependencies {
     implementation project(':privacy-dashboard-api')
     implementation project(':privacy-dashboard-impl')
 
+    implementation project(":privacy-protections-popup-api")
+    implementation project(":privacy-protections-popup-impl")
+
     implementation project(':remote-messaging-api')
     implementation project(':remote-messaging-impl')
     implementation project(':remote-messaging-store')
@@ -318,9 +322,6 @@ dependencies {
     implementation project(':broken-site-impl')
     implementation project(':broken-site-store')
 
-    implementation project(':backup-agent-api')
-    implementation project(':backup-agent-impl')
-
     // Deprecated. TODO: Stop using this artifact.
     implementation "androidx.legacy:legacy-support-v4:_"
     debugImplementation Square.leakCanary.android
@@ -353,10 +354,6 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:_"
     implementation "io.reactivex.rxjava2:rxandroid:_"
     implementation JakeWharton.timber
-
-    // ThreeTenABP
-    implementation "com.jakewharton.threetenabp:threetenabp:_"
-    testImplementation "org.threeten:threetenbp:_"
 
     // RxRelay
     implementation "com.jakewharton.rxrelay2:rxrelay:_"
@@ -477,6 +474,8 @@ dependencies {
     implementation 'androidx.compose.runtime:runtime-rxjava2'
     implementation 'io.coil-kt:coil-compose:1.3.2'
     implementation 'jp.wasabeef:blurry:4.0.1'
+
+    coreLibraryDesugaring Android.tools.desugarJdkLibs
 }
 
 tasks.register('fastlaneVersionCode') {

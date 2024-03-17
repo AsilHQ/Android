@@ -32,14 +32,17 @@ import com.duckduckgo.subscriptions.impl.SubscriptionStatus.Unknown
 import com.duckduckgo.subscriptions.impl.SubscriptionsData.*
 import com.duckduckgo.subscriptions.impl.billing.BillingClientWrapper
 import com.duckduckgo.subscriptions.impl.billing.PurchaseState
+import com.duckduckgo.subscriptions.impl.pixels.SubscriptionPixelSender
+import com.duckduckgo.subscriptions.impl.repository.AuthRepository
 import com.duckduckgo.subscriptions.impl.services.AuthService
 import com.duckduckgo.subscriptions.impl.services.CreateAccountResponse
 import com.duckduckgo.subscriptions.impl.services.Entitlement
 import com.duckduckgo.subscriptions.impl.services.ResponseError
 import com.duckduckgo.subscriptions.impl.services.StoreLoginBody
 import com.duckduckgo.subscriptions.impl.services.SubscriptionsService
-import com.duckduckgo.subscriptions.store.AuthDataStore
 import com.squareup.anvil.annotations.ContributesBinding
+import com.squareup.moshi.JsonDataException
+import com.squareup.moshi.JsonEncodingException
 import com.squareup.moshi.Moshi
 import dagger.SingleInstanceIn
 import javax.inject.Inject
@@ -124,6 +127,11 @@ interface SubscriptionsManager {
      * Deletes the current account
      */
     suspend fun deleteAccount(): Boolean
+
+    /**
+     * Returns a [String] with the URL of the portal or null otherwise
+     */
+    suspend fun getPortalUrl(): String?
 }
 
 @SingleInstanceIn(AppScope::class)
@@ -131,12 +139,13 @@ interface SubscriptionsManager {
 class RealSubscriptionsManager @Inject constructor(
     private val authService: AuthService,
     private val subscriptionsService: SubscriptionsService,
-    private val authDataStore: AuthDataStore,
+    private val authRepository: AuthRepository,
     private val billingClientWrapper: BillingClientWrapper,
     private val emailManager: EmailManager,
     private val context: Context,
     @AppCoroutineScope private val coroutineScope: CoroutineScope,
     private val dispatcherProvider: DispatcherProvider,
+    private val pixelSender: SubscriptionPixelSender,
 ) : SubscriptionsManager {
 
     private val adapter = Moshi.Builder().build().adapter(ResponseError::class.java)
@@ -151,7 +160,7 @@ class RealSubscriptionsManager @Inject constructor(
     override val hasSubscription = _hasSubscription.asStateFlow().onSubscription { emitHasSubscriptionsValues() }
 
     private var purchaseStateJob: Job? = null
-    private fun isUserAuthenticated(): Boolean = !authDataStore.accessToken.isNullOrBlank() && !authDataStore.authToken.isNullOrBlank()
+    private fun isUserAuthenticated(): Boolean = authRepository.isUserAuthenticated()
 
     private suspend fun emitHasSubscriptionsValues() {
         coroutineScope.launch(dispatcherProvider.io()) {
@@ -175,17 +184,28 @@ class RealSubscriptionsManager @Inject constructor(
 
     override suspend fun deleteAccount(): Boolean {
         return try {
-            val state = authService.delete("Bearer ${authDataStore.authToken}")
+            val state = authService.delete("Bearer ${authRepository.tokens().authToken}")
             (state.status == "deleted")
         } catch (e: Exception) {
             false
         }
     }
 
+    override suspend fun getPortalUrl(): String? {
+        return try {
+            if (isUserAuthenticated()) {
+                return subscriptionsService.portal("Bearer ${authRepository.tokens().accessToken}").customerPortalUrl
+            }
+            null
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     override suspend fun getSubscription(): Subscription {
         return try {
             if (isUserAuthenticated()) {
-                val response = subscriptionsService.subscription("Bearer ${authDataStore.accessToken}")
+                val response = subscriptionsService.subscription("Bearer ${authRepository.tokens().accessToken}")
                 val state = when (response.status) {
                     "Auto-Renewable" -> AutoRenewable
                     "Not Auto-Renewable" -> NotAutoRenewable
@@ -194,11 +214,13 @@ class RealSubscriptionsManager @Inject constructor(
                     "Expired" -> Expired
                     else -> Unknown
                 }
+                authRepository.saveSubscriptionData(response.platform, response.expiresOrRenewsAt)
                 return Subscription.Success(
                     productId = response.productId,
                     startedAt = response.startedAt,
                     expiresOrRenewsAt = response.expiresOrRenewsAt,
                     status = state,
+                    platform = response.platform,
                 )
             } else {
                 Subscription.Failure("Subscription not found")
@@ -212,8 +234,7 @@ class RealSubscriptionsManager @Inject constructor(
     }
 
     override suspend fun signOut() {
-        authDataStore.authToken = ""
-        authDataStore.accessToken = ""
+        authRepository.signOut()
         _isSignedIn.emit(false)
         _hasSubscription.emit(false)
     }
@@ -229,8 +250,11 @@ class RealSubscriptionsManager @Inject constructor(
             retries++
         }
         if (hasSubscription) {
+            pixelSender.reportPurchaseSuccess()
+            pixelSender.reportSubscriptionActivated()
             _currentPurchaseState.emit(CurrentPurchase.Success)
         } else {
+            pixelSender.reportPurchaseFailureBackend()
             _currentPurchaseState.emit(CurrentPurchase.Failure("An error happened, try again"))
         }
         _hasSubscription.emit(hasSubscription)
@@ -252,9 +276,10 @@ class RealSubscriptionsManager @Inject constructor(
     override suspend fun authenticate(authToken: String): SubscriptionsData {
         return try {
             val response = authService.accessToken("Bearer $authToken")
-            authDataStore.accessToken = response.accessToken
-            authDataStore.authToken = authToken
             val subscriptionData = getSubscriptionDataFromToken(response.accessToken)
+            if (subscriptionData is Success) {
+                authRepository.authenticate(authToken, response.accessToken, subscriptionData.externalId, subscriptionData.email)
+            }
             _isSignedIn.emit(isUserAuthenticated())
             _hasSubscription.emit(hasSubscription())
             return subscriptionData
@@ -275,7 +300,11 @@ class RealSubscriptionsManager @Inject constructor(
                 val storeLoginBody = StoreLoginBody(signature = signature, signedData = body, packageName = context.packageName)
                 val response = authService.storeLogin(storeLoginBody)
                 logcat(LogPriority.DEBUG) { "Subs: store login succeeded" }
-                authenticate(response.authToken)
+                val subscriptionsData = authenticate(response.authToken)
+                if (subscriptionsData is Success && subscriptionsData.entitlements.isNotEmpty()) {
+                    pixelSender.reportSubscriptionActivated()
+                }
+                subscriptionsData
             } else {
                 Failure(SUBSCRIPTION_NOT_FOUND_ERROR)
             }
@@ -290,9 +319,9 @@ class RealSubscriptionsManager @Inject constructor(
     override suspend fun getSubscriptionData(): SubscriptionsData {
         return try {
             if (isUserAuthenticated()) {
-                getSubscriptionDataFromToken(authDataStore.accessToken!!)
+                getSubscriptionDataFromToken(authRepository.tokens().accessToken!!)
             } else {
-                Failure("Subscription data not found")
+                Success(email = null, externalId = "", entitlements = emptyList())
             }
         } catch (e: HttpException) {
             val error = parseError(e)?.error ?: "An error happened"
@@ -324,11 +353,13 @@ class RealSubscriptionsManager @Inject constructor(
                         billingClientWrapper.launchBillingFlow(activity, billingParams)
                     }
                 } else {
+                    pixelSender.reportRestoreAfterPurchaseAttemptSuccess()
                     _currentPurchaseState.emit(CurrentPurchase.Recovered)
                 }
             }
             is Failure -> {
                 logcat(LogPriority.ERROR) { "Subs: ${response.message}" }
+                pixelSender.reportPurchaseFailureOther()
                 _currentPurchaseState.emit(CurrentPurchase.Failure(response.message))
             }
         }
@@ -337,7 +368,12 @@ class RealSubscriptionsManager @Inject constructor(
     private suspend fun prePurchaseFlow(): SubscriptionsData {
         return try {
             val subscriptionData = if (isUserAuthenticated()) {
-                getSubscriptionDataFromToken(authDataStore.accessToken!!)
+                getSubscriptionDataFromToken(authRepository.tokens().accessToken!!)
+                    .also { subscriptionsData ->
+                        if (subscriptionsData is Success && subscriptionsData.entitlements.isNotEmpty()) {
+                            pixelSender.reportSubscriptionActivated()
+                        }
+                    }
             } else {
                 recoverSubscriptionFromStore()
             }
@@ -358,13 +394,13 @@ class RealSubscriptionsManager @Inject constructor(
 
     override suspend fun getAuthToken(): AuthToken {
         return if (isUserAuthenticated()) {
-            logcat { "Subs auth token is ${authDataStore.authToken}" }
-            when (val response = getSubscriptionDataFromToken(authDataStore.authToken!!)) {
+            logcat { "Subs auth token is ${authRepository.tokens().authToken}" }
+            when (val response = getSubscriptionDataFromToken(authRepository.tokens().authToken!!)) {
                 is Success -> {
                     return if (response.entitlements.isEmpty()) {
                         AuthToken.Failure("")
                     } else {
-                        AuthToken.Success(authDataStore.authToken!!)
+                        AuthToken.Success(authRepository.tokens().authToken!!)
                     }
                 }
                 is Failure -> {
@@ -376,7 +412,7 @@ class RealSubscriptionsManager @Inject constructor(
                                 return if (subscriptionsData.entitlements.isEmpty()) {
                                     AuthToken.Failure("")
                                 } else {
-                                    AuthToken.Success(authDataStore.authToken!!)
+                                    AuthToken.Success(authRepository.tokens().authToken!!)
                                 }
                             } else {
                                 AuthToken.Failure(response.message)
@@ -396,7 +432,7 @@ class RealSubscriptionsManager @Inject constructor(
     override suspend fun getAccessToken(): AccessToken {
         return withContext(dispatcherProvider.io()) {
             if (isUserAuthenticated()) {
-                AccessToken.Success(authDataStore.accessToken!!)
+                AccessToken.Success(authRepository.tokens().accessToken!!)
             } else {
                 AccessToken.Failure("Token not found")
             }
@@ -418,7 +454,20 @@ class RealSubscriptionsManager @Inject constructor(
     }
 
     private suspend fun createAccount(): CreateAccountResponse {
-        return authService.createAccount("Bearer ${emailManager.getToken()}")
+        try {
+            val account = authService.createAccount("Bearer ${emailManager.getToken()}")
+            if (account.authToken.isEmpty()) {
+                pixelSender.reportPurchaseFailureAccountCreation()
+            }
+            return account
+        } catch (e: Exception) {
+            when (e) {
+                is JsonDataException, is JsonEncodingException, is HttpException -> {
+                    pixelSender.reportPurchaseFailureAccountCreation()
+                }
+            }
+            throw e
+        }
     }
 
     private fun parseError(e: HttpException): ResponseError? {
@@ -451,7 +500,13 @@ sealed class SubscriptionsData {
 }
 
 sealed class Subscription {
-    data class Success(val productId: String, val startedAt: Long, val expiresOrRenewsAt: Long, val status: SubscriptionStatus) : Subscription()
+    data class Success(
+        val productId: String,
+        val startedAt: Long,
+        val expiresOrRenewsAt: Long,
+        val status: SubscriptionStatus,
+        val platform: String,
+    ) : Subscription()
     data class Failure(val message: String) : Subscription()
 }
 

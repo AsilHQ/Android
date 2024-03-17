@@ -32,7 +32,6 @@ import com.duckduckgo.app.referral.AppInstallationReferrerStateListener
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.plugins.PluginPoint
 import com.duckduckgo.di.DaggerMap
-import com.jakewharton.threetenabp.AndroidThreeTen
 import dagger.android.AndroidInjector
 import dagger.android.HasDaggerInjector
 import io.reactivex.exceptions.UndeliverableException
@@ -40,9 +39,7 @@ import io.reactivex.plugins.RxJavaPlugins
 import java.io.File
 import javax.inject.Inject
 import kotlinx.coroutines.*
-import org.threeten.bp.zone.ZoneRulesProvider
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 private const val VPN_PROCESS_NAME = "vpn"
 
@@ -61,7 +58,7 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
     lateinit var vpnLifecycleObserverPluginPoint: PluginPoint<VpnProcessLifecycleObserver>
 
     @Inject
-    lateinit var activityLifecycleCallbacks: PluginPoint<com.duckduckgo.app.global.ActivityLifecycleCallbacks>
+    lateinit var activityLifecycleCallbacks: PluginPoint<com.duckduckgo.browser.api.ActivityLifecycleCallbacks>
 
     @Inject
     @AppCoroutineScope
@@ -83,9 +80,8 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
 
         configureDependencyInjection()
         setupActivityLifecycleCallbacks()
-        configureUncaughtExceptionHandlerBrowser()
-        initializeDateLibrary()
-        scheduleTasks()
+        configureUncaughtExceptionHandler()
+
         // Deprecated, we need to move all these into AppLifecycleEventObserver
         ProcessLifecycleOwner.get().lifecycle.apply {
             primaryLifecycleObserverPluginPoint.getPlugins().forEach {
@@ -104,8 +100,7 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
             configureLogging()
             Timber.d("Init for secondary process $shortProcessName with pid=${android.os.Process.myPid()}")
             configureDependencyInjection()
-            configureUncaughtExceptionHandlerVpn()
-            initializeDateLibrary()
+            configureUncaughtExceptionHandler()
 
             // ProcessLifecycleOwner doesn't know about secondary processes, so the callbacks are our own callbacks and limited to onCreate which
             // is good enough.
@@ -122,33 +117,7 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
         activityLifecycleCallbacks.getPlugins().forEach { registerActivityLifecycleCallbacks(it) }
     }
 
-    private fun scheduleTasks() {
-        val initialWorkRequest = OneTimeWorkRequest.Builder(HostBlockerWorker::class.java).build()
-        val periodicWorkRequest = PeriodicWorkRequest.Builder(
-            HostBlockerWorker::class.java, 7, TimeUnit.DAYS
-        ).build()
-
-        val workManager = WorkManager.getInstance(this)
-        workManager.enqueue(initialWorkRequest)
-        workManager.enqueue(periodicWorkRequest)
-
-        val initialWorkRequestStatus = workManager.getWorkInfoById(initialWorkRequest.id).get()
-        val periodicWorkRequestStatus = workManager.getWorkInfoById(periodicWorkRequest.id).get()
-
-        if (initialWorkRequestStatus.state == WorkInfo.State.SUCCEEDED) {
-            println("Initial worked")
-        } else if (initialWorkRequestStatus.state == WorkInfo.State.FAILED) {
-            println("Initial failed")
-        }
-
-        if (periodicWorkRequestStatus.state == WorkInfo.State.SUCCEEDED) {
-            println("periodicWorkRequestStatus worked")
-        } else if (periodicWorkRequestStatus.state == WorkInfo.State.FAILED) {
-            println("periodicWorkRequestStatus failed")
-        }
-    }
-
-    private fun configureUncaughtExceptionHandlerBrowser() {
+    private fun configureUncaughtExceptionHandler() {
         Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler)
         RxJavaPlugins.setErrorHandler { throwable ->
             if (throwable is UndeliverableException) {
@@ -157,10 +126,6 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
                 uncaughtExceptionHandler.uncaughtException(Thread.currentThread(), throwable)
             }
         }
-    }
-
-    private fun configureUncaughtExceptionHandlerVpn() {
-        Thread.setDefaultUncaughtExceptionHandler(uncaughtExceptionHandler)
     }
 
     private fun configureLogging() {
@@ -217,14 +182,6 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
             }
         }
         return dir
-    }
-
-    private fun initializeDateLibrary() {
-        AndroidThreeTen.init(this)
-        // Query the ZoneRulesProvider so that it is loaded on a background coroutine
-        GlobalScope.launch(dispatchers.io()) {
-            ZoneRulesProvider.getAvailableZoneIds()
-        }
     }
 
     /**

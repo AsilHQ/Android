@@ -38,10 +38,10 @@ import com.squareup.anvil.annotations.ContributesTo
 import dagger.Module
 import dagger.Provides
 import dagger.SingleInstanceIn
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Qualifier
-import org.threeten.bp.LocalDateTime
-import org.threeten.bp.format.DateTimeFormatter
 import timber.log.Timber
 
 interface PrivacyConfigPersister {
@@ -142,7 +142,10 @@ class RealPrivacyConfigPersister @Inject constructor(
 
 @VisibleForTesting
 fun PluginPoint<PrivacyFeaturePlugin>.signature(): Int {
-    return this.getPlugins().sumOf { it.featureName.hashCode() }
+    return this.getPlugins().sumOf {
+        // use the hash() of the feature or featureName for backwards compat
+        it.hash()?.hashCode() ?: it.featureName.hashCode()
+    }
 }
 
 @Retention(AnnotationRetention.BINARY)
