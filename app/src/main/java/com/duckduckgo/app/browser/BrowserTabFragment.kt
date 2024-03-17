@@ -260,6 +260,8 @@ import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.FragmentViewModelFactory
 import com.duckduckgo.common.utils.KAHF_BROWSER_URL
+import com.duckduckgo.common.utils.KAHF_TUBE_INTERFACE
+import com.duckduckgo.common.utils.POPUP_ANIMATION
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
 import com.duckduckgo.common.utils.SAFE_GAZE_ALL_TIME_CENSORED_COUNT
 import com.duckduckgo.common.utils.SAFE_GAZE_AND_DNS_INIT
@@ -947,7 +949,7 @@ class BrowserTabFragment :
             val y = iconRect.top
             val x = iconRect.left
             popupWindow.apply {
-                animationStyle = 2132017505
+                animationStyle = POPUP_ANIMATION
                 isFocusable = true
             }
             kahfDnsdIcon.post {
@@ -1047,7 +1049,7 @@ class BrowserTabFragment :
                         }
                     },
                 ),
-                "KahfTubeInterface",
+                KAHF_TUBE_INTERFACE,
             )
             loadUrl("https://m.youtube.com/?noapp")
         }
@@ -1195,7 +1197,7 @@ class BrowserTabFragment :
             val x = iconRect.left
             val y = iconRect.top
             popupWindow.apply {
-                animationStyle = 2132017505
+                animationStyle = POPUP_ANIMATION
                 isFocusable = true
             }
 
@@ -2524,9 +2526,9 @@ class BrowserTabFragment :
                             email: String?,
                             imgSrc: String?
                         ) {
-                            Timber.tag("KahfTubeInterface").v("name: $name")
-                            Timber.tag("KahfTubeInterface").v("email: $email")
-                            Timber.tag("KahfTubeInterface").v("imgSrc: $imgSrc")
+                            Timber.tag(KAHF_TUBE_INTERFACE).v("name: $name")
+                            Timber.tag(KAHF_TUBE_INTERFACE).v("email: $email")
+                            Timber.tag(KAHF_TUBE_INTERFACE).v("imgSrc: $imgSrc")
                         }
 
                         override fun onHalalzTap() {
@@ -2543,7 +2545,7 @@ class BrowserTabFragment :
                         }
                     },
                 ),
-                "KahfTubeInterface",
+                KAHF_TUBE_INTERFACE,
             )
             it.settings.apply {
                 userAgentProvider.setHintHeader(this)
@@ -3075,7 +3077,7 @@ class BrowserTabFragment :
     private fun hideKeyboard() {
         if (!isHidden) {
             Timber.v("Keyboard now hiding")
-            omnibar.omnibarTextInput.postDelayed(KEYBOARD_DELAY) { omnibar.omnibarTextInput?.hideKeyboard() }
+            omnibar.omnibarTextInput.postDelayed(KEYBOARD_DELAY) { omnibar.omnibarTextInput.hideKeyboard() }
             binding.focusDummy.requestFocus()
         }
     }
@@ -3083,7 +3085,7 @@ class BrowserTabFragment :
     private fun showKeyboardImmediately() {
         if (!isHidden) {
             Timber.v("Keyboard now showing")
-            omnibar.omnibarTextInput?.showKeyboard()
+            omnibar.omnibarTextInput.showKeyboard()
         }
     }
 

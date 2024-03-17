@@ -27,3 +27,5 @@ const val SAFE_GAZE_ALL_TIME_CENSORED_COUNT = "all_time_censored_count"
 const val CHECK_KAHF_DNS_URL = "https://check.kahfdns.com"
 const val SUPPORT_SAFE_GAZE_URL = "https://www.patreon.com/SafeGaze"
 const val KAHF_BROWSER_URL = "https://play.google.com/store/apps/details?id=org.halalz.kahfbrowser"
+const val KAHF_TUBE_INTERFACE = "KahfTubeInterface"
+const val POPUP_ANIMATION = 2132017505
