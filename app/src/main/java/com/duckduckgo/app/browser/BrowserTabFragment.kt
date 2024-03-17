@@ -977,10 +977,12 @@ class BrowserTabFragment :
                     if (DnsOverVpnService.isVpnRunning(connectivityManager)){
                         kahfDnsToggleButton.isChecked = true
                         kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
+                        protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
                         kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
                     }else{
                         kahfDnsToggleButton.isChecked = false
                         kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
+                        protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
                         kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.WHITE)
                     }
                     handleTrackTint(kahfDnsToggleButton.isChecked, kahfDnsToggleButton)
@@ -989,9 +991,11 @@ class BrowserTabFragment :
                         if (DnsOverVpnService.isVpnRunning(connectivityManager)){
                             disconnectVpn()
                             kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
+                            protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
                         }else{
                             connectVpn()
                             kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
+                            protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
                         }
                     }
                 }

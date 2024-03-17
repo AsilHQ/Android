@@ -130,7 +130,7 @@
                 android:textSize="11sp"
                 style="@style/Typography.DuckDuckGo.Body1.Bold"
                 android:textColor="@color/black"
-                android:text="@string/kahf_dns_protect_dummy_text"/>
+                android:text="@string/kahf_dns_not_protected_text"/>
 
             <TextView
                 android:id="@+id/verify_connection_text_view"
