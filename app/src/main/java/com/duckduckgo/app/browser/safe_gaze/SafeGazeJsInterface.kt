@@ -11,7 +11,9 @@ import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.duckduckgo.app.browser.DuckDuckGoWebView
 import com.duckduckgo.app.safegaze.ondeviceobjectdetection.ObjectDetectionHelper
+import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
+import com.duckduckgo.common.utils.SAFE_GAZE_SESSION_CENSORED_COUNT
 
 class SafeGazeJsInterface(
     private val context: Context,
@@ -70,7 +72,7 @@ class SafeGazeJsInterface(
 
     @JavascriptInterface
     fun sendMessage(message: String) {
-        updateBlur(preferences.getInt("safe_gaze_blur_progress", 0).toFloat())
+        updateBlur(preferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0).toFloat())
         if (message.startsWith("coreML/-/")){
             val parts = message.split("/-/")
             val imageUrl = if (parts.size >= 2) parts[1] else ""
@@ -80,7 +82,7 @@ class SafeGazeJsInterface(
             }
         }
         if (message.contains("page_refresh")) {
-            preferences.edit().putInt("session_censored_count", 0).apply()
+            preferences.edit().putInt(SAFE_GAZE_SESSION_CENSORED_COUNT, 0).apply()
         } else if(message.contains("replaced")) {
             handleAllTimeCounter()
             handleCurrentSessionCounter()
@@ -100,18 +102,18 @@ class SafeGazeJsInterface(
     }
 
     private fun saveAllTimeCounterValue(value: Int) {
-        preferences.edit().putInt("all_time_censored_count", value).apply()
+        preferences.edit().putInt(SAFE_GAZE_SESSION_CENSORED_COUNT, value).apply()
     }
 
     private fun getAllTimeCounter(): Int {
-        return preferences.getInt("all_time_censored_count", 0)
+        return preferences.getInt(SAFE_GAZE_SESSION_CENSORED_COUNT, 0)
     }
 
     private fun saveSessionCounterValue(value: Int) {
-        preferences.edit().putInt("session_censored_count", value).apply()
+        preferences.edit().putInt(SAFE_GAZE_SESSION_CENSORED_COUNT, value).apply()
     }
 
     private fun getCurrentSessionCounter(): Int {
-        return preferences.getInt("session_censored_count", 0)
+        return preferences.getInt(SAFE_GAZE_SESSION_CENSORED_COUNT, 0)
     }
 }

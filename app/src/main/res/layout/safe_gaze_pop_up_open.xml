@@ -510,7 +510,7 @@
                 android:layout_marginTop="20dp">
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/share_card_view"
+                android:id="@+id/share_card_image_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/share_card"
@@ -523,7 +523,7 @@
                     android:id="@+id/support_this_project_button"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    app:layout_constraintStart_toEndOf="@id/share_card_view"
+                    app:layout_constraintStart_toEndOf="@id/share_card_image_view"
                     app:layout_constraintEnd_toStartOf="@id/dark_mode_card_view"
                     android:textAllCaps="false"
                     android:textFontWeight="700"

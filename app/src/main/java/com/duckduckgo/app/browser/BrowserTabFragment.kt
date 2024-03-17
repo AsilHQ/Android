@@ -70,7 +70,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.AnyThread
 import androidx.annotation.StringRes
-import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -129,7 +128,10 @@ import com.duckduckgo.app.browser.databinding.FragmentBrowserTabBinding
 import com.duckduckgo.app.browser.databinding.HttpAuthenticationBinding
 import com.duckduckgo.app.browser.databinding.IncludeOmnibarToolbarBinding
 import com.duckduckgo.app.browser.databinding.IncludeQuickAccessItemsBinding
+import com.duckduckgo.app.browser.databinding.KahfDnsPopUpBinding
 import com.duckduckgo.app.browser.databinding.PopupWindowBrowserMenuBinding
+import com.duckduckgo.app.browser.databinding.SafeGazePopUpCloseBinding
+import com.duckduckgo.app.browser.databinding.SafeGazePopUpOpenBinding
 import com.duckduckgo.app.browser.downloader.BlobConverterInjector
 import com.duckduckgo.app.browser.favicon.FaviconManager
 import com.duckduckgo.app.browser.favicon.setting.FaviconPromptSheet
@@ -254,14 +256,22 @@ import com.duckduckgo.common.ui.view.makeSnackbarWithNoBottomInset
 import com.duckduckgo.common.ui.view.show
 import com.duckduckgo.common.ui.view.showKeyboard
 import com.duckduckgo.common.ui.viewbinding.viewBinding
+import com.duckduckgo.common.utils.CHECK_KAHF_DNS_URL
 import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.FragmentViewModelFactory
+import com.duckduckgo.common.utils.KAHF_BROWSER_URL
+import com.duckduckgo.common.utils.KAHF_TUBE_INTERFACE
+import com.duckduckgo.common.utils.POPUP_ANIMATION
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
+import com.duckduckgo.common.utils.SAFE_GAZE_ALL_TIME_CENSORED_COUNT
+import com.duckduckgo.common.utils.SAFE_GAZE_AND_DNS_INIT
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_INTERFACE
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import com.duckduckgo.common.utils.SAFE_GAZE_REPORT_URL
+import com.duckduckgo.common.utils.SAFE_GAZE_SESSION_CENSORED_COUNT
+import com.duckduckgo.common.utils.SUPPORT_SAFE_GAZE_URL
 import com.duckduckgo.common.utils.extensions.dpToPx
 import com.duckduckgo.common.utils.extensions.html
 import com.duckduckgo.common.utils.extensions.websiteFromGeoLocationsApiOrigin
@@ -861,13 +871,13 @@ class BrowserTabFragment :
     }
 
     private fun initSafeGazeAndKhfDns() {
-        if (!sharedPreferences.getBoolean("safe_gaze_and_dns_init",false)){
+        if (!sharedPreferences.getBoolean(SAFE_GAZE_AND_DNS_INIT,false)){
             safeGazeInterface.updateBlur(30f)
             editor.putInt(SAFE_GAZE_BLUR_PROGRESS, 30)
             editor.apply()
             connectVpn()
         }
-        editor.putBoolean("safe_gaze_and_dns_init", true)
+        editor.putBoolean(SAFE_GAZE_AND_DNS_INIT, true)
         editor.apply()
     }
 
@@ -877,6 +887,7 @@ class BrowserTabFragment :
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         omnibar = IncludeOmnibarToolbarBinding.bind(binding.rootView)
@@ -930,59 +941,58 @@ class BrowserTabFragment :
     private fun handleKahfIconClick(){
         kahfDnsdIcon.setOnClickListener {
             val popupView = LayoutInflater.from(context).inflate(R.layout.kahf_dns_pop_up, null)
+            val popupBinding = KahfDnsPopUpBinding.bind(popupView)
             val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            val switch = popupView.findViewById<SwitchCompat>(R.id.kahf_dns_toggle_button)
-            val dnsText = popupView.findViewById<TextView>(R.id.kahf_dns_state_text_view)
-            val protectionTextView = popupView.findViewById<TextView>(R.id.verify_connection_text_view)
             val iconRect = Rect()
             kahfDnsdIcon.getGlobalVisibleRect(iconRect)
             val y = iconRect.top
             val x = iconRect.left
             popupWindow.apply {
-                animationStyle = 2132017505
+                animationStyle = POPUP_ANIMATION
                 isFocusable = true
             }
-            kahfDnsdIcon.post {
-                val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
-                val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
-                val newPopUpPosition = (x - popUpLayingOut) - 40
-                popupWindow.showAtLocation(
-                    kahfDnsdIcon,
-                    Gravity.NO_GRAVITY,
-                    newPopUpPosition,
-                    (y + omnibar.toolbar.height) - 20,
-                )
-                protectionTextView.setOnClickListener {
-                    val url = "https://check.kahfdns.com"
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse(url)
-                    startActivity(intent)
-                }
-                val pointerArrow =
-                    popupView.findViewById<ImageView>(R.id.pointer_arrow_kahf_dns_image_view)
-                val pointerArrowParams =
-                    pointerArrow.layoutParams as ConstraintLayout.LayoutParams
-                pointerArrowParams.rightMargin = leftOverDevicePixel - 93
-                pointerArrow.layoutParams = pointerArrowParams
+            popupBinding.apply {
+                kahfDnsdIcon.post {
+                    val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
+                    val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
+                    val newPopUpPosition = (x - popUpLayingOut) - 40
+                    popupWindow.showAtLocation(
+                        kahfDnsdIcon,
+                        Gravity.NO_GRAVITY,
+                        newPopUpPosition,
+                        (y + omnibar.toolbar.height) - 20,
+                    )
+                    protectedTextView.setOnClickListener {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.data = Uri.parse(CHECK_KAHF_DNS_URL)
+                        startActivity(intent)
+                    }
+                    val pointerArrow =
+                        popupView.findViewById<ImageView>(R.id.pointer_arrow_kahf_dns_image_view)
+                    val pointerArrowParams =
+                        pointerArrow.layoutParams as ConstraintLayout.LayoutParams
+                    pointerArrowParams.rightMargin = leftOverDevicePixel - 93
+                    pointerArrow.layoutParams = pointerArrowParams
 
-                if (DnsOverVpnService.isVpnRunning(connectivityManager)){
-                    switch.isChecked = true
-                    dnsText.text = resources.getString(string.kahf_dns_up)
-                    switch.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
-                }else{
-                    switch.isChecked = false
-                    dnsText.text = resources.getString(string.kahf_dns_down)
-                    switch.trackTintList = ColorStateList.valueOf(Color.WHITE)
-                }
-                handleTrackTint(switch.isChecked, switch)
-                switch.setOnCheckedChangeListener { _, isChecked ->
-                    handleTrackTint(isChecked, switch)
                     if (DnsOverVpnService.isVpnRunning(connectivityManager)){
-                        disconnectVpn()
-                        dnsText.text = resources.getString(string.kahf_dns_down)
+                        kahfDnsToggleButton.isChecked = true
+                        kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
+                        kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
                     }else{
-                        connectVpn()
-                        dnsText.text = resources.getString(string.kahf_dns_up)
+                        kahfDnsToggleButton.isChecked = false
+                        kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
+                        kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.WHITE)
+                    }
+                    handleTrackTint(kahfDnsToggleButton.isChecked, kahfDnsToggleButton)
+                    kahfDnsToggleButton.setOnCheckedChangeListener { _, isChecked ->
+                        handleTrackTint(isChecked, kahfDnsToggleButton)
+                        if (DnsOverVpnService.isVpnRunning(connectivityManager)){
+                            disconnectVpn()
+                            kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
+                        }else{
+                            connectVpn()
+                            kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
+                        }
                     }
                 }
             }
@@ -999,7 +1009,6 @@ class BrowserTabFragment :
     }
     @SuppressLint("SetJavaScriptEnabled")
     private fun prepareHeadlessKahfTubeWebView() {
-        //showEmailAccessForKahfTubeDialog()
         binding.headerlessKahfTubeWebview.apply {
             settings.javaScriptEnabled = true
             webViewClient = KahfTubeWebViewClient()
@@ -1040,7 +1049,7 @@ class BrowserTabFragment :
                         }
                     },
                 ),
-                "KahfTubeInterface",
+                KAHF_TUBE_INTERFACE,
             )
             loadUrl("https://m.youtube.com/?noapp")
         }
@@ -1086,45 +1095,38 @@ class BrowserTabFragment :
     }
 
     private fun handleSafeGazeOpenView(view: View){
-        val thisPageCounter = view.findViewById<TextView>(R.id.this_page_counter_text_view)
-        val lifeTimeCounter = view.findViewById<TextView>(R.id.lifetime_counter_text_view)
-        val switch = view.findViewById<SwitchCompat>(R.id.safe_gaze_open_switch_view)
-        val urlTextView = view.findViewById<TextView>(R.id.url_open_text_view)
-        val supportButton = view.findViewById<AppCompatButton>(R.id.support_this_project_button)
-        val reportTextView = view.findViewById<TextView>(R.id.report_text_view_open)
-        val blurImageView = view.findViewById<AppCompatImageView>(R.id.blur_image_view)
-        val shareImageView = view.findViewById<AppCompatImageView>(R.id.share_card_view)
-        shareImageView.setOnClickListener {
-            val shareIntent = Intent(Intent.ACTION_SEND)
-            shareIntent.type = "text/plain"
-            shareIntent.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=org.halalz.kahfbrowser")
-            startActivity(Intent.createChooser(shareIntent, "Share via"))
-        }
-        handleProgressBar(view, blurImageView)
-        loadImageWithBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0), blurImageView)
-        reportTextView.setOnClickListener {
-            val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            startActivity(intent)
-        }
-        supportButton.setOnClickListener {
-            val url = "https://www.patreon.com/SafeGaze"
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            if (intent.resolveActivity(requireActivity().packageManager) != null) {
+        val safeGazeOpenViewPopUpBinding = SafeGazePopUpOpenBinding.bind(view)
+        safeGazeOpenViewPopUpBinding.apply {
+            shareCardImageView.setOnClickListener {
+                val shareIntent = Intent(Intent.ACTION_SEND)
+                shareIntent.type = "text/plain"
+                shareIntent.putExtra(Intent.EXTRA_TEXT, KAHF_BROWSER_URL)
+                startActivity(Intent.createChooser(shareIntent, "Share via"))
+            }
+            handleProgressBar(view, blurImageView)
+            loadImageWithBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0), blurImageView)
+            reportTextViewOpen.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(SAFE_GAZE_REPORT_URL))
                 startActivity(intent)
             }
-        }
-        urlTextView.text = viewModel.url
-        thisPageCounter.text = sharedPreferences.getInt("session_censored_count", 0).toString()
-        lifeTimeCounter.text = sharedPreferences.getInt("all_time_censored_count", 0).toString()
+            supportThisProjectButton.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(SUPPORT_SAFE_GAZE_URL))
+                if (intent.resolveActivity(requireActivity().packageManager) != null) {
+                    startActivity(intent)
+                }
+            }
+            urlOpenTextView.text = viewModel.url
+            thisPageCounterTextView.text = sharedPreferences.getInt(SAFE_GAZE_SESSION_CENSORED_COUNT, 0).toString()
+            lifetimeCounterTextView.text = sharedPreferences.getInt(SAFE_GAZE_ALL_TIME_CENSORED_COUNT, 0).toString()
 
-        switch.setOnCheckedChangeListener { _, _ ->
-            editor.putBoolean(SAFE_GAZE_ACTIVE, false)
-            editor.apply()
-            toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), VISIBLE)
-            toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), GONE)
-            switch.isChecked = true
-            webView?.reload()
+            safeGazeOpenSwitchView.setOnCheckedChangeListener { _, _ ->
+                editor.putBoolean(SAFE_GAZE_ACTIVE, false)
+                editor.apply()
+                toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), VISIBLE)
+                toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), GONE)
+                safeGazeOpenSwitchView.isChecked = true
+                webView?.reload()
+            }
         }
     }
 
@@ -1141,20 +1143,20 @@ class BrowserTabFragment :
     }
 
     private fun handleSafeGazeCloseView(view: View){
-        val safeGazeOpenImageView = view.findViewById<AppCompatImageView>(R.id.safe_gaze_on_image_view)
-        val urlTextView = view.findViewById<TextView>(R.id.url_text_view)
-        val reportTextView = view.findViewById<TextView>(R.id.report_text_view)
-        reportTextView.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(SAFE_GAZE_REPORT_URL))
-            startActivity(intent)
-        }
-        urlTextView.text = viewModel.url
-        safeGazeOpenImageView.setOnClickListener{
-            editor.putBoolean(SAFE_GAZE_ACTIVE, true)
-            editor.apply()
-            toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), VISIBLE)
-            toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), GONE)
-            webView?.reload()
+        val safeGazeOpenViewPopUpBinding = SafeGazePopUpCloseBinding.bind(view)
+        safeGazeOpenViewPopUpBinding.apply {
+            reportTextView.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(SAFE_GAZE_REPORT_URL))
+                startActivity(intent)
+            }
+            urlTextView.text = viewModel.url
+            safeGazeOnImageView.setOnClickListener{
+                editor.putBoolean(SAFE_GAZE_ACTIVE, true)
+                editor.apply()
+                toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), VISIBLE)
+                toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), GONE)
+                webView?.reload()
+            }
         }
     }
 
@@ -1195,7 +1197,7 @@ class BrowserTabFragment :
             val x = iconRect.left
             val y = iconRect.top
             popupWindow.apply {
-                animationStyle = 2132017505
+                animationStyle = POPUP_ANIMATION
                 isFocusable = true
             }
 
@@ -2524,9 +2526,9 @@ class BrowserTabFragment :
                             email: String?,
                             imgSrc: String?
                         ) {
-                            Timber.tag("KahfTubeInterface").v("name: $name")
-                            Timber.tag("KahfTubeInterface").v("email: $email")
-                            Timber.tag("KahfTubeInterface").v("imgSrc: $imgSrc")
+                            Timber.tag(KAHF_TUBE_INTERFACE).v("name: $name")
+                            Timber.tag(KAHF_TUBE_INTERFACE).v("email: $email")
+                            Timber.tag(KAHF_TUBE_INTERFACE).v("imgSrc: $imgSrc")
                         }
 
                         override fun onHalalzTap() {
@@ -2543,7 +2545,7 @@ class BrowserTabFragment :
                         }
                     },
                 ),
-                "KahfTubeInterface",
+                KAHF_TUBE_INTERFACE,
             )
             it.settings.apply {
                 userAgentProvider.setHintHeader(this)
@@ -3075,7 +3077,7 @@ class BrowserTabFragment :
     private fun hideKeyboard() {
         if (!isHidden) {
             Timber.v("Keyboard now hiding")
-            omnibar.omnibarTextInput.postDelayed(KEYBOARD_DELAY) { omnibar.omnibarTextInput?.hideKeyboard() }
+            omnibar.omnibarTextInput.postDelayed(KEYBOARD_DELAY) { omnibar.omnibarTextInput.hideKeyboard() }
             binding.focusDummy.requestFocus()
         }
     }
@@ -3083,7 +3085,7 @@ class BrowserTabFragment :
     private fun showKeyboardImmediately() {
         if (!isHidden) {
             Timber.v("Keyboard now showing")
-            omnibar.omnibarTextInput?.showKeyboard()
+            omnibar.omnibarTextInput.showKeyboard()
         }
     }
 
