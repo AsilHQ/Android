@@ -128,6 +128,7 @@ import com.duckduckgo.app.browser.databinding.FragmentBrowserTabBinding
 import com.duckduckgo.app.browser.databinding.HttpAuthenticationBinding
 import com.duckduckgo.app.browser.databinding.IncludeOmnibarToolbarBinding
 import com.duckduckgo.app.browser.databinding.IncludeQuickAccessItemsBinding
+import com.duckduckgo.app.browser.databinding.KahfDnsPopUpBinding
 import com.duckduckgo.app.browser.databinding.PopupWindowBrowserMenuBinding
 import com.duckduckgo.app.browser.databinding.SafeGazePopUpCloseBinding
 import com.duckduckgo.app.browser.databinding.SafeGazePopUpOpenBinding
@@ -931,10 +932,8 @@ class BrowserTabFragment :
     private fun handleKahfIconClick(){
         kahfDnsdIcon.setOnClickListener {
             val popupView = LayoutInflater.from(context).inflate(R.layout.kahf_dns_pop_up, null)
+            val popupBinding = KahfDnsPopUpBinding.bind(popupView)
             val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            val switch = popupView.findViewById<SwitchCompat>(R.id.kahf_dns_toggle_button)
-            val dnsText = popupView.findViewById<TextView>(R.id.kahf_dns_state_text_view)
-            val protectionTextView = popupView.findViewById<TextView>(R.id.verify_connection_text_view)
             val iconRect = Rect()
             kahfDnsdIcon.getGlobalVisibleRect(iconRect)
             val y = iconRect.top
@@ -943,47 +942,48 @@ class BrowserTabFragment :
                 animationStyle = 2132017505
                 isFocusable = true
             }
-            kahfDnsdIcon.post {
-                val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
-                val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
-                val newPopUpPosition = (x - popUpLayingOut) - 40
-                popupWindow.showAtLocation(
-                    kahfDnsdIcon,
-                    Gravity.NO_GRAVITY,
-                    newPopUpPosition,
-                    (y + omnibar.toolbar.height) - 20,
-                )
-                protectionTextView.setOnClickListener {
-                    val url = "https://check.kahfdns.com"
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse(url)
-                    startActivity(intent)
-                }
-                val pointerArrow =
-                    popupView.findViewById<ImageView>(R.id.pointer_arrow_kahf_dns_image_view)
-                val pointerArrowParams =
-                    pointerArrow.layoutParams as ConstraintLayout.LayoutParams
-                pointerArrowParams.rightMargin = leftOverDevicePixel - 93
-                pointerArrow.layoutParams = pointerArrowParams
+            popupBinding.apply {
+                kahfDnsdIcon.post {
+                    val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
+                    val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
+                    val newPopUpPosition = (x - popUpLayingOut) - 40
+                    popupWindow.showAtLocation(
+                        kahfDnsdIcon,
+                        Gravity.NO_GRAVITY,
+                        newPopUpPosition,
+                        (y + omnibar.toolbar.height) - 20,
+                    )
+                    protectedTextView.setOnClickListener {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.data = Uri.parse("https://check.kahfdns.com")
+                        startActivity(intent)
+                    }
+                    val pointerArrow =
+                        popupView.findViewById<ImageView>(R.id.pointer_arrow_kahf_dns_image_view)
+                    val pointerArrowParams =
+                        pointerArrow.layoutParams as ConstraintLayout.LayoutParams
+                    pointerArrowParams.rightMargin = leftOverDevicePixel - 93
+                    pointerArrow.layoutParams = pointerArrowParams
 
-                if (DnsOverVpnService.isVpnRunning(connectivityManager)){
-                    switch.isChecked = true
-                    dnsText.text = resources.getString(string.kahf_dns_up)
-                    switch.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
-                }else{
-                    switch.isChecked = false
-                    dnsText.text = resources.getString(string.kahf_dns_down)
-                    switch.trackTintList = ColorStateList.valueOf(Color.WHITE)
-                }
-                handleTrackTint(switch.isChecked, switch)
-                switch.setOnCheckedChangeListener { _, isChecked ->
-                    handleTrackTint(isChecked, switch)
                     if (DnsOverVpnService.isVpnRunning(connectivityManager)){
-                        disconnectVpn()
-                        dnsText.text = resources.getString(string.kahf_dns_down)
+                        kahfDnsToggleButton.isChecked = true
+                        kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
+                        kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
                     }else{
-                        connectVpn()
-                        dnsText.text = resources.getString(string.kahf_dns_up)
+                        kahfDnsToggleButton.isChecked = false
+                        kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
+                        kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.WHITE)
+                    }
+                    handleTrackTint(kahfDnsToggleButton.isChecked, kahfDnsToggleButton)
+                    kahfDnsToggleButton.setOnCheckedChangeListener { _, isChecked ->
+                        handleTrackTint(isChecked, kahfDnsToggleButton)
+                        if (DnsOverVpnService.isVpnRunning(connectivityManager)){
+                            disconnectVpn()
+                            kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
+                        }else{
+                            connectVpn()
+                            kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
+                        }
                     }
                 }
             }
