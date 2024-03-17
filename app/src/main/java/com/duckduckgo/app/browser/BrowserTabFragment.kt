@@ -1108,7 +1108,7 @@ class BrowserTabFragment :
             startActivity(intent)
         }
         supportButton.setOnClickListener {
-            val url = "https://safegaze.com/support-safegaze/"
+            val url = "https://www.patreon.com/SafeGaze"
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             if (intent.resolveActivity(requireActivity().packageManager) != null) {
                 startActivity(intent)
