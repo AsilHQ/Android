@@ -255,10 +255,12 @@ import com.duckduckgo.common.ui.view.makeSnackbarWithNoBottomInset
 import com.duckduckgo.common.ui.view.show
 import com.duckduckgo.common.ui.view.showKeyboard
 import com.duckduckgo.common.ui.viewbinding.viewBinding
+import com.duckduckgo.common.utils.CHECK_KAHF_DNS_URL
 import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.FragmentViewModelFactory
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
+import com.duckduckgo.common.utils.SAFE_GAZE_AND_DNS_INIT
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_INTERFACE
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
@@ -862,13 +864,13 @@ class BrowserTabFragment :
     }
 
     private fun initSafeGazeAndKhfDns() {
-        if (!sharedPreferences.getBoolean("safe_gaze_and_dns_init",false)){
+        if (!sharedPreferences.getBoolean(SAFE_GAZE_AND_DNS_INIT,false)){
             safeGazeInterface.updateBlur(30f)
             editor.putInt(SAFE_GAZE_BLUR_PROGRESS, 30)
             editor.apply()
             connectVpn()
         }
-        editor.putBoolean("safe_gaze_and_dns_init", true)
+        editor.putBoolean(SAFE_GAZE_AND_DNS_INIT, true)
         editor.apply()
     }
 
@@ -878,6 +880,7 @@ class BrowserTabFragment :
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         omnibar = IncludeOmnibarToolbarBinding.bind(binding.rootView)
@@ -954,9 +957,8 @@ class BrowserTabFragment :
                     (y + omnibar.toolbar.height) - 20,
                 )
                 protectionTextView.setOnClickListener {
-                    val url = "https://check.kahfdns.com"
                     val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse(url)
+                    intent.data = Uri.parse(CHECK_KAHF_DNS_URL)
                     startActivity(intent)
                 }
                 val pointerArrow =
