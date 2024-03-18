@@ -16,7 +16,9 @@
 
 package com.duckduckgo.app.browser
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat.PNG
@@ -50,7 +52,7 @@ import com.duckduckgo.app.browser.WebViewPixelName.WEB_RENDERER_GONE_KILLED
 import com.duckduckgo.app.browser.certificates.rootstore.CertificateValidationState
 import com.duckduckgo.app.browser.certificates.rootstore.TrustedCertificateStore
 import com.duckduckgo.app.browser.cookies.ThirdPartyCookieManager
-import com.duckduckgo.app.browser.host_blocker.helper.HostBlockerHelper
+import com.duckduckgo.app.browser.safe_gaze_and_host_blocker.helper.HostBlockerHelper
 import com.duckduckgo.app.browser.httpauth.WebViewHttpAuthStore
 import com.duckduckgo.app.browser.logindetection.DOMLoginDetector
 import com.duckduckgo.app.browser.logindetection.WebNavigationEvent
@@ -86,6 +88,8 @@ import timber.log.Timber
 import java.io.BufferedReader
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.URI
@@ -127,6 +131,8 @@ class BrowserWebViewClient @Inject constructor(
     private var isEmailAccessForKahfTubeDialogShowed = false
     lateinit var activity: FragmentActivity
     private var start: Long? = null
+    private var sharedPreferences: SharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
+    private var editor: SharedPreferences.Editor = sharedPreferences.edit()
 
     /**
      * This is the method of url overriding available from API 24 onwards
@@ -150,6 +156,7 @@ class BrowserWebViewClient @Inject constructor(
         Timber.v("shouldOverride $url")
         if (!(HostBlockerHelper(webView, context = context).blockUrl(url.toString()))){
             try {
+                shouldBlockSafeGaze(url.toString())
                 if (isForMainFrame && dosDetector.isUrlGeneratingDos(url)) {
                     webView.loadUrl("about:blank")
                     webViewClientListener?.dosAttackDetected()
@@ -273,6 +280,68 @@ class BrowserWebViewClient @Inject constructor(
             }
         }
         return false
+    }
+
+    @SuppressLint("SdCardPath")
+    private fun shouldBlockSafeGaze(url: String?): Boolean {
+        try {
+            val safeGazeTxtFilePath = "${context.filesDir}/safe_gaze.txt"
+            val host = extractHost(url)
+            val file = File(safeGazeTxtFilePath)
+            if (!file.exists()) {
+                println("Hosts file not found at path: $safeGazeTxtFilePath")
+                return false
+            }
+
+            val inputStream = FileInputStream(file)
+            val reader = BufferedReader(InputStreamReader(inputStream))
+            var line: String?
+
+            while (reader.readLine().also { line = it } != null) {
+                if (line?.contains("#") == true || line?.isEmpty() == true) {
+                    continue
+                }
+                val components = line?.split("\\s+".toRegex())
+                println("Components -> $components")
+                println("Components Size -> ${components?.size}")
+                println("Url -> $url")
+                if (components != null) {
+                    val domain = components[0]
+                    if (host.contains(domain)) {
+                        disableSafeGaze()
+                        return true
+                    }else{
+                        enableSafeGaze()
+                    }
+                }
+            }
+            return false
+        } catch (e: Exception) {
+            println("Error reading safe_gaze.txt: ${e.message}")
+            return false
+        }
+    }
+
+    private fun disableSafeGaze(){
+        println("Safegaze disable")
+        editor.putBoolean(SAFE_GAZE_ACTIVE, false)
+        editor.apply()
+    }
+
+    private fun enableSafeGaze(){
+        println("Safegaze enable")
+        editor.putBoolean(SAFE_GAZE_ACTIVE, true)
+        editor.apply()
+    }
+
+    private fun extractHost(url: String?): String {
+        return try {
+            val uri = URI(url)
+            uri.host ?: ""
+        } catch (e: Exception) {
+            println("Error extracting host: ${e.message}")
+            ""
+        }
     }
 
     private fun handleSafeGaze(webView: WebView) {
@@ -473,8 +542,8 @@ class BrowserWebViewClient @Inject constructor(
         val emailAccessForKahfTubeDialog = TextAlertDialogBuilder(activity)
             .setTitle(context.getString(string.kahftube))
             .setMessage(context.getString(string.kahf_tube_email_access_message))
-            .setPositiveButton(R.string.allow)
-            .setNegativeButton(R.string.cancel)
+            .setPositiveButton(string.allow)
+            .setNegativeButton(string.cancel)
             //.setView(inputBinding)
             .addEventListener(
                 object : TextAlertDialogBuilder.EventListener() {
@@ -504,7 +573,7 @@ class BrowserWebViewClient @Inject constructor(
 
             val isImageContainsHuman = ObjectDetectionHelper(webView.context).isImageContainsHuman(bitmap)
 
-            if (isImageContainsHuman) {
+            return if (isImageContainsHuman) {
                 val changedBitmap: Bitmap = Glide
                     .with(webView.context)
                     .asBitmap()
@@ -515,9 +584,9 @@ class BrowserWebViewClient @Inject constructor(
                 changedBitmap.compress(PNG, 90, byteArrayOutputStream)
                 val inputStream = ByteArrayInputStream(byteArrayOutputStream.toByteArray())
 
-                return WebResourceResponse("image/png", "utf-8", inputStream)
+                WebResourceResponse("image/png", "utf-8", inputStream)
             } else {
-                return null
+                null
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -698,9 +767,9 @@ enum class WebViewPixelName(override val pixelName: String) : Pixel.PixelName {
 }
 
 enum class WebViewErrorResponse(@StringRes val errorId: Int) {
-    BAD_URL(R.string.webViewErrorBadUrl),
-    CONNECTION(R.string.webViewErrorNoConnection),
-    OMITTED(R.string.webViewErrorNoConnection),
-    LOADING(R.string.webViewErrorNoConnection),
-    SSL_PROTOCOL_ERROR(R.string.webViewErrorSslProtocol),
+    BAD_URL(string.webViewErrorBadUrl),
+    CONNECTION(string.webViewErrorNoConnection),
+    OMITTED(string.webViewErrorNoConnection),
+    LOADING(string.webViewErrorNoConnection),
+    SSL_PROTOCOL_ERROR(string.webViewErrorSslProtocol),
 }

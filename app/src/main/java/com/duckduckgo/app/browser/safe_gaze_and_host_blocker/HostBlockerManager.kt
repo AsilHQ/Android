@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.duckduckgo.app.browser.host_blocker
+package com.duckduckgo.app.browser.safe_gaze_and_host_blocker
 
 import android.content.Context
 import timber.log.Timber

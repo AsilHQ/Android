@@ -22,7 +22,7 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.duckduckgo.app.browser.BuildConfig
-import com.duckduckgo.app.browser.host_blocker.HostBlockerWorker
+import com.duckduckgo.app.browser.safe_gaze_and_host_blocker.SafeGazeBlockListAndHostBlockerWorker
 import com.duckduckgo.app.di.AppComponent
 import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.app.di.DaggerAppComponent
@@ -40,6 +40,7 @@ import java.io.File
 import javax.inject.Inject
 import kotlinx.coroutines.*
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 private const val VPN_PROCESS_NAME = "vpn"
 
@@ -93,6 +94,7 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
         appCoroutineScope.launch(dispatchers.io()) {
             referralStateListener.initialiseReferralRetrieval()
         }
+        scheduleTasks()
     }
 
     override fun onSecondaryProcessCreate(shortProcessName: String) {
@@ -125,6 +127,32 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
             } else {
                 uncaughtExceptionHandler.uncaughtException(Thread.currentThread(), throwable)
             }
+        }
+    }
+
+    private fun scheduleTasks() {
+        val initialWorkRequest = OneTimeWorkRequest.Builder(SafeGazeBlockListAndHostBlockerWorker::class.java).build()
+        val periodicWorkRequest = PeriodicWorkRequest.Builder(
+            SafeGazeBlockListAndHostBlockerWorker::class.java, 7, TimeUnit.DAYS
+        ).build()
+
+        val workManager = WorkManager.getInstance(this)
+        workManager.enqueue(initialWorkRequest)
+        workManager.enqueue(periodicWorkRequest)
+
+        val initialWorkRequestStatus = workManager.getWorkInfoById(initialWorkRequest.id).get()
+        val periodicWorkRequestStatus = workManager.getWorkInfoById(periodicWorkRequest.id).get()
+
+        if (initialWorkRequestStatus.state == WorkInfo.State.SUCCEEDED) {
+            println("Initial worked")
+        } else if (initialWorkRequestStatus.state == WorkInfo.State.FAILED) {
+            println("Initial failed")
+        }
+
+        if (periodicWorkRequestStatus.state == WorkInfo.State.SUCCEEDED) {
+            println("periodicWorkRequestStatus worked")
+        } else if (periodicWorkRequestStatus.state == WorkInfo.State.FAILED) {
+            println("periodicWorkRequestStatus failed")
         }
     }
 
