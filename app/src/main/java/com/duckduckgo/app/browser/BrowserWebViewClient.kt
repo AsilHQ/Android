@@ -289,7 +289,6 @@ class BrowserWebViewClient @Inject constructor(
             val host = extractHost(url)
             val file = File(safeGazeTxtFilePath)
             if (!file.exists()) {
-                println("Hosts file not found at path: $safeGazeTxtFilePath")
                 return false
             }
 
@@ -302,9 +301,6 @@ class BrowserWebViewClient @Inject constructor(
                     continue
                 }
                 val components = line?.split("\\s+".toRegex())
-                println("Components -> $components")
-                println("Components Size -> ${components?.size}")
-                println("Url -> $url")
                 if (components != null) {
                     val domain = components[0]
                     if (host.contains(domain)) {
@@ -317,19 +313,16 @@ class BrowserWebViewClient @Inject constructor(
             }
             return false
         } catch (e: Exception) {
-            println("Error reading safe_gaze.txt: ${e.message}")
             return false
         }
     }
 
     private fun disableSafeGaze(){
-        println("Safegaze disable")
         editor.putBoolean(SAFE_GAZE_ACTIVE, false)
         editor.apply()
     }
 
     private fun enableSafeGaze(){
-        println("Safegaze enable")
         editor.putBoolean(SAFE_GAZE_ACTIVE, true)
         editor.apply()
     }
@@ -339,7 +332,7 @@ class BrowserWebViewClient @Inject constructor(
             val uri = URI(url)
             uri.host ?: ""
         } catch (e: Exception) {
-            println("Error extracting host: ${e.message}")
+            Timber.d("Error extracting host: ${e.message}")
             ""
         }
     }
@@ -480,7 +473,7 @@ class BrowserWebViewClient @Inject constructor(
                 stringBuilder.append(line).append('\n')
             }
         } catch (e: IOException) {
-            println("Exception is -> ${e.localizedMessage}")
+            Timber.d("Read Asset File Exception: ${e.localizedMessage}")
             e.printStackTrace()
         }
         return stringBuilder.toString()
