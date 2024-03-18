@@ -304,26 +304,22 @@ class BrowserWebViewClient @Inject constructor(
                 if (components != null) {
                     val domain = components[0]
                     if (host.contains(domain)) {
-                        disableSafeGaze()
+                        handleSafeGazeActivation(false)
                         return true
                     }else{
-                        enableSafeGaze()
+                        handleSafeGazeActivation(true)
                     }
                 }
             }
             return false
         } catch (e: Exception) {
+            Timber.d("Safe Gaze Blocker Catch: ${e.localizedMessage ?: e.message ?: e}")
             return false
         }
     }
 
-    private fun disableSafeGaze(){
-        editor.putBoolean(SAFE_GAZE_ACTIVE, false)
-        editor.apply()
-    }
-
-    private fun enableSafeGaze(){
-        editor.putBoolean(SAFE_GAZE_ACTIVE, true)
+    private fun handleSafeGazeActivation(shouldBeActive: Boolean){
+        editor.putBoolean(SAFE_GAZE_ACTIVE, shouldBeActive)
         editor.apply()
     }
 
@@ -433,7 +429,6 @@ class BrowserWebViewClient @Inject constructor(
     ) {
         super.onPageFinished(webView, url)
         handleKahfTube(webView, url)
-        //handleSafeGaze(webView)
         jsPlugins.getPlugins().forEach {
             it.onPageFinished(webView, url, webViewClientListener?.getSite())
         }
@@ -490,25 +485,6 @@ class BrowserWebViewClient @Inject constructor(
         webView: WebView,
         request: WebResourceRequest,
     ): WebResourceResponse? {
-        /*val webResourceResponse = runBlocking {
-            val documentUrl = withContext(dispatcherProvider.main()) { webView.url }
-            withContext(dispatcherProvider.main()) {
-                loginDetector.onEvent(WebNavigationEvent.ShouldInterceptRequest(webView, request))
-            }
-            Timber.v("Intercepting resource ${request.url} type:${request.method} on page $documentUrl")
-            requestInterceptor.shouldIntercept(request, webView, documentUrl, webViewClientListener)
-        }
-        //return webResourceResponse
-
-        if (isImageUrl(request.url.toString())) {
-            checkForFacesAndMask(webView, request.url)?.let {
-                return it
-            } ?: kotlin.run {
-                return webResourceResponse
-            }
-        } else {
-            return webResourceResponse
-        }*/
         return runBlocking {
             val documentUrl = withContext(dispatcherProvider.main()) { webView.url }
             withContext(dispatcherProvider.main()) {
@@ -524,7 +500,7 @@ class BrowserWebViewClient @Inject constructor(
     }
 
     private fun isImageUrl(url: String): Boolean {
-        val keywords = listOf<String>("images", "jpg", "png", "jpeg", "webp", "svg")
+        val keywords = listOf("images", "jpg", "png", "jpeg", "webp", "svg")
         for (keyword in keywords) {
             if (url.contains(keyword, true)) return true
         }
