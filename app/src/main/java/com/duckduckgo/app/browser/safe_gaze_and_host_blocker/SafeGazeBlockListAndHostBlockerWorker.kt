@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package com.duckduckgo.app.browser.host_blocker
+package com.duckduckgo.app.browser.safe_gaze_and_host_blocker
 
 import android.content.Context
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import org.mozilla.fenix.host_blocker.SafeGazeBlockListManager
 
-class HostBlockerWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
+class SafeGazeBlockListAndHostBlockerWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     override fun doWork(): Result {
         HostBlockerManager.fetchAndOverwriteHostFile(applicationContext)
+        SafeGazeBlockListManager.fetchAndOverwriteHostFile(applicationContext)
         return Result.success()
     }
 }

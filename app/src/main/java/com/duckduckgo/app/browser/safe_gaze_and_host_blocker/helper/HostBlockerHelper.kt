@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.duckduckgo.app.browser.host_blocker.helper
+package com.duckduckgo.app.browser.safe_gaze_and_host_blocker.helper
 
 import android.annotation.SuppressLint
 import android.content.Context
