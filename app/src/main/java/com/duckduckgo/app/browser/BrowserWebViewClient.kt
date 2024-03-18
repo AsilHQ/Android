@@ -304,26 +304,22 @@ class BrowserWebViewClient @Inject constructor(
                 if (components != null) {
                     val domain = components[0]
                     if (host.contains(domain)) {
-                        disableSafeGaze()
+                        handleSafeGazeActivation(false)
                         return true
                     }else{
-                        enableSafeGaze()
+                        handleSafeGazeActivation(true)
                     }
                 }
             }
             return false
         } catch (e: Exception) {
+            Timber.d("Safe Gaze Blocker Catch: ${e.localizedMessage ?: e.message ?: e}")
             return false
         }
     }
 
-    private fun disableSafeGaze(){
-        editor.putBoolean(SAFE_GAZE_ACTIVE, false)
-        editor.apply()
-    }
-
-    private fun enableSafeGaze(){
-        editor.putBoolean(SAFE_GAZE_ACTIVE, true)
+    private fun handleSafeGazeActivation(shouldBeActive: Boolean){
+        editor.putBoolean(SAFE_GAZE_ACTIVE, shouldBeActive)
         editor.apply()
     }
 
