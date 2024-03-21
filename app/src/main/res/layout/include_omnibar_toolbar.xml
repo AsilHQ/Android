@@ -252,7 +252,7 @@
                 app:layout_constraintBottom_toBottomOf="@+id/toolbar"
                 app:layout_constraintEnd_toStartOf="@+id/safe_gaze_icon"
                 app:layout_constraintStart_toEndOf="@+id/toolbar"
-                android:src="@drawable/kahf_dns_icon"
+                android:src="@drawable/kahf_guard_logo"
                 />
 
             <com.duckduckgo.app.browser.TabSwitcherButton
