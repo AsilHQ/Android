@@ -50,13 +50,13 @@
                 app:layout_constraintTop_toTopOf="@id/dns_pop_up_top_view"
                 app:layout_constraintBottom_toBottomOf="@id/dns_pop_up_top_view"
                 android:layout_marginStart="20dp"
-                android:src="@drawable/kahf_guard_logo"/>
+                android:src="@drawable/kahf_dns_black_logo"/>
 
             <TextView
                 android:id="@+id/kahf_dns_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/kahf_guard"
+                android:text="@string/kahf_dns"
                 android:layout_marginStart="10dp"
                 android:textSize="16sp"
                 android:textColor="@color/black"
@@ -75,14 +75,14 @@
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/kahf_dns_text_image_view"
-                android:layout_width="200dp"
-                android:layout_height="75dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/dns_pop_up_top_view"
                 app:layout_constraintBottom_toTopOf="@id/kahf_dns_toggle_button"
                 android:layout_marginTop="25dp"
-                android:src="@drawable/kahf_guard_logo_with_text"/>
+                android:src="@drawable/kahf_dns_text"/>
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/kahf_dns_toggle_button"

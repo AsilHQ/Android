@@ -846,5 +846,5 @@
     <string name="kahf_dns_protected_text">You are protected from 5,480,082 Haram site</string>
     <string name="verify_protection">Verify Protection</string>
     <string name="by_halalz_e_ticaret_ltd_ti">by Halalz e-ticaret Ltd Şti</string>
-    <string name="kahf_guard">KahfGuard</string>
+    <string name="kahf_dns">Kahf DNS</string>
 </resources>
