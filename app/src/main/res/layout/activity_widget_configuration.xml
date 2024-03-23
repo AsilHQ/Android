@@ -52,7 +52,7 @@
                 android:id="@+id/widgetConfigThemeSystem"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="@font/poppins"
                 android:text="@string/widgetConfigurationSystemThemeOption"
                 android:textColor="?attr/daxColorPrimaryText"
                 android:visibility="gone"
@@ -63,7 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:checked="true"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="@font/poppins"
                 android:text="@string/widgetConfigurationLightThemeOption"
                 android:textColor="?attr/daxColorPrimaryText" />
 
@@ -71,7 +71,7 @@
                 android:id="@+id/widgetConfigThemeDark"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:fontFamily="sans-serif-medium"
+                android:fontFamily="@font/poppins"
                 android:text="@string/widgetConfigurationDarkThemeOption"
                 android:textColor="?attr/daxColorPrimaryText" />
         </RadioGroup>
