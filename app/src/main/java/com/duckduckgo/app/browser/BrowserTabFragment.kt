@@ -259,6 +259,7 @@ import com.duckduckgo.common.ui.viewbinding.viewBinding
 import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.FragmentViewModelFactory
+import com.duckduckgo.common.utils.KAHF_GUARD_CHECK_URL
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_INTERFACE
@@ -592,8 +593,8 @@ class BrowserTabFragment :
     private val safeGazeIcon: AppCompatImageView
         get() = omnibar.safeGazeIcon
 
-    private val kahfDnsdIcon: AppCompatImageView
-        get() = omnibar.kahfDnsIcon
+    private val kahGuarddIcon: AppCompatImageView
+        get() = omnibar.kahfGuardIcon
 
     private val menuButton: ViewGroup
         get() = omnibar.browserMenu
@@ -930,12 +931,12 @@ class BrowserTabFragment :
 
     @SuppressLint("InflateParams")
     private fun handleKahfIconClick(){
-        kahfDnsdIcon.setOnClickListener {
+        kahGuarddIcon.setOnClickListener {
             val popupView = LayoutInflater.from(context).inflate(R.layout.kahf_guard_pop_up, null)
             val popupBinding = KahfGuardPopUpBinding.bind(popupView)
             val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             val iconRect = Rect()
-            kahfDnsdIcon.getGlobalVisibleRect(iconRect)
+            kahGuarddIcon.getGlobalVisibleRect(iconRect)
             val y = iconRect.top
             val x = iconRect.left
             popupWindow.apply {
@@ -943,19 +944,19 @@ class BrowserTabFragment :
                 isFocusable = true
             }
             popupBinding.apply {
-                kahfDnsdIcon.post {
+                kahGuarddIcon.post {
                     val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
                     val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
                     val newPopUpPosition = (x - popUpLayingOut) - 40
                     popupWindow.showAtLocation(
-                        kahfDnsdIcon,
+                        kahGuarddIcon,
                         Gravity.NO_GRAVITY,
                         newPopUpPosition,
                         (y + omnibar.toolbar.height) - 20,
                     )
                     protectedTextView.setOnClickListener {
                         val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse("https://check.kahfdns.com")
+                        intent.data = Uri.parse(KAHF_GUARD_CHECK_URL)
                         startActivity(intent)
                     }
                     val pointerArrow =
