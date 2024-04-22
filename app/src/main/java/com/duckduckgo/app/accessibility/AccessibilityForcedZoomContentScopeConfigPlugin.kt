@@ -28,7 +28,7 @@ class AccessibilityForcedZoomContentScopeConfigPlugin @Inject constructor(
 ) : ContentScopeConfigPlugin {
     override fun config(): String = ""
 
-    override fun preferences(): String? {
+    override fun preferences(): String {
         return "\"forcedZoomEnabled\":${accessibilitySettingsDataStore.forceZoom}"
     }
 }

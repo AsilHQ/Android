@@ -40,7 +40,7 @@ import com.duckduckgo.sync.api.favicons.FaviconsFetchingStore
 import java.io.File
 import kotlinx.coroutines.withContext
 
-class DuckDuckGoFaviconManager constructor(
+class DuckDuckGoFaviconManager(
     private val faviconPersister: FaviconPersister,
     private val savedSitesDao: SavedSitesEntitiesDao,
     private val fireproofWebsiteRepository: FireproofWebsiteRepository,

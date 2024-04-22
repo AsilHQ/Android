@@ -25,7 +25,7 @@ interface LetsEncryptCertificateProvider {
     fun findByCname(cname: String): LetsEncryptCertificate?
 }
 
-class LetsEncryptCertificateProviderImpl constructor(
+class LetsEncryptCertificateProviderImpl(
     private val certificates: Set<LetsEncryptCertificate>,
 ) : LetsEncryptCertificateProvider {
     override fun certificates(): List<LetsEncryptCertificate> {

@@ -51,12 +51,12 @@ class AboutDuckDuckGoViewModel @Inject constructor(
     )
 
     sealed class Command {
-        object LaunchBrowserWithLearnMoreUrl : Command()
-        object LaunchBrowserWithPrivacyProtectionsUrl : Command()
-        object LaunchWebViewWithPrivacyPolicyUrl : Command()
-        object ShowNetPUnlockedSnackbar : Command()
-        object LaunchNetPWaitlist : Command()
-        object LaunchFeedback : Command()
+        data object LaunchBrowserWithLearnMoreUrl : Command()
+        data object LaunchBrowserWithPrivacyProtectionsUrl : Command()
+        data object LaunchWebViewWithPrivacyPolicyUrl : Command()
+        data object ShowNetPUnlockedSnackbar : Command()
+        data object LaunchNetPWaitlist : Command()
+        data object LaunchFeedback : Command()
     }
 
     private val viewState = MutableStateFlow(ViewState())
@@ -96,7 +96,7 @@ class AboutDuckDuckGoViewModel @Inject constructor(
     }
 
     fun onVersionClicked() {
-        if (viewState.value.networkProtectionWaitlistState == NetPWaitlistState.NotUnlocked) {
+        if (viewState.value.networkProtectionWaitlistState == NotUnlocked) {
             netPEasterEggCounter++
             if (netPEasterEggCounter >= MAX_EASTER_EGG_COUNT) {
                 viewModelScope.launch { command.send(Command.ShowNetPUnlockedSnackbar) }

@@ -43,20 +43,20 @@ data class LoginDetected(
 
 sealed class NavigationEvent {
     sealed class UserAction : NavigationEvent() {
-        object NavigateForward : UserAction()
-        object NavigateBack : UserAction()
-        object NewQuerySubmitted : UserAction()
-        object Refresh : UserAction()
+        data object NavigateForward : UserAction()
+        data object NavigateBack : UserAction()
+        data object NewQuerySubmitted : UserAction()
+        data object Refresh : UserAction()
     }
 
     data class WebNavigationEvent(val navigationStateChange: WebNavigationStateChange) : NavigationEvent()
-    object PageFinished : NavigationEvent()
-    object GpcRedirect : NavigationEvent()
+    data object PageFinished : NavigationEvent()
+    data object GpcRedirect : NavigationEvent()
     data class LoginAttempt(val url: String) : NavigationEvent()
     data class Redirect(val url: String) : NavigationEvent()
 }
 
-class NextPageLoginDetection constructor(
+class NextPageLoginDetection(
     private val settingsDataStore: SettingsDataStore,
     private val appCoroutineScope: CoroutineScope,
     private val dispatcherProvider: DispatcherProvider = DefaultDispatcherProvider(),

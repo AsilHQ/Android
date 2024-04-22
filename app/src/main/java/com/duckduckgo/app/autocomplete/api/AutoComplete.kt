@@ -98,7 +98,7 @@ class AutoCompleteApi @Inject constructor(
             .map { rankBookmarks(query, it) }
             .flattenAsObservable { it }
             .map {
-                AutoCompleteBookmarkSuggestion(phrase = it.url.toUri().toStringDropScheme(), title = it.title.orEmpty(), url = it.url)
+                AutoCompleteBookmarkSuggestion(phrase = it.url.toUri().toStringDropScheme(), title = it.title, url = it.url)
             }
             .distinctUntilChanged()
             .take(2)
@@ -111,7 +111,7 @@ class AutoCompleteApi @Inject constructor(
             .map { rankFavorites(query, it) }
             .flattenAsObservable { it }
             .map {
-                AutoCompleteBookmarkSuggestion(phrase = it.url.toUri().toStringDropScheme(), title = it.title.orEmpty(), url = it.url)
+                AutoCompleteBookmarkSuggestion(phrase = it.url.toUri().toStringDropScheme(), title = it.title, url = it.url)
             }
             .distinctUntilChanged()
             .take(2)

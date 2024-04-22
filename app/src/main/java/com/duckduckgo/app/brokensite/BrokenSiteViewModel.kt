@@ -82,7 +82,7 @@ class BrokenSiteViewModel @Inject constructor(
     )
 
     sealed class Command {
-        object ConfirmAndFinish : Command()
+        data object ConfirmAndFinish : Command()
     }
 
     val viewState: MutableLiveData<ViewState> = MutableLiveData()

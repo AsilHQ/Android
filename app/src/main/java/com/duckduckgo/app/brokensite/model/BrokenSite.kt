@@ -42,15 +42,15 @@ sealed class BrokenSiteCategory(
     @StringRes val category: Int,
     val key: String,
 ) {
-    object BlockedCategory : BrokenSiteCategory(R.string.brokenSiteCategoryBlocked, BLOCKED_CATEGORY_KEY)
-    object LayoutCategory : BrokenSiteCategory(R.string.brokenSiteCategoryLayout, LAYOUT_CATEGORY_KEY)
-    object EmptySpacesCategory : BrokenSiteCategory(R.string.brokenSiteCategoryEmptySpaces, EMPTY_SPACES_CATEGORY_KEY)
-    object ShoppingCategory : BrokenSiteCategory(R.string.brokenSiteCategoryShopping, SHOPPING_CATEGORY_KEY)
-    object PaywallCategory : BrokenSiteCategory(R.string.brokenSiteCategoryPaywall, PAYWALL_CATEGORY_KEY)
-    object CommentsCategory : BrokenSiteCategory(R.string.brokenSiteCategoryComments, COMMENTS_CATEGORY_KEY)
-    object VideosCategory : BrokenSiteCategory(R.string.brokenSiteCategoryVideos, VIDEOS_CATEGORY_KEY)
-    object LoginCategory : BrokenSiteCategory(R.string.brokenSiteCategoryLogin, LOGIN_CATEGORY_KEY)
-    object OtherCategory : BrokenSiteCategory(R.string.brokenSiteCategoryOther, OTHER_CATEGORY_KEY)
+    data object BlockedCategory : BrokenSiteCategory(R.string.brokenSiteCategoryBlocked, BLOCKED_CATEGORY_KEY)
+    data object LayoutCategory : BrokenSiteCategory(R.string.brokenSiteCategoryLayout, LAYOUT_CATEGORY_KEY)
+    data object EmptySpacesCategory : BrokenSiteCategory(R.string.brokenSiteCategoryEmptySpaces, EMPTY_SPACES_CATEGORY_KEY)
+    data object ShoppingCategory : BrokenSiteCategory(R.string.brokenSiteCategoryShopping, SHOPPING_CATEGORY_KEY)
+    data object PaywallCategory : BrokenSiteCategory(R.string.brokenSiteCategoryPaywall, PAYWALL_CATEGORY_KEY)
+    data object CommentsCategory : BrokenSiteCategory(R.string.brokenSiteCategoryComments, COMMENTS_CATEGORY_KEY)
+    data object VideosCategory : BrokenSiteCategory(R.string.brokenSiteCategoryVideos, VIDEOS_CATEGORY_KEY)
+    data object LoginCategory : BrokenSiteCategory(R.string.brokenSiteCategoryLogin, LOGIN_CATEGORY_KEY)
+    data object OtherCategory : BrokenSiteCategory(R.string.brokenSiteCategoryOther, OTHER_CATEGORY_KEY)
 
     companion object {
         const val BLOCKED_CATEGORY_KEY = "blocked"

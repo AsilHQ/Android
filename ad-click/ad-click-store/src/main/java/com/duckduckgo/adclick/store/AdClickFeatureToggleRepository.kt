@@ -29,6 +29,6 @@ interface AdClickFeatureToggleRepository : AdClickFeatureToggleStore {
     }
 }
 
-internal class RealAdClickFeatureToggleRepository constructor(
+internal class RealAdClickFeatureToggleRepository(
     private val adClickFeatureToggleStore: AdClickFeatureToggleStore,
 ) : AdClickFeatureToggleRepository, AdClickFeatureToggleStore by adClickFeatureToggleStore

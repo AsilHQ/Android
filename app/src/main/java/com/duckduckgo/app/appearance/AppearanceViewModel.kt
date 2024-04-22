@@ -50,8 +50,8 @@ class AppearanceViewModel @Inject constructor(
 
     sealed class Command {
         data class LaunchThemeSettings(val theme: DuckDuckGoTheme) : Command()
-        object LaunchAppIcon : Command()
-        object UpdateTheme : Command()
+        data object LaunchAppIcon : Command()
+        data object UpdateTheme : Command()
     }
 
     private val viewState = MutableStateFlow(ViewState())

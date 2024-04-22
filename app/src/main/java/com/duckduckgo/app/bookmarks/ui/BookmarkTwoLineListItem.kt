@@ -18,6 +18,7 @@
 
 package com.duckduckgo.app.bookmarks.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View
@@ -28,6 +29,7 @@ import com.duckduckgo.common.ui.view.text.DaxTextView
 import com.duckduckgo.common.ui.viewbinding.viewBinding
 import com.duckduckgo.mobile.android.R
 
+@SuppressLint("CustomViewStyleable")
 class BookmarkTwoLineListItem @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,

@@ -130,7 +130,7 @@ class BookmarksActivity : DuckDuckGoActivity() {
 
     private fun getParentFolderId() = intent.extras?.getString(KEY_BOOKMARK_FOLDER_ID)
         ?: SavedSitesNames.BOOKMARKS_ROOT
-
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(
         requestCode: Int,
         resultCode: Int,
@@ -333,6 +333,7 @@ class BookmarksActivity : DuckDuckGoActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (searchBar.isVisible) {
             hideSearchBar()
