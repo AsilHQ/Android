@@ -128,7 +128,7 @@ import com.duckduckgo.app.browser.databinding.FragmentBrowserTabBinding
 import com.duckduckgo.app.browser.databinding.HttpAuthenticationBinding
 import com.duckduckgo.app.browser.databinding.IncludeOmnibarToolbarBinding
 import com.duckduckgo.app.browser.databinding.IncludeQuickAccessItemsBinding
-import com.duckduckgo.app.browser.databinding.KahfDnsPopUpBinding
+import com.duckduckgo.app.browser.databinding.KahfGuardPopUpBinding
 import com.duckduckgo.app.browser.databinding.PopupWindowBrowserMenuBinding
 import com.duckduckgo.app.browser.databinding.SafeGazePopUpCloseBinding
 import com.duckduckgo.app.browser.databinding.SafeGazePopUpOpenBinding
@@ -931,8 +931,8 @@ class BrowserTabFragment :
     @SuppressLint("InflateParams")
     private fun handleKahfIconClick(){
         kahfDnsdIcon.setOnClickListener {
-            val popupView = LayoutInflater.from(context).inflate(R.layout.kahf_dns_pop_up, null)
-            val popupBinding = KahfDnsPopUpBinding.bind(popupView)
+            val popupView = LayoutInflater.from(context).inflate(R.layout.kahf_guard_pop_up, null)
+            val popupBinding = KahfGuardPopUpBinding.bind(popupView)
             val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             val iconRect = Rect()
             kahfDnsdIcon.getGlobalVisibleRect(iconRect)
@@ -959,33 +959,33 @@ class BrowserTabFragment :
                         startActivity(intent)
                     }
                     val pointerArrow =
-                        popupView.findViewById<ImageView>(R.id.pointer_arrow_kahf_dns_image_view)
+                        popupView.findViewById<ImageView>(R.id.pointer_arrow_kahf_guard_image_view)
                     val pointerArrowParams =
                         pointerArrow.layoutParams as ConstraintLayout.LayoutParams
                     pointerArrowParams.rightMargin = leftOverDevicePixel - 93
                     pointerArrow.layoutParams = pointerArrowParams
 
                     if (DnsOverVpnService.isVpnRunning(connectivityManager)){
-                        kahfDnsToggleButton.isChecked = true
-                        kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
+                        kahfGuardToggleButton.isChecked = true
+                        kahfGuardStateTextView.text = resources.getString(string.kahf_guard_up)
                         protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
-                        kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
+                        kahfGuardToggleButton.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
                     }else{
-                        kahfDnsToggleButton.isChecked = false
-                        kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
-                        protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
-                        kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.WHITE)
+                        kahfGuardToggleButton.isChecked = false
+                        kahfGuardStateTextView.text = resources.getString(string.kahf_dns_down)
+                        protectedTextView.text = resources.getString(string.kahf_guard_not_protected_text)
+                        kahfGuardToggleButton.trackTintList = ColorStateList.valueOf(Color.WHITE)
                     }
-                    handleTrackTint(kahfDnsToggleButton.isChecked, kahfDnsToggleButton)
-                    kahfDnsToggleButton.setOnCheckedChangeListener { _, isChecked ->
-                        handleTrackTint(isChecked, kahfDnsToggleButton)
+                    handleTrackTint(kahfGuardToggleButton.isChecked, kahfGuardToggleButton)
+                    kahfGuardToggleButton.setOnCheckedChangeListener { _, isChecked ->
+                        handleTrackTint(isChecked, kahfGuardToggleButton)
                         if (DnsOverVpnService.isVpnRunning(connectivityManager)){
                             disconnectVpn()
-                            kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
-                            protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
+                            kahfGuardStateTextView.text = resources.getString(string.kahf_dns_down)
+                            protectedTextView.text = resources.getString(string.kahf_guard_not_protected_text)
                         }else{
                             connectVpn()
-                            kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
+                            kahfGuardStateTextView.text = resources.getString(string.kahf_guard_up)
                             protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
                         }
                     }
