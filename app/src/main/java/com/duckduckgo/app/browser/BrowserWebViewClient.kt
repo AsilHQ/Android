@@ -428,7 +428,7 @@ class BrowserWebViewClient @Inject constructor(
         url: String?,
     ) {
         super.onPageFinished(webView, url)
-        handleKahfTube(webView, url)
+        //handleKahfTube(webView, url)
         jsPlugins.getPlugins().forEach {
             it.onPageFinished(webView, url, webViewClientListener?.getSite())
         }
