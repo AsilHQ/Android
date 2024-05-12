@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/spacing_dialog"
+    android:background="@color/bg_disconnected"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/logo_white_disconnected"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@null">
+    </ImageView>
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/alert_title_vpn_access_denied"
+        android:textColor="@color/white"
+        android:layout_marginStart="5dp"
+        android:fontFamily="@font/poppins_bold"
+        android:textSize="@dimen/font_dialog_title"
+        app:layout_constraintStart_toEndOf="@id/logo"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+    </TextView>
+
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/alert_text_vpn_access_denied"
+        android:textColor="@color/white"
+        android:fontFamily="@font/poppins_regular"
+        android:textSize="@dimen/font_dialog_text"
+        android:layout_marginTop="@dimen/spacing_dialog"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_cancel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel"
+        android:textColor="@color/bg_disconnected"
+        android:backgroundTint="@color/bg_app"
+        android:layout_marginTop="@dimen/spacing_dialog"
+        android:layout_marginEnd="@dimen/spacing_dialog"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/button_retry"
+        app:layout_constraintTop_toBottomOf="@id/description"
+        style="@style/DialogButton"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_retry"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/try_again"
+        android:textColor="@color/theme"
+        android:backgroundTint="@color/bg_app"
+        android:layout_marginTop="@dimen/spacing_dialog"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/button_cancel"
+        app:layout_constraintTop_toBottomOf="@id/description"
+        style="@style/DialogButton"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>

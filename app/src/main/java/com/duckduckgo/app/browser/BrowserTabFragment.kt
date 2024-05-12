@@ -21,7 +21,14 @@ import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.app.ActivityOptions
 import android.app.PendingIntent
-import android.content.*
+import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
@@ -29,13 +36,17 @@ import android.content.res.AssetManager
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.graphics.Rect
-import android.net.ConnectivityManager
 import android.graphics.Typeface
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.net.VpnService
-import android.os.*
+import android.os.Build
+import android.os.Bundle
+import android.os.Environment
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.print.PrintAttributes
 import android.print.PrintManager
 import android.provider.MediaStore
@@ -45,8 +56,19 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.StyleSpan
 import android.util.DisplayMetrics
-import android.view.*
-import android.view.View.*
+import android.view.ContextMenu
+import android.view.Gravity
+import android.view.KeyEvent
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.View
+import android.view.View.GONE
+import android.view.View.OnFocusChangeListener
+import android.view.View.VISIBLE
+import android.view.View.inflate
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
 import android.webkit.PermissionRequest
@@ -57,7 +79,9 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebView.FindListener
 import android.webkit.WebView.HitTestResult
-import android.webkit.WebView.HitTestResult.*
+import android.webkit.WebView.HitTestResult.IMAGE_TYPE
+import android.webkit.WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE
+import android.webkit.WebView.HitTestResult.UNKNOWN_TYPE
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
@@ -79,13 +103,23 @@ import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import androidx.core.text.toSpannable
-import androidx.core.view.*
+import androidx.core.view.doOnLayout
+import androidx.core.view.isEmpty
+import androidx.core.view.isInvisible
+import androidx.core.view.isNotEmpty
+import androidx.core.view.isVisible
+import androidx.core.view.postDelayed
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.transaction
-import androidx.lifecycle.*
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -172,8 +206,14 @@ import com.duckduckgo.app.browser.urlextraction.UrlExtractingWebView
 import com.duckduckgo.app.browser.urlextraction.UrlExtractingWebViewClient
 import com.duckduckgo.app.browser.webshare.WebShareChooser
 import com.duckduckgo.app.browser.webview.WebContentDebugging
-import com.duckduckgo.app.cta.ui.*
-import com.duckduckgo.app.cta.ui.DaxDialogCta.*
+import com.duckduckgo.app.cta.ui.BubbleCta
+import com.duckduckgo.app.cta.ui.Cta
+import com.duckduckgo.app.cta.ui.CtaViewModel
+import com.duckduckgo.app.cta.ui.DaxBubbleCta
+import com.duckduckgo.app.cta.ui.DaxDialogCta
+import com.duckduckgo.app.cta.ui.DaxDialogCta.DaxTrackersBlockedCta
+import com.duckduckgo.app.cta.ui.DialogCta
+import com.duckduckgo.app.cta.ui.HomePanelCta
 import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.app.dns.DnsOverVpnService
 import com.duckduckgo.app.fire.fireproofwebsite.data.FireproofWebsiteEntity
@@ -259,7 +299,6 @@ import com.duckduckgo.common.ui.viewbinding.viewBinding
 import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.FragmentViewModelFactory
-import com.duckduckgo.common.utils.KAHF_GUARD_CHECK_URL
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_INTERFACE
@@ -305,8 +344,16 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.hoko.blur.HokoBlur
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.halalz.kahftube.network.ApiService
 import org.halalz.kahftube.network.RequestListener
 import org.halalz.kahftube.view.ProfilePageActivity
@@ -320,8 +367,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
 @InjectWith(FragmentScope::class)
 class BrowserTabFragment :
@@ -569,7 +614,6 @@ class BrowserTabFragment :
 
     private val findInPage
         get() = omnibar.findInPage
-
     private val newBrowserTab
         get() = binding.includeNewBrowserTab
 
@@ -593,7 +637,7 @@ class BrowserTabFragment :
     private val safeGazeIcon: AppCompatImageView
         get() = omnibar.safeGazeIcon
 
-    private val kahGuarddIcon: AppCompatImageView
+    private val kahGuardIcon: AppCompatImageView
         get() = omnibar.kahfGuardIcon
 
     private val menuButton: ViewGroup
@@ -931,12 +975,12 @@ class BrowserTabFragment :
 
     @SuppressLint("InflateParams")
     private fun handleKahfIconClick(){
-        kahGuarddIcon.setOnClickListener {
+        kahGuardIcon.setOnClickListener {
             val popupView = LayoutInflater.from(context).inflate(R.layout.kahf_guard_pop_up, null)
             val popupBinding = KahfGuardPopUpBinding.bind(popupView)
             val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             val iconRect = Rect()
-            kahGuarddIcon.getGlobalVisibleRect(iconRect)
+            kahGuardIcon.getGlobalVisibleRect(iconRect)
             val y = iconRect.top
             val x = iconRect.left
             popupWindow.apply {
@@ -944,17 +988,18 @@ class BrowserTabFragment :
                 isFocusable = true
             }
             popupBinding.apply {
-                kahGuarddIcon.post {
+                kahGuardIcon.post {
                     val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
                     val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
                     val newPopUpPosition = (x - popUpLayingOut) - 40
                     popupWindow.showAtLocation(
-                        kahGuarddIcon,
+                        kahGuardIcon,
                         Gravity.NO_GRAVITY,
                         newPopUpPosition,
                         (y + omnibar.toolbar.height) - 20,
                     )
-                    protectedTextView.setOnClickListener {
+                    println("Root view is -> ${binding.rootView}")
+/*                    protectedTextView.setOnClickListener {
                         val intent = Intent(Intent.ACTION_VIEW)
                         intent.data = Uri.parse(KAHF_GUARD_CHECK_URL)
                         startActivity(intent)
@@ -989,7 +1034,7 @@ class BrowserTabFragment :
                             kahfGuardStateTextView.text = resources.getString(string.kahf_guard_up)
                             protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
                         }
-                    }
+                    }*/
                 }
             }
         }
@@ -1461,28 +1506,26 @@ class BrowserTabFragment :
     private fun addTabsObserver() {
         viewModel.tabs.observe(
             viewLifecycleOwner,
-            Observer {
-                it?.let {
-                    decorator.renderTabIcon(it)
-                }
-            },
-        )
+        ) {
+            it?.let {
+                decorator.renderTabIcon(it)
+            }
+        }
 
         viewModel.liveSelectedTab.distinctUntilChanged().observe(
             viewLifecycleOwner,
-            Observer {
-                it?.let {
-                    val wasActive = isActiveTab
-                    isActiveTab = it.tabId == tabId
-                    if (wasActive && !isActiveTab) {
-                        Timber.v("Tab %s is newly inactive", tabId)
+        ) {
+            it?.let {
+                val wasActive = isActiveTab
+                isActiveTab = it.tabId == tabId
+                if (wasActive && !isActiveTab) {
+                    Timber.v("Tab %s is newly inactive", tabId)
 
-                        // want to ensure that we aren't offering to inject credentials from an inactive tab
-                        hideDialogWithTag(CredentialAutofillPickerDialog.TAG)
-                    }
+                    // want to ensure that we aren't offering to inject credentials from an inactive tab
+                    hideDialogWithTag(CredentialAutofillPickerDialog.TAG)
                 }
-            },
-        )
+            }
+        }
     }
 
     private fun fragmentIsVisible(): Boolean {
@@ -3484,6 +3527,7 @@ class BrowserTabFragment :
     }
 
     companion object {
+        var LAST_CONNECT_OR_DISCONNECT_PRESSED: Boolean = true
         private const val TAB_ID_ARG = "TAB_ID_ARG"
         private const val URL_EXTRA_ARG = "URL_EXTRA_ARG"
         private const val SKIP_HOME_ARG = "SKIP_HOME_ARG"

@@ -1,178 +1,342 @@
-<!-- res/layout/popup_layout.xml -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/popup_constraint_layout"
     android:layout_width="275dp"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent"
+    android:background="@color/bg_app"
+    android:orientation="vertical"
+    android:animateLayoutChanges="true"
+    >
 
-    <ImageView
-        android:id="@+id/pointer_arrow_kahf_guard_image_view"
-        android:layout_width="14dp"
-        android:layout_height="9dp"
-        android:contentDescription="@string/pointer_arrow"
-        android:src="@drawable/pointer_arrow"
-        app:layout_constraintBottom_toTopOf="@id/popupLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/popupLayout"
-        android:layout_width="275dp"
-        android:layout_height="match_parent"
-        android:background="@drawable/kahf_guard_pop_up_background"
-        app:cardCornerRadius="10dp"
-        app:cardElevation="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+    <!-- company -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/company_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/bg_company"
+        android:paddingStart="@dimen/spacing_h_company"
+        android:paddingTop="@dimen/spacing_v_company"
+        android:paddingEnd="@dimen/spacing_h_company"
+        android:paddingBottom="@dimen/spacing_v_company"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <!-- company app logo -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/company_logo"
+            android:layout_width="@dimen/image_company"
+            android:layout_height="@dimen/image_company"
+            android:paddingStart="0dp"
+            android:paddingEnd="@dimen/spacing_h_company"
+            android:src="@drawable/kahf_guard_logo"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- company app name -->
+        <TextView
+            android:id="@+id/company_app"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:fontFamily="@font/poppins_bold"
+            android:includeFontPadding="false"
+            android:text="Kahf Guard"
+            android:textColor="@color/text_company_app"
+            android:textSize="@dimen/font_company_app"
+            app:layout_constraintStart_toEndOf="@id/company_logo"
+            app:layout_constraintTop_toTopOf="@id/company_logo" />
+
+        <!-- company name -->
+        <TextView
+            android:id="@+id/company_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-2dp"
+            android:fontFamily="@font/poppins_regular"
+            android:includeFontPadding="false"
+            android:padding="0dp"
+            android:text="@string/company"
+            android:textSize="@dimen/font_company_name"
+            app:layout_constraintStart_toStartOf="@id/company_app"
+            app:layout_constraintTop_toBottomOf="@id/company_app" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- connected/safe-to-close message -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/connected_safe_to_close"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/theme"
+        android:paddingTop="@dimen/spacing_top_connected_safe_to_close"
+        android:paddingBottom="@dimen/spacing_bottom_connected_safe_to_close"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"
+        >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:text="@string/connected_safe_to_close"
+            android:textSize="@dimen/font_connected_safe_to_close"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- main contents container -->
+    <!-- vertically centered -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/padding_container"
+        android:layout_marginTop="@dimen/margin_top_container"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:animateLayoutChanges="true">
+
+        <!-- logo -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/app_logo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:maxWidth="@dimen/image_logo_max_width"
+            android:scaleType="fitCenter"
+            android:src="@drawable/logo_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.80" />
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:layout_marginTop="@dimen/margin_top_loading"
+            android:visibility="gone"
+            app:indicatorSize="@dimen/size_loading"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/app_logo"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/connect_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_top_connect_switch"
+            android:layout_marginBottom="@dimen/margin_bottom_connect_switch"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/app_logo"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:scaleX="@dimen/scale_connect_switch"
+            android:scaleY="@dimen/scale_connect_switch"
+            app:trackDecorationTint="@color/switch_track_outline_selector"
+            app:trackTint="@color/switch_track_color_selector"
+            app:thumbTint="@color/switch_thumb_color_selector"
+            style="@style/SelectableItemBackgroundBorderless"
+            app:thumbIcon="@drawable/thumb_icon"
+            app:thumbIconTint="@color/theme"
+            />
+
+        <!-- disconnected container -->
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="275dp"
-            android:layout_height="match_parent"
-            android:background="@drawable/safe_gaze_card_view_background">
+            android:id="@+id/disconnected_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_top_connect_status"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/connect_switch"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:animateLayoutChanges="true"
+            >
 
-            <View
-                android:id="@+id/kahf_guard_pop_up_top_view"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:background="#F0F0F0"
-                />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/kahf_guard_pop_up_logo_image_view"
-                android:layout_width="24dp"
-                android:layout_height="27dp"
-                app:layout_constraintStart_toStartOf="@id/kahf_guard_pop_up_top_view"
-                app:layout_constraintTop_toTopOf="@id/kahf_guard_pop_up_top_view"
-                app:layout_constraintBottom_toBottomOf="@id/kahf_guard_pop_up_top_view"
-                android:layout_marginStart="20dp"
-                android:src="@drawable/kahf_guard_logo"/>
-
+            <!-- Connection status -->
             <TextView
-                android:id="@+id/kahf_guard_text_view"
+                android:id="@+id/disconnected_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/kahf_guard"
-                android:layout_marginStart="10dp"
-                android:textSize="16sp"
+                android:fontFamily="@font/poppins_bold"
+                android:includeFontPadding="false"
+                android:text="@string/status_disconnected"
                 android:textColor="@color/black"
-                android:textStyle="bold"
-                app:layout_constraintStart_toEndOf="@+id/kahf_guard_pop_up_logo_image_view"
-                app:layout_constraintTop_toTopOf="@+id/kahf_guard_pop_up_logo_image_view"/>
-
-            <TextView
-                android:id="@+id/halalz_company_name_text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/by_halalz_e_ticaret_ltd_ti"
-                android:textSize="9sp"
-                app:layout_constraintTop_toBottomOf="@id/kahf_guard_text_view"
-                app:layout_constraintStart_toStartOf="@+id/kahf_guard_text_view"/>
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/kahf_guard_text_image_view"
-                android:layout_width="200dp"
-                android:layout_height="75dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/kahf_guard_pop_up_top_view"
-                app:layout_constraintBottom_toTopOf="@id/kahf_guard_toggle_button"
-                android:layout_marginTop="25dp"
-                android:src="@drawable/kahf_guard_logo_with_text"/>
-
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/kahf_guard_toggle_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:checked="true"
-                android:textAllCaps="false"
-                android:textSize="15sp"
-                android:layout_marginTop="25dp"
-                android:thumb="@drawable/thumb_selector"
+                android:textSize="@dimen/font_connect_status"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/kahf_guard_text_image_view"
-                app:showText="false"
-                app:switchTextAppearance="@style/SwitchTextAppearance"
-                app:thumbTint="#FFFFFF"
-                app:track="@drawable/track_selector"
-                />
+                app:layout_constraintTop_toTopOf="parent" />
 
+            <!-- Connection text -->
             <TextView
-                android:id="@+id/kahf_guard_state_text_view"
+                android:id="@+id/disconnected_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="10dp"
-                android:paddingBottom="0dp"
-                android:text="@string/kahf_guard_up"
+                android:layout_margin="0dp"
+                android:fontFamily="@font/poppins_regular"
+                android:text="@string/status_disconnected_text"
+                android:textAlignment="center"
                 android:textColor="@color/black"
-                android:textStyle="bold"
-                android:textFontWeight="700"
+                android:textSize="@dimen/font_connect_message"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/kahf_guard_toggle_button" />
-            
-            <TextView
-                android:id="@+id/protected_text_view"
+                app:layout_constraintTop_toBottomOf="@id/disconnected_status" />
+
+            <!-- connect type button -->
+            <com.google.android.material.divider.MaterialDivider
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/kahf_guard_state_text_view"
-                app:layout_constraintBottom_toTopOf="@+id/verify_connection_text_view"
-                android:textAlignment="center"
-                android:layout_marginTop="15dp"
-                android:textSize="11sp"
-                style="@style/Typography.DuckDuckGo.Body1.Bold"
-                android:textColor="@color/black"
-                android:text="@string/kahf_guard_not_protected_text"/>
+                app:layout_constraintBottom_toTopOf="@id/connect_type_button"
+                app:layout_constraintStart_toStartOf="@id/connect_Type_icon"
+                app:layout_constraintEnd_toEndOf="@id/connect_type_button"
+                app:dividerColor="@color/theme"
+                />
 
-            <TextView
-                android:id="@+id/verify_connection_text_view"
+            <ImageView
+                android:id="@+id/connect_Type_icon"
+                android:layout_width="@dimen/icon_connect_type"
+                android:layout_height="@dimen/icon_connect_type"
+                android:src="@drawable/icon_connect_type"
+                app:layout_constraintLeft_toLeftOf="@id/connect_type_button"
+                app:layout_constraintTop_toTopOf="@id/connect_type_button"
+                app:layout_constraintBottom_toBottomOf="@id/connect_type_button"
+                android:layout_marginStart="@dimen/icon_connect_margin_start"
+                />
+
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toTopOf="@id/connect_type_button"
+                app:layout_constraintStart_toStartOf="@id/connect_type_button"
+                app:layout_constraintEnd_toEndOf="@id/connect_type_button"
+                app:dividerColor="@color/theme"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/connect_type_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="@dimen/margin_top_connect_button"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/protected_text_view"
-                android:layout_marginVertical="20dp"
-                android:textColor="#3C60F2"
-                android:textSize="12sp"
-                android:text="@string/verify_protection"/>
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/disconnected_message"
+                android:fontFamily="@font/poppins_regular"
+                android:textSize="@dimen/font_connect_button"
+                style="@style/SimpleButton"
+                />
 
-
+            <com.google.android.material.divider.MaterialDivider
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@id/connect_type_button"
+                app:layout_constraintStart_toStartOf="@id/connect_Type_icon"
+                app:layout_constraintEnd_toEndOf="@id/connect_type_button"
+                app:dividerColor="@color/theme"
+                />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+        <!-- connected container -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/connected_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_top_connect_status"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/connect_switch"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone"
+            android:animateLayoutChanges="true"
+            >
+
+            <!-- Connection status -->
+            <TextView
+                android:id="@+id/connected_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_bold"
+                android:includeFontPadding="false"
+                android:text="@string/status_connected"
+                android:textColor="@color/black"
+                android:textSize="@dimen/font_connect_status"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- Connection text -->
+            <TextView
+                android:id="@+id/connected_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="0dp"
+                android:fontFamily="@font/poppins_merged"
+                android:text="@string/status_connected_placeholder_text"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:textSize="@dimen/font_connect_message"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/connected_status" />
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/disable_youtube_ss_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/connected_message"
+                android:text="@string/text_disable_safe_search_in_yt"
+                android:textColor="@color/text_checkbox_not_selected"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/verify_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_top_verify_button"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/disable_youtube_ss_switch"
+                android:fontFamily="@font/poppins_merged"
+                android:text="@string/button_verify"
+                android:textSize="@dimen/font_verify_button"
+                style="@style/SimpleButton"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/switch_to_native_dns_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/verify_button"
+                android:fontFamily="@font/poppins_merged"
+                android:textSize="@dimen/font_switch_to_native_dns_button"
+                android:text="@string/switch_to_native_dns_button"
+                android:textAlignment="center"
+                android:textColor="@color/theme"
+                android:textAllCaps="false"
+                android:padding="0dp"
+                style="@style/SimpleButton"
+                android:visibility="gone"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Banner and bottom buttons -->
+    <com.duckduckgo.app.kahf_guard.layouts.BottomContainer
+        android:id="@+id/bottom_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

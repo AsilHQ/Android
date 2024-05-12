@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="@dimen/bottom_container_padding"
+    android:paddingEnd="@dimen/bottom_container_padding"
+    android:paddingTop="@dimen/bottom_container_padding_top"
+    android:paddingBottom="@dimen/bottom_container_padding"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:translationY="@dimen/bottom_banner_max_height_and_button_height"
+    >
+
+    <!--         -->
+    <!-- Banner  -->
+    <!--         -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/bottom_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxHeight="@dimen/bottom_banner_max_height"
+        android:scaleType="fitCenter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <!--         -->
+    <!-- buttons -->
+    <!--         -->
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottom_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/height_bottom_button"
+        android:padding="0dp"
+        android:layout_marginTop="@dimen/bottom_container_padding"
+        app:layout_constraintTop_toBottomOf="@id/bottom_banner"
+        app:layout_constraintStart_toStartOf="parent"
+        android:visibility="invisible"
+        >
+
+        <!-- share button -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/bottom_button_share"
+            android:layout_width="@dimen/width_bottom_button"
+            android:layout_height="@dimen/height_bottom_button"
+            android:background="@drawable/bottom_button_shape"
+            android:padding="@dimen/padding_bottom_button"
+            android:scaleType="fitCenter"
+            android:src="@drawable/bottom_button_share"
+            android:clickable="true"
+            android:focusable="true"
+            android:tooltipText="@string/bottom_button_share"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <!-- community button -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/bottom_button_community"
+            android:layout_width="@dimen/width_bottom_button"
+            android:layout_height="@dimen/height_bottom_button"
+            android:background="@drawable/bottom_button_shape"
+            android:padding="@dimen/padding_bottom_button"
+            android:layout_marginStart="@dimen/margin_bottom_button"
+            android:scaleType="fitCenter"
+            android:src="@drawable/bottom_button_community"
+            android:clickable="true"
+            android:focusable="true"
+            android:tooltipText="@string/bottom_button_community"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/bottom_button_share"
+            />
+
+        <!-- contact button -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/bottom_button_contact"
+            android:layout_width="@dimen/width_bottom_button"
+            android:layout_height="@dimen/height_bottom_button"
+            android:background="@drawable/bottom_button_shape"
+            android:padding="@dimen/padding_bottom_button"
+            android:scaleType="fitCenter"
+            android:layout_marginStart="@dimen/margin_bottom_button"
+            android:src="@drawable/bottom_button_contact"
+            android:clickable="true"
+            android:focusable="true"
+            android:tooltipText="@string/bottom_button_contact_us"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/bottom_button_community"
+            />
+
+        <!-- patreon button -->
+        <LinearLayout
+            android:id="@+id/bottom_button_patreon"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/height_bottom_button"
+            android:paddingStart="@dimen/padding_bottom_button"
+            android:paddingEnd="@dimen/padding_bottom_button"
+            android:background="@drawable/bottom_button_patreon_shape"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:tooltipText="@string/bottom_button_support"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="2dp"
+            >
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/bottom_button_patreon"
+                android:clickable="true"
+                android:focusable="true"
+                />
+
+            <TextView
+                android:id="@+id/bottom_button_patreon_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_regular"
+                android:textSize="15sp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/theme"
+                android:text="@string/bottom_button_support"
+                />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

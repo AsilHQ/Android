@@ -23,4 +23,66 @@
     <dimen name="default_padding">16dp</dimen>
     <dimen name="_200dp">200dp</dimen>
     <dimen name="_08dp">08dp</dimen>
+    <!-- company -->
+    <dimen name="height_company_details">60dp</dimen>
+    <dimen name="font_company_app">16sp</dimen>
+    <dimen name="font_company_name">12sp</dimen>
+    <dimen name="image_company">40dp</dimen>
+    <dimen name="spacing_h_company">8dp</dimen>
+    <dimen name="spacing_v_company">8dp</dimen>
+
+    <!-- logo -->
+    <dimen name="image_logo_max_width">320dp</dimen> <!-- height will be according to aspect ratio automatically -->
+    <dimen name="image_logo_top">100dp</dimen>
+
+    <!-- container -->
+    <dimen name="padding_container">10dp</dimen>
+    <dimen name="margin_top_container">-75dp</dimen>
+
+    <!-- connection status -->
+    <dimen name="scale_connect_switch">1.7</dimen>
+    <dimen name="margin_top_connect_switch">15dp</dimen>
+    <dimen name="margin_bottom_connect_switch">15dp</dimen>
+    <dimen name="margin_top_connect_status">15dp</dimen>
+    <dimen name="font_connect_status">20sp</dimen>
+    <dimen name="font_connect_message">12sp</dimen>
+    <dimen name="size_loading">80dp</dimen>
+    <dimen name="margin_top_connect_type_picker">20dp</dimen>
+    <dimen name="margin_top_loading">30dp</dimen>
+
+    <!-- connect type button -->
+    <dimen name="margin_top_connect_button">20dp</dimen>
+    <dimen name="font_connect_button">12sp</dimen>
+    <dimen name="icon_connect_type">18dp</dimen>
+    <dimen name="icon_connect_margin_start">-15dp</dimen>
+
+    <!-- bottom banner and buttons -->
+    <dimen name="bottom_container_padding">10dp</dimen>
+    <dimen name="bottom_container_padding_top">20dp</dimen> <!-- we need higher so that animation is not cut off -->
+    <dimen name="bottom_banner_max_height">80dp</dimen>
+
+    <dimen name="size_bottom_button_icon">24dp</dimen>
+    <dimen name="corner_radius_bottom_button">5dp</dimen>
+    <dimen name="width_bottom_button">50dp</dimen>
+    <dimen name="height_bottom_button">40dp</dimen>
+    <dimen name="padding_bottom_button">10dp</dimen>
+    <dimen name="margin_bottom_button">10dp</dimen>
+
+    <dimen name="bottom_banner_max_height_and_button_height">140dp</dimen> <!-- bottom_banner_max_height + height_bottom_button + 10dp safe margin -->
+
+    <!-- dialog -->
+    <dimen name="icon_cancel">30dp</dimen>
+    <dimen name="font_dialog_title">15sp</dimen>
+    <dimen name="font_dialog_text">12sp</dimen>
+    <dimen name="font_dialog_text2">11sp</dimen>
+    <dimen name="spacing_dialog">15dp</dimen>
+    <dimen name="padding_bottom_contents_dialog">40dp</dimen>
+
+    <!-- others -->
+    <dimen name="font_connected_safe_to_close">11sp</dimen>
+    <dimen name="spacing_top_connected_safe_to_close">5dp</dimen>
+    <dimen name="spacing_bottom_connected_safe_to_close">5dp</dimen>
+    <dimen name="font_verify_button">15sp</dimen>
+    <dimen name="margin_top_verify_button">5dp</dimen>
+    <dimen name="font_switch_to_native_dns_button">11sp</dimen>
 </resources>

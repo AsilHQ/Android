@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- commons -->
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="red">#FF0000</color>
+    <color name="yellow">#FFFF00</color>
+    <color name="blue">#0000FF</color>
+
+    <!-- theme -->
+    <color name="theme">#139F0D</color>
+    <color name="theme_light">#36C330</color>
+    <color name="bg_app">#f2faf1</color>
+    <color name="bg_disconnected">#9A0000</color>
+    <color name="bg_disconnected_light">#FFF0F0</color>
+    <color name="tab_indicator_connected">@color/theme</color>
+    <color name="tab_indicator_disconnected">#D10000</color>
+
+    <!-- company -->
+    <color name="bg_company">#FFFFFF</color>
+    <color name="text_company_app">#000000</color>
+
+    <!-- switch -->
+    <color name="bg_switch_thumb">#333333</color>
+    <color name="bg_switch_thumb_activated">#FFFFFF</color>
+    <color name="bg_switch_track">#CCD1CA</color>
+    <color name="bg_switch_track_activated">#2da031</color>
+    <color name="bg_switch_outline">#C3C6C2</color>
+    <color name="bg_switch_outline_activated">#248E28</color>
+
+    <!-- bottom container -->
+    <color name="bg_bottom_button">#FFFFFF</color>
+    <color name="bg_click_bottom_button">#A1D8A3</color>
+    <color name="border_bottom_button">#EEEEEE</color>
+
+    <!-- dialog -->
+    <color name="text_dialog">#333333</color>
+    <color name="title_dialog">#555555</color>
+    <color name="text_dialog_hostname">#000000</color>
+    <color name="bg_dialog_hostname">#CCCCCC</color>
+
+    <!-- connect type -->
+    <color name="text_selected_connect_type">@color/theme</color>
+    <color name="text_checkbox_not_selected">#666666</color>
+    <color name="text_checkbox_selected">#000000</color>
+</resources>
