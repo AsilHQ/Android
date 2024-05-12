@@ -48,7 +48,6 @@ import com.duckduckgo.app.browser.mediaplayback.MediaPlayback
 import com.duckduckgo.app.browser.model.BasicAuthenticationRequest
 import com.duckduckgo.app.browser.navigation.safeCopyBackForwardList
 import com.duckduckgo.app.browser.pageloadpixel.PageLoadedHandler
-import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.global.model.Site
 import com.duckduckgo.app.pixels.remoteconfig.OptimizeTrackerEvaluationRCWrapper
 import com.duckduckgo.app.statistics.pixels.Pixel
@@ -96,10 +95,7 @@ class BrowserWebViewClientTest {
     private val cookieManagerProvider: CookieManagerProvider = mock()
     private val cookieManager: CookieManager = mock()
     private val loginDetector: DOMLoginDetector = mock()
-    private val accessibilitySettings: AccessibilityManager = mock()
     private val dosDetector: DosDetector = DosDetector()
-    private val trustedCertificateStore: TrustedCertificateStore = mock()
-    private val webViewHttpAuthStore: WebViewHttpAuthStore = mock()
     private val thirdPartyCookieManager: ThirdPartyCookieManager = mock()
     private val browserAutofillConfigurator: BrowserAutofill.Configurator = mock()
     private val webResourceRequest: WebResourceRequest = mock()
@@ -116,43 +112,6 @@ class BrowserWebViewClientTest {
     private val optimizeTrackerEvaluationRCWrapper = TestOptimizeTrackerEvaluationRCWrapper()
     private val mediaPlayback: MediaPlayback = mock()
 
-    @UiThreadTest
-    @Before
-    fun setup() {
-        webView = TestWebView(context)
-        testee = BrowserWebViewClient(
-            webViewHttpAuthStore,
-            trustedCertificateStore,
-            requestRewriter,
-            specialUrlDetector,
-            requestInterceptor,
-            cookieManagerProvider,
-            loginDetector,
-            dosDetector,
-            thirdPartyCookieManager,
-            TestScope(),
-            coroutinesTestRule.testDispatcherProvider,
-            browserAutofillConfigurator,
-            ampLinks,
-            printInjector,
-            internalTestUserChecker,
-            adClickManager,
-            autoconsent,
-            pixel,
-            crashLogger,
-            jsPlugins,
-            currentTimeProvider,
-            pageLoadedHandler,
-            optimizeTrackerEvaluationRCWrapper,
-            mediaPlayback,
-        )
-        testee.webViewClientListener = listener
-        whenever(webResourceRequest.url).thenReturn(Uri.EMPTY)
-        whenever(cookieManagerProvider.get()).thenReturn(cookieManager)
-        whenever(currentTimeProvider.getTimeInMillis()).thenReturn(0)
-        whenever(webViewVersionProvider.getMajorVersion()).thenReturn("1")
-        whenever(deviceInfo.appVersion).thenReturn("1")
-    }
 
     @UiThreadTest
     @Test
@@ -670,8 +629,6 @@ class BrowserWebViewClientTest {
         val urlType = SpecialUrlDetector.UrlType.Web(EXAMPLE_URL)
         val rewrittenUrl = "https://rewritten-example.com"
         whenever(specialUrlDetector.determineType(initiatingUrl = any(), uri = any())).thenReturn(urlType)
-        whenever(requestRewriter.shouldRewriteRequest(any())).thenReturn(true)
-        whenever(requestRewriter.rewriteRequestWithCustomQueryParams(any())).thenReturn(rewrittenUrl.toUri())
         whenever(listener.linkOpenedInNewTab()).thenReturn(false)
 
         assertTrue(testee.shouldOverrideUrlLoading(mockWebView, webResourceRequest))
@@ -687,8 +644,6 @@ class BrowserWebViewClientTest {
         val urlType = SpecialUrlDetector.UrlType.Web(EXAMPLE_URL)
         val rewrittenUrl = "https://rewritten-example.com"
         whenever(specialUrlDetector.determineType(initiatingUrl = any(), uri = any())).thenReturn(urlType)
-        whenever(requestRewriter.shouldRewriteRequest(any())).thenReturn(true)
-        whenever(requestRewriter.rewriteRequestWithCustomQueryParams(any())).thenReturn(rewrittenUrl.toUri())
         whenever(listener.linkOpenedInNewTab()).thenReturn(true)
 
         assertTrue(testee.shouldOverrideUrlLoading(mockWebView, webResourceRequest))
