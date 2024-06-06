@@ -846,6 +846,11 @@ class BrowserTabFragment :
         }
     }
 
+    override fun onDetach() {
+        super.onDetach()
+        safeGazeInterface.closeMlModels()
+    }
+
     private fun connectVpn() {
         val intent = VpnService.prepare(requireActivity().applicationContext)
         if (intent != null) {
