@@ -60,6 +60,7 @@ android {
     buildFeatures {
         viewBinding = true
         compose true
+        mlModelBinding true
     }
 
     composeOptions {
@@ -398,10 +399,12 @@ dependencies {
     implementation 'io.github.hokofly:hoko-blur:1.5.3'
 
     // MLKit
-    implementation "com.google.mlkit:object-detection:_"
+    // implementation "com.google.mlkit:object-detection:_"
+    implementation 'com.google.mlkit:face-detection:16.1.6'
 
-    //tensorflow-lite
-    implementation "org.tensorflow:tensorflow-lite-task-vision:_"
+    // Tensorflow-lite
+    implementation 'org.tensorflow:tensorflow-lite-support:0.1.0'
+    implementation 'org.tensorflow:tensorflow-lite-metadata:0.1.0'
 
     // Lottie
     implementation "com.airbnb.android:lottie:_"
