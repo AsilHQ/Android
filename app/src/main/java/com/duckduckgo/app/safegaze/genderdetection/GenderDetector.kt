@@ -19,7 +19,6 @@ import timber.log.Timber
 
 class GenderDetector (val context: Context) {
     private val inputImageSize = 128
-    private val shift = 5
     private val model: Gender  = Gender.newInstance(context)
 
     private val imageProcessor = ImageProcessor.Builder()
@@ -28,7 +27,8 @@ class GenderDetector (val context: Context) {
         .build()
 
     private val faceDetectorOptions = FaceDetectorOptions.Builder()
-        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+        .setMinFaceSize(40f)
         .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_NONE)
         .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_NONE)
         .build()
@@ -88,13 +88,23 @@ class GenderDetector (val context: Context) {
         faceDetector.close()
     }
 
-    private fun cropToBBox(image: Bitmap, boundingBox: Rect) : Bitmap {
-        return Bitmap.createBitmap(
-            image,
-            boundingBox.left - 0 * shift,
-            boundingBox.top + shift,
-            boundingBox.width() + 0 * shift,
-            boundingBox.height() + 0 * shift
-        )
+    private fun cropToBBox(image: Bitmap, boundingBox: Rect): Bitmap {
+        // Ensure boundingBox coordinates are within the image bounds
+        val left = boundingBox.left.coerceAtLeast(0)
+        val top = boundingBox.top.coerceAtLeast(0)
+        val right = boundingBox.right.coerceAtMost(image.width)
+        val bottom = boundingBox.bottom.coerceAtMost(image.height)
+
+        // Calculate the width and height of the cropped area
+        val width = right - left
+        val height = bottom - top
+
+        // If the bounding box is completely out of bounds, return null or a default bitmap
+        if (width <= 0 || height <= 0) {
+            return image // return a default bitmap if needed
+        }
+
+        // Create and return the cropped bitmap
+        return Bitmap.createBitmap(image, left, top, width, height)
     }
 }
