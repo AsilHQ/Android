@@ -10,8 +10,10 @@ import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import com.duckduckgo.app.browser.DuckDuckGoWebView
-import com.duckduckgo.app.safegaze.ondeviceobjectdetection.ObjectDetectionHelper
+import com.duckduckgo.app.safegaze.genderdetection.GenderDetector
+import com.duckduckgo.app.safegaze.nsfwdetection.NsfwDetector
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
+import timber.log.Timber
 
 class SafeGazeJsInterface(
     private val context: Context,
@@ -21,15 +23,31 @@ class SafeGazeJsInterface(
     private val preferences: SharedPreferences =
         context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
 
-    private val objectDetectionHelper = ObjectDetectionHelper(context)
+    private val nsfwDetector = NsfwDetector(context)
+    private val genderDetector = GenderDetector(context)
+    var imageCount = 0
 
-    private fun isImageContainsHumanFromWebView(url: String, callback: (Boolean) -> Unit) {
+    private fun shouldBlurImage(url: String, shouldBlur: (Boolean) -> Unit) {
         loadImageBitmapFromUrl(url, context) { bitmap ->
             if (bitmap != null) {
-                val containsHuman = objectDetectionHelper.isImageContainsHuman(bitmap)
-                callback(containsHuman)
+                val a = System.currentTimeMillis()
+                val nsfwPrediction = nsfwDetector.isNsfw(bitmap)
+                val b = System.currentTimeMillis()
+
+                Timber.d("kLog Contains nsfw: ${nsfwPrediction.isSafe().not()}. Processing time: ${b-a}")
+
+                if (nsfwPrediction.isSafe()) {
+                    genderDetector.predict(bitmap) { prediction ->
+                        val c = System.currentTimeMillis()
+                        Timber.d("kLog Contains female: ${prediction.hasFemale}. Processing time: ${c-b}")
+
+                        shouldBlur(prediction.hasFemale)
+                    }
+                } else {
+                    shouldBlur(true)
+                }
             } else {
-                callback(false)
+                shouldBlur(false)
             }
         }
     }
@@ -71,12 +89,15 @@ class SafeGazeJsInterface(
     @JavascriptInterface
     fun sendMessage(message: String) {
         updateBlur(preferences.getInt("safe_gaze_blur_progress", 0).toFloat())
-        if (message.startsWith("coreML/-/")){
+        if (message.startsWith("coreML/-/")) {
             val parts = message.split("/-/")
             val imageUrl = if (parts.size >= 2) parts[1] else ""
             val index = if (parts.size >= 2) parts[2] else ""
-            isImageContainsHumanFromWebView(imageUrl){
-                callSafegazeOnDeviceModelHandler(it, index.toInt())
+
+            synchronized(this) {
+                shouldBlurImage(imageUrl) {
+                    callSafegazeOnDeviceModelHandler(it, index.toInt())
+                }
             }
         }
         if (message.contains("page_refresh")) {
@@ -113,5 +134,10 @@ class SafeGazeJsInterface(
 
     private fun getCurrentSessionCounter(): Int {
         return preferences.getInt("session_censored_count", 0)
+    }
+
+    fun closeMlModels() {
+        nsfwDetector.dispose()
+        genderDetector.dispose()
     }
 }

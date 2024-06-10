@@ -337,16 +337,6 @@ class BrowserWebViewClient @Inject constructor(
         val sharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
         val isSafeGazeActive = sharedPreferences.getBoolean(SAFE_GAZE_ACTIVE, true)
         if (isSafeGazeActive) {
-            val jsCode0 = readAssetFile(context.assets, "public/nsfwjs/group1-shard1of1.min.js")
-            val jsCode1 = readAssetFile(context.assets, "public/nsfwjs/model.min.js")
-            val jsCode2 = readAssetFile(context.assets, "public/nsfwjs/nsfwjs.min.js")
-            val jsCode3 = readAssetFile(context.assets, "public/nsfwjs/tfjs@3.18.0.js")
-
-            webView.evaluateJavascript("javascript:(function() { $jsCode0 })()", null)
-            webView.evaluateJavascript("javascript:(function() { $jsCode1 })()", null)
-            webView.evaluateJavascript("javascript:(function() { $jsCode2 })()", null)
-            webView.evaluateJavascript("javascript:(function() { $jsCode3 })()", null)
-
             val jsCode = readAssetFile(context.assets, "safe_gaze_v2.js")
             webView.evaluateJavascript("javascript:(function() { $jsCode })()", null)
         }
