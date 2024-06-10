@@ -12,20 +12,33 @@ import com.bumptech.glide.request.transition.Transition
 import com.duckduckgo.app.browser.DuckDuckGoWebView
 import com.duckduckgo.app.safegaze.genderdetection.GenderDetector
 import com.duckduckgo.app.safegaze.nsfwdetection.NsfwDetector
+import com.duckduckgo.common.utils.DefaultDispatcherProvider
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
+import java.util.concurrent.ConcurrentLinkedQueue
+
+internal data class UrlInfo(val url: String, val index: Int)
 
 class SafeGazeJsInterface(
     private val context: Context,
-    private val webView: DuckDuckGoWebView? = null
-) {
+    private val webView: DuckDuckGoWebView? = null,
 
-    private val preferences: SharedPreferences =
-        context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
+) {
+    private val dispatcher: DefaultDispatcherProvider = DefaultDispatcherProvider()
+    private val preferences: SharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
 
     private val nsfwDetector = NsfwDetector(context)
     private val genderDetector = GenderDetector(context)
-    var imageCount = 0
+    private val alreadyProcessedUrls = mutableMapOf<String, Boolean>()
+
+    private val urlQueue: ConcurrentLinkedQueue<UrlInfo> = ConcurrentLinkedQueue()
+    private var processingJob: Job? = null
+    private val scope = CoroutineScope(dispatcher.computation() + Job())
 
     private fun shouldBlurImage(url: String, shouldBlur: (Boolean) -> Unit) {
         loadImageBitmapFromUrl(url, context) { bitmap ->
@@ -94,10 +107,10 @@ class SafeGazeJsInterface(
             val imageUrl = if (parts.size >= 2) parts[1] else ""
             val index = if (parts.size >= 2) parts[2] else ""
 
-            synchronized(this) {
-                shouldBlurImage(imageUrl) {
-                    callSafegazeOnDeviceModelHandler(it, index.toInt())
-                }
+            if (alreadyProcessedUrls.containsKey(imageUrl)) {
+                callSafegazeOnDeviceModelHandler(alreadyProcessedUrls[imageUrl]!!, index.toInt())
+            } else {
+                addTaskToQueue(imageUrl, index.toInt())
             }
         }
         if (message.contains("page_refresh")) {
@@ -105,6 +118,31 @@ class SafeGazeJsInterface(
         } else if(message.contains("replaced")) {
             handleAllTimeCounter()
             handleCurrentSessionCounter()
+        }
+    }
+
+    private fun addTaskToQueue(url: String, index: Int) {
+        urlQueue.add(UrlInfo(url, index))
+        processQueue()
+    }
+
+    private fun processQueue() {
+        if (processingJob?.isActive != true) {
+
+            processingJob = scope.launch {
+                while (urlQueue.isNotEmpty()) {
+                    val task = urlQueue.poll()
+
+                    task?.let {
+                        withContext(dispatcher.computation()) {
+                            shouldBlurImage(it.url) { blur->
+                                alreadyProcessedUrls[it.url] = blur
+                                callSafegazeOnDeviceModelHandler(blur, it.index)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -139,5 +177,6 @@ class SafeGazeJsInterface(
     fun closeMlModels() {
         nsfwDetector.dispose()
         genderDetector.dispose()
+        scope.cancel()
     }
 }
