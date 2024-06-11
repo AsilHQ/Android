@@ -261,6 +261,7 @@ import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.FragmentViewModelFactory
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
+import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
 import com.duckduckgo.common.utils.SAFE_GAZE_INTERFACE
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import com.duckduckgo.common.utils.SAFE_GAZE_REPORT_URL
@@ -868,9 +869,9 @@ class BrowserTabFragment :
     }
 
     private fun initSafeGazeAndKhfDns() {
-        if (!sharedPreferences.getBoolean("safe_gaze_and_dns_init",false)){
-            safeGazeInterface.updateBlur(30f)
-            editor.putInt(SAFE_GAZE_BLUR_PROGRESS, 30)
+        if (!sharedPreferences.getBoolean("safe_gaze_and_dns_init",false)) {
+            safeGazeInterface.updateBlur(SAFE_GAZE_DEFAULT_BLUR_VALUE.toFloat())
+            editor.putInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE)
             editor.apply()
             connectVpn()
         }
@@ -2511,10 +2512,12 @@ class BrowserTabFragment :
         ).findViewById(R.id.browserWebView) as DuckDuckGoWebView
 
         webView?.let {
+            safeGazeInterface = SafeGazeJsInterface(requireContext(), webView!!)
+
             it.webViewClient = browserWebViewClient
             browserWebViewClient.activity = requireActivity()
             it.webChromeClient = browserWebChromeClient
-            it.addJavascriptInterface(SafeGazeJsInterface(requireContext(), webView!!), SAFE_GAZE_INTERFACE)
+            it.addJavascriptInterface(safeGazeInterface, SAFE_GAZE_INTERFACE)
             it.addJavascriptInterface(
                 KahfTubeInterface(
                     requireContext(),

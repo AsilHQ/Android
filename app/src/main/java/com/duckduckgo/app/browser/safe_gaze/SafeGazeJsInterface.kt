@@ -101,7 +101,6 @@ class SafeGazeJsInterface(
 
     @JavascriptInterface
     fun sendMessage(message: String) {
-        updateBlur(preferences.getInt("safe_gaze_blur_progress", 0).toFloat())
         if (message.startsWith("coreML/-/")) {
             val parts = message.split("/-/")
             val imageUrl = if (parts.size >= 2) parts[1] else ""

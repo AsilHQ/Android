@@ -75,6 +75,8 @@ import com.duckduckgo.common.utils.CurrentTimeProvider
 import com.duckduckgo.common.ui.view.dialog.TextAlertDialogBuilder
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
+import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
+import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import com.duckduckgo.common.utils.plugins.PluginPoint
 import com.duckduckgo.cookies.api.CookieManagerProvider
@@ -336,7 +338,14 @@ class BrowserWebViewClient @Inject constructor(
     private fun handleSafeGaze(webView: WebView) {
         val sharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
         val isSafeGazeActive = sharedPreferences.getBoolean(SAFE_GAZE_ACTIVE, true)
+
         if (isSafeGazeActive) {
+            // Set blur intensity
+            val blurIntensity = sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE).toFloat() / 100f
+            val jsFunction = "window.blurIntensity = $blurIntensity;"
+            webView.evaluateJavascript(jsFunction, null)
+
+            // Run SafeGaze script
             val jsCode = readAssetFile(context.assets, "safe_gaze_v2.js")
             webView.evaluateJavascript("javascript:(function() { $jsCode })()", null)
         }
