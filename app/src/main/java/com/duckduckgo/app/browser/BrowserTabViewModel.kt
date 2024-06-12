@@ -174,6 +174,11 @@ import kotlinx.coroutines.flow.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONObject
 import timber.log.Timber
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStreamReader
 
 @ContributesViewModel(FragmentScope::class)
 class BrowserTabViewModel @Inject constructor(
@@ -594,6 +599,8 @@ class BrowserTabViewModel @Inject constructor(
 
     val url: String?
         get() = site?.url
+
+    val host: String get() = site?.domain ?: ""
 
     val title: String?
         get() = site?.title
@@ -3286,6 +3293,17 @@ class BrowserTabViewModel @Inject constructor(
     ) {
         viewModelScope.launch(dispatchers.io()) {
             faviconsFetchingPrompt.onPromptAnswered(fetchingEnabled)
+        }
+    }
+
+    fun removeHostFromSafeGazeWhiteList(hostName: String, filePath: String) {
+        val host = hostName.replace("www.", "")
+        if (host.isNotEmpty()) {
+            val file = File(filePath)
+            if (file.exists()) {
+                // Read lines, filter out the host, and write back to the file
+                file.writeText(file.readLines().filterNot { it == host }.joinToString("\n"))
+            }
         }
     }
 

@@ -1119,7 +1119,7 @@ class BrowserTabFragment :
                     startActivity(intent)
                 }
             }
-            urlOpenTextView.text = viewModel.url
+            urlOpenTextView.text = viewModel.host
             thisPageCounterTextView.text = sharedPreferences.getInt("session_censored_count", 0).toString()
             lifetimeCounterTextView.text = sharedPreferences.getInt("all_time_censored_count", 0).toString()
 
@@ -1153,13 +1153,17 @@ class BrowserTabFragment :
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(SAFE_GAZE_REPORT_URL))
                 startActivity(intent)
             }
-            urlTextView.text = viewModel.url
+            urlTextView.text = viewModel.host
             safeGazeOnImageView.setOnClickListener{
                 editor.putBoolean(SAFE_GAZE_ACTIVE, true)
                 editor.apply()
                 toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), VISIBLE)
                 toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), GONE)
                 webView?.reload()
+
+                viewModel.removeHostFromSafeGazeWhiteList(
+                    viewModel.host, "${requireContext().filesDir}/safe_gaze.txt"
+                )
             }
         }
     }
