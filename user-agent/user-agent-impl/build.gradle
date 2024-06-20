@@ -55,6 +55,10 @@ dependencies {
     testImplementation AndroidX.test.ext.junit
     testImplementation Square.retrofit2.converter.moshi
     testImplementation Testing.junit4
+    testImplementation AndroidX.archCore.testing
+    androidTestImplementation AndroidX.archCore.testing
+
+    coreLibraryDesugaring Android.tools.desugarJdkLibs
 }
 
 anvil {
