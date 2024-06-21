@@ -43,21 +43,24 @@ class SafeGazeJsInterface(
     private fun shouldBlurImage(url: String, shouldBlur: (Boolean) -> Unit) {
         loadImageBitmapFromUrl(url, context) { bitmap ->
             if (bitmap != null) {
-                val a = System.currentTimeMillis()
+                // val a = System.currentTimeMillis()
                 val nsfwPrediction = nsfwDetector.isNsfw(bitmap)
-                val b = System.currentTimeMillis()
+                // val b = System.currentTimeMillis()
 
-                Timber.d("kLog Contains nsfw: ${nsfwPrediction.isSafe().not()}. Processing time: ${b-a}")
 
                 if (nsfwPrediction.isSafe()) {
                     genderDetector.predict(bitmap) { prediction ->
-                        val c = System.currentTimeMillis()
-                        Timber.d("kLog Contains female: ${prediction.hasFemale}. Processing time: ${c-b}")
+                        // val c = System.currentTimeMillis()
+                        if (prediction.hasFemale)
+                            Timber.d("kLog Female (${prediction.femaleConfidence}) $url")
 
                         shouldBlur(prediction.hasFemale)
                     }
                 } else {
-                    shouldBlur(true)
+                    nsfwPrediction.getLabelWithConfidence().let {
+                        Timber.d("kLog Nsfw: ${it.first} (${it.second}) $url")
+                        shouldBlur(true)
+                    }
                 }
             } else {
                 shouldBlur(false)

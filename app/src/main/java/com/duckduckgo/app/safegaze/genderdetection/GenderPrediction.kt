@@ -19,5 +19,7 @@ package com.duckduckgo.app.safegaze.genderdetection
 data class GenderPrediction(
     var faceCount: Int = 0,
     var hasMale: Boolean = false,
-    var hasFemale: Boolean = false
+    var hasFemale: Boolean = false,
+    var maleConfidence: Float = 0.0f,
+    var femaleConfidence: Float = 0.0f
 )
