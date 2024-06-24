@@ -19,6 +19,8 @@ import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.image.ops.ResizeOp.ResizeMethod.BILINEAR
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import timber.log.Timber
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class GenderDetector (val context: Context) {
     private val inputImageSize = 128
@@ -44,38 +46,36 @@ class GenderDetector (val context: Context) {
 
     private val faceDetector = FaceDetection.getClient(faceDetectorOptions)
 
-    fun predict(
-        bitmap: Bitmap,
-        onComplete: (GenderPrediction) -> Unit
-    ) {
-        val prediction = GenderPrediction()
-        val image = InputImage.fromBitmap(bitmap, 0)
+    suspend fun predict(bitmap: Bitmap): GenderPrediction {
 
-        faceDetector.process(image).addOnSuccessListener { faces ->
-            prediction.faceCount = faces.size
+        return suspendCoroutine { continuation ->
+            val prediction = GenderPrediction()
+            val image = InputImage.fromBitmap(bitmap, 0)
 
-            // convert to regular for loop
-            for (i in 0 until faces.size) {
-                val face = faces[i]
-                val subjectFace = cropToBBox(bitmap, face.boundingBox) ?: continue
-                val genderPredictions = getGenderPredictionV5(subjectFace)
+            faceDetector.process(image).addOnSuccessListener { faces ->
+                prediction.faceCount = faces.size
 
-                val isMale = genderPredictions.first > genderPredictions.second
-                prediction.hasMale = prediction.hasMale || isMale
-                prediction.maleConfidence = genderPredictions.first
-                prediction.femaleConfidence = genderPredictions.second
+                for (i in 0 until faces.size) {
+                    val face = faces[i]
+                    val subjectFace = cropToBBox(bitmap, face.boundingBox) ?: continue
+                    val genderPredictions = getGenderPredictionV5(subjectFace)
 
-                if (prediction.femaleConfidence >= SAFE_GAZE_MIN_FEMALE_CONFIDENCE) {
-                    prediction.hasFemale = true
-                    break
+                    val isMale = genderPredictions.first > genderPredictions.second
+                    prediction.hasMale = prediction.hasMale || isMale
+                    prediction.maleConfidence = genderPredictions.first
+                    prediction.femaleConfidence = genderPredictions.second
+
+                    if (prediction.femaleConfidence >= SAFE_GAZE_MIN_FEMALE_CONFIDENCE) {
+                        prediction.hasFemale = true
+                        break
+                    }
                 }
+
+                continuation.resume(prediction)
+            }.addOnFailureListener {
+                Timber.e("kLog Exception while detecting faces: $it")
+                continuation.resume(prediction)
             }
-
-            onComplete(prediction)
-        }.addOnFailureListener {
-            Timber.e("kLog Exception while detecting faces: $it")
-
-            onComplete(prediction)
         }
     }
 
