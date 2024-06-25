@@ -129,6 +129,7 @@ import com.duckduckgo.app.browser.databinding.HttpAuthenticationBinding
 import com.duckduckgo.app.browser.databinding.IncludeOmnibarToolbarBinding
 import com.duckduckgo.app.browser.databinding.IncludeQuickAccessItemsBinding
 import com.duckduckgo.app.browser.databinding.KahfDnsPopUpBinding
+import com.duckduckgo.app.browser.databinding.KahfDnsSwitchBinding
 import com.duckduckgo.app.browser.databinding.PopupWindowBrowserMenuBinding
 import com.duckduckgo.app.browser.databinding.SafeGazePopUpCloseBinding
 import com.duckduckgo.app.browser.databinding.SafeGazePopUpOpenBinding
@@ -1003,7 +1004,7 @@ class BrowserTabFragment :
 
     private fun handleTrackTint(isChecked: Boolean, switch: SwitchCompat){
         if (isChecked) {
-            switch.trackTintList = ColorStateList.valueOf(0xFFC474FF.toInt())
+            switch.trackTintList = ColorStateList.valueOf(0xFF11B9CD.toInt())
         } else {
             switch.trackTintList = ColorStateList.valueOf(0xFFE1E1E1.toInt())
         }
@@ -1236,6 +1237,48 @@ class BrowserTabFragment :
                     pointerArrow.layoutParams as ConstraintLayout.LayoutParams
                 pointerArrowParams.rightMargin = leftOverDevicePixel - 113
                 pointerArrow.layoutParams = pointerArrowParams
+
+                configureDnsSwitch(popupView.findViewById(R.id.dns_switch))
+            }
+        }
+    }
+
+    private fun configureDnsSwitch(view: View) {
+        val binding = KahfDnsSwitchBinding.bind(view)
+
+        binding.let {
+            it.protectedTextView.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = Uri.parse("https://check.kahfdns.com")
+                startActivity(intent)
+            }
+
+            if (DnsOverVpnService.isVpnRunning(connectivityManager)) {
+                it.kahfDnsToggleButton.isChecked = true
+                it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
+                it.protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
+                it.kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
+            } else {
+                it.kahfDnsToggleButton.isChecked = false
+                it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
+                it.protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
+                it.kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.WHITE)
+            }
+
+            handleTrackTint(it.kahfDnsToggleButton.isChecked, it.kahfDnsToggleButton)
+
+            it.kahfDnsToggleButton.setOnCheckedChangeListener { _, isChecked ->
+                handleTrackTint(isChecked, it.kahfDnsToggleButton)
+
+                if (DnsOverVpnService.isVpnRunning(connectivityManager) && !isChecked) {
+                    disconnectVpn()
+                    it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
+                    it.protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
+                } else if (!DnsOverVpnService.isVpnRunning(connectivityManager) && isChecked) {
+                    connectVpn()
+                    it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
+                    it.protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
+                }
             }
         }
     }
