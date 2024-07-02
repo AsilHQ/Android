@@ -113,12 +113,12 @@ class SafeGazeJsInterface(
         if (message.startsWith("coreML/-/")) {
             val parts = message.split("/-/")
             val imageUrl = if (parts.size >= 2) parts[1] else ""
-            val index = if (parts.size >= 2) parts[2] else ""
+            val index = (if (parts.size >= 2) parts[2] else "0").toInt()
 
             if (alreadyProcessedUrls.containsKey(imageUrl)) {
-                callSafegazeOnDeviceModelHandler(alreadyProcessedUrls[imageUrl]!!, index.toInt())
+                callSafegazeOnDeviceModelHandler(alreadyProcessedUrls[imageUrl]!!, index)
             } else {
-                addTaskToQueue(imageUrl, index.toInt())
+                addTaskToQueue(imageUrl, index)
             }
         }
         if (message.contains("page_refresh")) {
@@ -142,9 +142,13 @@ class SafeGazeJsInterface(
                     val task = urlQueue.poll()
 
                     task?.let {
-                        val shouldBlur = shouldBlurImage(it.url, this)
-                        alreadyProcessedUrls[it.url] = shouldBlur
-                        callSafegazeOnDeviceModelHandler(shouldBlur, it.index)
+                        if (alreadyProcessedUrls.containsKey(it.url)) {
+                            callSafegazeOnDeviceModelHandler(alreadyProcessedUrls[it.url]!!, it.index)
+                        } else {
+                            val shouldBlur = shouldBlurImage(it.url, this)
+                            alreadyProcessedUrls[it.url] = shouldBlur
+                            callSafegazeOnDeviceModelHandler(shouldBlur, it.index)
+                        }
                     }
                 }
             }
