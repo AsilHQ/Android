@@ -497,6 +497,7 @@
     <string name="onboardingFeatureOptionOneClickDataClearing">One-click data clearing</string>
 
     <!-- Download Confirmation -->
+    <string name="downloadConfirmationContinue">Save to downloads</string>
     <string name="downloadConfirmationSaveFileTitle" instruction="Placeholder is the name of a file">Save %1$s</string>
     <string name="downloadConfirmationKeepBothFilesText">Keep both</string>
     <string name="downloadConfirmationReplaceOldFileText">Replace</string>
