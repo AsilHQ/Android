@@ -3,6 +3,7 @@ package com.duckduckgo.app.browser.safe_gaze
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.webkit.JavascriptInterface
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -41,27 +42,31 @@ class SafeGazeJsInterface(
     private val scope = CoroutineScope(dispatcher.computation() + Job())
 
     private fun shouldBlurImage(url: String, shouldBlur: (Boolean) -> Unit) {
-        loadImageBitmapFromUrl(url, context) { bitmap ->
-            if (bitmap != null) {
-                val a = System.currentTimeMillis()
-                val nsfwPrediction = nsfwDetector.isNsfw(bitmap)
-                val b = System.currentTimeMillis()
+        try {
+            loadImageBitmapFromUrl(url, context) { bitmap ->
+                if (bitmap != null) {
+                    val a = System.currentTimeMillis()
+                    val nsfwPrediction = nsfwDetector.isNsfw(bitmap)
+                    val b = System.currentTimeMillis()
 
-                Timber.d("kLog Contains nsfw: ${nsfwPrediction.isSafe().not()}. Processing time: ${b-a}")
+                    Timber.d("kLog ${url} Contains nsfw: ${nsfwPrediction.isSafe().not()}. Processing time: ${b - a}")
 
-                if (nsfwPrediction.isSafe()) {
-                    genderDetector.predict(bitmap) { prediction ->
-                        val c = System.currentTimeMillis()
-                        Timber.d("kLog Contains female: ${prediction.hasFemale}. Processing time: ${c-b}")
+                    if (nsfwPrediction.isSafe()) {
+                        genderDetector.predict(bitmap) { prediction ->
+                            val c = System.currentTimeMillis()
+                            Timber.d("kLog ${url} Contains female: ${prediction.hasFemale}. Processing time: ${c - b}")
 
-                        shouldBlur(prediction.hasFemale)
+                            shouldBlur(prediction.hasFemale)
+                        }
+                    } else {
+                        shouldBlur(true)
                     }
                 } else {
-                    shouldBlur(true)
+                    shouldBlur(false)
                 }
-            } else {
-                shouldBlur(false)
             }
+        } catch (e: Exception){
+            shouldBlur(false)
         }
     }
 
@@ -74,6 +79,9 @@ class SafeGazeJsInterface(
                 .into(object : SimpleTarget<Bitmap>() {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                         listener(resource)
+                    }
+                    override fun onLoadFailed(errorDrawable: Drawable?) {
+                        listener(null)
                     }
                 })
         } catch (e: Exception) {
