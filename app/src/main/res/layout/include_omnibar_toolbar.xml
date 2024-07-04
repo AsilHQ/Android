@@ -241,7 +241,7 @@
                 app:layout_constraintStart_toEndOf="@+id/kahf_dns_icon"
                 android:layout_marginStart="@dimen/keyline_1"
                 android:layout_marginEnd="@dimen/keyline_1"
-                android:src="@drawable/safe_gaze_icon"
+                android:src="@drawable/kahf_guard_logo"
                 />
 
             <androidx.appcompat.widget.AppCompatImageView
@@ -253,6 +253,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/safe_gaze_icon"
                 app:layout_constraintStart_toEndOf="@+id/toolbar"
                 android:src="@drawable/kahf_guard_logo"
+                android:visibility="gone"
                 />
 
             <com.duckduckgo.app.browser.TabSwitcherButton

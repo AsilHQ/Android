@@ -8,7 +8,7 @@ import android.webkit.JavascriptInterface
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.duckduckgo.app.browser.DuckDuckGoWebView
 import com.duckduckgo.app.safegaze.genderdetection.GenderDetector
@@ -19,9 +19,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.concurrent.ConcurrentLinkedQueue
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 internal data class UrlInfo(val url: String, val index: Int)
 
@@ -41,52 +42,55 @@ class SafeGazeJsInterface(
     private var processingJob: Job? = null
     private val scope = CoroutineScope(dispatcher.computation() + Job())
 
-    private fun shouldBlurImage(url: String, shouldBlur: (Boolean) -> Unit) {
-        try {
-            loadImageBitmapFromUrl(url, context) { bitmap ->
-                if (bitmap != null) {
-                    val a = System.currentTimeMillis()
-                    val nsfwPrediction = nsfwDetector.isNsfw(bitmap)
-                    val b = System.currentTimeMillis()
+    private suspend fun shouldBlurImage(url: String, mScope: CoroutineScope): Boolean {
+        return suspendCoroutine { continuation ->
+            mScope.launch {
+                val bitmap = loadImageBitmapFromUrl(url, context)
 
-                    Timber.d("kLog ${url} Contains nsfw: ${nsfwPrediction.isSafe().not()}. Processing time: ${b - a}")
+                if (bitmap != null) {
+                    val nsfwPrediction = nsfwDetector.isNsfw(bitmap)
 
                     if (nsfwPrediction.isSafe()) {
-                        genderDetector.predict(bitmap) { prediction ->
-                            val c = System.currentTimeMillis()
-                            Timber.d("kLog ${url} Contains female: ${prediction.hasFemale}. Processing time: ${c - b}")
+                        val genderPrediction = genderDetector.predict(bitmap)
 
-                            shouldBlur(prediction.hasFemale)
-                        }
+                        if (genderPrediction.hasFemale)
+                            Timber.d("kLog Female (${genderPrediction.femaleConfidence}) $url")
+
+                        continuation.resume(genderPrediction.hasFemale)
                     } else {
-                        shouldBlur(true)
+                        nsfwPrediction.getLabelWithConfidence().let {
+                            Timber.d("kLog Nsfw: ${it.first} (${it.second}) $url")
+                            continuation.resume(true)
+                        }
                     }
                 } else {
-                    shouldBlur(false)
+                    continuation.resume(false)
                 }
             }
-        } catch (e: Exception){
-            shouldBlur(false)
-        }
+        } 
     }
 
-    private fun loadImageBitmapFromUrl(url: String, context: Context, listener: (Bitmap?) -> Unit) {
-        try {
-            Glide.with(context)
-                .asBitmap()
-                .load(url)
-                .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE))
-                .into(object : SimpleTarget<Bitmap>() {
-                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                        listener(resource)
-                    }
-                    override fun onLoadFailed(errorDrawable: Drawable?) {
-                        listener(null)
-                    }
-                })
-        } catch (e: Exception) {
-            e.printStackTrace()
-            listener(null)
+
+    private suspend fun loadImageBitmapFromUrl(url: String, context: Context): Bitmap? {
+        return suspendCoroutine { continuation ->
+            try {
+                Glide.with(context)
+                    .asBitmap()
+                    .load(url)
+                    .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE))
+                    .into(object : CustomTarget<Bitmap>() {
+                        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                            continuation.resume(resource)
+                        }
+                        override fun onLoadFailed(errorDrawable: Drawable?) {
+                            continuation.resume(null)
+                        }
+                        override fun onLoadCleared(placeholder: Drawable?) {}
+                    })
+            } catch (e: Exception) {
+                e.printStackTrace()
+                continuation.resume(null)
+            }
         }
     }
 
@@ -112,12 +116,12 @@ class SafeGazeJsInterface(
         if (message.startsWith("coreML/-/")) {
             val parts = message.split("/-/")
             val imageUrl = if (parts.size >= 2) parts[1] else ""
-            val index = if (parts.size >= 2) parts[2] else ""
+            val index = (if (parts.size >= 2) parts[2] else "0").toInt()
 
             if (alreadyProcessedUrls.containsKey(imageUrl)) {
-                callSafegazeOnDeviceModelHandler(alreadyProcessedUrls[imageUrl]!!, index.toInt())
+                callSafegazeOnDeviceModelHandler(alreadyProcessedUrls[imageUrl]!!, index)
             } else {
-                addTaskToQueue(imageUrl, index.toInt())
+                addTaskToQueue(imageUrl, index)
             }
         }
         if (message.contains("page_refresh")) {
@@ -141,11 +145,12 @@ class SafeGazeJsInterface(
                     val task = urlQueue.poll()
 
                     task?.let {
-                        withContext(dispatcher.computation()) {
-                            shouldBlurImage(it.url) { blur->
-                                alreadyProcessedUrls[it.url] = blur
-                                callSafegazeOnDeviceModelHandler(blur, it.index)
-                            }
+                        if (alreadyProcessedUrls.containsKey(it.url)) {
+                            callSafegazeOnDeviceModelHandler(alreadyProcessedUrls[it.url]!!, it.index)
+                        } else {
+                            val shouldBlur = shouldBlurImage(it.url, this)
+                            alreadyProcessedUrls[it.url] = shouldBlur
+                            callSafegazeOnDeviceModelHandler(shouldBlur, it.index)
                         }
                     }
                 }

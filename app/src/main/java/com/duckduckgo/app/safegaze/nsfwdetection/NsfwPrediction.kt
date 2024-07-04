@@ -25,7 +25,7 @@ data class NsfwPrediction(val predictions: FloatArray) {
     fun porn() = predictions[3]
     fun sexy() = predictions[4]
 
-    fun getLabel(): String {
+    fun getLabelWithConfidence(): Pair<String, Float> {
         val maxIndex = predictions.indices.maxByOrNull { i -> predictions[i] } ?: -1
         val label = if (maxIndex != -1 && maxIndex < labels.size) {
             labels[maxIndex]
@@ -33,14 +33,18 @@ data class NsfwPrediction(val predictions: FloatArray) {
             "Unknown"
         }
 
-        return label
+        return Pair(label, predictions[maxIndex])
     }
 
     fun safeScore() = drawing() + neutral()
 
     fun unsafeScore() = hentai() + porn() + sexy()
 
-    fun isSafe() = safeScore() > unsafeScore()
+    fun isSafe(): Boolean {
+        val x = predictions.indices.maxByOrNull { i -> predictions[i] } ?: -1
+        return x == 0 || x == 2
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
