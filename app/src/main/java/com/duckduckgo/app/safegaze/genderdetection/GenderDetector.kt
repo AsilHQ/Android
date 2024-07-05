@@ -3,15 +3,13 @@ package com.duckduckgo.app.safegaze.genderdetection
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
-import com.duckduckgo.app.browser.ml.FaceModelV5
-import com.duckduckgo.app.browser.ml.Gender
 import com.duckduckgo.common.utils.SAFE_GAZE_MIN_FACE_SIZE
 import com.duckduckgo.common.utils.SAFE_GAZE_MIN_FEMALE_CONFIDENCE
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
-import org.tensorflow.lite.DataType
 import org.tensorflow.lite.DataType.FLOAT32
+import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
@@ -19,21 +17,17 @@ import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.image.ops.ResizeOp.ResizeMethod.BILINEAR
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import timber.log.Timber
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class GenderDetector (val context: Context) {
-    private val inputImageSize = 128
-    private val model: Gender  = Gender.newInstance(context)
-    private val v5Model = FaceModelV5.newInstance(context)
-
+    private val inputImageSize = 224
+    private var interpreter: Interpreter? = null
 
     private val imageProcessor = ImageProcessor.Builder()
         .add(ResizeOp(inputImageSize, inputImageSize, BILINEAR))
-        .add(NormalizeOp(0f, 255f))
-        .build()
-    private val imageProcessor2 = ImageProcessor.Builder()
-        .add(ResizeOp(80, 80, BILINEAR))
         .add(NormalizeOp(0f, 255f))
         .build()
 
@@ -45,6 +39,24 @@ class GenderDetector (val context: Context) {
         .build()
 
     private val faceDetector = FaceDetection.getClient(faceDetectorOptions)
+
+    init {
+        try {
+            val model = context.assets.open("gender_yolo_v8.tflite").use { it.readBytes() }
+            val modelBuffer = ByteBuffer.allocateDirect(model.size)
+            modelBuffer.order(ByteOrder.nativeOrder())
+            modelBuffer.put(model)
+
+            val options = Interpreter.Options().apply{
+                this.setNumThreads(4)
+            }
+            interpreter = Interpreter(modelBuffer, options)
+
+            warmUpModel()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
     suspend fun predict(bitmap: Bitmap): GenderPrediction {
 
@@ -58,7 +70,10 @@ class GenderDetector (val context: Context) {
                 for (i in 0 until faces.size) {
                     val face = faces[i]
                     val subjectFace = cropToBBox(bitmap, face.boundingBox) ?: continue
-                    val genderPredictions = getGenderPredictionV5(subjectFace)
+
+                    val currentTime = System.currentTimeMillis()
+                    val genderPredictions = getGenderPrediction(subjectFace)
+                    Timber.d("kLog elapsed time yolo8: ${System.currentTimeMillis() - currentTime}")
 
                     val isMale = genderPredictions.first > genderPredictions.second
                     prediction.hasMale = prediction.hasMale || isMale
@@ -79,48 +94,36 @@ class GenderDetector (val context: Context) {
         }
     }
 
-    private fun getGenderPrediction(bitmap: Bitmap): Triple<Float, Float, Boolean> {
-        val inputFeature = TensorBuffer.createFixedSize(intArrayOf(1, inputImageSize, inputImageSize, 3), DataType.FLOAT32)
-
-        val buffer = TensorImage(FLOAT32).let {
+    private fun getGenderPrediction(bitmap: Bitmap): Pair<Float, Float> {
+        val inputFeature = TensorBuffer.createFixedSize(intArrayOf(1, inputImageSize, inputImageSize, 3), FLOAT32)
+        val byteBuffer = TensorImage(FLOAT32).let {
             it.load(bitmap)
             imageProcessor.process(it)
         }.tensorBuffer.buffer
+        inputFeature.loadBuffer(byteBuffer)
 
-        inputFeature.loadBuffer(buffer)
-        val outputs = model.process(inputFeature)
-        val outputFeature = outputs.outputFeature0AsTensorBuffer
-
-        return Triple(outputFeature.floatArray[0], outputFeature.floatArray[1],false)
+        return try {
+            val outputBuffer = Array(1) { FloatArray(2).apply { fill(0f) } }
+            interpreter?.run(byteBuffer, outputBuffer)
+            Pair(outputBuffer[0][1], outputBuffer[0][0])
+        } catch (e: Exception) {
+            Pair(0f, 0f)
+        }
     }
 
-    private fun getGenderPredictionV5(bitmap: Bitmap): Triple<Float, Float, Boolean> {
-        // val currentTime = System.currentTimeMillis()
+    private fun warmUpModel() {
+        val dummyInput = ByteBuffer.allocateDirect(inputImageSize * inputImageSize * 3 * 4).apply {
+            order(ByteOrder.nativeOrder())
+            for (i in 0 until inputImageSize * inputImageSize * 3) {
+                putFloat(0.0f)  // Using zeros as dummy data
+            }
+            rewind()
+        }
 
-        val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 80, 80, 3), FLOAT32)
-        val byteBuffer = TensorImage(FLOAT32).let {
-            it.load(bitmap)
-            imageProcessor2.process(it)
-        }.tensorBuffer.buffer
-        inputFeature0.loadBuffer(byteBuffer)
+        val outputBuffer = Array(1) { FloatArray(2) }
+        interpreter?.run(dummyInput, outputBuffer)
 
-        val outputs = v5Model.process(inputFeature0)
-        val ageFeature = outputs.outputFeature0AsTensorBuffer
-        val genderFeature = outputs.outputFeature1AsTensorBuffer
-
-        // get index of max value from ageFeature
-        val maxIndex = ageFeature.floatArray.indices.maxByOrNull { ageFeature.floatArray[it] } ?: 0
-        val isAdult = maxIndex > 0
-
-        // Timber.d("kLog elapsed time v2: ${System.currentTimeMillis() - currentTime}")
-
-        return Triple(genderFeature.floatArray[1], genderFeature.floatArray[0], isAdult)
-    }
-
-    fun dispose() {
-        model.close()
-        v5Model.close()
-        faceDetector.close()
+        Timber.d("kLog Gender model wormed up")
     }
 
     private fun cropToBBox(image: Bitmap, boundingBox: Rect): Bitmap? {
@@ -140,5 +143,10 @@ class GenderDetector (val context: Context) {
 
         // Create and return the cropped bitmap
         return Bitmap.createBitmap(image, left, top, width, height)
+    }
+
+    fun dispose() {
+        interpreter?.close()
+        faceDetector.close()
     }
 }

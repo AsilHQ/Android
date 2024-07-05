@@ -2,7 +2,6 @@ package com.duckduckgo.app.safegaze.nsfwdetection
 
 import android.content.Context
 import android.graphics.Bitmap
-import com.duckduckgo.app.browser.ml.Gender
 import com.duckduckgo.app.browser.ml.Nsfw
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.DataType.FLOAT32
@@ -11,9 +10,7 @@ import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.image.ops.ResizeOp.ResizeMethod.BILINEAR
-import org.tensorflow.lite.support.image.ops.ResizeOp.ResizeMethod.NEAREST_NEIGHBOR
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
-import timber.log.Timber
 
 class NsfwDetector(val context: Context) {
     private val inputImageSize = 224
