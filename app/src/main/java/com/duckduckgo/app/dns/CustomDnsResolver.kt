@@ -15,90 +15,117 @@ import org.xbill.DNS.Section
 import org.xbill.DNS.Type
 import timber.log.Timber
 import java.io.IOException
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
+
+data class CachedDnsResponse(
+    val message: Message,
+    val expirationTimeMillis: Long
+) {
+    fun isExpired() = System.currentTimeMillis() > expirationTimeMillis
+}
 
 class CustomDnsResolver {
+    private val dohServerUrl = "https://sp-dns-doh.kahfguard.com/dns-query"
+    private val failed = "failed"
+    
+    private val client = OkHttpClient()
+    private val cache = ConcurrentHashMap<String, CachedDnsResponse>()
 
-    fun resolve(
-        uri: Uri,
-        onQueryResolved: (String) -> Unit
-    ) {
-        this.resolve(uri.host ?: "", onQueryResolved)
+    suspend fun resolve(uri: Uri): String {
+        return resolve(uri.host ?: "")
     }
 
-    fun resolve(
-        domain: String,
-        onQueryResolved: (String) -> Unit
-    ) {
-        val query = createDnsQuery(domain.plus(".")) // trailing dot to make absolute URL
+    suspend fun resolve(domain: String): String {
+        val absDomain = domain.plus(".") // trailing dot to make absolute URL
 
-        if (query != null) {
-            sendDoHRequest(query, onQueryResolved)
-        } else {
-            onQueryResolved("")
+        // Create queries outside the conditional blocks for potential reuse
+        val queryA = createDnsQuery(absDomain, Type.A)
+        val queryAAAA = createDnsQuery(absDomain, Type.AAAA)
+
+        return when {
+            queryA != null -> checkCacheAndSendRequest(absDomain, Type.A, queryA)
+            queryAAAA != null -> checkCacheAndSendRequest(absDomain, Type.AAAA, queryAAAA)
+            else -> failed
         }
     }
 
-    private fun createDnsQuery(domain: String): ByteArray? {
+    private suspend fun checkCacheAndSendRequest(
+        domain: String,
+        recordType: Int,
+        queryData: ByteArray,
+    ): String {
+        val cacheKey = "$domain-$recordType"
+        cache[cacheKey]?.takeUnless { it.isExpired() }?.let { cachedResponse ->
+            Timber.d("ipLog Cache hit!")
+            return getDnsResponse(cachedResponse.message, recordType)
+        }
+
+        return sendDoHRequest(queryData, recordType, domain)
+    }
+
+    private fun createDnsQuery(domain: String, recordType: Int): ByteArray? {
         return try {
-            val record = Record.newRecord(org.xbill.DNS.Name.fromString(domain), Type.A, DClass.IN)
-            val query = Message.newQuery(record)
-            query.toWire()
+            val record = Record.newRecord(org.xbill.DNS.Name.fromString(domain), recordType, DClass.IN)
+            Message.newQuery(record).toWire()
         } catch (e: Exception) {
             Timber.e(e)
             null
         }
     }
 
-    private fun sendDoHRequest(
+    private suspend fun sendDoHRequest(
         queryData: ByteArray,
-        onQueryResolved: (String) -> Unit
-    ) {
-        val client = OkHttpClient()
-
+        recordType: Int,
+        domain: String,
+    ): String {
         val request = Request.Builder()
-            .url("https://sp-dns-doh.kahfguard.com/dns-query")
+            .url(dohServerUrl)
             .addHeader("Content-Type", "application/dns-message")
             .addHeader("Accept", "application/dns-message")
-            .post(
-                queryData.toRequestBody(
-                    "application/dns-message".toMediaTypeOrNull(),
-                    0,
-                    queryData.size,
-                ),
-            )
+            .post(queryData.toRequestBody("application/dns-message".toMediaTypeOrNull())) // Simplified request body
             .build()
 
-        client.newCall(request)
-            .enqueue(
-                object : Callback {
-                    override fun onFailure(
-                        call: Call,
-                        e: IOException
-                    ) {
-                        Timber.e(e)
-                        onQueryResolved("")
+        return suspendCoroutine { continuation ->
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    Timber.e(e)
+                    continuation.resume(failed)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    if (response.isSuccessful) {
+                        response.body?.bytes()?.let { responseBytes ->
+                            val responseMessage = Message(responseBytes)
+                            val ip = getDnsResponse(responseMessage, recordType)
+                            cacheDnsResponse(domain, recordType, responseMessage)
+                            continuation.resume(ip)
+                        } ?: continuation.resume(failed) // Handle null body
+                    } else {
+                        continuation.resume(failed)
+                        Timber.e("DoH query failed with status code ${response.code}")
                     }
+                }
+            })
+        }
+    }
 
-                    override fun onResponse(
-                        call: Call,
-                        response: Response
-                    ) {
-                        if (response.isSuccessful) {
-                            response.body?.let { responseBody ->
-                                val responseBytes = responseBody.bytes()
-                                val responseMessage = Message(responseBytes)
+    private fun getDnsResponse(responseMessage: Message, recordType: Int): String {
+        return responseMessage.getSection(Section.ANSWER)
+            .firstOrNull { it.type == recordType }
+            ?.rdataToString()
+            ?: failed
+    }
 
-                                val answers = responseMessage.getSection(Section.ANSWER)
-                                val ip = answers.first { it.type == Type.A }.rdataToString() // Address Record
+    private fun cacheDnsResponse(domain: String, recordType: Int, responseMessage: Message) {
+        val cacheKey = "$domain-$recordType"
+        val ttl = responseMessage.getMinTTL()
+        val cachedResponse = CachedDnsResponse(responseMessage, System.currentTimeMillis() + ttl * 1000)
+        cache[cacheKey] = cachedResponse
+    }
 
-                                onQueryResolved(ip)
-                            }
-                        } else {
-                            onQueryResolved("")
-                            Timber.e("DoH query failed with status code ${response.code}")
-                        }
-                    }
-                },
-            )
+    private fun Message.getMinTTL(): Long {
+        return getSection(Section.ANSWER).minOfOrNull { it.ttl } ?: 0L
     }
 }
