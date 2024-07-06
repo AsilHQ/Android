@@ -174,11 +174,7 @@ import kotlinx.coroutines.flow.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.BufferedReader
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.InputStreamReader
 
 @ContributesViewModel(FragmentScope::class)
 class BrowserTabViewModel @Inject constructor(
@@ -243,6 +239,7 @@ class BrowserTabViewModel @Inject constructor(
     NavigationHistoryListener {
 
     private var buildingSiteFactoryJob: Job? = null
+    private var hostBlockerHelper: HostBlockerHelper? = null
 
     sealed class GlobalLayoutViewState {
         data class Browser(val isNewTabState: Boolean = true) : GlobalLayoutViewState()
@@ -1001,7 +998,10 @@ class BrowserTabViewModel @Inject constructor(
         if (query.isBlank()) {
             return
         }
-        if (!(HostBlockerHelper(webView, context = context).blockUrl(query, true))){
+
+        if (hostBlockerHelper == null) hostBlockerHelper = HostBlockerHelper(context)
+
+        if (hostBlockerHelper?.shouldBlock(query, webView, true) == false) {
             if (currentGlobalLayoutState() is Invalidated) {
                 recoverTabWithQuery(query)
                 return
