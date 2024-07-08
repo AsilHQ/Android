@@ -1,6 +1,9 @@
 package com.duckduckgo.app.dns
 
-import android.net.Uri
+import androidx.core.net.toUri
+import com.duckduckgo.common.utils.DispatcherProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -26,60 +29,49 @@ data class CachedDnsResponse(
     fun isExpired() = System.currentTimeMillis() > expirationTimeMillis
 }
 
-class CustomDnsResolver {
+class CustomDnsResolver(private val dispatcher: DispatcherProvider) {
     private val dohServerUrl = "https://sp-dns-doh.kahfguard.com/dns-query"
-    private val failed = "failed"
-    
+
     private val client = OkHttpClient()
     private val cache = ConcurrentHashMap<String, CachedDnsResponse>()
 
-    suspend fun resolve(uri: Uri): String {
-        return resolve(uri.host ?: "")
-    }
+    suspend fun sendDnsQueries(domain: android.net.Uri): String? {
+        val host = domain.host?.plus(".") ?: return null // trailing dot to make absolute URL
 
-    suspend fun resolve(domain: String): String {
-        val absDomain = domain.plus(".") // trailing dot to make absolute URL
-
-        // Create queries outside the conditional blocks for potential reuse
-        val queryA = createDnsQuery(absDomain, Type.A)
-        val queryAAAA = createDnsQuery(absDomain, Type.AAAA)
-
-        return when {
-            queryA != null -> checkCacheAndSendRequest(absDomain, Type.A, queryA)
-            queryAAAA != null -> checkCacheAndSendRequest(absDomain, Type.AAAA, queryAAAA)
-            else -> failed
-        }
+        return checkCacheAndSendRequest(host, Type.A, createDnsQuery(host, Type.A), mutableSetOf())
+            ?: checkCacheAndSendRequest(host, Type.AAAA, createDnsQuery(host, Type.AAAA), mutableSetOf())
+            ?: checkCacheAndSendRequest(host, Type.CNAME, createDnsQuery(host, Type.CNAME), mutableSetOf())
     }
 
     private suspend fun checkCacheAndSendRequest(
         domain: String,
         recordType: Int,
         queryData: ByteArray,
-    ): String {
+        visitedDomains: MutableSet<String>
+    ): String? {
         val cacheKey = "$domain-$recordType"
         cache[cacheKey]?.takeUnless { it.isExpired() }?.let { cachedResponse ->
             Timber.d("ipLog Cache hit!")
-            return getDnsResponse(cachedResponse.message, recordType)
+            return getDnsResponse(cachedResponse.message, visitedDomains)
         }
 
-        return sendDoHRequest(queryData, recordType, domain)
+        return sendDoHRequest(queryData, recordType, domain, visitedDomains)
     }
 
-    private fun createDnsQuery(domain: String, recordType: Int): ByteArray? {
-        return try {
-            val record = Record.newRecord(org.xbill.DNS.Name.fromString(domain), recordType, DClass.IN)
-            Message.newQuery(record).toWire()
-        } catch (e: Exception) {
-            Timber.e(e)
-            null
-        }
+    private fun createDnsQuery(domain: String, type: Int): ByteArray {
+        val name = org.xbill.DNS.Name.fromString(domain, org.xbill.DNS.Name.root)
+        val record = Record.newRecord(name, type, DClass.IN)
+        val query = Message.newQuery(record)
+
+        return query.toWire()
     }
 
     private suspend fun sendDoHRequest(
         queryData: ByteArray,
         recordType: Int,
         domain: String,
-    ): String {
+        visitedDomains: MutableSet<String>
+    ): String? {
         val request = Request.Builder()
             .url(dohServerUrl)
             .addHeader("Content-Type", "application/dns-message")
@@ -91,19 +83,22 @@ class CustomDnsResolver {
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     Timber.e(e)
-                    continuation.resume(failed)
+                    continuation.resume(null)
                 }
 
                 override fun onResponse(call: Call, response: Response) {
                     if (response.isSuccessful) {
                         response.body?.bytes()?.let { responseBytes ->
                             val responseMessage = Message(responseBytes)
-                            val ip = getDnsResponse(responseMessage, recordType)
                             cacheDnsResponse(domain, recordType, responseMessage)
-                            continuation.resume(ip)
-                        } ?: continuation.resume(failed) // Handle null body
+
+                            CoroutineScope(dispatcher.io()).launch {
+                                val dnsResponse = getDnsResponse(responseMessage, visitedDomains)
+                                continuation.resume(dnsResponse)
+                            }
+                        } ?: continuation.resume(null)
                     } else {
-                        continuation.resume(failed)
+                        continuation.resume(null)
                         Timber.e("DoH query failed with status code ${response.code}")
                     }
                 }
@@ -111,11 +106,33 @@ class CustomDnsResolver {
         }
     }
 
-    private fun getDnsResponse(responseMessage: Message, recordType: Int): String {
-        return responseMessage.getSection(Section.ANSWER)
-            .firstOrNull { it.type == recordType }
-            ?.rdataToString()
-            ?: failed
+    private suspend fun getDnsResponse(responseMessage: Message, visitedDomains: MutableSet<String>): String? {
+        val answers = responseMessage.getSection(Section.ANSWER)
+        val results = mutableListOf<String?>()
+
+        for (record in answers) {
+            when (record.type) {
+                Type.A -> {
+                    val ipAddress = record.rdataToString()
+                    results.add(0, ipAddress)
+                }
+                Type.AAAA -> {
+                    val ipAddress = record.rdataToString()
+                    results.add(ipAddress)
+                }
+                Type.CNAME -> {
+                    val cnameTarget = record.rdataToString()
+
+                    if (!visitedDomains.contains(cnameTarget)) {
+                        visitedDomains.add(cnameTarget)
+                        sendDnsQueries(cnameTarget.toUri())
+                    }
+                }
+                else -> results.add(null)
+            }
+        }
+
+        return results.first()
     }
 
     private fun cacheDnsResponse(domain: String, recordType: Int, responseMessage: Message) {
