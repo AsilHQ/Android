@@ -5,11 +5,6 @@ import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.webkit.JavascriptInterface
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
 import com.duckduckgo.app.browser.DuckDuckGoWebView
 import com.duckduckgo.app.safegaze.genderdetection.GenderDetector
 import com.duckduckgo.app.safegaze.nsfwdetection.NsfwDetector
@@ -23,6 +18,12 @@ import timber.log.Timber
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import android.graphics.BitmapFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.InputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 internal data class UrlInfo(val url: String, val index: Int)
 
@@ -45,7 +46,7 @@ class SafeGazeJsInterface(
     private suspend fun shouldBlurImage(url: String, mScope: CoroutineScope): Boolean {
         return suspendCoroutine { continuation ->
             mScope.launch {
-                val bitmap = loadImageBitmapFromUrl(url, context)
+                val bitmap = loadImageBitmapFromUrl(url)
 
                 if (bitmap != null) {
                     val nsfwPrediction = nsfwDetector.isNsfw(bitmap)
@@ -71,25 +72,22 @@ class SafeGazeJsInterface(
     }
 
 
-    private suspend fun loadImageBitmapFromUrl(url: String, context: Context): Bitmap? {
-        return suspendCoroutine { continuation ->
-            try {
-                Glide.with(context)
-                    .asBitmap()
-                    .load(url)
-                    .apply(RequestOptions.diskCacheStrategyOf(DiskCacheStrategy.NONE))
-                    .into(object : CustomTarget<Bitmap>() {
-                        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                            continuation.resume(resource)
-                        }
-                        override fun onLoadFailed(errorDrawable: Drawable?) {
-                            continuation.resume(null)
-                        }
-                        override fun onLoadCleared(placeholder: Drawable?) {}
-                    })
-            } catch (e: Exception) {
-                e.printStackTrace()
-                continuation.resume(null)
+    private suspend fun loadImageBitmapFromUrl(urlString: String): Bitmap? {
+        return withContext(Dispatchers.IO) {
+            suspendCoroutine<Bitmap?> { continuation ->
+                try {
+                    val url = URL(urlString)
+                    val connection = url.openConnection() as HttpURLConnection
+                    connection.doInput = true
+                    connection.useCaches = true // Enable cache
+                    connection.connect()
+                    val input: InputStream = connection.inputStream
+                    val bitmap = BitmapFactory.decodeStream(input)
+                    continuation.resume(bitmap)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    continuation.resume(null)
+                }
             }
         }
     }
