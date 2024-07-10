@@ -21,6 +21,6 @@ const val SAFE_GAZE_BLUR_PROGRESS = "safe_gaze_blur_progress"
 const val SAFE_GAZE_ACTIVE = "safe_gaze_active"
 const val SAFE_GAZE_INTERFACE = "SafeGazeInterface"
 const val SAFE_GAZE_PREFERENCES = "safe_gaze_preferences"
-const val SAFE_GAZE_DEFAULT_BLUR_VALUE = 30
+const val SAFE_GAZE_DEFAULT_BLUR_VALUE = 80
 const val SAFE_GAZE_MIN_FACE_SIZE = 15
 const val SAFE_GAZE_MIN_FEMALE_CONFIDENCE = 0.8f
