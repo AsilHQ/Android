@@ -174,11 +174,7 @@ import kotlinx.coroutines.flow.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONObject
 import timber.log.Timber
-import java.io.BufferedReader
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.InputStreamReader
 
 @ContributesViewModel(FragmentScope::class)
 class BrowserTabViewModel @Inject constructor(
@@ -243,6 +239,7 @@ class BrowserTabViewModel @Inject constructor(
     NavigationHistoryListener {
 
     private var buildingSiteFactoryJob: Job? = null
+    private var hostBlockerHelper: HostBlockerHelper? = null
 
     sealed class GlobalLayoutViewState {
         data class Browser(val isNewTabState: Boolean = true) : GlobalLayoutViewState()
@@ -992,83 +989,79 @@ class BrowserTabViewModel @Inject constructor(
 
     fun onUserSubmittedQuery(
         query: String,
-        queryOrigin: QueryOrigin = QueryOrigin.FromUser,
-        webView: WebView? = null,
-        context: Context? = null
+        queryOrigin: QueryOrigin = QueryOrigin.FromUser
     ) {
         navigationAwareLoginDetector.onEvent(NavigationEvent.UserAction.NewQuerySubmitted)
 
         if (query.isBlank()) {
             return
         }
-        if (!(HostBlockerHelper(webView, context = context).blockUrl(query, true))){
-            if (currentGlobalLayoutState() is Invalidated) {
-                recoverTabWithQuery(query)
-                return
-            }
 
-            command.value = HideKeyboard
-            val trimmedInput = query.trim()
-
-            viewModelScope.launch(dispatchers.io()) {
-                searchCountDao.incrementSearchCount()
-            }
-
-            val verticalParameter = extractVerticalParameter(url)
-            var urlToNavigate = queryUrlConverter.convertQueryToUrl(trimmedInput, verticalParameter, queryOrigin)
-
-            when (val type = specialUrlDetector.determineType(trimmedInput)) {
-                is NonHttpAppLink -> {
-                    nonHttpAppLinkClicked(type)
-                }
-
-                is SpecialUrlDetector.UrlType.CloakedAmpLink -> {
-                    handleCloakedAmpLink(type.ampUrl)
-                }
-
-                else -> {
-                    if (type is SpecialUrlDetector.UrlType.ExtractedAmpLink) {
-                        Timber.d("AMP link detection: Using extracted URL: ${type.extractedUrl}")
-                        urlToNavigate = type.extractedUrl
-                    } else if (type is SpecialUrlDetector.UrlType.TrackingParameterLink) {
-                        Timber.d("Loading parameter cleaned URL: ${type.cleanedUrl}")
-                        urlToNavigate = type.cleanedUrl
-                    }
-
-                    if (shouldClearHistoryOnNewQuery()) {
-                        command.value = ResetHistory
-                    }
-
-                    fireQueryChangedPixel(trimmedInput)
-
-                    if (!appSettingsPreferencesStore.showAppLinksPrompt) {
-                        appLinksHandler.updatePreviousUrl(urlToNavigate)
-                        appLinksHandler.setUserQueryState(true)
-                    } else {
-                        clearPreviousUrl()
-                    }
-
-                    command.value = NavigationCommand.Navigate(urlToNavigate, getUrlHeaders(urlToNavigate))
-                }
-            }
-
-            globalLayoutState.value = Browser(isNewTabState = false)
-            findInPageViewState.value = FindInPageViewState(visible = false)
-            omnibarViewState.value = currentOmnibarViewState().copy(
-                omnibarText = trimmedInput,
-                shouldMoveCaretToEnd = false,
-                forceExpand = true,
-            )
-            browserViewState.value = currentBrowserViewState().copy(
-                browserShowing = true,
-                showClearButton = false,
-                showVoiceSearch = voiceSearchAvailability.shouldShowVoiceSearch(urlLoaded = urlToNavigate),
-                browserError = OMITTED,
-            )
-            autoCompleteViewState.value =
-                currentAutoCompleteViewState().copy(showSuggestions = false, showFavorites = false, searchResults = AutoCompleteResult("", emptyList()))
+        if (currentGlobalLayoutState() is Invalidated) {
+            recoverTabWithQuery(query)
+            return
         }
 
+        command.value = HideKeyboard
+        val trimmedInput = query.trim()
+
+        viewModelScope.launch(dispatchers.io()) {
+            searchCountDao.incrementSearchCount()
+        }
+
+        val verticalParameter = extractVerticalParameter(url)
+        var urlToNavigate = queryUrlConverter.convertQueryToUrl(trimmedInput, verticalParameter, queryOrigin)
+
+        when (val type = specialUrlDetector.determineType(trimmedInput)) {
+            is NonHttpAppLink -> {
+                nonHttpAppLinkClicked(type)
+            }
+
+            is SpecialUrlDetector.UrlType.CloakedAmpLink -> {
+                handleCloakedAmpLink(type.ampUrl)
+            }
+
+            else -> {
+                if (type is SpecialUrlDetector.UrlType.ExtractedAmpLink) {
+                    Timber.d("AMP link detection: Using extracted URL: ${type.extractedUrl}")
+                    urlToNavigate = type.extractedUrl
+                } else if (type is SpecialUrlDetector.UrlType.TrackingParameterLink) {
+                    Timber.d("Loading parameter cleaned URL: ${type.cleanedUrl}")
+                    urlToNavigate = type.cleanedUrl
+                }
+
+                if (shouldClearHistoryOnNewQuery()) {
+                    command.value = ResetHistory
+                }
+
+                fireQueryChangedPixel(trimmedInput)
+
+                if (!appSettingsPreferencesStore.showAppLinksPrompt) {
+                    appLinksHandler.updatePreviousUrl(urlToNavigate)
+                    appLinksHandler.setUserQueryState(true)
+                } else {
+                    clearPreviousUrl()
+                }
+
+                command.value = NavigationCommand.Navigate(urlToNavigate, getUrlHeaders(urlToNavigate))
+            }
+        }
+
+        globalLayoutState.value = Browser(isNewTabState = false)
+        findInPageViewState.value = FindInPageViewState(visible = false)
+        omnibarViewState.value = currentOmnibarViewState().copy(
+            omnibarText = trimmedInput,
+            shouldMoveCaretToEnd = false,
+            forceExpand = true,
+        )
+        browserViewState.value = currentBrowserViewState().copy(
+            browserShowing = true,
+            showClearButton = false,
+            showVoiceSearch = voiceSearchAvailability.shouldShowVoiceSearch(urlLoaded = urlToNavigate),
+            browserError = OMITTED,
+        )
+        autoCompleteViewState.value =
+            currentAutoCompleteViewState().copy(showSuggestions = false, showFavorites = false, searchResults = AutoCompleteResult("", emptyList()))
     }
 
     private fun getUrlHeaders(url: String?): Map<String, String> {
