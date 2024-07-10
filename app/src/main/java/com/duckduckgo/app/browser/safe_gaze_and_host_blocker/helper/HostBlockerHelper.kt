@@ -19,9 +19,11 @@ package com.duckduckgo.app.browser.safe_gaze_and_host_blocker.helper
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Base64
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import timber.log.Timber
 import java.io.BufferedReader
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.InputStreamReader
@@ -34,6 +36,7 @@ class HostBlockerHelper(
         <!DOCTYPE html>
         <html>
         <head>
+            <title>Blocked</title>
             <style>
                 body {
                     display: flex;
@@ -70,6 +73,7 @@ class HostBlockerHelper(
         </head>
         <body>
             <img src="https://storage.asil.co/403Restricted.png" alt="Image" isSent="true" />
+            <p style="text-align: center; font-size: 20px;"><h1>Blocked by KahfGuard</h1></p></body>
             <div class="quran-verses">
                 "Tell the believing men that they should lower their gaze and guard their modesty; that will make for greater purity for them; And Allah is well acquainted with all that they do. And tell the believing women that they should lower their gaze and guard their modesty…".
             </div>
@@ -80,6 +84,12 @@ class HostBlockerHelper(
         </html>
     """.trimIndent()
     private var blockedHosts: Set<String>? = null
+
+    val blockedResourceResponse = WebResourceResponse(
+        "text/html", // MIME type
+        "UTF-8", // Encoding
+        ByteArrayInputStream(errorHtml.toByteArray()),
+    )
 
     init {
         loadBlockedHosts()
