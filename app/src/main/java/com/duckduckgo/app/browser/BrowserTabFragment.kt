@@ -30,6 +30,8 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Rect
 import android.net.ConnectivityManager
 import android.graphics.Typeface
@@ -1122,6 +1124,11 @@ class BrowserTabFragment :
             .processor()
             .blur(bitmap)
 
+        val matrix = ColorMatrix();
+        val grayScaleAmount = (1-(blurRadius/100.0))
+        matrix.setSaturation(grayScaleAmount.toFloat())
+        val cf = ColorMatrixColorFilter(matrix);
+        imageView.colorFilter = cf;
         imageView.setImageBitmap(blurredBitmap)
     }
 
