@@ -73,7 +73,7 @@ class HostBlockerHelper(
         </head>
         <body>
             <img src="https://storage.asil.co/403Restricted.png" alt="Image" isSent="true" />
-            <p style="text-align: center; font-size: 20px;"><h1>Blocked by KahfGuard</h1></p></body>
+            <p style="text-align: center; font-size: 20px;"><h1>Page contains harmful content</h1></p></body>
             <div class="quran-verses">
                 "Tell the believing men that they should lower their gaze and guard their modesty; that will make for greater purity for them; And Allah is well acquainted with all that they do. And tell the believing women that they should lower their gaze and guard their modesty…".
             </div>
@@ -84,7 +84,6 @@ class HostBlockerHelper(
         </html>
     """.trimIndent()
     private var blockedHosts: Set<String>? = null
-
     val blockedResourceResponse = WebResourceResponse(
         "text/html", // MIME type
         "UTF-8", // Encoding
@@ -95,15 +94,16 @@ class HostBlockerHelper(
         loadBlockedHosts()
     }
 
+    fun dataUri() = "data:text/html;charset=utf-8;base64," + Base64.encodeToString(
+        errorHtml.toByteArray(),
+        Base64.NO_PADDING,
+    )
+
     @SuppressLint("SetJavaScriptEnabled")
     fun shouldBlock(uri: String, webView: WebView?, isQuery: Boolean = false): Boolean {
         return if (shouldBlockHost(uri, isQuery)) {
-            val dataUri = "data:text/html;charset=utf-8;base64," + Base64.encodeToString(
-                errorHtml.toByteArray(),
-                Base64.NO_PADDING,
-            )
             webView?.settings?.javaScriptEnabled = true
-            webView?.loadUrl(dataUri)
+            webView?.loadUrl(dataUri())
             true
         } else {
             false
@@ -142,7 +142,7 @@ class HostBlockerHelper(
         }
     }
 
-    private fun shouldBlockHost(url: String?, isQuery: Boolean): Boolean {
+    fun shouldBlockHost(url: String?, isQuery: Boolean): Boolean {
         val host: String = if (isQuery) {
             url ?: ""
         } else {

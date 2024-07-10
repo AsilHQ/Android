@@ -77,6 +77,7 @@ import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
+import com.duckduckgo.common.utils.SAFE_GAZE_PRIVATE_DNS
 import com.duckduckgo.common.utils.plugins.PluginPoint
 import com.duckduckgo.cookies.api.CookieManagerProvider
 import com.duckduckgo.privacy.config.api.AmpLinks
@@ -158,11 +159,12 @@ class BrowserWebViewClient @Inject constructor(
         url: Uri,
         isForMainFrame: Boolean,
     ): Boolean {
-        val shouldBlock = hostBlockerHelper.shouldBlock(url.toString(), webView)
+        val privateDnsEnabled = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
 
-        if (!shouldBlock) {
+        if (privateDnsEnabled && !hostBlockerHelper.shouldBlock(url.toString(), webView)) {
             try {
                 shouldBlockSafeGaze(url.toString())
+
                 if (isForMainFrame && dosDetector.isUrlGeneratingDos(url)) {
                     webView.loadUrl("about:blank")
                     webViewClientListener?.dosAttackDetected()
@@ -518,13 +520,12 @@ class BrowserWebViewClient @Inject constructor(
         request: WebResourceRequest,
     ): WebResourceResponse? {
         val url = request.url.toString()
+        val privateDnsEnabled = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
 
         return runBlocking {
             withContext(dispatcherProvider.io()) {
                 try {
-                    val ipAddress = resolveDns(Uri.parse(url))
-
-                    if (ipAddress == "0.0.0.0") {
+                    if (privateDnsEnabled && resolveDns(Uri.parse(url)) == "0.0.0.0") {
                         if (!request.isForMainFrame) {
                             WebResourceResponse(null, null, null)
                         } else {
