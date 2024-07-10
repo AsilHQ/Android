@@ -989,9 +989,7 @@ class BrowserTabViewModel @Inject constructor(
 
     fun onUserSubmittedQuery(
         query: String,
-        queryOrigin: QueryOrigin = QueryOrigin.FromUser,
-        webView: WebView? = null,
-        context: Context? = null
+        queryOrigin: QueryOrigin = QueryOrigin.FromUser
     ) {
         navigationAwareLoginDetector.onEvent(NavigationEvent.UserAction.NewQuerySubmitted)
 

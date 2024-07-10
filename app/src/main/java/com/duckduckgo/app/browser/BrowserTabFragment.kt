@@ -1564,7 +1564,7 @@ class BrowserTabFragment :
     }
 
     fun submitQuery(query: String) {
-        viewModel.onUserSubmittedQuery(query, webView = webView, context = requireContext())
+        viewModel.onUserSubmittedQuery(query)
     }
 
     private fun navigate(
@@ -2455,7 +2455,7 @@ class BrowserTabFragment :
             onMoveListener,
             {
                 pixel.fire(originPixel)
-                viewModel.onUserSubmittedQuery(it.favorite.url, webView = webView, context = requireContext())
+                viewModel.onUserSubmittedQuery(it.favorite.url)
             },
             { viewModel.onEditSavedSiteRequested(it.favorite) },
             { viewModel.onDeleteFavoriteRequested(it.favorite) },
@@ -2535,13 +2535,13 @@ class BrowserTabFragment :
                     is AutoCompleteBookmarkSuggestion -> FromAutocomplete(isNav = true)
                     is AutoCompleteSearchSuggestion -> FromAutocomplete(isNav = suggestion.isUrl)
                 }
-                viewModel.onUserSubmittedQuery(suggestion.phrase, origin, webView = webView, context = requireContext())
+                viewModel.onUserSubmittedQuery(suggestion.phrase, origin)
             }
         }
     }
 
     private fun userEnteredQuery(query: String) {
-        viewModel.onUserSubmittedQuery(query, webView = webView, context = requireContext())
+        viewModel.onUserSubmittedQuery(query)
     }
 
     @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
