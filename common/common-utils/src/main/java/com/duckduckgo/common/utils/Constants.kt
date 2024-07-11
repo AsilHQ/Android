@@ -17,10 +17,13 @@
 package com.duckduckgo.common.utils
 
 const val SAFE_GAZE_REPORT_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
+const val SAFE_GAZE_JS_URL = "https://raw.githubusercontent.com/AsilHQ/Android/js_code_dev/node_modules/%40duckduckgo/privacy-dashboard/build/app/safe_gaze_v2.js"
+const val SAFE_GAZE_JS_FILENAME = "safe_gaze.js"
 const val SAFE_GAZE_BLUR_PROGRESS = "safe_gaze_blur_progress"
 const val SAFE_GAZE_ACTIVE = "safe_gaze_active"
+const val SAFE_GAZE_PRIVATE_DNS = "private_dns"
 const val SAFE_GAZE_INTERFACE = "SafeGazeInterface"
 const val SAFE_GAZE_PREFERENCES = "safe_gaze_preferences"
-const val SAFE_GAZE_DEFAULT_BLUR_VALUE = 30
+const val SAFE_GAZE_DEFAULT_BLUR_VALUE = 80
 const val SAFE_GAZE_MIN_FACE_SIZE = 15
 const val SAFE_GAZE_MIN_FEMALE_CONFIDENCE = 0.8f

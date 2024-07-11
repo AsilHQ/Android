@@ -418,6 +418,8 @@ dependencies {
     // HTML
     implementation 'org.jsoup:jsoup:_'
 
+    // DNS resolver
+    implementation "dnsjava:dnsjava:3.5.3"
 
     // Flipper
     internalImplementation "com.facebook.flipper:flipper:_"

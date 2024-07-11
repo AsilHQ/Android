@@ -16,137 +16,70 @@
 
 package com.duckduckgo.app.browser.safe_gaze_and_host_blocker.helper
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.util.Base64
-import android.webkit.WebView
-import timber.log.Timber
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStreamReader
-import java.net.URI
+import android.webkit.WebResourceResponse
+import java.io.ByteArrayInputStream
 
-class HostBlockerHelper(
-    webView: WebView? = null,
-    private val context: Context? = null
-) {
-    private val _webView = webView
-    private val errorHtml = "<!DOCTYPE html>\n" +
-        "<html>\n" +
-        "<head>\n" +
-        "    <style>\n" +
-        "        body {\n" +
-        "            display: flex;\n" +
-        "            flex-direction: column;\n" +
-        "            justify-content: center;\n" +
-        "            align-items: center;\n" +
-        "            height: 100vh;\n" +
-        "            margin: 0;\n" +
-        "        }\n" +
-        "        img {\n" +
-        "            max-width: 100%;\n" +
-        "            max-height: 80%;\n" +
-        "        }\n" +
-        "        .quran-verses {\n" +
-        "            color: #000;\n" +
-        "            text-align: center;\n" +
-        "            font-family: Zilla Slab;\n" +
-        "            font-size: 31px;\n" +
-        "            font-style: normal;\n" +
-        "            font-weight: 500;\n" +
-        "            line-height: normal;\n" +
-        "            padding-top: 40px;\n" +
-        "            padding-left: 60px;\n" +
-        "            padding-right: 60px;\n" +
-        "        }\n" +
-        "        .place {\n" +
-        "            color: #000;\n" +
-        "            font-family: Zilla Slab;\n" +
-        "            font-size: 18px;\n" +
-        "            font-style: normal;\n" +
-        "            font-weight: 400;\n" +
-        "            line-height: normal;\n" +
-        "            padding-top: 40px;\n" +
-        "        }\n" +
-        "    </style>\n" +
-        "</head>\n" +
-        "<body>\n" +
-        "    <img src=\"https://storage.asil.co/403Restricted.png\" alt=\"Image\" isSent=\"true\" />\n" +
-        "    <div class=\"quran-verses\">\n" +
-        "        \"Tell the believing men that they should lower their gaze and guard their modesty; that will make for greater purity for them; And Allah is well acquainted with all that they do. And tell the believing women that they should lower their gaze and guard their modesty…\".\n" +
-        "    </div>\n" +
-        "    <div class=\"place\">\n" +
-        "        (Quran 24:30-31)\n" +
-        "    </div>\n" +
-        "</body>\n" +
-        "</html>\n"
-    
-    @SuppressLint("SetJavaScriptEnabled") fun blockUrl(uri: String, isQuery: Boolean = false): Boolean{
-        return if (shouldBlockHost(uri, isQuery)){
-            val dataUri = "data:text/html;charset=utf-8;base64," + Base64.encodeToString(
-                errorHtml.toByteArray(),
-                Base64.NO_PADDING,
-            )
-            _webView?.settings?.javaScriptEnabled = true
-            _webView?.loadUrl(dataUri)
-            true
-        }else{
-            false
-        }
-    }
-
-    private fun shouldBlockHost(url: String?, isQuery: Boolean): Boolean {
-        val host: String = if (isQuery){
-            url ?: ""
-        }else{
-            extractHost(url)
-        }
-
-        try {
-            val hostsTxtFilePath = "${context?.filesDir}/hosts.txt"
-            val file = File(hostsTxtFilePath)
-            if (!file.exists()) {
-                Timber.tag("HostBlocker").d("Hosts file not found at path: $hostsTxtFilePath")
-                return false
-            }
-
-            val inputStream = FileInputStream(file)
-            val reader = BufferedReader(InputStreamReader(inputStream))
-            var line: String?
-
-            while (reader.readLine().also { line = it } != null) {
-                if (line?.contains("#") == true || line?.isEmpty() == true) {
-                    continue
+class HostBlockerHelper {
+    private val errorHtml = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Blocked</title>
+            <style>
+                body {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
                 }
-                val components = line?.split("\\s+".toRegex())
-                if (components != null) {
-                    if (components.size >= 2) {
-                        val domain = components[1]
-                        if (host == domain) {
-                            Timber.tag("HostBlocker").d("Domain -> $domain")
-                            Timber.tag("HostBlocker").d("Host -> $host")
-                            return true
-                        }
-                    }
+                img {
+                    max-width: 100%;
+                    max-height: 80%;
                 }
-            }
+                .quran-verses {
+                    color: #000;
+                    text-align: center;
+                    font-family: Zilla Slab;
+                    font-size: 31px;
+                    font-weight: 500;
+                    line-height: normal;
+                    padding-top: 40px;
+                    padding-left: 60px;
+                    padding-right: 60px;
+                }
+                .place {
+                    color: #000;
+                    font-family: Zilla Slab;
+                    font-size: 18px;
+                    font-weight: 400;
+                    line-height: normal;
+                    padding-top: 40px;
+                }
+            </style>
+        </head>
+        <body>
+            <img src="https://storage.asil.co/403Restricted.png" alt="Image" isSent="true" />
+            <p style="text-align: center; font-size: 20px;"><h1>Page contains harmful content</h1></p></body>
+            <div class="quran-verses">
+                "Tell the believing men that they should lower their gaze and guard their modesty; that will make for greater purity for them; And Allah is well acquainted with all that they do. And tell the believing women that they should lower their gaze and guard their modesty…".
+            </div>
+            <div class="place">
+                (Quran 24:30-31)
+            </div>
+        </body>
+        </html>
+    """.trimIndent()
+    val blockedResourceResponse = WebResourceResponse(
+        "text/html", // MIME type
+        "UTF-8", // Encoding
+        ByteArrayInputStream(errorHtml.toByteArray()),
+    )
 
-            return false
-        } catch (e: Exception) {
-            Timber.tag("HostBlocker").d("Error reading hosts.txt: ${e.message}")
-            return false
-        }
-    }
-
-    private fun extractHost(url: String?): String {
-        return try {
-            val uri = URI(url)
-            uri.host ?: ""
-        } catch (e: Exception) {
-            Timber.tag("HostBlocker").d("Error extracting host: ${e.message}")
-            ""
-        }
-    }
-
+    fun dataUri() = "data:text/html;charset=utf-8;base64," + Base64.encodeToString(
+        errorHtml.toByteArray(),
+        Base64.NO_PADDING,
+    )
 }

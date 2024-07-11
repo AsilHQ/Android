@@ -25,7 +25,6 @@ import android.graphics.Bitmap.CompressFormat.PNG
 import android.net.Uri
 import android.net.http.SslError
 import android.net.http.SslError.SSL_UNTRUSTED
-import android.os.Build
 import android.webkit.HttpAuthHandler
 import android.webkit.RenderProcessGoneDetail
 import android.webkit.SslErrorHandler
@@ -34,7 +33,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -62,6 +60,7 @@ import com.duckduckgo.app.browser.navigation.safeCopyBackForwardList
 import com.duckduckgo.app.browser.pageloadpixel.PageLoadedHandler
 import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.di.AppCoroutineScope
+import com.duckduckgo.app.dns.CustomDnsResolver
 import com.duckduckgo.app.kahftube.SharedPreferenceManager
 import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
 import com.duckduckgo.app.safegaze.ondeviceobjectdetection.ObjectDetectionHelper
@@ -77,7 +76,9 @@ import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
+import com.duckduckgo.common.utils.SAFE_GAZE_JS_FILENAME
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
+import com.duckduckgo.common.utils.SAFE_GAZE_PRIVATE_DNS
 import com.duckduckgo.common.utils.plugins.PluginPoint
 import com.duckduckgo.cookies.api.CookieManagerProvider
 import com.duckduckgo.privacy.config.api.AmpLinks
@@ -96,6 +97,8 @@ import java.io.IOException
 import java.io.InputStreamReader
 import java.net.URI
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 private const val ABOUT_BLANK = "about:blank"
 
@@ -125,8 +128,8 @@ class BrowserWebViewClient @Inject constructor(
     private val shouldSendPageLoadedPixel: PageLoadedHandler,
     private val optimizeTrackerEvaluationRCWrapper: OptimizeTrackerEvaluationRCWrapper,
     private val mediaPlayback: MediaPlayback,
+    private val dnsResolver: CustomDnsResolver
 ) : WebViewClient() {
-
     var webViewClientListener: WebViewClientListener? = null
     private var lastPageStarted: String? = null
     private var isMainJSLoaded = false
@@ -135,6 +138,7 @@ class BrowserWebViewClient @Inject constructor(
     private var start: Long? = null
     private var sharedPreferences: SharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
     private var editor: SharedPreferences.Editor = sharedPreferences.edit()
+    private val hostBlockerHelper = HostBlockerHelper()
 
     /**
      * This is the method of url overriding available from API 24 onwards
@@ -155,10 +159,12 @@ class BrowserWebViewClient @Inject constructor(
         url: Uri,
         isForMainFrame: Boolean,
     ): Boolean {
-        Timber.v("shouldOverride $url")
-        if (!(HostBlockerHelper(webView, context = context).blockUrl(url.toString()))){
+        val privateDnsEnabled = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
+
+        if (privateDnsEnabled) {
             try {
                 shouldBlockSafeGaze(url.toString())
+
                 if (isForMainFrame && dosDetector.isUrlGeneratingDos(url)) {
                     webView.loadUrl("about:blank")
                     webViewClientListener?.dosAttackDetected()
@@ -207,20 +213,21 @@ class BrowserWebViewClient @Inject constructor(
                         false
                     }
 
-                is SpecialUrlDetector.UrlType.SearchQuery -> false
-                is SpecialUrlDetector.UrlType.Web -> {
-                    if (requestRewriter.shouldRewriteRequest(url)) {
-                        webViewClientListener?.let { listener ->
-                            val newUri = requestRewriter.rewriteRequestWithCustomQueryParams(url)
-                            loadUrl(listener, webView, newUri.toString())
-                            return true
+                    is SpecialUrlDetector.UrlType.SearchQuery -> false
+
+                    is SpecialUrlDetector.UrlType.Web -> {
+                        if (requestRewriter.shouldRewriteRequest(url)) {
+                            webViewClientListener?.let { listener ->
+                                val newUri = requestRewriter.rewriteRequestWithCustomQueryParams(url)
+                                loadUrl(listener, webView, newUri.toString())
+                                return true
+                            }
                         }
+                        if (isForMainFrame) {
+                            webViewClientListener?.willOverrideUrl(url.toString())
+                        }
+                        false
                     }
-                    if (isForMainFrame) {
-                        webViewClientListener?.willOverrideUrl(url.toString())
-                    }
-                    false
-                }
 
                     is SpecialUrlDetector.UrlType.ExtractedAmpLink -> {
                         if (isForMainFrame) {
@@ -275,6 +282,7 @@ class BrowserWebViewClient @Inject constructor(
                         }
                         false
                     }
+                    else -> false
                 }
             } catch (e: Throwable) {
                 crashLogger.logCrash(CrashLogger.Crash(shortName = "m_webview_should_override", t = e))
@@ -308,7 +316,7 @@ class BrowserWebViewClient @Inject constructor(
                     if (host.contains(domain)) {
                         handleSafeGazeActivation(false)
                         return true
-                    }else{
+                    } else {
                         handleSafeGazeActivation(true)
                     }
                 }
@@ -344,11 +352,37 @@ class BrowserWebViewClient @Inject constructor(
             val blurIntensity = sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE).toFloat() / 100f
             val jsFunction = "window.blurIntensity = $blurIntensity;"
             webView.evaluateJavascript(jsFunction, null)
+            webView.evaluateJavascript("""
+                window.sendMessage = sendMessage;
+
+                function sendMessage(message) {
+                    console.log(message);
+                    SafeGazeInterface.sendMessage(message);
+                }
+            """.trimIndent(), null)
 
             // Run SafeGaze script
-            val jsCode = readAssetFile(context.assets, "safe_gaze_v2.js")
-            webView.evaluateJavascript("javascript:(function() { $jsCode })()", null)
+            try {
+                val localJsFile = File("${context.filesDir}/${SAFE_GAZE_JS_FILENAME}")
+                val jsCode = localJsFile.readText(Charsets.UTF_8)
+
+                if (jsCode.endsWith("--eof--\n")) {
+                    webView.evaluateJavascript("javascript:(function() { $jsCode })()", null)
+                    Timber.d("SafeGazeJs: Injecting remote version")
+                } else {
+                    loadLocalJs(webView)
+                    Timber.d("SafeGazeJs: Injecting local version. Because no --eof--")
+                }
+            } catch (e: Exception) {
+                loadLocalJs(webView)
+                Timber.d("SafeGazeJs: Injecting local version. Because $e")
+            }
         }
+    }
+
+    private fun loadLocalJs(webView: WebView) {
+        val jsCode = readAssetFile(context.assets, "safe_gaze_v2.js")
+        webView.evaluateJavascript("javascript:(function() { $jsCode })()", null)
     }
 
     private fun handleKahfTube(
@@ -387,6 +421,24 @@ class BrowserWebViewClient @Inject constructor(
         }
     }
 
+    private suspend fun resolveDns(uri: Uri): String {
+        return suspendCoroutine { continuation ->
+            CoroutineScope(dispatcherProvider.io()).launch {
+                // val initialTime = System.currentTimeMillis()
+                val ip = dnsResolver.sendDnsQueries(uri)
+
+                val resolvedDomain = when (ip) {
+                    null -> uri.toString() // failed to resolve
+                    "0.0.0.0" -> "0.0.0.0"
+                    else -> uri.toString() // "${uri.scheme}://${ip}${uri.path}${uri.query?.let { "?$it" } ?: ""}"
+                }
+
+                // Timber.d("ipLog $ip || lookup time ${System.currentTimeMillis() - initialTime}ms || ${uri.host}")
+                continuation.resume(resolvedDomain)
+            }
+        }
+    }
+
     @UiThread
     override fun onPageStarted(
         webView: WebView,
@@ -400,7 +452,6 @@ class BrowserWebViewClient @Inject constructor(
         }
         //handleKahfTube(webView, url)
         url?.let {
-            // See https://app.asana.com/0/0/1206159443951489/f (WebView limitations)
             if (it != "about:blank" && start == null) {
                 start = currentTimeProvider.getTimeInMillis()
             }
@@ -466,6 +517,7 @@ class BrowserWebViewClient @Inject constructor(
         }
     }
 
+    @Suppress("SameParameterValue")
     private fun readAssetFile(assetManager: AssetManager, fileName: String): String {
         val stringBuilder = StringBuilder()
         try {
@@ -494,16 +546,33 @@ class BrowserWebViewClient @Inject constructor(
         webView: WebView,
         request: WebResourceRequest,
     ): WebResourceResponse? {
+        val url = request.url.toString()
+        val privateDnsEnabled = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
+
         return runBlocking {
-            val documentUrl = withContext(dispatcherProvider.main()) { webView.url }
-            withContext(dispatcherProvider.main()) {
-                loginDetector.onEvent(WebNavigationEvent.ShouldInterceptRequest(webView, request))
-            }
-            Timber.v("Intercepting resource ${request.url} type:${request.method} on page $documentUrl")
-            if (optimizeTrackerEvaluationRCWrapper.enabled) {
-                requestInterceptor.shouldIntercept(request, webView, documentUrl?.toUri(), webViewClientListener)
-            } else {
-                requestInterceptor.shouldIntercept(request, webView, documentUrl, webViewClientListener)
+            withContext(dispatcherProvider.io()) {
+                try {
+                    if (privateDnsEnabled && resolveDns(Uri.parse(url)) == "0.0.0.0") {
+                        if (!request.isForMainFrame) {
+                            WebResourceResponse(null, null, null)
+                        } else {
+                            hostBlockerHelper.blockedResourceResponse
+                        }
+                    } else {
+                        val documentUrl = withContext(dispatcherProvider.main()) { webView.url }
+                        withContext(dispatcherProvider.main()) {
+                            loginDetector.onEvent(WebNavigationEvent.ShouldInterceptRequest(webView, request))
+                        }
+                        Timber.v("Intercepting resource ${request.url} type:${request.method} on page $documentUrl")
+                        if (optimizeTrackerEvaluationRCWrapper.enabled) {
+                            requestInterceptor.shouldIntercept(request, webView, documentUrl?.toUri(), webViewClientListener)
+                        } else {
+                            requestInterceptor.shouldIntercept(request, webView, documentUrl, webViewClientListener)
+                        }
+                    }
+                } catch (e: Exception) {
+                    null
+                }
             }
         }
     }
@@ -516,8 +585,8 @@ class BrowserWebViewClient @Inject constructor(
         return false
     }
 
-    fun showEmailAccessForKahfTubeDialog() {
-        val emailAccessForKahfTubeDialog = TextAlertDialogBuilder(activity)
+    private fun showEmailAccessForKahfTubeDialog() {
+        TextAlertDialogBuilder(activity)
             .setTitle(context.getString(string.kahftube))
             .setMessage(context.getString(string.kahf_tube_email_access_message))
             .setPositiveButton(string.allow)
@@ -572,7 +641,6 @@ class BrowserWebViewClient @Inject constructor(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onRenderProcessGone(
         view: WebView?,
         detail: RenderProcessGoneDetail?,
@@ -615,6 +683,7 @@ class BrowserWebViewClient @Inject constructor(
         }
     }
 
+    @SuppressLint("WebViewClientOnReceivedSslError")
     override fun onReceivedSslError(
         view: WebView?,
         handler: SslErrorHandler,

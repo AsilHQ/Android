@@ -30,11 +30,12 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Rect
 import android.net.ConnectivityManager
 import android.graphics.Typeface
 import android.net.Uri
-import android.net.VpnService
 import android.os.*
 import android.print.PrintAttributes
 import android.print.PrintManager
@@ -86,7 +87,6 @@ import androidx.fragment.app.commitNow
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.transaction
 import androidx.lifecycle.*
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -162,6 +162,7 @@ import com.duckduckgo.app.browser.omnibar.animations.TrackersAnimatorListener
 import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.browser.remotemessage.SharePromoLinkRMFBroadCastReceiver
 import com.duckduckgo.app.browser.safe_gaze.SafeGazeJsInterface
+import com.duckduckgo.app.browser.safe_gaze_and_host_blocker.helper.HostBlockerHelper
 import com.duckduckgo.app.browser.session.WebViewSessionStorage
 import com.duckduckgo.app.browser.shortcut.ShortcutBuilder
 import com.duckduckgo.app.browser.tabpreview.WebViewPreviewGenerator
@@ -176,7 +177,7 @@ import com.duckduckgo.app.browser.webview.WebContentDebugging
 import com.duckduckgo.app.cta.ui.*
 import com.duckduckgo.app.cta.ui.DaxDialogCta.*
 import com.duckduckgo.app.di.AppCoroutineScope
-import com.duckduckgo.app.dns.DnsOverVpnService
+import com.duckduckgo.app.dns.CustomDnsResolver
 import com.duckduckgo.app.fire.fireproofwebsite.data.FireproofWebsiteEntity
 import com.duckduckgo.app.fire.fireproofwebsite.data.website
 import com.duckduckgo.app.global.model.PrivacyShield.UNKNOWN
@@ -265,6 +266,7 @@ import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
 import com.duckduckgo.common.utils.SAFE_GAZE_INTERFACE
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
+import com.duckduckgo.common.utils.SAFE_GAZE_PRIVATE_DNS
 import com.duckduckgo.common.utils.SAFE_GAZE_REPORT_URL
 import com.duckduckgo.common.utils.extensions.dpToPx
 import com.duckduckgo.common.utils.extensions.html
@@ -323,6 +325,7 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlin.coroutines.resume
 
 @InjectWith(FragmentScope::class)
 class BrowserTabFragment :
@@ -500,12 +503,17 @@ class BrowserTabFragment :
     @Inject
     lateinit var appLinksLauncher: AppLinksLauncher
 
+    @Inject
+    lateinit var dnsResolver: CustomDnsResolver
+
     /**
      * We use this to monitor whether the user was seeing the in-context Email Protection signup prompt
      * This is needed because the activity stack will be cleared if an external link is opened in our browser
      * We need to be able to determine if inContextEmailProtection view was showing. If it was, it will consume email verification links.
      */
     var inContextEmailProtectionShowing: Boolean = false
+
+    private val hostBlockerHelper = HostBlockerHelper()
 
     private var urlExtractingWebView: UrlExtractingWebView? = null
 
@@ -816,8 +824,6 @@ class BrowserTabFragment :
 
         connectivityManager = requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-        LocalBroadcastManager.getInstance(requireContext())
-            .registerReceiver(receiveBroadcastMessageFromVpnService, IntentFilter(DnsOverVpnService.INTENT_VPN_STATUS_CHANGED))
         sitePermissionsDialogLauncher.registerPermissionLauncher(this)
         externalCameraLauncher.registerForResult(this) {
             when (it) {
@@ -838,35 +844,9 @@ class BrowserTabFragment :
         }
     }
 
-    private val receiveBroadcastMessageFromVpnService: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(
-            context: Context,
-            intent: Intent
-        ) {
-            val newStatus = intent.getBooleanExtra("status", false)
-            println("Broadcast Receiver status -> $newStatus")
-        }
-    }
-
     override fun onDetach() {
         super.onDetach()
         safeGazeInterface.closeMlModels()
-    }
-
-    private fun connectVpn() {
-        val intent = VpnService.prepare(requireActivity().applicationContext)
-        if (intent != null) {
-            startActivityForResult(intent, 0)
-        } else {
-            onActivityResult(0, RESULT_OK, null)
-        }
-    }
-
-
-    private fun disconnectVpn() {
-        val intent = Intent(requireActivity(), DnsOverVpnService::class.java)
-        intent.setAction(DnsOverVpnService.INTENT_ACTION_STOP_VPN)
-        requireActivity().startService(intent)
     }
 
     private fun initSafeGazeAndKhfDns() {
@@ -874,7 +854,6 @@ class BrowserTabFragment :
             safeGazeInterface.updateBlur(SAFE_GAZE_DEFAULT_BLUR_VALUE.toFloat())
             editor.putInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE)
             editor.apply()
-            connectVpn()
         }
         editor.putBoolean("safe_gaze_and_dns_init", true)
         editor.apply()
@@ -972,12 +951,12 @@ class BrowserTabFragment :
                     pointerArrowParams.rightMargin = leftOverDevicePixel - 93
                     pointerArrow.layoutParams = pointerArrowParams
 
-                    if (DnsOverVpnService.isVpnRunning(connectivityManager)){
+                    if (sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)){
                         kahfDnsToggleButton.isChecked = true
                         kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
                         protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
                         kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
-                    }else{
+                    } else{
                         kahfDnsToggleButton.isChecked = false
                         kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
                         protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
@@ -986,12 +965,16 @@ class BrowserTabFragment :
                     handleTrackTint(kahfDnsToggleButton.isChecked, kahfDnsToggleButton)
                     kahfDnsToggleButton.setOnCheckedChangeListener { _, isChecked ->
                         handleTrackTint(isChecked, kahfDnsToggleButton)
-                        if (DnsOverVpnService.isVpnRunning(connectivityManager)){
-                            disconnectVpn()
+                        if (sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)){
+                            editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, false)
+                            editor.apply()
+
                             kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
                             protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
-                        }else{
-                            connectVpn()
+                        } else{
+                            editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, true)
+                            editor.apply()
+
                             kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
                             protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
                         }
@@ -1144,6 +1127,11 @@ class BrowserTabFragment :
             .processor()
             .blur(bitmap)
 
+        val matrix = ColorMatrix();
+        val grayScaleAmount = (1-(blurRadius/100.0))
+        matrix.setSaturation(grayScaleAmount.toFloat())
+        val cf = ColorMatrixColorFilter(matrix);
+        imageView.colorFilter = cf;
         imageView.setImageBitmap(blurredBitmap)
     }
 
@@ -1253,7 +1241,7 @@ class BrowserTabFragment :
                 startActivity(intent)
             }
 
-            if (DnsOverVpnService.isVpnRunning(connectivityManager)) {
+            if (sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)) {
                 it.kahfDnsToggleButton.isChecked = true
                 it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
                 it.protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
@@ -1270,12 +1258,16 @@ class BrowserTabFragment :
             it.kahfDnsToggleButton.setOnCheckedChangeListener { _, isChecked ->
                 handleTrackTint(isChecked, it.kahfDnsToggleButton)
 
-                if (DnsOverVpnService.isVpnRunning(connectivityManager) && !isChecked) {
-                    disconnectVpn()
+                if (sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false) && !isChecked) {
+                    editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, false)
+                    editor.apply()
+
                     it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
                     it.protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
-                } else if (!DnsOverVpnService.isVpnRunning(connectivityManager) && isChecked) {
-                    connectVpn()
+                } else if (!sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false) && isChecked) {
+                    editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, true)
+                    editor.apply()
+
                     it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
                     it.protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
                 }
@@ -1582,7 +1574,7 @@ class BrowserTabFragment :
     }
 
     fun submitQuery(query: String) {
-        viewModel.onUserSubmittedQuery(query, webView = webView, context = requireContext())
+        viewModel.onUserSubmittedQuery(query)
     }
 
     private fun navigate(
@@ -1592,7 +1584,23 @@ class BrowserTabFragment :
         hideKeyboard()
         renderer.hideFindInPage()
         viewModel.registerDaxBubbleCtaDismissed()
-        webView?.loadUrl(url, headers)
+
+        val privateDnsEnabled = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
+
+        if (privateDnsEnabled) {
+            CoroutineScope(dispatchers.io()).launch {
+                val ip = dnsResolver.sendDnsQueries(url.toUri())
+
+                withContext(dispatchers.main()) {
+                    webView?.loadUrl(
+                        if (ip == "0.0.0.0") hostBlockerHelper.dataUri() else url,
+                        headers
+                    )
+                }
+            }
+        } else {
+            webView?.loadUrl(url, headers)
+        }
     }
 
     private fun onRefreshRequested() {
@@ -2320,11 +2328,6 @@ class BrowserTabFragment :
         if (requestCode == REQUEST_CODE_CHOOSE_FILE) {
             handleFileUploadResult(resultCode, data)
         }
-        if (resultCode == RESULT_OK) {
-            val intent = Intent(requireActivity(), DnsOverVpnService::class.java)
-            intent.setAction(DnsOverVpnService.INTENT_ACTION_START_VPN)
-            requireActivity().startService(intent)
-        }
     }
 
     private fun handleFileUploadResult(
@@ -2461,7 +2464,7 @@ class BrowserTabFragment :
             onMoveListener,
             {
                 pixel.fire(originPixel)
-                viewModel.onUserSubmittedQuery(it.favorite.url, webView = webView, context = requireContext())
+                viewModel.onUserSubmittedQuery(it.favorite.url)
             },
             { viewModel.onEditSavedSiteRequested(it.favorite) },
             { viewModel.onDeleteFavoriteRequested(it.favorite) },
@@ -2541,13 +2544,13 @@ class BrowserTabFragment :
                     is AutoCompleteBookmarkSuggestion -> FromAutocomplete(isNav = true)
                     is AutoCompleteSearchSuggestion -> FromAutocomplete(isNav = suggestion.isUrl)
                 }
-                viewModel.onUserSubmittedQuery(suggestion.phrase, origin, webView = webView, context = requireContext())
+                viewModel.onUserSubmittedQuery(suggestion.phrase, origin)
             }
         }
     }
 
     private fun userEnteredQuery(query: String) {
-        viewModel.onUserSubmittedQuery(query, webView = webView, context = requireContext())
+        viewModel.onUserSubmittedQuery(query)
     }
 
     @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
