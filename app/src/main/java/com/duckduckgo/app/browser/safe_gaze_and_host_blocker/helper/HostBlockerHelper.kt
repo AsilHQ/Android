@@ -111,7 +111,7 @@ class HostBlockerHelper(
     }
 
     private fun loadBlockedHosts() {
-        try {
+        /*try {
             val hostsTxtFilePath = "${context?.filesDir}/hosts.txt"
             val file = File(hostsTxtFilePath)
             if (!file.exists()) {
@@ -139,7 +139,7 @@ class HostBlockerHelper(
         } catch (e: Exception) {
             Timber.tag("HostBlocker").d("Error reading hosts.txt: ${e.message}")
             blockedHosts = emptySet()
-        }
+        }*/
     }
 
     fun shouldBlockHost(url: String?, isQuery: Boolean): Boolean {
