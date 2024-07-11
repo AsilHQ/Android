@@ -503,6 +503,12 @@ class BrowserTabFragment :
     @Inject
     lateinit var appLinksLauncher: AppLinksLauncher
 
+    @Inject
+    lateinit var hostBlockerHelper: HostBlockerHelper
+
+    @Inject
+    lateinit var dnsResolver: CustomDnsResolver
+
     /**
      * We use this to monitor whether the user was seeing the in-context Email Protection signup prompt
      * This is needed because the activity stack will be cleared if an external link is opened in our browser
@@ -547,8 +553,6 @@ class BrowserTabFragment :
     private val downloadMessagesJob = ConflatedJob()
 
     private lateinit var safeGazeInterface: SafeGazeJsInterface
-    private val hostBlockerHelper = HostBlockerHelper(context)
-    private val dnsResolver by lazy { CustomDnsResolver(dispatchers) }
 
     private val viewModel: BrowserTabViewModel by lazy {
         val viewModel = ViewModelProvider(this, viewModelFactory)[BrowserTabViewModel::class.java]

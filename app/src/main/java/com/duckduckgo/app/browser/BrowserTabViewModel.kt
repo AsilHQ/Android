@@ -17,7 +17,6 @@
 package com.duckduckgo.app.browser
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.net.http.SslCertificate
@@ -68,7 +67,6 @@ import com.duckduckgo.app.browser.favicon.FaviconSource.UrlFavicon
 import com.duckduckgo.app.browser.favorites.FavoritesQuickAccessAdapter
 import com.duckduckgo.app.browser.history.NavigationHistoryAdapter.NavigationHistoryListener
 import com.duckduckgo.app.browser.history.NavigationHistoryEntry
-import com.duckduckgo.app.browser.safe_gaze_and_host_blocker.helper.HostBlockerHelper
 import com.duckduckgo.app.browser.logindetection.FireproofDialogsEventHandler
 import com.duckduckgo.app.browser.logindetection.FireproofDialogsEventHandler.Event
 import com.duckduckgo.app.browser.logindetection.LoginDetected
@@ -239,7 +237,6 @@ class BrowserTabViewModel @Inject constructor(
     NavigationHistoryListener {
 
     private var buildingSiteFactoryJob: Job? = null
-    private var hostBlockerHelper: HostBlockerHelper? = null
 
     sealed class GlobalLayoutViewState {
         data class Browser(val isNewTabState: Boolean = true) : GlobalLayoutViewState()

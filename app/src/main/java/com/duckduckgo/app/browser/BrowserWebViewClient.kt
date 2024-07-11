@@ -127,8 +127,9 @@ class BrowserWebViewClient @Inject constructor(
     private val shouldSendPageLoadedPixel: PageLoadedHandler,
     private val optimizeTrackerEvaluationRCWrapper: OptimizeTrackerEvaluationRCWrapper,
     private val mediaPlayback: MediaPlayback,
+    private val hostBlockerHelper: HostBlockerHelper,
+    private val dnsResolver: CustomDnsResolver
 ) : WebViewClient() {
-
     var webViewClientListener: WebViewClientListener? = null
     private var lastPageStarted: String? = null
     private var isMainJSLoaded = false
@@ -137,8 +138,6 @@ class BrowserWebViewClient @Inject constructor(
     private var start: Long? = null
     private var sharedPreferences: SharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
     private var editor: SharedPreferences.Editor = sharedPreferences.edit()
-    private val dnsResolver = CustomDnsResolver(dispatcherProvider)
-    private val hostBlockerHelper = HostBlockerHelper(context)
 
     /**
      * This is the method of url overriding available from API 24 onwards

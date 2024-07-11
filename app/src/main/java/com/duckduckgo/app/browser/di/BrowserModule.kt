@@ -40,6 +40,7 @@ import com.duckduckgo.app.browser.mediaplayback.store.ALL_MIGRATIONS
 import com.duckduckgo.app.browser.mediaplayback.store.MediaPlaybackDao
 import com.duckduckgo.app.browser.mediaplayback.store.MediaPlaybackDatabase
 import com.duckduckgo.app.browser.pageloadpixel.PageLoadedPixelDao
+import com.duckduckgo.app.browser.safe_gaze_and_host_blocker.helper.HostBlockerHelper
 import com.duckduckgo.app.browser.session.WebViewSessionInMemoryStorage
 import com.duckduckgo.app.browser.session.WebViewSessionStorage
 import com.duckduckgo.app.browser.tabpreview.FileBasedWebViewPreviewGenerator
@@ -50,6 +51,7 @@ import com.duckduckgo.app.browser.urlextraction.DOMUrlExtractor
 import com.duckduckgo.app.browser.urlextraction.JsUrlExtractor
 import com.duckduckgo.app.browser.urlextraction.UrlExtractingWebViewClient
 import com.duckduckgo.app.di.AppCoroutineScope
+import com.duckduckgo.app.dns.CustomDnsResolver
 import com.duckduckgo.app.fire.*
 import com.duckduckgo.app.fire.fireproofwebsite.data.FireproofWebsiteRepository
 import com.duckduckgo.app.global.db.AppDatabase
@@ -321,5 +323,17 @@ class BrowserModule {
     @SingleInstanceIn(AppScope::class)
     fun providesMediaPlaybackDao(mediaPlaybackDatabase: MediaPlaybackDatabase): MediaPlaybackDao {
         return mediaPlaybackDatabase.mediaPlaybackDao()
+    }
+
+    @Provides
+    @SingleInstanceIn(AppScope::class)
+    fun providesHostBlocker(context: Context): HostBlockerHelper {
+        return HostBlockerHelper(context)
+    }
+
+    @Provides
+    @SingleInstanceIn(AppScope::class)
+    fun providesDnsResolver(dispatcherProvider: DispatcherProvider): CustomDnsResolver {
+        return CustomDnsResolver(dispatcherProvider)
     }
 }
