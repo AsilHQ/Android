@@ -63,7 +63,6 @@ import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.app.dns.CustomDnsResolver
 import com.duckduckgo.app.kahftube.SharedPreferenceManager
 import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
-import com.duckduckgo.app.safegaze.ondeviceobjectdetection.ObjectDetectionHelper
 import com.duckduckgo.app.pixels.remoteconfig.OptimizeTrackerEvaluationRCWrapper
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.autoconsent.api.Autoconsent
@@ -591,54 +590,7 @@ class BrowserWebViewClient @Inject constructor(
             .setMessage(context.getString(string.kahf_tube_email_access_message))
             .setPositiveButton(string.allow)
             .setNegativeButton(string.cancel)
-            //.setView(inputBinding)
-            .addEventListener(
-                object : TextAlertDialogBuilder.EventListener() {
-                    override fun onPositiveButtonClicked() {
-                        super.onPositiveButtonClicked()
-                    }
-
-                    override fun onNegativeButtonClicked() {
-                        super.onNegativeButtonClicked()
-                    }
-                },
-            )
             .show()
-    }
-
-    private fun checkForFacesAndMask(
-        webView: WebView,
-        url: Uri
-    ): WebResourceResponse? {
-        try {
-            val bitmap: Bitmap = Glide
-                .with(webView.context)
-                .asBitmap()
-                .load(url)
-                .submit()
-                .get()
-
-            val isImageContainsHuman = ObjectDetectionHelper(webView.context).isImageContainsHuman(bitmap)
-
-            return if (isImageContainsHuman) {
-                val changedBitmap: Bitmap = Glide
-                    .with(webView.context)
-                    .asBitmap()
-                    .load("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYQxPL5nl4tqOAYUdFb28nY82mPkqvJDkQrg&usqp=CAU")
-                    .submit()
-                    .get()
-                val byteArrayOutputStream = ByteArrayOutputStream()
-                changedBitmap.compress(PNG, 90, byteArrayOutputStream)
-                val inputStream = ByteArrayInputStream(byteArrayOutputStream.toByteArray())
-
-                WebResourceResponse("image/png", "utf-8", inputStream)
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return null
-        }
     }
 
     override fun onRenderProcessGone(
