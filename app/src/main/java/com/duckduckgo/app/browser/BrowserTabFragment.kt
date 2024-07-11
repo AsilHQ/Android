@@ -504,9 +504,6 @@ class BrowserTabFragment :
     lateinit var appLinksLauncher: AppLinksLauncher
 
     @Inject
-    lateinit var hostBlockerHelper: HostBlockerHelper
-
-    @Inject
     lateinit var dnsResolver: CustomDnsResolver
 
     /**
@@ -515,6 +512,8 @@ class BrowserTabFragment :
      * We need to be able to determine if inContextEmailProtection view was showing. If it was, it will consume email verification links.
      */
     var inContextEmailProtectionShowing: Boolean = false
+
+    private val hostBlockerHelper = HostBlockerHelper()
 
     private var urlExtractingWebView: UrlExtractingWebView? = null
 
@@ -1590,8 +1589,7 @@ class BrowserTabFragment :
 
         if (privateDnsEnabled) {
             CoroutineScope(dispatchers.io()).launch {
-                val isBlackListed = hostBlockerHelper.shouldBlockHost(url, isQuery = false)
-                val ip = if (isBlackListed) "0.0.0.0" else dnsResolver.sendDnsQueries(url.toUri())
+                val ip = dnsResolver.sendDnsQueries(url.toUri())
 
                 withContext(dispatchers.main()) {
                     webView?.loadUrl(

@@ -93,7 +93,6 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.URI
@@ -129,7 +128,6 @@ class BrowserWebViewClient @Inject constructor(
     private val shouldSendPageLoadedPixel: PageLoadedHandler,
     private val optimizeTrackerEvaluationRCWrapper: OptimizeTrackerEvaluationRCWrapper,
     private val mediaPlayback: MediaPlayback,
-    private val hostBlockerHelper: HostBlockerHelper,
     private val dnsResolver: CustomDnsResolver
 ) : WebViewClient() {
     var webViewClientListener: WebViewClientListener? = null
@@ -140,6 +138,7 @@ class BrowserWebViewClient @Inject constructor(
     private var start: Long? = null
     private var sharedPreferences: SharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
     private var editor: SharedPreferences.Editor = sharedPreferences.edit()
+    private val hostBlockerHelper = HostBlockerHelper()
 
     /**
      * This is the method of url overriding available from API 24 onwards
@@ -162,7 +161,7 @@ class BrowserWebViewClient @Inject constructor(
     ): Boolean {
         val privateDnsEnabled = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
 
-        if (privateDnsEnabled && !hostBlockerHelper.shouldBlock(url.toString(), webView)) {
+        if (privateDnsEnabled) {
             try {
                 shouldBlockSafeGaze(url.toString())
 

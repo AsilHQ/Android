@@ -17,7 +17,6 @@
 package com.duckduckgo.app.global
 
 import androidx.lifecycle.ProcessLifecycleOwner
-import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkInfo
@@ -133,7 +132,6 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
     }
 
     private fun scheduleTasks() {
-        val initialWorkRequest = OneTimeWorkRequest.Builder(SafeGazeBlockListAndHostBlockerWorker::class.java).build()
         val periodicWorkRequest = PeriodicWorkRequest.Builder(
             SafeGazeBlockListAndHostBlockerWorker::class.java, 7, TimeUnit.DAYS
         ).build()
@@ -143,18 +141,10 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
         val workManager = WorkManager.getInstance(this)
         workManager.apply {
             enqueue(jsDownloadWorkReq)
-            enqueue(initialWorkRequest)
             enqueue(periodicWorkRequest)
         }
 
-        val initialWorkRequestStatus = workManager.getWorkInfoById(initialWorkRequest.id).get()
         val periodicWorkRequestStatus = workManager.getWorkInfoById(periodicWorkRequest.id).get()
-
-        if (initialWorkRequestStatus.state == WorkInfo.State.SUCCEEDED) {
-            println("Initial worked")
-        } else if (initialWorkRequestStatus.state == WorkInfo.State.FAILED) {
-            println("Initial failed")
-        }
 
         if (periodicWorkRequestStatus.state == WorkInfo.State.SUCCEEDED) {
             println("periodicWorkRequestStatus worked")

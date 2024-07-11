@@ -16,22 +16,11 @@
 
 package com.duckduckgo.app.browser.safe_gaze_and_host_blocker.helper
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.util.Base64
 import android.webkit.WebResourceResponse
-import android.webkit.WebView
-import timber.log.Timber
-import java.io.BufferedReader
 import java.io.ByteArrayInputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.InputStreamReader
-import java.net.URI
 
-class HostBlockerHelper(
-    private val context: Context? = null
-) {
+class HostBlockerHelper {
     private val errorHtml = """
         <!DOCTYPE html>
         <html>
@@ -83,83 +72,14 @@ class HostBlockerHelper(
         </body>
         </html>
     """.trimIndent()
-    private var blockedHosts: Set<String>? = null
     val blockedResourceResponse = WebResourceResponse(
         "text/html", // MIME type
         "UTF-8", // Encoding
         ByteArrayInputStream(errorHtml.toByteArray()),
     )
 
-    init {
-        loadBlockedHosts()
-    }
-
     fun dataUri() = "data:text/html;charset=utf-8;base64," + Base64.encodeToString(
         errorHtml.toByteArray(),
         Base64.NO_PADDING,
     )
-
-    @SuppressLint("SetJavaScriptEnabled")
-    fun shouldBlock(uri: String, webView: WebView?, isQuery: Boolean = false): Boolean {
-        return if (shouldBlockHost(uri, isQuery)) {
-            webView?.settings?.javaScriptEnabled = true
-            webView?.loadUrl(dataUri())
-            true
-        } else {
-            false
-        }
-    }
-
-    private fun loadBlockedHosts() {
-        /*try {
-            val hostsTxtFilePath = "${context?.filesDir}/hosts.txt"
-            val file = File(hostsTxtFilePath)
-            if (!file.exists()) {
-                Timber.tag("HostBlocker").d("Hosts file not found at path: $hostsTxtFilePath")
-                blockedHosts = emptySet()
-                return
-            }
-
-            val inputStream = FileInputStream(file)
-            val reader = BufferedReader(InputStreamReader(inputStream))
-            val hostsSet = mutableSetOf<String>()
-            var line: String?
-
-            while (reader.readLine().also { line = it } != null) {
-                if (line?.contains("#") == true || line?.isEmpty() == true) {
-                    continue
-                }
-                val components = line?.split("\\s+".toRegex())
-                if (components != null && components.size >= 2) {
-                    hostsSet.add(components[1])
-                }
-            }
-
-            blockedHosts = hostsSet
-        } catch (e: Exception) {
-            Timber.tag("HostBlocker").d("Error reading hosts.txt: ${e.message}")
-            blockedHosts = emptySet()
-        }*/
-    }
-
-    fun shouldBlockHost(url: String?, isQuery: Boolean): Boolean {
-        val host: String = if (isQuery) {
-            url ?: ""
-        } else {
-            extractHost(url)
-        }
-
-        return blockedHosts?.contains(host) == true
-    }
-
-    private fun extractHost(url: String?): String {
-        return try {
-            val uri = URI(url)
-            uri.host ?: ""
-        } catch (e: Exception) {
-            Timber.tag("HostBlocker").d("Error extracting host: ${e.message}")
-            ""
-        }
-    }
-
 }

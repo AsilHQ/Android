@@ -327,12 +327,6 @@ class BrowserModule {
 
     @Provides
     @SingleInstanceIn(AppScope::class)
-    fun providesHostBlocker(context: Context): HostBlockerHelper {
-        return HostBlockerHelper(context)
-    }
-
-    @Provides
-    @SingleInstanceIn(AppScope::class)
     fun providesDnsResolver(dispatcherProvider: DispatcherProvider): CustomDnsResolver {
         return CustomDnsResolver(dispatcherProvider)
     }
