@@ -18,10 +18,12 @@ package com.duckduckgo.app.global
 
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.duckduckgo.app.browser.BuildConfig
+import com.duckduckgo.app.browser.safe_gaze.JsDownloadWorker
 import com.duckduckgo.app.browser.safe_gaze_and_host_blocker.SafeGazeBlockListAndHostBlockerWorker
 import com.duckduckgo.app.di.AppComponent
 import com.duckduckgo.app.di.AppCoroutineScope
@@ -136,9 +138,14 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
             SafeGazeBlockListAndHostBlockerWorker::class.java, 7, TimeUnit.DAYS
         ).build()
 
+        val jsDownloadWorkReq = OneTimeWorkRequestBuilder<JsDownloadWorker>().addTag("jsDownloader").build()
+
         val workManager = WorkManager.getInstance(this)
-        workManager.enqueue(initialWorkRequest)
-        workManager.enqueue(periodicWorkRequest)
+        workManager.apply {
+            enqueue(jsDownloadWorkReq)
+            enqueue(initialWorkRequest)
+            enqueue(periodicWorkRequest)
+        }
 
         val initialWorkRequestStatus = workManager.getWorkInfoById(initialWorkRequest.id).get()
         val periodicWorkRequestStatus = workManager.getWorkInfoById(periodicWorkRequest.id).get()

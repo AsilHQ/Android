@@ -76,6 +76,7 @@ import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
+import com.duckduckgo.common.utils.SAFE_GAZE_JS_FILENAME
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import com.duckduckgo.common.utils.SAFE_GAZE_PRIVATE_DNS
 import com.duckduckgo.common.utils.plugins.PluginPoint
@@ -92,6 +93,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.URI
@@ -281,6 +283,7 @@ class BrowserWebViewClient @Inject constructor(
                         }
                         false
                     }
+                    else -> false
                 }
             } catch (e: Throwable) {
                 crashLogger.logCrash(CrashLogger.Crash(shortName = "m_webview_should_override", t = e))
@@ -350,11 +353,37 @@ class BrowserWebViewClient @Inject constructor(
             val blurIntensity = sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE).toFloat() / 100f
             val jsFunction = "window.blurIntensity = $blurIntensity;"
             webView.evaluateJavascript(jsFunction, null)
+            webView.evaluateJavascript("""
+                window.sendMessage = sendMessage;
+
+                function sendMessage(message) {
+                    console.log(message);
+                    SafeGazeInterface.sendMessage(message);
+                }
+            """.trimIndent(), null)
 
             // Run SafeGaze script
-            val jsCode = readAssetFile(context.assets, "safe_gaze_v2.js")
-            webView.evaluateJavascript("javascript:(function() { $jsCode })()", null)
+            try {
+                val localJsFile = File("${context.filesDir}/${SAFE_GAZE_JS_FILENAME}")
+                val jsCode = localJsFile.readText(Charsets.UTF_8)
+
+                if (jsCode.endsWith("--eof--\n")) {
+                    webView.evaluateJavascript("javascript:(function() { $jsCode })()", null)
+                    Timber.d("SafeGazeJs: Injecting remote version")
+                } else {
+                    loadLocalJs(webView)
+                    Timber.d("SafeGazeJs: Injecting local version. Because no --eof--")
+                }
+            } catch (e: Exception) {
+                loadLocalJs(webView)
+                Timber.d("SafeGazeJs: Injecting local version. Because $e")
+            }
         }
+    }
+
+    private fun loadLocalJs(webView: WebView) {
+        val jsCode = readAssetFile(context.assets, "safe_gaze_v2.js")
+        webView.evaluateJavascript("javascript:(function() { $jsCode })()", null)
     }
 
     private fun handleKahfTube(
