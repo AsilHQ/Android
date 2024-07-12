@@ -28,14 +28,14 @@ internal data class UrlInfo(val url: String, val index: Int)
 
 class SafeGazeJsInterface(
     private val context: Context,
-    private val webView: DuckDuckGoWebView? = null,
-
+    private val webView: DuckDuckGoWebView,
+    private val nsfwDetector: NsfwDetector,
+    private val genderDetector: GenderDetector
 ) {
     private val dispatcher: DefaultDispatcherProvider = DefaultDispatcherProvider()
     private val preferences: SharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
 
-    private val nsfwDetector = NsfwDetector(context)
-    private val genderDetector = GenderDetector(context)
+
     private val alreadyProcessedUrls = mutableMapOf<String, Boolean>()
 
     private val urlQueue: ConcurrentLinkedQueue<UrlInfo> = ConcurrentLinkedQueue()
@@ -97,7 +97,7 @@ class SafeGazeJsInterface(
     @JavascriptInterface
     fun callSafegazeOnDeviceModelHandler(isExist: Boolean, index: Int) {
         val jsFunctionCall = "safegazeOnDeviceModelHandler($isExist, $index);"
-        webView?.post {
+        webView.post {
             webView.evaluateJavascript(jsFunctionCall, null)
         }
     }
@@ -106,7 +106,7 @@ class SafeGazeJsInterface(
     fun updateBlur(blur: Float){
         val trimmedBlur = blur / 100
         val jsFunction = "window.blurIntensity = $trimmedBlur; updateBluredImageOpacity();"
-        webView?.post {
+        webView.post {
             webView.evaluateJavascript(jsFunction, null)
         }
     }
@@ -186,9 +186,10 @@ class SafeGazeJsInterface(
         return preferences.getInt("session_censored_count", 0)
     }
 
-    fun closeMlModels() {
-        nsfwDetector.dispose()
-        genderDetector.dispose()
+    fun cancelOngoingImageProcessing() {
+        // Don't dispose models since these are singleton instances and will affect the other tabs
+        // nsfwDetector.dispose()
+        // genderDetector.dispose()
         scope.cancel()
     }
 }

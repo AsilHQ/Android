@@ -200,6 +200,8 @@ import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
 import com.duckduckgo.app.location.data.LocationPermissionType
 import com.duckduckgo.app.pixels.AppPixelName
 import com.duckduckgo.app.playstore.PlayStoreUtils
+import com.duckduckgo.app.safegaze.genderdetection.GenderDetector
+import com.duckduckgo.app.safegaze.nsfwdetection.NsfwDetector
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.app.survey.model.Survey
 import com.duckduckgo.app.survey.ui.SurveyActivity
@@ -325,7 +327,6 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlin.coroutines.resume
 
 @InjectWith(FragmentScope::class)
 class BrowserTabFragment :
@@ -505,6 +506,12 @@ class BrowserTabFragment :
 
     @Inject
     lateinit var dnsResolver: CustomDnsResolver
+
+    @Inject
+    lateinit var nsfwDetector: NsfwDetector
+
+    @Inject
+    lateinit var genderDetector: GenderDetector
 
     /**
      * We use this to monitor whether the user was seeing the in-context Email Protection signup prompt
@@ -806,10 +813,8 @@ class BrowserTabFragment :
         removeDaxDialogFromActivity()
         renderer = BrowserTabFragmentRenderer()
         decorator = BrowserTabFragmentDecorator()
-        safeGazeInterface = SafeGazeJsInterface(requireContext())
         sharedPreferences = requireContext().getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
         editor = sharedPreferences.edit()
-        initSafeGazeAndKhfDns()
         voiceSearchLauncher.registerResultsCallback(this, requireActivity(), BROWSER) {
             when (it) {
                 is VoiceSearchLauncher.Event.VoiceRecognitionSuccess -> {
@@ -846,17 +851,7 @@ class BrowserTabFragment :
 
     override fun onDetach() {
         super.onDetach()
-        safeGazeInterface.closeMlModels()
-    }
-
-    private fun initSafeGazeAndKhfDns() {
-        if (!sharedPreferences.getBoolean("safe_gaze_and_dns_init",false)) {
-            safeGazeInterface.updateBlur(SAFE_GAZE_DEFAULT_BLUR_VALUE.toFloat())
-            editor.putInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE)
-            editor.apply()
-        }
-        editor.putBoolean("safe_gaze_and_dns_init", true)
-        editor.apply()
+        safeGazeInterface.cancelOngoingImageProcessing()
     }
 
     private fun resumeWebView() {
@@ -1090,7 +1085,7 @@ class BrowserTabFragment :
                 startActivity(Intent.createChooser(shareIntent, "Share via"))
             }
             handleProgressBar(view, blurImageView)
-            loadImageWithBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0), blurImageView)
+            loadImageWithBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE), blurImageView)
             reportTextViewOpen.setOnClickListener {
                 val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -1161,9 +1156,9 @@ class BrowserTabFragment :
     private fun handleProgressBar(view: View, imageView: ImageView) {
         val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
         val iconImageView: ImageView = view.findViewById(R.id.icon_image_view)
-        val progress = sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0)
+        val progress = sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE)
         progressBar.progress = progress
-        updateViewsPosition(iconImageView, sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0))
+        updateViewsPosition(iconImageView, sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE))
         progressBar.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
@@ -1188,7 +1183,7 @@ class BrowserTabFragment :
         var currentLayout: View
         val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         safeGazeIcon.setOnClickListener {
-            safeGazeInterface.updateBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0).toFloat())
+            safeGazeInterface.updateBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE).toFloat())
             val iconRect = Rect()
             safeGazeIcon.getGlobalVisibleRect(iconRect)
             val x = iconRect.left
@@ -2559,10 +2554,10 @@ class BrowserTabFragment :
             R.layout.include_duckduckgo_browser_webview,
             binding.webViewContainer,
             true,
-        ).findViewById(R.id.browserWebView) as DuckDuckGoWebView
+        ).findViewById(R.id.browserWebView)
 
         webView?.let {
-            safeGazeInterface = SafeGazeJsInterface(requireContext(), webView!!)
+            safeGazeInterface = SafeGazeJsInterface(requireContext(), webView!!, nsfwDetector, genderDetector)
 
             it.webViewClient = browserWebViewClient
             browserWebViewClient.activity = requireActivity()
