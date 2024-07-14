@@ -36,8 +36,12 @@ import android.webkit.WebView
 import androidx.annotation.AnyThread
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import com.duckduckgo.adclick.api.AdClickManager
 import com.duckduckgo.anvil.annotations.ContributesViewModel
 import com.duckduckgo.app.accessibility.data.AccessibilitySettingsDataStore
@@ -49,13 +53,87 @@ import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.A
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteSearchSuggestion
 import com.duckduckgo.app.bookmarks.ui.EditSavedSiteDialogFragment.DeleteBookmarkListener
 import com.duckduckgo.app.bookmarks.ui.EditSavedSiteDialogFragment.EditSavedSiteListener
-import com.duckduckgo.app.browser.BrowserTabViewModel.Command.*
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.AddHomeShortcut
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.AskDomainPermission
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.AskToAutomateFireproofWebsite
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.AskToDisableLoginDetection
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.AskToFireproofWebsite
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.BrokenSiteFeedback
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.CancelIncomingAutofillRequest
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.CheckSystemLocationPermission
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ChildTabClosed
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ConvertBlobToDataUri
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.CopyAliasToClipboard
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.CopyLink
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.DaxCommand
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.DeleteFavoriteConfirmation
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.DeleteFireproofConfirmation
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.DeleteSavedSiteConfirmation
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.DialNumber
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.DismissFindInPage
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.DownloadImage
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.EditWithSelectedQuery
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.EmailSignEvent
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ExtractUrlFromCloakedAmpLink
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.FindInPageCommand
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.GenerateWebViewPreviewImage
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.HandleNonHttpAppLink
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.HideKeyboard
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.HideWebContent
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.InjectEmailAddress
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.LaunchAddWidget
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.LaunchAutofillSettings
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.LaunchNewTab
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.LaunchSurvey
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.LaunchTabSwitcher
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.LoadExtractedUrl
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.OpenAppLink
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.OpenInNewBackgroundTab
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.OpenInNewTab
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.OpenMessageInNewTab
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.PrintLink
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.RefreshUserAgent
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.RequestFileDownload
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.RequestSystemLocationPermission
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.RequiresAuthentication
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ResetHistory
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.SaveCredentials
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ScreenLock
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ScreenUnlock
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.SendEmail
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.SendResponseToJs
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.SendSms
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShareLink
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowAppLinkPrompt
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowBackNavigationHistory
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowDomainHasPermissionMessage
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowEditSavedSiteDialog
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowEmailProtectionChooseEmailPrompt
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowErrorWithAction
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowExistingImageOrCameraChooser
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowFaviconsPrompt
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowFileChooser
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowFireproofWebSiteConfirmation
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowFullScreen
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowImageCamera
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowKeyboard
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowPrivacyProtectionDisabledConfirmation
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowPrivacyProtectionEnabledConfirmation
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowSavedSiteAddedConfirmation
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowSitePermissionsDialog
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowSoundRecorder
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowUserCredentialSavedOrUpdatedConfirmation
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowVideoCamera
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.ShowWebContent
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.WebShareRequest
+import com.duckduckgo.app.browser.BrowserTabViewModel.Command.WebViewError
 import com.duckduckgo.app.browser.BrowserTabViewModel.GlobalLayoutViewState.Browser
 import com.duckduckgo.app.browser.BrowserTabViewModel.GlobalLayoutViewState.Invalidated
 import com.duckduckgo.app.browser.BrowserTabViewModel.HighlightableButton.Visible
 import com.duckduckgo.app.browser.LongPressHandler.RequiredAction
 import com.duckduckgo.app.browser.SpecialUrlDetector.UrlType.AppLink
 import com.duckduckgo.app.browser.SpecialUrlDetector.UrlType.NonHttpAppLink
+import com.duckduckgo.app.browser.WebViewErrorResponse.BLOCKED
 import com.duckduckgo.app.browser.WebViewErrorResponse.LOADING
 import com.duckduckgo.app.browser.WebViewErrorResponse.OMITTED
 import com.duckduckgo.app.browser.addtohome.AddToHomeCapabilityDetector
@@ -81,13 +159,18 @@ import com.duckduckgo.app.browser.remotemessage.RemoteMessagingModel
 import com.duckduckgo.app.browser.remotemessage.asBrowserTabCommand
 import com.duckduckgo.app.browser.session.WebViewSessionStorage
 import com.duckduckgo.app.browser.urlextraction.UrlExtractionListener
-import com.duckduckgo.app.cta.ui.*
+import com.duckduckgo.app.cta.ui.Cta
+import com.duckduckgo.app.cta.ui.CtaViewModel
+import com.duckduckgo.app.cta.ui.DaxDialogCta
+import com.duckduckgo.app.cta.ui.DialogCta
+import com.duckduckgo.app.cta.ui.HomePanelCta
 import com.duckduckgo.app.di.AppCoroutineScope
+import com.duckduckgo.app.dns.CustomDnsResolver
 import com.duckduckgo.app.fire.fireproofwebsite.data.FireproofWebsiteEntity
 import com.duckduckgo.app.fire.fireproofwebsite.data.FireproofWebsiteRepository
 import com.duckduckgo.app.fire.fireproofwebsite.ui.AutomaticFireproofSetting.ALWAYS
 import com.duckduckgo.app.fire.fireproofwebsite.ui.AutomaticFireproofSetting.ASK_EVERY_TIME
-import com.duckduckgo.app.global.*
+import com.duckduckgo.app.global.SingleLiveEvent
 import com.duckduckgo.app.global.events.db.UserEventKey
 import com.duckduckgo.app.global.events.db.UserEventsStore
 import com.duckduckgo.app.global.model.PrivacyShield
@@ -136,7 +219,11 @@ import com.duckduckgo.downloads.api.DownloadStateListener
 import com.duckduckgo.downloads.api.FileDownloader
 import com.duckduckgo.downloads.api.FileDownloader.PendingFileDownload
 import com.duckduckgo.js.messaging.api.JsCallbackData
-import com.duckduckgo.privacy.config.api.*
+import com.duckduckgo.privacy.config.api.AmpLinkInfo
+import com.duckduckgo.privacy.config.api.AmpLinks
+import com.duckduckgo.privacy.config.api.ContentBlocking
+import com.duckduckgo.privacy.config.api.Gpc
+import com.duckduckgo.privacy.config.api.TrackingParameters
 import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupExperimentExternalPixels
 import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupManager
 import com.duckduckgo.privacyprotectionspopup.api.PrivacyProtectionsPopupUiEvent
@@ -161,18 +248,58 @@ import dagger.Lazy
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import java.net.URI
-import java.net.URISyntaxException
-import java.util.*
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.File
+import java.net.URI
+import java.net.URISyntaxException
+import java.util.Locale
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.MutableMap
+import kotlin.collections.any
+import kotlin.collections.contains
+import kotlin.collections.drop
+import kotlin.collections.emptyList
+import kotlin.collections.emptyMap
+import kotlin.collections.filter
+import kotlin.collections.filterNot
+import kotlin.collections.firstOrNull
+import kotlin.collections.forEach
+import kotlin.collections.isNotEmpty
+import kotlin.collections.joinToString
+import kotlin.collections.map
+import kotlin.collections.mapOf
+import kotlin.collections.minus
+import kotlin.collections.mutableMapOf
+import kotlin.collections.mutableSetOf
+import kotlin.collections.plus
+import kotlin.collections.set
+import kotlin.collections.setOf
+import kotlin.collections.take
+import kotlin.collections.toList
 
 @ContributesViewModel(FragmentScope::class)
 class BrowserTabViewModel @Inject constructor(
@@ -237,6 +364,7 @@ class BrowserTabViewModel @Inject constructor(
     NavigationHistoryListener {
 
     private var buildingSiteFactoryJob: Job? = null
+    private val dnsResolver = CustomDnsResolver(dispatchers)
 
     sealed class GlobalLayoutViewState {
         data class Browser(val isNewTabState: Boolean = true) : GlobalLayoutViewState()
@@ -569,6 +697,7 @@ class BrowserTabViewModel @Inject constructor(
     var siteLiveData: MutableLiveData<Site> = MutableLiveData()
     val privacyShieldViewState: MutableLiveData<PrivacyShieldViewState> = MutableLiveData()
 
+    var privateDnsEnabled = true
     var skipHome = false
     var hasCtaBeenShownForCurrentPage: AtomicBoolean = AtomicBoolean(false)
     val tabs: LiveData<List<TabEntity>> = tabRepository.liveTabs
@@ -1008,7 +1137,7 @@ class BrowserTabViewModel @Inject constructor(
 
         val verticalParameter = extractVerticalParameter(url)
         var urlToNavigate = queryUrlConverter.convertQueryToUrl(trimmedInput, verticalParameter, queryOrigin)
-
+        var wvError = OMITTED
         when (val type = specialUrlDetector.determineType(trimmedInput)) {
             is NonHttpAppLink -> {
                 nonHttpAppLinkClicked(type)
@@ -1040,7 +1169,19 @@ class BrowserTabViewModel @Inject constructor(
                     clearPreviousUrl()
                 }
 
-                command.value = NavigationCommand.Navigate(urlToNavigate, getUrlHeaders(urlToNavigate))
+
+                if (privateDnsEnabled) {
+                    runBlocking {
+                        val ip = dnsResolver.sendDnsQueries(urlToNavigate.toUri())
+                        if (ip == "0.0.0.0") {
+                            wvError = BLOCKED
+                        } else {
+                            command.value = NavigationCommand.Navigate(urlToNavigate, getUrlHeaders(urlToNavigate))
+                        }
+                    }
+                } else {
+                    command.value = NavigationCommand.Navigate(urlToNavigate, getUrlHeaders(urlToNavigate))
+                }
             }
         }
 
@@ -1055,7 +1196,7 @@ class BrowserTabViewModel @Inject constructor(
             browserShowing = true,
             showClearButton = false,
             showVoiceSearch = voiceSearchAvailability.shouldShowVoiceSearch(urlLoaded = urlToNavigate),
-            browserError = OMITTED,
+            browserError = wvError,
         )
         autoCompleteViewState.value =
             currentAutoCompleteViewState().copy(showSuggestions = false, showFavorites = false, searchResults = AutoCompleteResult("", emptyList()))

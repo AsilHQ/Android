@@ -116,6 +116,7 @@ import com.duckduckgo.app.browser.BrowserTabViewModel.OmnibarViewState
 import com.duckduckgo.app.browser.BrowserTabViewModel.PrivacyShieldViewState
 import com.duckduckgo.app.browser.BrowserTabViewModel.SavedSiteChangedViewState
 import com.duckduckgo.app.browser.R.string
+import com.duckduckgo.app.browser.WebViewErrorResponse.BLOCKED
 import com.duckduckgo.app.browser.WebViewErrorResponse.LOADING
 import com.duckduckgo.app.browser.WebViewErrorResponse.OMITTED
 import com.duckduckgo.app.browser.applinks.AppLinksLauncher
@@ -162,7 +163,6 @@ import com.duckduckgo.app.browser.omnibar.animations.TrackersAnimatorListener
 import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.browser.remotemessage.SharePromoLinkRMFBroadCastReceiver
 import com.duckduckgo.app.browser.safe_gaze.SafeGazeJsInterface
-import com.duckduckgo.app.browser.safe_gaze_and_host_blocker.helper.HostBlockerHelper
 import com.duckduckgo.app.browser.session.WebViewSessionStorage
 import com.duckduckgo.app.browser.shortcut.ShortcutBuilder
 import com.duckduckgo.app.browser.tabpreview.WebViewPreviewGenerator
@@ -519,8 +519,6 @@ class BrowserTabFragment :
      * We need to be able to determine if inContextEmailProtection view was showing. If it was, it will consume email verification links.
      */
     var inContextEmailProtectionShowing: Boolean = false
-
-    private val hostBlockerHelper = HostBlockerHelper()
 
     private var urlExtractingWebView: UrlExtractingWebView? = null
 
@@ -946,7 +944,7 @@ class BrowserTabFragment :
                     pointerArrowParams.rightMargin = leftOverDevicePixel - 93
                     pointerArrow.layoutParams = pointerArrowParams
 
-                    if (sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)){
+                    if (isPrivateDnsEnabled()){
                         kahfDnsToggleButton.isChecked = true
                         kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
                         protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
@@ -960,15 +958,13 @@ class BrowserTabFragment :
                     handleTrackTint(kahfDnsToggleButton.isChecked, kahfDnsToggleButton)
                     kahfDnsToggleButton.setOnCheckedChangeListener { _, isChecked ->
                         handleTrackTint(isChecked, kahfDnsToggleButton)
-                        if (sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)){
-                            editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, false)
-                            editor.apply()
+                        if (isPrivateDnsEnabled()){
+                            updatePrivateDnsSettings(false)
 
                             kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
                             protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
                         } else{
-                            editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, true)
-                            editor.apply()
+                            updatePrivateDnsSettings(true)
 
                             kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
                             protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
@@ -1236,7 +1232,7 @@ class BrowserTabFragment :
                 startActivity(intent)
             }
 
-            if (sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)) {
+            if (isPrivateDnsEnabled()) {
                 it.kahfDnsToggleButton.isChecked = true
                 it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
                 it.protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
@@ -1253,15 +1249,13 @@ class BrowserTabFragment :
             it.kahfDnsToggleButton.setOnCheckedChangeListener { _, isChecked ->
                 handleTrackTint(isChecked, it.kahfDnsToggleButton)
 
-                if (sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false) && !isChecked) {
-                    editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, false)
-                    editor.apply()
+                if (isPrivateDnsEnabled() && !isChecked) {
+                    updatePrivateDnsSettings(false)
 
                     it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
                     it.protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
-                } else if (!sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false) && isChecked) {
-                    editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, true)
-                    editor.apply()
+                } else if (!isPrivateDnsEnabled() && isChecked) {
+                    updatePrivateDnsSettings(true)
 
                     it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
                     it.protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
@@ -1269,6 +1263,14 @@ class BrowserTabFragment :
             }
         }
     }
+
+    private fun updatePrivateDnsSettings(enabled: Boolean) {
+        editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, enabled)
+        editor.apply()
+        viewModel.privateDnsEnabled = enabled
+    }
+
+    private fun isPrivateDnsEnabled() = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
 
     private fun toggleVisibilityWithAnimation(view: View, visibility: Int) {
         val anim = if (visibility == VISIBLE) {
@@ -1351,6 +1353,7 @@ class BrowserTabFragment :
         super.onResume()
         omnibar.appBarLayout.setExpanded(true)
         viewModel.onViewResumed()
+        viewModel.privateDnsEnabled = isPrivateDnsEnabled()
 
         // onResume can be called for a hidden/backgrounded fragment, ensure this tab is visible.
         if (fragmentIsVisible()) {
@@ -1559,12 +1562,21 @@ class BrowserTabFragment :
         omnibar.shieldIcon.isInvisible = true
         webView?.onPause()
         webView?.hide()
-        errorView.errorMessage.text = getString(errorType.errorId, url).html(requireContext())
-        if (appTheme.isLightModeEnabled()) {
-            errorView.yetiIcon.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_light)
+
+        if (errorType.name == BLOCKED.name) {
+            errorView.errorMessage.text = getString(errorType.errorId, url).html(requireContext())
+            errorView.yetiIcon.setImageResource(R.drawable.blocked)
+            errorView.errorTitle.text = getString(string.webViewBlockedTitle)
         } else {
-            errorView.yetiIcon.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_dark)
+            errorView.errorTitle.text = getString(string.webViewErrorTitle)
+            errorView.errorMessage.text = getString(errorType.errorId, url).html(requireContext())
+            if (appTheme.isLightModeEnabled()) {
+                errorView.yetiIcon.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_light)
+            } else {
+                errorView.yetiIcon.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_dark)
+            }
         }
+
         errorView.errorLayout.show()
     }
 
@@ -1579,23 +1591,7 @@ class BrowserTabFragment :
         hideKeyboard()
         renderer.hideFindInPage()
         viewModel.registerDaxBubbleCtaDismissed()
-
-        val privateDnsEnabled = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
-
-        if (privateDnsEnabled) {
-            CoroutineScope(dispatchers.io()).launch {
-                val ip = dnsResolver.sendDnsQueries(url.toUri())
-
-                withContext(dispatchers.main()) {
-                    webView?.loadUrl(
-                        if (ip == "0.0.0.0") hostBlockerHelper.dataUri() else url,
-                        headers
-                    )
-                }
-            }
-        } else {
-            webView?.loadUrl(url, headers)
-        }
+        webView?.loadUrl(url, headers)
     }
 
     private fun onRefreshRequested() {
@@ -3946,11 +3942,13 @@ class BrowserTabFragment :
         fun renderBrowserViewState(viewState: BrowserViewState) {
             renderIfChanged(viewState, lastSeenBrowserViewState) {
                 val browserShowing = viewState.browserShowing
-                val browserShowingChanged = viewState.browserShowing != lastSeenBrowserViewState?.browserShowing
+                val browserShowingChanged = viewState.browserShowing != (lastSeenBrowserViewState?.browserShowing ?: false)
                 val errorChanged = viewState.browserError != lastSeenBrowserViewState?.browserError
 
                 lastSeenBrowserViewState = viewState
-                if (browserShowingChanged) {
+                if (viewState.browserError == BLOCKED) {
+                    showError(viewState.browserError, webView?.url)
+                } else if (browserShowingChanged) {
                     if (browserShowing) {
                         showBrowser()
                     } else {
