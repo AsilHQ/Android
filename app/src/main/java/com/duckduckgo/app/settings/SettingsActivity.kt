@@ -66,11 +66,11 @@ import com.duckduckgo.navigation.api.GlobalActivityStarter
 import com.duckduckgo.settings.api.ProSettingsPlugin
 import com.duckduckgo.sync.api.SyncActivityWithEmptyParams
 import com.duckduckgo.windows.api.ui.WindowsScreenWithEmptyParams
-import javax.inject.Inject
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
+import javax.inject.Inject
 
 @InjectWith(ActivityScope::class)
 @ContributeToActivityStarter(SettingsScreenNoParams::class, screenName = "settings")
@@ -106,8 +106,8 @@ class SettingsActivity : DuckDuckGoActivity() {
     private val viewsSettings
         get() = binding.includeSettings.contentSettingsSettings
 
-    private val viewsMore
-        get() = binding.includeSettings.contentSettingsMore
+    // private val viewsMore
+    //     get() = binding.includeSettings.contentSettingsMore
 
     private val viewsInternal
         get() = binding.includeSettings.contentSettingsInternal
@@ -153,10 +153,10 @@ class SettingsActivity : DuckDuckGoActivity() {
             aboutSetting.setClickListener { viewModel.onAboutSettingClicked() }
         }
 
-        with(viewsMore) {
-            macOsSetting.setClickListener { viewModel.onMacOsSettingClicked() }
-            windowsSetting.setClickListener { viewModel.windowsSettingClicked() }
-        }
+        // with(viewsMore) {
+        //     macOsSetting.setClickListener { viewModel.onMacOsSettingClicked() }
+        //     windowsSetting.setClickListener { viewModel.windowsSettingClicked() }
+        // }
     }
 
     private fun configureSettings() {
@@ -225,13 +225,14 @@ class SettingsActivity : DuckDuckGoActivity() {
     }
 
     private fun updateEmailSubtitle(emailAddress: String?) {
-        if (emailAddress.isNullOrEmpty()) {
+        viewsPrivacy.emailSetting.gone()
+        /*if (emailAddress.isNullOrEmpty()) {
             viewsPrivacy.emailSetting.setSecondaryText(getString(R.string.settingsEmailProtectionSubtitle))
             viewsPrivacy.emailSetting.setItemStatus(CheckListItem.CheckItemStatus.DISABLED)
         } else {
             viewsPrivacy.emailSetting.setSecondaryText(emailAddress)
             viewsPrivacy.emailSetting.setItemStatus(CheckListItem.CheckItemStatus.ENABLED)
-        }
+        }*/
     }
 
     private fun updateSyncSetting(visible: Boolean) {

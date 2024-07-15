@@ -20,7 +20,6 @@ import android.os.Bundle
 import android.view.View
 import com.duckduckgo.saved.sites.impl.R
 import com.duckduckgo.savedsites.api.models.BookmarkFolder
-import java.util.*
 
 class AddBookmarkFolderDialogFragment : SavedSiteDialogFragment() {
 

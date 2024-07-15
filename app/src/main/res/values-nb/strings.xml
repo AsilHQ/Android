@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2022 DuckDuckGo
+  ~ Copyright (c) 2022 Kahf
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
 <!-- smartling.entity_escaping = false -->
 <!-- smartling.instruction_attributes = instruction -->
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="appName" translatable="false">DuckDuckGo</string>
-    <string name="appDescription" translatable="false">DuckDuckGo</string>
-    <string name="duckDuckGoLogoDescription">DuckDuckGo-logo</string>
-    <string name="duckDuckGoPrivacySimplified">Personvern gjort enkelt</string>
+    <string name="asilLogoDescription">Kahf-logo</string>
+    <string name="asilPrivacySimplified">Personvern gjort enkelt</string>
     <string name="yes">Ja</string>
     <string name="no">Nei</string>
     <string name="open">Åpne</string>
@@ -28,8 +26,8 @@
     <string name="search">Søk</string>
 
     <!-- Onboarding Activity -->
-    <string name="onboardingDefaultBrowserDescription">Åpne innstillinger for å søke og surfe med DuckDuckGo hver gang.</string>
-    <string name="onboardingDefaultBrowserTitle">Gjør DuckDuckGo til ditt standardvalg</string>
+    <string name="onboardingDefaultBrowserDescription">Åpne innstillinger for å søke og surfe med Kahf hver gang.</string>
+    <string name="onboardingDefaultBrowserTitle">Gjør Kahf til ditt standardvalg</string>
 
     <!-- Default Browser -->
     <string name="cannotLaunchDefaultAppSettings">Kan ikke åpne innstillinger for standardapp</string>
@@ -37,7 +35,7 @@
     <string name="defaultBrowserMaybeLater">Kanskje senere</string>
     <string name="defaultBrowserLetsDoIt">Gjør til standardnettleser</string>
     <string name="defaultBrowserDescriptionNoDefault">Åpne lenker med ro i sinnet, hver gang.</string>
-    <string name="defaultBrowserInstructions">Velg DuckDuckGo og trykk på <font color="#678fff">Alltid</font>.</string>
+    <string name="defaultBrowserInstructions">Velg Kahf og trykk på <font color="#678fff">Alltid</font>.</string>
 
     <!-- Browser Activity -->
     <string name="browserPopupMenu">Nettlesermeny</string>
@@ -90,11 +88,11 @@
     <!-- Opening external apps -->
     <string name="openExternalApp">Åpne ekstern app</string>
     <string name="launchingExternalApp">Åpne i en annen app</string>
-    <string name="confirmOpenExternalApp">Ønsker du å forlate DuckDuckGo for å vise dette innholdet?</string>
+    <string name="confirmOpenExternalApp">Ønsker du å forlate Kahf for å vise dette innholdet?</string>
     <string name="unableToOpenLink">Kan ikke åpne denne typen lenke</string>
 
     <!-- Tabs -->
-    <string name="homeTab" translatable="false">DuckDuckGo</string>
+    <string name="homeTab" translatable="false">Kahf</string>
     <string name="tabActivityTitle">Faner</string>
     <string name="tabsMenuItem">Faner</string>
     <string name="newTabMenuItem">Ny fane</string>
@@ -122,12 +120,12 @@
     <string name="settingsHeadingAppearance">Utseende</string>
     <string name="settingsHeadingCustomize">Tilpass</string>
     <string name="settingsHeadingAbout">Om</string>
-    <string name="settingsAboutDuckduckgo">Om DuckDuckGo</string>
+    <string name="settingsAboutAsil">Om Kahf</string>
     <string name="settingsVersion">Versjon</string>
     <string name="leaveFeedback">Del tilbakemelding</string>
     <string name="settingsEmailProtectionTitle">E-postbeskyttelse</string>
     <string name="settingsEmailProtectionSubtitle">Blokker e-postsporere og skjul adressen din</string>
-    <string name="settingsHeadingMore">Mer fra DuckDuckGo</string>
+    <string name="settingsHeadingMore">Mer fra Kahf</string>
     <string name="settingsLightTheme">Lyst</string>
     <string name="settingsTheme">Utseende</string>
     <string name="settingsDarkTheme">Mørk</string>
@@ -142,8 +140,8 @@
     <string name="settingsSubtitleNotificationsDisabled">Deaktivert</string>
     <string name="settingsSubtitleNotificationsEnabled">Aktivert</string>
     <string name="settingsDefaultBrowserTitle">Standardnettleser</string>
-    <string name="settingsDefaultBrowserSetDescription">DuckDuckGo er standardnettleseren din</string>
-    <string name="settingsDefaultBrowserNotSetDescription">Gjør DuckDuckGo til standardnettleser</string>
+    <string name="settingsDefaultBrowserSetDescription">Kahf er standardnettleseren din</string>
+    <string name="settingsDefaultBrowserNotSetDescription">Gjør Kahf til standardnettleser</string>
     <string name="settingsPrivateSearchTitle">Privat søk</string>
     <string name="settingsPrivateSearchDescription">Aktivert som standard</string>
     <string name="settingsWebTrackingProtectionTitle">Beskyttelse mot nettsporing</string>
@@ -156,7 +154,7 @@
     <!-- Private Search -->
     <string name="privateSearchActivityTitle">Privat søk</string>
     <string name="privateSearchTitle">Private Search er aktivert</string>
-    <string name="privateSearchDescription">DuckDuckGo Private Search er standardsøkemotoren din, så du kan søke på nettet uten å bli sporet.</string>
+    <string name="privateSearchDescription">Kahf Private Search er standardsøkemotoren din, så du kan søke på nettet uten å bli sporet.</string>
     <string name="privateSearchHeadingSearchSettings">Søkeinnstillinger</string>
     <string name="privateSearchMoreSearchSettingsPrimaryText">Flere søkeinnstillinger</string>
     <string name="privateSearchMoreSearchSettingsSecondaryText">Tilpass søkespråk, region med mer</string>
@@ -173,7 +171,7 @@
     <string name="webTrackingProtectionActivityTitle">Beskyttelse mot nettsporing</string>
     <string name="webTrackingProtectionLearnMoreTitle">Beskyttelse mot nettsporing</string>
     <string name="webTrackingProtectionTitle">Nettsporingsbeskyttelse er aktivert</string>
-    <string name="webTrackingProtectionDescription"><![CDATA[DuckDuckGo sporer deg aldri, og vi er opptatt av å beskytte personvernet ditt så godt som mulig. Vi vedlikeholder og utvikler kontinuerlig beskyttelseslag for å holde tritt med nye sporingsmetoder og tilbyr mange beskyttelsestiltak som andre nettlesere ikke har som standard. <u><a href=\"\">Finn ut mer</a><u/>]]></string>
+    <string name="webTrackingProtectionDescription"><![CDATA[Kahf sporer deg aldri, og vi er opptatt av å beskytte personvernet ditt så godt som mulig. Vi vedlikeholder og utvikler kontinuerlig beskyttelseslag for å holde tritt med nye sporingsmetoder og tilbyr mange beskyttelsestiltak som andre nettlesere ikke har som standard. <u><a href=\"\">Finn ut mer</a><u/>]]></string>
 
     <!-- Cookie Pop-Up Protection -->
     <string name="cookiePopupProtectionTitle">Beskyttelse mot popup-vinduer om informasjonskapsler</string>
@@ -208,9 +206,9 @@
     <string name="settingsAutomaticallyClearWhenAppExit60Minutes">når appen lukkes eller har vært inaktiv i 1 time</string>
 
     <!-- About Activity -->
-    <string name="aboutActivityTitle">Om DuckDuckGo</string>
+    <string name="aboutActivityTitle">Om Kahf</string>
     <string name="aboutHeader">Velkommen til «the Duck Side»!</string>
-    <string name="aboutDescription">DuckDuckGo er et uavhengig personvernselskap som ble grunnlagt i 2008, for alle som er lei av å bli sporet på nettet og vil ha en enkel løsning. Vi er beviset på at ekte personvern er mulig på nettet uten å fire på kravene.\n\nDuckDuckGo-nettleseren inneholder funksjonene du kan forvente deg av en vanlig nettleser, som bokmerker, faner, passord og lignende, samt <annotation type="privacy_protection_link">en rekke kraftige personvernfunksjoner</annotation>, som ikke tilbys som standard i de fleste populære nettleserne. Disse usedvanlig omfattende personvernfunksjonene bidrar til å beskytte nettaktivitetene dine, fra søk til surfing, e-poster med mer.\n\nPersonvernfunksjonene fungerer uten at du behøver å kunne noe om de tekniske detaljene eller forholde deg til kompliserte innstillinger. Det eneste du behøver å gjøre, er å bytte nettleser til DuckDuckGo på alle enhetene dine, så får du personvern som standard.\n\nMen hvis du vil ta en titt under panseret, finner du mer informasjon om hvordan DuckDuckGos personvern fungerer på våre <annotation type="learn_more_link">hjelpesider</annotation></string>
+    <string name="aboutDescription">Kahf er et uavhengig personvernselskap som ble grunnlagt i 2008, for alle som er lei av å bli sporet på nettet og vil ha en enkel løsning. Vi er beviset på at ekte personvern er mulig på nettet uten å fire på kravene.\n\nKahf-nettleseren inneholder funksjonene du kan forvente deg av en vanlig nettleser, som bokmerker, faner, passord og lignende, samt <annotation type="privacy_protection_link">en rekke kraftige personvernfunksjoner</annotation>, som ikke tilbys som standard i de fleste populære nettleserne. Disse usedvanlig omfattende personvernfunksjonene bidrar til å beskytte nettaktivitetene dine, fra søk til surfing, e-poster med mer.\n\nPersonvernfunksjonene fungerer uten at du behøver å kunne noe om de tekniske detaljene eller forholde deg til kompliserte innstillinger. Det eneste du behøver å gjøre, er å bytte nettleser til Kahf på alle enhetene dine, så får du personvern som standard.\n\nMen hvis du vil ta en titt under panseret, finner du mer informasjon om hvordan Asils personvern fungerer på våre <annotation type="learn_more_link">hjelpesider</annotation></string>
     <string name="no_suggestions">Ingen forslag</string>
 
     <!-- Broken Site Activity -->
@@ -248,7 +246,7 @@
     <string name="removeAll">Fjern alle</string>
 
     <!-- Widget -->
-    <string name="searchWidgetTextHint">Søk med DuckDuckGo</string>
+    <string name="searchWidgetTextHint">Søk med Kahf</string>
 
     <!-- Favorites widget -->
     <string name="addFavoriteMenuTitleHighlighted">👋 Legg til i favoritter</string>
@@ -273,7 +271,7 @@
     <string name="surveyCtaLaunchButton">Delta i spørreundersøkelsen</string>
     <string name="surveyCtaDismissButton">Nei takk</string>
     <string name="surveyActivityTitle">Spørreundersøkelse</string>
-    <string name="surveyTitle">DuckDuckGo-undersøkelse</string>
+    <string name="surveyTitle">Kahf-undersøkelse</string>
     <string name="surveyDismissContentDescription">Avvis spørreundersøkelsen</string>
     <string name="surveyLoadingErrorTitle">Å nei!</string>
     <string name="surveyLoadingErrorText">Spørreundersøkelsen vår laster ikke for øyeblikket.\nPrøv igjen senere.</string>
@@ -288,14 +286,14 @@
     <string name="addWidgetInstruction1Label">1</string>
     <string name="addWidgetInstruction1">Trykk lenge på startskjermen og åpne deretter widget-menyen.</string>
     <string name="addWidgetInstruction2Label">2</string>
-    <string name="addWidgetInstruction2">Finn DuckDuckGo-widgeten.</string>
+    <string name="addWidgetInstruction2">Finn Kahf-widgeten.</string>
     <string name="addWidgetInstruction3Label">3</string>
     <string name="addWidgetInstruction3">Dra widgeten til startskjermen.</string>
     <string name="addWidgetInstructionsButtonGoHome">Gå til startskjermen</string>
     <string name="addWidgetInstructionsButtonClose">Lukk</string>
 
     <!-- App Enjoyment / Rating / Feedback -->
-    <string name="appEnjoymentDialogTitle">Liker du DuckDuckGo?</string>
+    <string name="appEnjoymentDialogTitle">Liker du Kahf?</string>
     <string name="appEnjoymentDialogMessage">Vi vil gjerne høre hva du mener.</string>
     <string name="appEnjoymentDialogPositiveButton">Jeg liker dette</string>
     <string name="appEnjoymentDialogNegativeButton">Det trengs forbedringer</string>
@@ -317,15 +315,15 @@
 
     <!-- Clear Notification -->
     <string name="clearNotificationTitle">Sletting av data satt til manuell</string>
-    <string name="clearNotificationDescription">Tilpass DuckDuckGo for å slette netthistorikken etter hver økt.</string>
+    <string name="clearNotificationDescription">Tilpass Kahf for å slette netthistorikken etter hver økt.</string>
 
     <!-- Privacy Protection Notification -->
     <string name="privacyProtectionNotificationDefaultTitle">Vi beskytter personvernet ditt</string>
     <string name="privacyProtectionNotificationReportTitle">Din personvernrapport</string>
-    <string name="privacyProtectionNotificationDefaultDescription">Når du bruker DuckDuckGo-appen, beskytter den dataene dine ved å blokkere sporing og kryptere tilkoblinger.</string>
-    <string name="privacyProtectionNotificationUpgadeDescription" instruction="Placeholder is a the number of connections we have protected">Du beskyttet dataene dine ved å sikre %1$d ukrypterte tilkoblinger mens du brukte DuckDuckGo.</string>
-    <string name="privacyProtectionNotificationTrackerDescription" instruction="Placeholder is the numer of trackers blocked">Du beskyttet dataene dine ved å blokkere %1$d sporinger mens du brukte DuckDuckGo.</string>
-    <string name="privacyProtectionNotificationBothDescription" instruction="%1$d is the number of trackers blocked and %2$d is the number of unencrypted connections">Du beskyttet dataene dine ved å blokkere %1$d sporinger og sikre %2$d ukrypterte tilkoblinger mens du brukte DuckDuckGo.</string>
+    <string name="privacyProtectionNotificationDefaultDescription">Når du bruker Kahf-appen, beskytter den dataene dine ved å blokkere sporing og kryptere tilkoblinger.</string>
+    <string name="privacyProtectionNotificationUpgadeDescription" instruction="Placeholder is a the number of connections we have protected">Du beskyttet dataene dine ved å sikre %1$d ukrypterte tilkoblinger mens du brukte Kahf.</string>
+    <string name="privacyProtectionNotificationTrackerDescription" instruction="Placeholder is the numer of trackers blocked">Du beskyttet dataene dine ved å blokkere %1$d sporinger mens du brukte Kahf.</string>
+    <string name="privacyProtectionNotificationBothDescription" instruction="%1$d is the number of trackers blocked and %2$d is the number of unencrypted connections">Du beskyttet dataene dine ved å blokkere %1$d sporinger og sikre %2$d ukrypterte tilkoblinger mens du brukte Kahf.</string>
     <string name="privacyProtectionNotificationLaunchButton">Fortsett å bruke nettleseren</string>
 
     <!-- Authentication -->
@@ -337,7 +335,7 @@
     <string name="authenticationDialogPasswordHint">Passord</string>
 
     <!-- User-facing label for when a user selects text and might want to search for that text -->
-    <string name="systemTextSearchMessage">Søk med DuckDuckGo</string>
+    <string name="systemTextSearchMessage">Søk med Kahf</string>
 
     <!-- App feedback disambiguation -->
     <string name="feedbackActivityTitle">Del tilbakemelding</string>
@@ -356,8 +354,8 @@
     <string name="websiteNotLoadingTitleShort">Problemer med innlasting av nettsteder</string>
     <string name="websiteNotLoadingSubtitle">Hvilket nettsted fungerer ikke?</string>
 
-    <string name="searchNotGoodEnoughTitleLong">DuckDuckGo-søket er ikke bra nok</string>
-    <string name="searchNotGoodEnoughTitleShort">DuckDuckGo-søkeproblemer</string>
+    <string name="searchNotGoodEnoughTitleLong">Kahf-søket er ikke bra nok</string>
+    <string name="searchNotGoodEnoughTitleShort">Kahf-søkeproblemer</string>
     <string name="searchNotGoodEnoughSubtitle">Hvilken søkefunksjon kan vi legge til eller forbedre?</string>
     <string name="searchNotGoodEnoughSubReasonTechnicalSearches">Programmerings- og tekniske søk</string>
     <string name="searchNotGoodEnoughSubReasonGoogleLayout">Layout burde ligne mer på Google</string>
@@ -418,8 +416,8 @@
     <!-- System Search-->
     <string name="systemSearchDeviceAppLabel">Fra denne enheten</string>
     <string name="systemSearchAppNotFound">Programmet ble ikke funnet</string>
-    <string name="systemSearchOnboardingText">Takk for at du valgte DuckDuckGo!\nNår du bruker vårt søk eller app, er søkene dine beskyttet.</string>
-    <string name="systemSearchOnboardingFeaturesIntroText">DuckDuckGo-appen kan også:</string>
+    <string name="systemSearchOnboardingText">Takk for at du valgte Kahf!\nNår du bruker vårt søk eller app, er søkene dine beskyttet.</string>
+    <string name="systemSearchOnboardingFeaturesIntroText">Kahf-appen kan også:</string>
     <string name="systemSearchOnboardingFeatureOneText">Blokkerer utrygge sporere.</string>
     <string name="systemSearchOnboardingFeatureTwoText">Tvinger kryptering av nettsteder.</string>
     <string name="systemSearchOnboardingFeatureThreeText">Sletter data med ett trykk.</string>
@@ -437,7 +435,7 @@
     <string name="daxDialogAppTpRetentionSecondaryButtonText">Ikke nå</string>
 
     <!-- New Onboarding Experience -->
-    <string name="onboardingWelcomeTitle">"Velkommen til DuckDuckGo!"</string>
+    <string name="onboardingWelcomeTitle">"Velkommen til Kahf!"</string>
     <string name="onboardingDaxText"><![CDATA[Internettet kan være ganske skummelt.<br/><br/>Men ikke vær redd! Det er enklere enn du tror å søke og surfe privat.]]></string>
     <string name="onboardingLetsDoItButton">Sett i gang!</string>
     <string name="daxNonSerpCtaText"><![CDATA[Jeg blokkerer irriterende sporere mens du trykker og blar.\n\nDu kan bare fortsette å surfe!]]></string>
@@ -528,7 +526,7 @@
     <string name="dosErrorMessage">Tilkobling avbrutt. Dette nettstedet kan skade enheten din.</string>
 
     <!-- Precise Location -->
-    <string name="preciseLocationSystemDialogTitle">Vil du aktivere posisjonstjenester for DuckDuckGo privatnettleser?</string>
+    <string name="preciseLocationSystemDialogTitle">Vil du aktivere posisjonstjenester for Kahf privatnettleser?</string>
     <string name="preciseLocationSystemDialogSubtitle" instruction="%1$s and %2$s are both the name of the website requesting the location">%1$s ber om tillatelse til å se posisjonen til enheten din. Først må du gi appen tillatelse til å sende enhetens posisjon, deretter kan %2$s be om tillatelse.</string>
     <string name="preciseLocationSystemDialogAllow">Aktiver</string>
     <string name="preciseLocationSystemDialogDeny">Kanskje senere</string>
@@ -540,7 +538,7 @@
     <string name="preciseLocationSiteDialogAllowOnce">Kun for denne økten</string>
     <string name="preciseLocationSiteDialogDenyAlways">Aldri tillat</string>
     <string name="preciseLocationSiteDialogDenyOnce">Ikke tillat for denne økten</string>
-    <string name="preciseLocationFeatureDescription">Nettstedene du besøker kan be om å få tilgang til posisjonen til enheten din. De får ikke tilgang før du eksplisitt gir dem tillatelse. DuckDuckGo bruker kun posisjoner anonymt for å kunne gi deg lokale søkeresultater.</string>
+    <string name="preciseLocationFeatureDescription">Nettstedene du besøker kan be om å få tilgang til posisjonen til enheten din. De får ikke tilgang før du eksplisitt gir dem tillatelse. Kahf bruker kun posisjoner anonymt for å kunne gi deg lokale søkeresultater.</string>
     <string name="preciseLocationToggleText">Nettsteder kan be om posisjonen min</string>
     <string name="preciseLocationEmptyListHint">Ingen nettsider har fått tilgang til posisjon</string>
     <string name="preciseLocationNoSystemPermission">Du må gi denne appen tilgang til posisjon for å administrere posisjonstilgangene du har gitt til enkeltsider.</string>
@@ -556,7 +554,7 @@
 
     <!--  Global Privacy Control-->
     <string name="globalPrivacyControlActivityTitle">Global Privacy Control (GPC)</string>
-    <string name="globalPrivacyControlDescription"><![CDATA[DuckDuckGo blokkerer mange sporere automatisk. Med Global Privacy Control (GPC) kan du også be deltakende nettsteder om å begrense salg eller deling av dine personopplysninger med andre selskaper. <u><a href=\"\">Finn ut mer</a><u/>]]></string>
+    <string name="globalPrivacyControlDescription"><![CDATA[Kahf blokkerer mange sporere automatisk. Med Global Privacy Control (GPC) kan du også be deltakende nettsteder om å begrense salg eller deling av dine personopplysninger med andre selskaper. <u><a href=\"\">Finn ut mer</a><u/>]]></string>
     <string name="globalPrivacyControlSetting">Global Privacy Control (GPC)</string>
     <string name="globalPrivacyControlToggle">Global Privacy Control (GPC)</string>
     <string name="disabled">Deaktivert</string>
@@ -594,14 +592,14 @@
     <string name="settingsAccessibility">Tilgjengelighet</string>
     <string name="accessibilityActivityTitle">Tilgjengelighet</string>
     <string name="accessibilityFontSizeTitle">Tekststørrelse</string>
-    <string name="accessibilityFontSizeHint">Dra glidebryteren til du kan lese dette uten anstrengelse. Nettsteder du ser på i DuckDuckGo, tilpasser seg dette.</string>
+    <string name="accessibilityFontSizeHint">Dra glidebryteren til du kan lese dette uten anstrengelse. Nettsteder du ser på i Kahf, tilpasser seg dette.</string>
     <string name="accessibilityForceZoomTitle">Fremtving manuell side-zoom</string>
     <string name="accessibilityForceZoomSubtitle">Knip og zoom på alle nettsteder, også de som ellers forhindrer det</string>
     <string name="accessibilityTextSizeOverrideTitle">Juster tekststørrelse</string>
-    <string name="accessibilityTextSizeOverrideSubtitle">Tekst på nettsteder du ser på i DuckDuckGo, justeres til innstillingen nedenfor</string>
+    <string name="accessibilityTextSizeOverrideSubtitle">Tekst på nettsteder du ser på i Kahf, justeres til innstillingen nedenfor</string>
 
     <!-- Privacy Policy -->
-    <string name="settingsPrivacyPolicyDuckduckgo">Personvernerklæring</string>
+    <string name="settingsPrivacyPolicyAsil">Personvernerklæring</string>
 
     <!-- Home Screen Widget -->
     <string name="homeScreenWidgetAdded" instruction="Placeholder is the name of the widget">%1$s widget er lagt til på startskjermen</string>
@@ -609,7 +607,7 @@
 
     <!-- MacOs Settings -->
     <string name="macos_settings_description">Surf privat med vår app for Mac</string>
-    <string name="macos_settings_title">DuckDuckGo-nettleser for Mac</string>
+    <string name="macos_settings_title">Kahf-nettleser for Mac</string>
 
     <!-- Downloads -->
     <string name="downloadsMenuItem">Nedlastinger</string>
@@ -671,7 +669,7 @@
     <string name="downloadsNotifyMeSubtitle">Få et varsel når nedlastinger er fullført.</string>
 
     <!-- Windows Settings -->
-    <string name="windows_settings_title">DuckDuckGo-nettleser for Windows</string>
+    <string name="windows_settings_title">Kahf-nettleser for Windows</string>
     <string name="windows_settings_description">Surf privat med vår app for Windows</string>
     <string name="windows_settings_description_ready">Nedlasting tilgjengelig</string>
     <string name="windows_settings_description_list">Du er satt på listen!</string>
@@ -686,7 +684,7 @@
     <string name="closeAppTabsConfirmationDialogClose">Lukk</string>
 
     <!-- Private voice search -->
-    <string name="accessibilityVoiceSearchSubtitle">Legg til alternativet privat talesøk i adressefeltet. Lydopptakene verken lagres eller deles med noen, inkludert DuckDuckGo.</string>
+    <string name="accessibilityVoiceSearchSubtitle">Legg til alternativet privat talesøk i adressefeltet. Lydopptakene verken lagres eller deles med noen, inkludert Kahf.</string>
     <string name="accessibilityVoiceSearchTitle">Privat talesøk</string>
 
     <!-- Uploading an image from the camera or choosing to use existing image -->
@@ -694,8 +692,8 @@
     <string name="imageCaptureCameraGalleryDisambiguationTitle">Last opp et bilde</string>
     <string name="imageCaptureCameraGalleryDisambiguationGalleryOption">Velg fil</string>
     <string name="imageCaptureCameraGalleryDisambiguationCameraOption">Ta bilde</string>
-    <string name="imageCaptureCameraPermissionDeniedTitle">Tillat DuckDuckGo å be om kameratilgang på denne enheten</string>
-    <string name="imageCaptureCameraPermissionDeniedMessage">Nettsteder kan bare bruke kameraet ditt hvis du lar DuckDuckGo be om tilgang.</string>
+    <string name="imageCaptureCameraPermissionDeniedTitle">Tillat Kahf å be om kameratilgang på denne enheten</string>
+    <string name="imageCaptureCameraPermissionDeniedMessage">Nettsteder kan bare bruke kameraet ditt hvis du lar Kahf be om tilgang.</string>
     <string name="imageCaptureCameraPermissionDeniedPositiveButton">Åpne innstillinger</string>
     <string name="imageCaptureCameraPermissionDeniedNegativeButton">Avbryt</string>
 
@@ -705,15 +703,15 @@
     <string name="autofillLoginUpdatedSnackbarMessage">Passordet er oppdatert</string>
 
     <!-- Custom Tab -->
-    <string name="openInDdgMenuItemTitle">Åpne i DuckDuckGo</string>
-    <string name="runningInDdgMenuItemTitle">Kjører i DuckDuckGo</string>
+    <string name="openInDdgMenuItemTitle">Åpne i Kahf</string>
+    <string name="runningInDdgMenuItemTitle">Kjører i Kahf</string>
 
     <!-- SSL Error -->
     <string name="sslErrorTitle">Advarsel: Dette nettstedet kan være usikkert</string>
     <string name="sslErrorHeadline" instruction="Placeholder is domain with certificate issues">Sertifikatet for dette nettstedet er ugyldig. Det kan være du er koblet til en server som utgir seg for å være %1$s, noe som kan sette konfidensiell informasjon i fare.</string>
     <string name="sslErrorLeaveCTA">Forlat dette nettstedet</string>
     <string name="sslErrorAdvancedCTA">Avansert</string>
-    <string name="sslErrorExpandedHeadline">DuckDuckGo advarer deg når et nettsted har et ugyldig sertifikat.</string>
+    <string name="sslErrorExpandedHeadline">Kahf advarer deg når et nettsted har et ugyldig sertifikat.</string>
     <string name="sslErrorExpandedCTA"><![CDATA[<u>Godta risikoen og gå til nettstedet<u/>]]></string>
     <string name="sslErrorExpiredMessage" instruction="Placeholder is domain with certificate issues">Sikkerhetssertifikatet for %1$s er utløpt. Det er mulig at nettstedet er feilkonfigurert, at en angriper har kompromittert forbindelsen eller at systemklokken din er feil.</string>
     <string name="sslErrorWrongHostMessage" instruction="Placeholder is domain with certificate issues">Sikkerhetssertifikatet for %1$s samsvarer ikke med *.%2$s. Det er mulig at nettstedet er feilkonfigurert, at en angriper har kompromittert tilkoblingen eller at systemklokken din er feil.</string>
@@ -732,7 +730,7 @@
     <string name="preOnboardingDaxDialog3Title">Fantastisk! Velkommen til the duck side.</string>
     <string name="preOnboardingDaxDialog3Button">Begynn å surfe</string>
     <string name="onboardingSearchDaxDialogTitle">Prøv et søk!</string>
-    <string name="onboardingSearchDaxDialogDescription">DuckDuckGo-søkene dine er alltid anonyme.</string>
+    <string name="onboardingSearchDaxDialogDescription">Kahf-søkene dine er alltid anonyme.</string>
     <string name="onboardingSearchDaxDialogOption1" instruction="translate &apos;duck&apos; too.">hva heter «and» på engelsk</string>
     <string name="onboardingSearchDaxDialogOption1English" instruction="translate &apos;duck&apos; too. Don&apos;t add question mark">hvordan si «duck» på spansk</string>
     <string name="onboardingSearchQueryOption1">hva heter and på engelsk</string>
@@ -749,12 +747,45 @@
     <string name="onboardingSitesDaxDialogOption2">yahoo.com</string>
     <string name="onboardingSitesDaxDialogOption3">ebay.com</string>
     <string name="onboardingSitesDaxDialogOption4">Overrask meg!</string>
-    <string name="onboardingSerpDaxDialogDescription">Det er DuckDuckGo Search. Privat. Raskt. Færre annonser.</string>
+    <string name="onboardingSerpDaxDialogDescription">Det er Kahf Search. Privat. Raskt. Færre annonser.</string>
     <string name="onboardingSerpDaxDialogButton">Skjønner!</string>
     <string name="onboardingSitesSuggestionsDaxDialogTitle">Nå kan du prøve å besøke et nettsted!</string>
     <plurals name="onboardingTrackersBlockedDialogDescription">
         <item quantity="one"><![CDATA[ og <b>%1$d andre</b> prøvde å spore deg her. Jeg blokkerte dem!<br/><br/>☝️ Trykk på skjoldet for mer informasjon.️]]></item>
         <item quantity="other"><![CDATA[ og <b>%1$d andre</b> prøvde å spore deg her. Jeg blokkerte dem!<br/><br/>☝️ Trykk på skjoldet for mer informasjon.️]]></item>
+    </plurals>
+    <string name="safegaze_popup_report_title">Vennligst rapporter eventuelle feil eller forslag via dette skjemaet</string>
+    <string name="safegaze_popup_support_title">Støtt dette prosjektet</string>
+    <string name="safegaze_popup_woman_title">Jeg er kvinne</string>
+    <string name="safegaze_popup_man_title">Jeg er mann</string>
+    <string name="safegaze_popup_comingsoon_title">Kommer snart</string>
+    <string name="safegaze_popup_gendermode_title">Kjønnsmodus</string>
+    <string name="safegaze_popup_sinfulacts_title">Syndige handlinger unngått</string>
+    <string name="safegaze_popup_thispage_title">Denne siden</string>
+    <string name="safegaze_popup_lifetime_title">Levetid</string>
+    <string name="safegaze_popup_alwayspurify_title">Alltid rense</string>
+    <string name="safegaze_popup_neverpurify_title">Aldri rense</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Bilde uskarphet intensitet</string>
+    <string name="safegaze_popup_takecontrol_title">Forbedre din online opplevelse med SafeGaze, vår bilde rensende utvidelse som beskytter ditt syn mot upassende innhold.</string>
+    <string name="safegaze_popup_turnon_title">Slå på SafeGaze</string>
+
+
+    <!-- Bookmarks -->
+    <string name="searchBookmarks">Søk i bokmerker</string>
+    <string name="deleteFolder" instruction="%1$s is the folder name">"Vil du slette %1$s?"</string>
+    <string name="deleteBookmark" instruction="%1$s is the bookmark name">"Vil du slette %1$s-bokmerket?"</string>
+    <string name="bookmarkAddedInBookmarks" instruction="%1$s is the folder name">Bokmerket er lagt til i %1$s</string>
+    <string name="addToFavorites">Legg til i favoritter</string>
+    <string name="editBookmark">Rediger bokmerke</string>
+    <string name="importBookmarksDescription">Hvis bokmerkene dine er lagret i en annen nettleser, kan\ndu importere dem til Kahf.</string>
+    <string name="importBookmarks">Importer bokmerker</string>
+    <string name="noResultsFor" instruction="%1$s is the search term">Ingen resultater for «%1$s»</string>
+    <string name="removeFromFavorites">Fjern fra favoritter</string>
+    <string name="addToFavoritesMenu">Legg til i favoritter</string>
+    <plurals name="bookmarkFolderDeleteMessage">
+        <item quantity="one">Er du sikker på at du vil slette denne mappen og %1$d element?</item>
+        <item quantity="other">Er du sikker på at du vil slette denne mappen og %1$d elementer?</item>
     </plurals>
     <plurals name="onboardingTrackersBlockedZeroDialogDescription" tools:ignore="ImpliedQuantity">
         <item quantity="one"><![CDATA[ prøvde å spore deg her. Jeg blokkerte dem!<br/><br/>☝️ Trykk på skjoldet for mer info.️]]></item>

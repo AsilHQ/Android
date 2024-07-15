@@ -52,6 +52,7 @@ import com.duckduckgo.app.browser.urlextraction.DOMUrlExtractor
 import com.duckduckgo.app.browser.urlextraction.JsUrlExtractor
 import com.duckduckgo.app.browser.urlextraction.UrlExtractingWebViewClient
 import com.duckduckgo.app.di.AppCoroutineScope
+import com.duckduckgo.app.dns.CustomDnsResolver
 import com.duckduckgo.app.fire.*
 import com.duckduckgo.app.fire.fireproofwebsite.data.FireproofWebsiteRepository
 import com.duckduckgo.app.global.db.AppDatabase
@@ -61,6 +62,8 @@ import com.duckduckgo.app.global.install.AppInstallStore
 import com.duckduckgo.app.lifecycle.MainProcessLifecycleObserver
 import com.duckduckgo.app.privacy.db.PrivacyProtectionCountDao
 import com.duckduckgo.app.referral.AppReferrerDataStore
+import com.duckduckgo.app.safegaze.genderdetection.GenderDetector
+import com.duckduckgo.app.safegaze.nsfwdetection.NsfwDetector
 import com.duckduckgo.app.settings.db.SettingsDataStore
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.app.statistics.store.StatisticsDataStore
@@ -92,6 +95,7 @@ import dagger.SingleInstanceIn
 import dagger.multibindings.IntoSet
 import javax.inject.Named
 import kotlinx.coroutines.CoroutineScope
+import timber.log.Timber
 
 @Module
 class BrowserModule {
@@ -336,5 +340,23 @@ class BrowserModule {
     @SingleInstanceIn(AppScope::class)
     fun providesMediaPlaybackDao(mediaPlaybackDatabase: MediaPlaybackDatabase): MediaPlaybackDao {
         return mediaPlaybackDatabase.mediaPlaybackDao()
+    }
+
+    @Provides
+    @SingleInstanceIn(AppScope::class)
+    fun providesDnsResolver(dispatcherProvider: DispatcherProvider): CustomDnsResolver {
+        return CustomDnsResolver(dispatcherProvider)
+    }
+
+    @Provides
+    @SingleInstanceIn(AppScope::class)
+    fun providesNsfwDetector(context: Context): NsfwDetector {
+        return NsfwDetector(context)
+    }
+
+    @Provides
+    @SingleInstanceIn(AppScope::class)
+    fun providesGenderDetector(context: Context): GenderDetector {
+        return GenderDetector(context)
     }
 }

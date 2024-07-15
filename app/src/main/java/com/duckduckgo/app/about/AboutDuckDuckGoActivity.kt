@@ -44,9 +44,9 @@ import com.duckduckgo.di.scopes.ActivityScope
 import com.duckduckgo.mobile.android.R.attr
 import com.duckduckgo.navigation.api.GlobalActivityStarter
 import com.google.android.material.snackbar.Snackbar
-import javax.inject.Inject
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
 @InjectWith(ActivityScope::class)
 @ContributeToActivityStarter(AboutScreenNoParams::class)
@@ -203,7 +203,7 @@ class AboutDuckDuckGoActivity : DuckDuckGoActivity() {
             this,
             WebViewActivityWithParams(
                 url = PRIVACY_POLICY_WEB_LINK,
-                screenTitle = getString(R.string.settingsPrivacyPolicyDuckduckgo),
+                screenTitle = getString(R.string.settingsPrivacyPolicyAsil),
             ),
         )
     }
@@ -213,7 +213,7 @@ class AboutDuckDuckGoActivity : DuckDuckGoActivity() {
             this,
             WebViewActivityWithParams(
                 url = PRIVACY_PROTECTIONS_WEB_LINK,
-                screenTitle = getString(R.string.settingsAboutDuckduckgo),
+                screenTitle = getString(R.string.settingsAboutAsil),
             ),
         )
     }
@@ -225,7 +225,7 @@ class AboutDuckDuckGoActivity : DuckDuckGoActivity() {
     companion object {
         private const val PRIVACY_PROTECTION_ANNOTATION = "privacy_protection_link"
         private const val LEARN_MORE_ANNOTATION = "learn_more_link"
-        private const val PRIVACY_POLICY_WEB_LINK = "https://duckduckgo.com/privacy"
-        private const val PRIVACY_PROTECTIONS_WEB_LINK = "https://duckduckgo.com/duckduckgo-help-pages/privacy/web-tracking-protections/"
+        private const val PRIVACY_POLICY_WEB_LINK = "https://asil.co/privacy"
+        private const val PRIVACY_PROTECTIONS_WEB_LINK = "https://asil.co/asil-help-pages/privacy/web-tracking-protections/"
     }
 }

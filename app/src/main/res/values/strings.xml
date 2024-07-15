@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (c) 2022 DuckDuckGo
+  ~ Copyright (c) 2023 Kahf
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 <!-- smartling.entity_escaping = false -->
 <!-- smartling.instruction_attributes = instruction -->
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="appName" translatable="false">DuckDuckGo</string>
-    <string name="appDescription" translatable="false">DuckDuckGo</string>
-    <string name="duckDuckGoLogoDescription">DuckDuckGo logo</string>
-    <string name="duckDuckGoPrivacySimplified">Privacy, simplified</string>
+    <string name="appName" translatable="false">Kahf Browser</string>
+    <string name="appDescription" translatable="false">Kahf Browser</string>
+    <string name="asilLogoDescription">Kahf logo</string>
+    <string name="asilPrivacySimplified">Privacy, simplified</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="open">Open</string>
@@ -27,8 +27,8 @@
     <string name="search">Search</string>
 
     <!-- Onboarding Activity -->
-    <string name="onboardingDefaultBrowserDescription">Visit Settings to search and browse with DuckDuckGo every time.</string>
-    <string name="onboardingDefaultBrowserTitle">Make DuckDuckGo your default</string>
+    <string name="onboardingDefaultBrowserDescription">Visit Settings to search and browse with Kahf every time.</string>
+    <string name="onboardingDefaultBrowserTitle">Make Kahf your default</string>
 
     <!-- Default Browser -->
     <string name="cannotLaunchDefaultAppSettings">Can\'t launch default app settings screen</string>
@@ -36,7 +36,7 @@
     <string name="defaultBrowserMaybeLater">Maybe Later</string>
     <string name="defaultBrowserLetsDoIt">Set as Default Browser</string>
     <string name="defaultBrowserDescriptionNoDefault">Open links with peace of mind, every time.</string>
-    <string name="defaultBrowserInstructions">Select DuckDuckGo and tap <font color='#678fff'>Always</font>.</string>
+    <string name="defaultBrowserInstructions">Select Kahf and tap <font color='#678fff'>Always</font>.</string>
 
     <!-- Browser Activity -->
     <string name="browserPopupMenu">Browser menu</string>
@@ -89,11 +89,11 @@
     <!-- Opening external apps -->
     <string name="openExternalApp">Open External App</string>
     <string name="launchingExternalApp">Open in another app</string>
-    <string name="confirmOpenExternalApp">Would you like to leave DuckDuckGo to view this content?</string>
+    <string name="confirmOpenExternalApp">Would you like to leave Kahf to view this content?</string>
     <string name="unableToOpenLink">Unable to open this type of link</string>
 
     <!-- Tabs -->
-    <string name="homeTab" translatable="false">DuckDuckGo</string>
+    <string name="homeTab" translatable="false">Kahf</string>
     <string name="tabActivityTitle">Tabs</string>
     <string name="tabsMenuItem">Tabs</string>
     <string name="newTabMenuItem">New Tab</string>
@@ -121,12 +121,12 @@
     <string name="settingsHeadingAppearance">Appearance</string>
     <string name="settingsHeadingCustomize">Customize</string>
     <string name="settingsHeadingAbout">About</string>
-    <string name="settingsAboutDuckduckgo">About DuckDuckGo</string>
+    <string name="settingsAboutAsil">About Kahf</string>
     <string name="settingsVersion">Version</string>
     <string name="leaveFeedback">Share Feedback</string>
     <string name="settingsEmailProtectionTitle">Email Protection</string>
     <string name="settingsEmailProtectionSubtitle">Block email trackers and hide your address</string>
-    <string name="settingsHeadingMore">More From DuckDuckGo</string>
+    <string name="settingsHeadingMore">More From Kahf</string>
     <string name="settingsLightTheme">Light</string>
     <string name="settingsTheme">Theme</string>
     <string name="settingsDarkTheme">Dark</string>
@@ -141,8 +141,8 @@
     <string name="settingsSubtitleNotificationsDisabled">Disabled</string>
     <string name="settingsSubtitleNotificationsEnabled">Enabled</string>
     <string name="settingsDefaultBrowserTitle">Default Browser</string>
-    <string name="settingsDefaultBrowserSetDescription">DuckDuckGo is your default browser</string>
-    <string name="settingsDefaultBrowserNotSetDescription">Make DuckDuckGo your default browser</string>
+    <string name="settingsDefaultBrowserSetDescription">Kahf is your default browser</string>
+    <string name="settingsDefaultBrowserNotSetDescription">Make Kahf your default browser</string>
     <string name="settingsPrivateSearchTitle">Private Search</string>
     <string name="settingsPrivateSearchDescription">Enabled by default</string>
     <string name="settingsWebTrackingProtectionTitle">Web Tracking Protection</string>
@@ -155,7 +155,7 @@
     <!-- Private Search -->
     <string name="privateSearchActivityTitle">Private Search</string>
     <string name="privateSearchTitle">Private Search is Enabled</string>
-    <string name="privateSearchDescription">DuckDuckGo Private Search is your default search engine, so you can search the web without being tracked.</string>
+    <string name="privateSearchDescription">Kahf Private Search is your default search engine, so you can search the web without being tracked.</string>
     <string name="privateSearchHeadingSearchSettings">Search Settings</string>
     <string name="privateSearchMoreSearchSettingsPrimaryText">More Search Settings</string>
     <string name="privateSearchMoreSearchSettingsSecondaryText">Customize your search language, region, and more</string>
@@ -172,7 +172,7 @@
     <string name="webTrackingProtectionActivityTitle">Web Tracking Protection</string>
     <string name="webTrackingProtectionLearnMoreTitle">Web Tracking Protection</string>
     <string name="webTrackingProtectionTitle">Web Tracking Protection is Enabled</string>
-    <string name="webTrackingProtectionDescription"><![CDATA[DuckDuckGo never tracks you and we aim to protect your privacy as much as possible. We continually maintain and develop layers of protection to keep up with new tracking methods and provide many protections that other browsers don’t offer by default. <u><a href="">Learn More</a><u/>]]></string>
+    <string name="webTrackingProtectionDescription"><![CDATA[Kahf never tracks you and we aim to protect your privacy as much as possible. We continually maintain and develop layers of protection to keep up with new tracking methods and provide many protections that other browsers don’t offer by default. <u><a href="">Learn More</a><u/>]]></string>
 
     <!-- Cookie Pop-Up Protection -->
     <string name="cookiePopupProtectionTitle">Cookie Pop-Up Protection</string>
@@ -207,9 +207,9 @@
     <string name="settingsAutomaticallyClearWhenAppExit60Minutes">App exit, inactive for 1 hour</string>
 
     <!-- About Activity -->
-    <string name="aboutActivityTitle">About DuckDuckGo</string>
-    <string name="aboutHeader">Welcome to the Duck Side!</string>
-    <string name="aboutDescription">DuckDuckGo is the independent Internet privacy company founded in 2008 for anyone who’s tired of being tracked online and wants an easy solution. We’re proof you can get real privacy protection online without tradeoffs.\n\nThe DuckDuckGo browser comes with the features you expect from a go-to browser, like bookmarks, tabs, passwords, and more, plus over <annotation type="privacy_protection_link">a dozen powerful privacy protections</annotation> not offered in most popular browsers by default. This uniquely comprehensive set of privacy protections helps protect your online activities, from searching to browsing, emailing, and more.\n\nOur privacy protections work without having to know anything about the technical details or deal with complicated settings. All you have to do is switch your browser to DuckDuckGo across all your devices and you get privacy by default.\n\nBut if you do want a peek under the hood, you can find more information about how DuckDuckGo privacy protections work on our <annotation type="learn_more_link">help pages</annotation></string>
+    <string name="aboutActivityTitle">About Kahf</string>
+    <string name="aboutHeader">Welcome to the Kahf!</string>
+    <string name="aboutDescription">Kahf is the independent Internet privacy company founded in 2008 for anyone who’s tired of being tracked online and wants an easy solution. We’re proof you can get real privacy protection online without tradeoffs.\n\nThe Kahf browser comes with the features you expect from a go-to browser, like bookmarks, tabs, passwords, and more, plus over <annotation type="privacy_protection_link">a dozen powerful privacy protections</annotation> not offered in most popular browsers by default. This uniquely comprehensive set of privacy protections helps protect your online activities, from searching to browsing, emailing, and more.\n\nOur privacy protections work without having to know anything about the technical details or deal with complicated settings. All you have to do is switch your browser to Kahf across all your devices and you get privacy by default.\n\nBut if you do want a peek under the hood, you can find more information about how Kahf privacy protections work on our <annotation type="learn_more_link">help pages</annotation></string>
     <string name="no_suggestions">No Suggestions</string>
 
     <!-- Broken Site Activity -->
@@ -247,7 +247,7 @@
     <string name="removeAll">Remove All</string>
 
     <!-- Widget -->
-    <string name="searchWidgetTextHint">Search DuckDuckGo</string>
+    <string name="searchWidgetTextHint">Search Kahf</string>
 
     <!-- Favorites widget -->
     <string name="addFavoriteMenuTitleHighlighted">👋 Add Favorite</string>
@@ -272,7 +272,7 @@
     <string name="surveyCtaLaunchButton">Take the Survey</string>
     <string name="surveyCtaDismissButton">No Thanks</string>
     <string name="surveyActivityTitle">User Survey</string>
-    <string name="surveyTitle">DuckDuckGo Survey</string>
+    <string name="surveyTitle">Kahf Survey</string>
     <string name="surveyDismissContentDescription">Dismiss survey</string>
     <string name="surveyLoadingErrorTitle">Oh no!</string>
     <string name="surveyLoadingErrorText">Our survey is not currently loading.\nPlease try again later.</string>
@@ -287,14 +287,14 @@
     <string name="addWidgetInstruction1Label">1</string>
     <string name="addWidgetInstruction1">Long-press your home screen, then open the widgets menu.</string>
     <string name="addWidgetInstruction2Label">2</string>
-    <string name="addWidgetInstruction2">Find the DuckDuckGo widget.</string>
+    <string name="addWidgetInstruction2">Find the Kahf widget.</string>
     <string name="addWidgetInstruction3Label">3</string>
     <string name="addWidgetInstruction3">Drag the widget to your home screen.</string>
     <string name="addWidgetInstructionsButtonGoHome">Go to Home Screen</string>
     <string name="addWidgetInstructionsButtonClose">Close</string>
 
     <!-- App Enjoyment / Rating / Feedback -->
-    <string name="appEnjoymentDialogTitle">Enjoying DuckDuckGo?</string>
+    <string name="appEnjoymentDialogTitle">Enjoying Kahf?</string>
     <string name="appEnjoymentDialogMessage">We\'d love to know what you think.</string>
     <string name="appEnjoymentDialogPositiveButton">I Like It</string>
     <string name="appEnjoymentDialogNegativeButton">It Needs Work</string>
@@ -316,15 +316,15 @@
 
     <!-- Clear Notification -->
     <string name="clearNotificationTitle">Data clearing set to manual</string>
-    <string name="clearNotificationDescription">Customize DuckDuckGo to automatically clear browsing data after every session.</string>
+    <string name="clearNotificationDescription">Customize Kahf to automatically clear browsing data after every session.</string>
 
     <!-- Privacy Protection Notification -->
     <string name="privacyProtectionNotificationDefaultTitle">We\'re protecting your privacy</string>
     <string name="privacyProtectionNotificationReportTitle">Your Privacy Report</string>
-    <string name="privacyProtectionNotificationDefaultDescription">Using the DuckDuckGo app protects your data by blocking trackers and encrypting connections.</string>
-    <string name="privacyProtectionNotificationUpgadeDescription" instruction="Placeholder is a the number of connections we have protected">You protected your data by securing %1$d unencrypted connections while using DuckDuckGo.</string>
-    <string name="privacyProtectionNotificationTrackerDescription" instruction="Placeholder is the numer of trackers blocked">You protected your data by blocking %1$d trackers while using DuckDuckGo.</string>
-    <string name="privacyProtectionNotificationBothDescription" instruction="%1$d is the number of trackers blocked and %2$d is the number of unencrypted connections">You protected your data by blocking %1$d trackers and securing %2$d unencrypted connections while using DuckDuckGo.</string>
+    <string name="privacyProtectionNotificationDefaultDescription">Using the Kahf app protects your data by blocking trackers and encrypting connections.</string>
+    <string name="privacyProtectionNotificationUpgadeDescription" instruction="Placeholder is a the number of connections we have protected">You protected your data by securing %1$d unencrypted connections while using Kahf.</string>
+    <string name="privacyProtectionNotificationTrackerDescription" instruction="Placeholder is the numer of trackers blocked">You protected your data by blocking %1$d trackers while using Kahf.</string>
+    <string name="privacyProtectionNotificationBothDescription" instruction="%1$d is the number of trackers blocked and %2$d is the number of unencrypted connections">You protected your data by blocking %1$d trackers and securing %2$d unencrypted connections while using Kahf.</string>
     <string name="privacyProtectionNotificationLaunchButton">Resume Browsing</string>
 
     <!-- Authentication -->
@@ -336,7 +336,7 @@
     <string name="authenticationDialogPasswordHint">Password</string>
 
     <!-- User-facing label for when a user selects text and might want to search for that text -->
-    <string name="systemTextSearchMessage">Search DuckDuckGo</string>
+    <string name="systemTextSearchMessage">Search Kahf</string>
 
     <!-- App feedback disambiguation -->
     <string name="feedbackActivityTitle">Share Feedback</string>
@@ -355,8 +355,8 @@
     <string name="websiteNotLoadingTitleShort">Website loading issues</string>
     <string name="websiteNotLoadingSubtitle">Which website is broken?</string>
 
-    <string name="searchNotGoodEnoughTitleLong">DuckDuckGo search isn\'t good enough</string>
-    <string name="searchNotGoodEnoughTitleShort">DuckDuckGo Search Issues</string>
+    <string name="searchNotGoodEnoughTitleLong">Kahf search isn\'t good enough</string>
+    <string name="searchNotGoodEnoughTitleShort">Kahf Search Issues</string>
     <string name="searchNotGoodEnoughSubtitle">Which search feature can we add or improve?</string>
     <string name="searchNotGoodEnoughSubReasonTechnicalSearches">Programming/technical search</string>
     <string name="searchNotGoodEnoughSubReasonGoogleLayout">The layout should be more like Google</string>
@@ -417,8 +417,8 @@
     <!-- System Search-->
     <string name="systemSearchDeviceAppLabel">From this device</string>
     <string name="systemSearchAppNotFound">Application could not be found</string>
-    <string name="systemSearchOnboardingText">Thanks for choosing DuckDuckGo!\nNow, when using our search or app, your searches are protected.</string>
-    <string name="systemSearchOnboardingFeaturesIntroText">The DuckDuckGo app also:</string>
+    <string name="systemSearchOnboardingText">Thanks for choosing Kahf!\nNow, when using our search or app, your searches are protected.</string>
+    <string name="systemSearchOnboardingFeaturesIntroText">The Kahf app also:</string>
     <string name="systemSearchOnboardingFeatureOneText">Blocks unsafe trackers.</string>
     <string name="systemSearchOnboardingFeatureTwoText">Forces encryption on websites.</string>
     <string name="systemSearchOnboardingFeatureThreeText">Clears data with one tap.</string>
@@ -436,7 +436,7 @@
     <string name="daxDialogAppTpRetentionSecondaryButtonText">Not Now</string>
 
     <!-- New Onboarding Experience -->
-    <string name="onboardingWelcomeTitle">"Welcome to DuckDuckGo!"</string>
+    <string name="onboardingWelcomeTitle">"Welcome to Kahf!"</string>
     <string name="onboardingDaxText"><![CDATA[The Internet can be kinda creepy.<br/><br/>Not to worry! Searching and browsing privately is easier than you think.]]></string>
     <string name="onboardingLetsDoItButton">Let\'s Do It!</string>
     <string name="daxNonSerpCtaText"><![CDATA[As you tap and scroll, I\'ll block pesky trackers. <br/><br/>Go ahead — keep browsing!]]></string>
@@ -444,6 +444,7 @@
     <string name="daxMainNetworkOwnedCtaText" instruction="%1$s is the name of a company, %2$s is the website where the tracking is happening, %3$s is the name of the company showing in %1$s">Heads up! Since %1$s owns %2$s, I can\'t stop them from seeing your activity here.&lt;br/&gt;&lt;br/&gt;But browse with me, and I can reduce what %3$s knows about you overall by blocking their trackers on lots of other sites.</string>
 
     <!-- Download Confirmation -->
+    <string name="downloadConfirmationContinue">Save to downloads</string>
     <string name="downloadConfirmationSaveFileTitle" instruction="Placeholder is the name of a file">Save %1$s</string>
     <string name="downloadConfirmationKeepBothFilesText">Keep both</string>
     <string name="downloadConfirmationReplaceOldFileText">Replace</string>
@@ -527,7 +528,7 @@
     <string name="dosErrorMessage">Connection aborted. This website could be harmful to your device.</string>
 
     <!-- Precise Location -->
-    <string name="preciseLocationSystemDialogTitle">Enable device location for DuckDuckGo Privacy Browser?</string>
+    <string name="preciseLocationSystemDialogTitle">Enable device location for Kahf Privacy Browser?</string>
     <string name="preciseLocationSystemDialogSubtitle" instruction="%1$s and %2$s are both the name of the website requesting the location">%1$s is requesting your device location. You\'ll first need to allow the app to send your device location, then %2$s can ask permission.</string>
     <string name="preciseLocationSystemDialogAllow">Enable</string>
     <string name="preciseLocationSystemDialogDeny">Maybe Later</string>
@@ -539,7 +540,7 @@
     <string name="preciseLocationSiteDialogAllowOnce">Only for This Session</string>
     <string name="preciseLocationSiteDialogDenyAlways">Deny Always</string>
     <string name="preciseLocationSiteDialogDenyOnce">Deny for This Session</string>
-    <string name="preciseLocationFeatureDescription">Sites you visit may ask to know your device location. They won\'t be able to access it until you explicitly grant permission. DuckDuckGo only uses your location anonymously to deliver local search results.</string>
+    <string name="preciseLocationFeatureDescription">Sites you visit may ask to know your device location. They won\'t be able to access it until you explicitly grant permission. Kahf only uses your location anonymously to deliver local search results.</string>
     <string name="preciseLocationToggleText">Sites Can Ask for My Location</string>
     <string name="preciseLocationEmptyListHint">No websites granted permission to access location</string>
     <string name="preciseLocationNoSystemPermission">To manage the location access permissions you\’ve granted to individual sites, enable location for this app in Android Settings.</string>
@@ -555,7 +556,7 @@
 
     <!--  Global Privacy Control-->
     <string name="globalPrivacyControlActivityTitle">Global Privacy Control (GPC)</string>
-    <string name="globalPrivacyControlDescription"><![CDATA[DuckDuckGo automatically blocks many trackers. With Global Privacy Control (GPC), you can also ask participating websites to restrict selling or sharing your personal data with other companies. <u><a href="">Learn More</a><u/>]]></string>
+    <string name="globalPrivacyControlDescription"><![CDATA[Kahf automatically blocks many trackers. With Global Privacy Control (GPC), you can also ask participating websites to restrict selling or sharing your personal data with other companies. <u><a href="">Learn More</a><u/>]]></string>
     <string name="globalPrivacyControlSetting">Global Privacy Control (GPC)</string>
     <string name="globalPrivacyControlToggle">Global Privacy Control (GPC)</string>
     <string name="disabled">Disabled</string>
@@ -593,14 +594,14 @@
     <string name="settingsAccessibility">Accessibility</string>
     <string name="accessibilityActivityTitle">Accessibility</string>
     <string name="accessibilityFontSizeTitle">Text size</string>
-    <string name="accessibilityFontSizeHint">Drag the slider until you can read this comfortably. Websites you view in DuckDuckGo will adjust to it.</string>
+    <string name="accessibilityFontSizeHint">Drag the slider until you can read this comfortably. Websites you view in Kahf will adjust to it.</string>
     <string name="accessibilityForceZoomTitle">Enforce manual page zoom</string>
     <string name="accessibilityForceZoomSubtitle">Pinch and zoom on any site, even those that would otherwise prevent it</string>
     <string name="accessibilityTextSizeOverrideTitle">Manage text size</string>
-    <string name="accessibilityTextSizeOverrideSubtitle">Text on websites you view in DuckDuckGo will adjust to match the setting below</string>
+    <string name="accessibilityTextSizeOverrideSubtitle">Text on websites you view in Kahf will adjust to match the setting below</string>
 
     <!-- Privacy Policy -->
-    <string name="settingsPrivacyPolicyDuckduckgo">Privacy Policy</string>
+    <string name="settingsPrivacyPolicyAsil">Privacy Policy</string>
 
     <!-- Home Screen Widget -->
     <string name="homeScreenWidgetAdded" instruction="Placeholder is the name of the widget">%1$s widget added to home screen</string>
@@ -608,7 +609,7 @@
 
     <!-- MacOs Settings -->
     <string name="macos_settings_description">Browse privately with our app for Mac</string>
-    <string name="macos_settings_title">DuckDuckGo Mac Browser</string>
+    <string name="macos_settings_title">Kahf Mac Browser</string>
 
     <!-- Downloads -->
     <string name="downloadsMenuItem">Downloads</string>
@@ -670,7 +671,7 @@
     <string name="downloadsNotifyMeSubtitle">Get a notification when downloads complete.</string>
 
     <!-- Windows Settings -->
-    <string name="windows_settings_title">DuckDuckGo Windows Browser</string>
+    <string name="windows_settings_title">Kahf Windows Browser</string>
     <string name="windows_settings_description">Browse privately with our app for Windows</string>
     <string name="windows_settings_description_ready">Download available</string>
     <string name="windows_settings_description_list">You\'re on the list!</string>
@@ -685,7 +686,7 @@
     <string name="closeAppTabsConfirmationDialogClose">Close</string>
 
     <!-- Private voice search -->
-    <string name="accessibilityVoiceSearchSubtitle">Add Private Voice Search option to the address bar. Audio is not stored or shared with anyone, including DuckDuckGo.</string>
+    <string name="accessibilityVoiceSearchSubtitle">Add Private Voice Search option to the address bar. Audio is not stored or shared with anyone, including Kahf.</string>
     <string name="accessibilityVoiceSearchTitle">Private Voice Search</string>
 
     <!-- Uploading an image from the camera or choosing to use existing image -->
@@ -693,8 +694,8 @@
     <string name="imageCaptureCameraGalleryDisambiguationTitle">Upload an image</string>
     <string name="imageCaptureCameraGalleryDisambiguationGalleryOption">Choose File</string>
     <string name="imageCaptureCameraGalleryDisambiguationCameraOption">Take Photo</string>
-    <string name="imageCaptureCameraPermissionDeniedTitle">Allow DuckDuckGo to ask for camera access on this device</string>
-    <string name="imageCaptureCameraPermissionDeniedMessage">Sites can only use your camera if you allow DuckDuckGo to ask for access.</string>
+    <string name="imageCaptureCameraPermissionDeniedTitle">Allow Kahf to ask for camera access on this device</string>
+    <string name="imageCaptureCameraPermissionDeniedMessage">Sites can only use your camera if you allow Kahf to ask for access.</string>
     <string name="imageCaptureCameraPermissionDeniedPositiveButton">Open Settings</string>
     <string name="imageCaptureCameraPermissionDeniedNegativeButton">Cancel</string>
 
@@ -702,17 +703,55 @@
     <string name="settingsAutofillLoginsSetting">Passwords</string>
     <string name="autofillLoginSavedSnackbarMessage">Password saved</string>
     <string name="autofillLoginUpdatedSnackbarMessage">Password updated</string>
+    <string name="safe_gaze_arrow" translatable="false">safe_gaze_arrow</string>
+    <string name="pointer_arrow">Pointer Arrow</string>
+    <string name="safe_gaze_up">Safe Gaze UP</string>
+    <string name="ads_and_other_creepy_things_blocked">Ads and other creepy things blocked</string>
+    <string name="if_this_site_appears_broken_try_shields_down">If this site appears broken, try Shields down</string>
+    <string name="_0">0</string>
+    <string name="profile">Profile</string>
+    <string name="preference">Preference</string>
+    <string name="unsubscribe_haram_channels">Unsubscribe Haram Channels</string>
+    <string name="gender">Gender</string>
+    <string name="religion_status">Religion Status</string>
+    <string name="save">Save</string>
+    <string name="kahftube">Kahf Tube</string>
+    <string name="allow">Allow</string>
+    <string name="kahf_tube_email_access_message">Kah Tube wants your permission to access your Youtube email and name to use Youtube Filtration feature.</string>
+    <string name="refresh_again">Refresh Again</string>
+    <string name="unsubscribe">Unsubscribe</string>
+    <string name="haram_channels_found">%1$d Haram channels found</string>
+
+    <string name="kahf_dns_up">Connected</string>
+    <string name="kahf_dns_down">Disconnected</string>
+
+    <string name="safegaze_popup_report_title">Please report any bugs or suggestions to this form</string>
+    <string name="safegaze_popup_support_title">Support this project</string>
+    <string name="safegaze_popup_woman_title">I am Woman</string>
+    <string name="safegaze_popup_man_title">I am Man</string>
+    <string name="safegaze_popup_comingsoon_title">Coming Soon</string>
+    <string name="safegaze_popup_gendermode_title">Gender Mode</string>
+    <string name="safegaze_popup_sinfulacts_title">Sinful acts avoided</string>
+    <string name="safegaze_popup_thispage_title">This Page</string>
+    <string name="safegaze_popup_lifetime_title">Lifetime</string>
+    <string name="safegaze_popup_alwayspurify_title">Always Purify</string>
+    <string name="safegaze_popup_neverpurify_title">Never Purify</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Image Blur Intensity</string>
+    <string name="safegaze_popup_takecontrol_title">Enhance your online experience with SafeGaze, our Image Purificator extension that shields your vision from inappropriate content.</string>
+    <string name="safegaze_popup_turnon_title">Turn on SafeGaze</string>
+
 
     <!-- Custom Tab -->
-    <string name="openInDdgMenuItemTitle">Open in DuckDuckGo</string>
-    <string name="runningInDdgMenuItemTitle">Running in DuckDuckGo</string>
+    <string name="openInDdgMenuItemTitle">Open in Kahf</string>
+    <string name="runningInDdgMenuItemTitle">Running in Kahf</string>
 
     <!-- SSL Error -->
     <string name="sslErrorTitle">Warning: This site may be insecure</string>
     <string name="sslErrorHeadline" instruction="Placeholder is domain with certificate issues">The certificate for this site is invalid. You might be connecting to a server that is pretending to be %1$s which could put your confidential information at risk.</string>
     <string name="sslErrorLeaveCTA">Leave This Site</string>
     <string name="sslErrorAdvancedCTA">Advanced</string>
-    <string name="sslErrorExpandedHeadline">DuckDuckGo warns you when a website has an invalid certificate.</string>
+    <string name="sslErrorExpandedHeadline">Kahf warns you when a website has an invalid certificate.</string>
     <string name="sslErrorExpandedCTA"><![CDATA[<u>Accept Risk and Visit Site<u/>]]></string>
     <string name="sslErrorExpiredMessage" instruction="Placeholder is domain with certificate issues">The security certificate for %1$s is expired. It’s possible that the website is misconfigured, that an attacker has compromised your connection, or that your system clock is incorrect.</string>
     <string name="sslErrorWrongHostMessage" instruction="Placeholder is domain with certificate issues">The security certificate for %1$s does not match *.%2$s. It’s possible that the website is misconfigured or that an attacker has compromised your connection, or that your system clock is incorrect.</string>
@@ -731,7 +770,7 @@
     <string name="preOnboardingDaxDialog3Title">Awesome! Welcome to the duck side.</string>
     <string name="preOnboardingDaxDialog3Button">Start Browsing</string>
     <string name="onboardingSearchDaxDialogTitle">Try a search!</string>
-    <string name="onboardingSearchDaxDialogDescription">Your DuckDuckGo searches are always anonymous.</string>
+    <string name="onboardingSearchDaxDialogDescription">Your Kahf searches are always anonymous.</string>
     <string name="onboardingSearchDaxDialogOption1" instruction="translate 'duck' too.">how to say “duck” in english</string>
     <string name="onboardingSearchDaxDialogOption1English" instruction="translate 'duck' too. Don't add question mark">how to say “duck” in spanish</string>
     <string name="onboardingSearchQueryOption1">how to say duck in english</string>
@@ -748,7 +787,7 @@
     <string name="onboardingSitesDaxDialogOption2">yahoo.com</string>
     <string name="onboardingSitesDaxDialogOption3">ebay.com</string>
     <string name="onboardingSitesDaxDialogOption4">Surprise me!</string>
-    <string name="onboardingSerpDaxDialogDescription">That’s DuckDuckGo Search. Private. Fast. Fewer ads.</string>
+    <string name="onboardingSerpDaxDialogDescription">That’s Kahf Search. Private. Fast. Fewer ads.</string>
     <string name="onboardingSerpDaxDialogButton">Got it!</string>
     <string name="onboardingSitesSuggestionsDaxDialogTitle">Next, try visiting a site!</string>
     <plurals name="onboardingTrackersBlockedDialogDescription">
@@ -765,4 +804,10 @@
     <string name="onboardingEndDaxDialogDescription">Remember: every time you browse with me a creepy ad loses its wings. 👌</string>
     <string name="onboardingEndDaxDialogButton">All done!</string>
 
+    <string name="deleteBookmarkConfirmationDescription" instruction="Placeholder is the name of the bookmark">Are you sure you want to delete your bookmark for &lt;b>%1$s&lt;/b>?</string>
+    <string name="kahf_dns_not_protected_text">You are not protected from 5,906,168 Haram site</string>
+    <string name="kahf_dns_protected_text">You are protected from 5,906,168 Haram site</string>
+    <string name="verify_protection">Verify Protection</string>
+    <string name="by_halalz_e_ticaret_ltd_ti">by Halalz e-ticaret Ltd Şti</string>
+    <string name="kahf_guard">KahfGuard</string>
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2022 DuckDuckGo
+  ~ Copyright (c) 2022 Kahf
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
 <!-- smartling.entity_escaping = false -->
 <!-- smartling.instruction_attributes = instruction -->
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="appName" translatable="false">DuckDuckGo</string>
-    <string name="appDescription" translatable="false">DuckDuckGo</string>
-    <string name="duckDuckGoLogoDescription">Logotip DuckDuckGo</string>
-    <string name="duckDuckGoPrivacySimplified">Zaštita privatnosti na jednostavniji način</string>
+    <string name="asilLogoDescription">Logotip Kahf</string>
+    <string name="asilPrivacySimplified">Zaštita privatnosti na jednostavniji način</string>
     <string name="yes">Da</string>
     <string name="no">Ne</string>
     <string name="open">Otvori</string>
@@ -28,8 +26,8 @@
     <string name="search">Pretraga</string>
 
     <!-- Onboarding Activity -->
-    <string name="onboardingDefaultBrowserDescription">Posjetite Postavke kako biste svaki put pretraživali i pregledavali uz DuckDuckGo.</string>
-    <string name="onboardingDefaultBrowserTitle">Postavi DuckDuckGo kao zadanu tražilicu</string>
+    <string name="onboardingDefaultBrowserDescription">Posjetite Postavke kako biste svaki put pretraživali i pregledavali uz Kahf.</string>
+    <string name="onboardingDefaultBrowserTitle">Postavi Kahf kao zadanu tražilicu</string>
 
     <!-- Default Browser -->
     <string name="cannotLaunchDefaultAppSettings">Ne mogu pokrenuti zaslon zadanih postavki u aplikaciji</string>
@@ -37,7 +35,7 @@
     <string name="defaultBrowserMaybeLater">Možda kasnije</string>
     <string name="defaultBrowserLetsDoIt">Postavi kao zadani preglednik</string>
     <string name="defaultBrowserDescriptionNoDefault">Svaki put poveznice otvori spokojno.</string>
-    <string name="defaultBrowserInstructions">Odaberi DuckDuckGo i dodirni <font color="#678fff">Uvijek </font>.</string>
+    <string name="defaultBrowserInstructions">Odaberi Kahf i dodirni <font color="#678fff">Uvijek </font>.</string>
 
     <!-- Browser Activity -->
     <string name="browserPopupMenu">Izbornik preglednika</string>
@@ -90,11 +88,11 @@
     <!-- Opening external apps -->
     <string name="openExternalApp">Otvori vanjsku aplikaciju</string>
     <string name="launchingExternalApp">Otvori u drugoj aplikaciji</string>
-    <string name="confirmOpenExternalApp">Želiš li napustiti DuckDuckGo da bi predledao/la ovaj sadržaj?</string>
+    <string name="confirmOpenExternalApp">Želiš li napustiti Kahf da bi predledao/la ovaj sadržaj?</string>
     <string name="unableToOpenLink">Nije moguće otvoriti ovu vrstu poveznice</string>
 
     <!-- Tabs -->
-    <string name="homeTab" translatable="false">DuckDuckGo</string>
+    <string name="homeTab" translatable="false">Kahf</string>
     <string name="tabActivityTitle">Kartice</string>
     <string name="tabsMenuItem">Kartice</string>
     <string name="newTabMenuItem">Nova kartica</string>
@@ -122,12 +120,12 @@
     <string name="settingsHeadingAppearance">Izgled</string>
     <string name="settingsHeadingCustomize">Prilagodba</string>
     <string name="settingsHeadingAbout">O</string>
-    <string name="settingsAboutDuckduckgo">O DuckDuckGou</string>
+    <string name="settingsAboutAsil">O Asilu</string>
     <string name="settingsVersion">Verzija</string>
     <string name="leaveFeedback">Podijeli povratne informacije</string>
     <string name="settingsEmailProtectionTitle">Zaštita e-pošte</string>
     <string name="settingsEmailProtectionSubtitle">Blokiraj programe za praćenje e-pošte i sakrij svoju adresu</string>
-    <string name="settingsHeadingMore">Više od DuckDuckGoa</string>
+    <string name="settingsHeadingMore">Više od Asila</string>
     <string name="settingsLightTheme">Svijetla</string>
     <string name="settingsTheme">Tema</string>
     <string name="settingsDarkTheme">Tamna</string>
@@ -142,8 +140,8 @@
     <string name="settingsSubtitleNotificationsDisabled">Onemogućeno</string>
     <string name="settingsSubtitleNotificationsEnabled">Omogućeno</string>
     <string name="settingsDefaultBrowserTitle">Zadani preglednik</string>
-    <string name="settingsDefaultBrowserSetDescription">DuckDuckGo je tvoj zadani preglednik</string>
-    <string name="settingsDefaultBrowserNotSetDescription">Postavi DuckDuckGo kao svoj zadani preglednik</string>
+    <string name="settingsDefaultBrowserSetDescription">Kahf je tvoj zadani preglednik</string>
+    <string name="settingsDefaultBrowserNotSetDescription">Postavi Kahf kao svoj zadani preglednik</string>
     <string name="settingsPrivateSearchTitle">Privatno pretraživanje</string>
     <string name="settingsPrivateSearchDescription">Omogućeno prema zadanim postavkama</string>
     <string name="settingsWebTrackingProtectionTitle">Zaštita od praćenja na webu</string>
@@ -156,7 +154,7 @@
     <!-- Private Search -->
     <string name="privateSearchActivityTitle">Privatno pretraživanje</string>
     <string name="privateSearchTitle">Omogućen je Private Search</string>
-    <string name="privateSearchDescription">DuckDuckGo Private Search tvoja je zadana tražilica, tako da možeš pretraživati web bez praćenja.</string>
+    <string name="privateSearchDescription">Kahf Private Search tvoja je zadana tražilica, tako da možeš pretraživati web bez praćenja.</string>
     <string name="privateSearchHeadingSearchSettings">Postavke pretraživanja</string>
     <string name="privateSearchMoreSearchSettingsPrimaryText">Dodatne postavke pretraživanja</string>
     <string name="privateSearchMoreSearchSettingsSecondaryText">Prilagodi jezik pretraživanja, regiju i još mnogo toga</string>
@@ -173,7 +171,7 @@
     <string name="webTrackingProtectionActivityTitle">Zaštita od praćenja na webu</string>
     <string name="webTrackingProtectionLearnMoreTitle">Zaštita od praćenja na webu</string>
     <string name="webTrackingProtectionTitle">Zaštita od praćenja na webu je omogućena</string>
-    <string name="webTrackingProtectionDescription"><![CDATA[DuckDuckGo te nikad ne prati i nastojimo zaštititi tvoju privatnost što je više moguće. Neprestano održavamo i razvijamo slojeve zaštite kako bismo bili u toku s novim metodama praćenja i pružamo mnoge zaštite koje drugi preglednici ne nude prema zadanim postavkama. <u><a href=\"\">Saznaj više</a><u/>]]></string>
+    <string name="webTrackingProtectionDescription"><![CDATA[Kahf te nikad ne prati i nastojimo zaštititi tvoju privatnost što je više moguće. Neprestano održavamo i razvijamo slojeve zaštite kako bismo bili u toku s novim metodama praćenja i pružamo mnoge zaštite koje drugi preglednici ne nude prema zadanim postavkama. <u><a href=\"\">Saznaj više</a><u/>]]></string>
 
     <!-- Cookie Pop-Up Protection -->
     <string name="cookiePopupProtectionTitle">Zaštita od skočnih prozora kolačića</string>
@@ -208,9 +206,9 @@
     <string name="settingsAutomaticallyClearWhenAppExit60Minutes">Izlaz iz aplikacije, neaktivna 1 sat</string>
 
     <!-- About Activity -->
-    <string name="aboutActivityTitle">O DuckDuckGou</string>
+    <string name="aboutActivityTitle">O Asilu</string>
     <string name="aboutHeader">Dobrodošli na našu stranu!</string>
-    <string name="aboutDescription">DuckDuckGo neovisna je tvrtka za privatnost na internetu osnovana 2008. godine namijenjena svakome tko je umoran od toga da ga prate na internetu i želi jednostavno rješenje za to. Mi smo dokaz da je prava zaštita privatnosti na internetu moguća bez kompromisa.\n\nPreglednik DuckDuckGo dolazi sa značajkama koje očekuješ od preglednika, poput oznaka, kartica, lozinki i još mnogo toga; ali uz to, pruža se više od <annotation type="privacy_protection_link">desetak moćnih zaštita privatnosti</annotation> koje se zadano ne nude u najpopularnijim preglednicima. Ovaj jedinstveno sveobuhvatan skup zaštite privatnosti pomaže u zaštiti tvojih mrežnih aktivnosti, od pretraživanja do pregledavanja, slanja e-pošte i još mnogo toga.\n\nNaša zaštita privatnosti funkcionira bez potrebe da znamo bilo što o tehničkim detaljima ili da se bavimo kompliciranim postavkama. Sve što trebaš učiniti jest prebaciti svoj preglednik na DuckDuckGo na svim svojim uređajima i prema zadanim postavkama dobivaš našu zaštitu privatnosti.\n\nAli ako želiš \"zaviriti ispod haube\", više informacija o tome kako DuckDuckGo zaštita privatnosti funkcionira možeš pronaći na našim <annotation type="learn_more_link">stranicama pomoći</annotation></string>
+    <string name="aboutDescription">Kahf neovisna je tvrtka za privatnost na internetu osnovana 2008. godine namijenjena svakome tko je umoran od toga da ga prate na internetu i želi jednostavno rješenje za to. Mi smo dokaz da je prava zaštita privatnosti na internetu moguća bez kompromisa.\n\nPreglednik Kahf dolazi sa značajkama koje očekuješ od preglednika, poput oznaka, kartica, lozinki i još mnogo toga; ali uz to, pruža se više od <annotation type="privacy_protection_link">desetak moćnih zaštita privatnosti</annotation> koje se zadano ne nude u najpopularnijim preglednicima. Ovaj jedinstveno sveobuhvatan skup zaštite privatnosti pomaže u zaštiti tvojih mrežnih aktivnosti, od pretraživanja do pregledavanja, slanja e-pošte i još mnogo toga.\n\nNaša zaštita privatnosti funkcionira bez potrebe da znamo bilo što o tehničkim detaljima ili da se bavimo kompliciranim postavkama. Sve što trebaš učiniti jest prebaciti svoj preglednik na Kahf na svim svojim uređajima i prema zadanim postavkama dobivaš našu zaštitu privatnosti.\n\nAli ako želiš \"zaviriti ispod haube\", više informacija o tome kako Kahf zaštita privatnosti funkcionira možeš pronaći na našim <annotation type="learn_more_link">stranicama pomoći</annotation></string>
     <string name="no_suggestions">Nema prijedloga</string>
 
     <!-- Broken Site Activity -->
@@ -248,7 +246,7 @@
     <string name="removeAll">Odstrani sve</string>
 
     <!-- Widget -->
-    <string name="searchWidgetTextHint">Pretraži DuckDuckGo</string>
+    <string name="searchWidgetTextHint">Pretraži Kahf</string>
 
     <!-- Favorites widget -->
     <string name="addFavoriteMenuTitleHighlighted">👋 Dodaj favorita</string>
@@ -273,7 +271,7 @@
     <string name="surveyCtaLaunchButton">Ispuni anketu</string>
     <string name="surveyCtaDismissButton">Ne, hvala</string>
     <string name="surveyActivityTitle">Anketa o korisniku</string>
-    <string name="surveyTitle">Anketa DuckDuckGo</string>
+    <string name="surveyTitle">Anketa Kahf</string>
     <string name="surveyDismissContentDescription">Odbaci anketu</string>
     <string name="surveyLoadingErrorTitle">O, ne!</string>
     <string name="surveyLoadingErrorText">Anketa se trenutačno ne učitava.\nPokušaj ponovno kasnije.</string>
@@ -288,14 +286,14 @@
     <string name="addWidgetInstruction1Label">1</string>
     <string name="addWidgetInstruction1">Dugim pritiskom pritisni početni zaslon, a zatim otvori izbornik widgeta.</string>
     <string name="addWidgetInstruction2Label">2</string>
-    <string name="addWidgetInstruction2">Pronađi widget DuckDuckGo.</string>
+    <string name="addWidgetInstruction2">Pronađi widget Kahf.</string>
     <string name="addWidgetInstruction3Label">3</string>
     <string name="addWidgetInstruction3">Dovuci widget na početni zaslon.</string>
     <string name="addWidgetInstructionsButtonGoHome">Idi na početni zaslon</string>
     <string name="addWidgetInstructionsButtonClose">Zatvori</string>
 
     <!-- App Enjoyment / Rating / Feedback -->
-    <string name="appEnjoymentDialogTitle">Sviđa li ti se DuckDuckGo?</string>
+    <string name="appEnjoymentDialogTitle">Sviđa li ti se Kahf?</string>
     <string name="appEnjoymentDialogMessage">Voljeli bismo znati što misliš.</string>
     <string name="appEnjoymentDialogPositiveButton">Sviđa mi se</string>
     <string name="appEnjoymentDialogNegativeButton">Treba doradu</string>
@@ -317,15 +315,15 @@
 
     <!-- Clear Notification -->
     <string name="clearNotificationTitle">Brisanje podataka postavljeno na ručno</string>
-    <string name="clearNotificationDescription">Prilagodite DuckDuckGo za automatsko brisanje podataka pregledavanja nakon svake sesije.</string>
+    <string name="clearNotificationDescription">Prilagodite Kahf za automatsko brisanje podataka pregledavanja nakon svake sesije.</string>
 
     <!-- Privacy Protection Notification -->
     <string name="privacyProtectionNotificationDefaultTitle">Štitimo tvoju privatnost</string>
     <string name="privacyProtectionNotificationReportTitle">Tvoje izvješće o zaštiti privatnosti</string>
-    <string name="privacyProtectionNotificationDefaultDescription">Korištenje aplikacije DuckDuckGo štiti tvoje podatke blokiranjem alata za praćenje i šifriranjem veza.</string>
-    <string name="privacyProtectionNotificationUpgadeDescription" instruction="Placeholder is a the number of connections we have protected">Zaštitio/la si svoje podatke osiguravanjem %1$d nešifriranih veza dok koristiš DuckDuckGo.</string>
-    <string name="privacyProtectionNotificationTrackerDescription" instruction="Placeholder is the numer of trackers blocked">Zaštitio/la si svoje podatke blokiranjem %1$d alata za praćenje dok koristiš DuckDuckGo.</string>
-    <string name="privacyProtectionNotificationBothDescription" instruction="%1$d is the number of trackers blocked and %2$d is the number of unencrypted connections">Zaštitio/la si svoje podatke blokiranjem %1$d alata za praćenje i osiguravanjem %2$d nešifriranih veza dok koristiš DuckDuckGo.</string>
+    <string name="privacyProtectionNotificationDefaultDescription">Korištenje aplikacije Kahf štiti tvoje podatke blokiranjem alata za praćenje i šifriranjem veza.</string>
+    <string name="privacyProtectionNotificationUpgadeDescription" instruction="Placeholder is a the number of connections we have protected">Zaštitio/la si svoje podatke osiguravanjem %1$d nešifriranih veza dok koristiš Kahf.</string>
+    <string name="privacyProtectionNotificationTrackerDescription" instruction="Placeholder is the numer of trackers blocked">Zaštitio/la si svoje podatke blokiranjem %1$d alata za praćenje dok koristiš Kahf.</string>
+    <string name="privacyProtectionNotificationBothDescription" instruction="%1$d is the number of trackers blocked and %2$d is the number of unencrypted connections">Zaštitio/la si svoje podatke blokiranjem %1$d alata za praćenje i osiguravanjem %2$d nešifriranih veza dok koristiš Kahf.</string>
     <string name="privacyProtectionNotificationLaunchButton">Nastavi pregledavati</string>
 
     <!-- Authentication -->
@@ -337,7 +335,7 @@
     <string name="authenticationDialogPasswordHint">Lozinka</string>
 
     <!-- User-facing label for when a user selects text and might want to search for that text -->
-    <string name="systemTextSearchMessage">Pretraži DuckDuckGo</string>
+    <string name="systemTextSearchMessage">Pretraži Kahf</string>
 
     <!-- App feedback disambiguation -->
     <string name="feedbackActivityTitle">Podijeli povratne informacije</string>
@@ -356,8 +354,8 @@
     <string name="websiteNotLoadingTitleShort">Problemi s učitavanjem web-mjesta</string>
     <string name="websiteNotLoadingSubtitle">Koje je web-mjesto neispravno?</string>
 
-    <string name="searchNotGoodEnoughTitleLong">Pretraživanje u DuckDuckGo nije dovoljno dobro</string>
-    <string name="searchNotGoodEnoughTitleShort">Problemi s pretraživanjem u DuckDuckGo</string>
+    <string name="searchNotGoodEnoughTitleLong">Pretraživanje u Kahf nije dovoljno dobro</string>
+    <string name="searchNotGoodEnoughTitleShort">Problemi s pretraživanjem u Kahf</string>
     <string name="searchNotGoodEnoughSubtitle">Koju značajku pretraživanja možemo dodati ili poboljšati?</string>
     <string name="searchNotGoodEnoughSubReasonTechnicalSearches">Programiranje/tehničko pretraživanje</string>
     <string name="searchNotGoodEnoughSubReasonGoogleLayout">Izgled bi trebao biti više nalik Googleu</string>
@@ -418,8 +416,8 @@
     <!-- System Search-->
     <string name="systemSearchDeviceAppLabel">Sa ovog uređaja</string>
     <string name="systemSearchAppNotFound">Aplikaciju nije bilo moguće pronaći</string>
-    <string name="systemSearchOnboardingText">Hvala što si odabrao/la DuckDuckGo!\nSada kada koristiš našu tražilicu ili aplikaciju, tvoje su pretrage zaštićene.</string>
-    <string name="systemSearchOnboardingFeaturesIntroText">Aplikacija DuckDuckGo također:</string>
+    <string name="systemSearchOnboardingText">Hvala što si odabrao/la Kahf!\nSada kada koristiš našu tražilicu ili aplikaciju, tvoje su pretrage zaštićene.</string>
+    <string name="systemSearchOnboardingFeaturesIntroText">Aplikacija Kahf također:</string>
     <string name="systemSearchOnboardingFeatureOneText">Blokira nesigurne alate za praćenje.</string>
     <string name="systemSearchOnboardingFeatureTwoText">Prisiljava šifriranje na web-mjestima.</string>
     <string name="systemSearchOnboardingFeatureThreeText">Briše podatke jednim dodirom.</string>
@@ -437,7 +435,7 @@
     <string name="daxDialogAppTpRetentionSecondaryButtonText">Ne sad</string>
 
     <!-- New Onboarding Experience -->
-    <string name="onboardingWelcomeTitle">"Dobro došao/la u DuckDuckGo!"</string>
+    <string name="onboardingWelcomeTitle">"Dobro došao/la u Kahf!"</string>
     <string name="onboardingDaxText"><![CDATA[Internet može biti pomalo neugodan.<br/><br/> Ne brini! Privatno pretraživanje i pregledavanje lakše je nego što misliš.]]></string>
     <string name="onboardingLetsDoItButton">Učinimo to!</string>
     <string name="daxNonSerpCtaText"><![CDATA[Dok dodiruješ i pomičeš se na zaslonu, blokirat ću neugodne tragače.\n\nSamo naprijed - nastavi pretraživati!]]></string>
@@ -528,7 +526,7 @@
     <string name="dosErrorMessage">Veza je prekinuta. Ovo web-mjesto može biti štetno za tvoj uređaj.</string>
 
     <!-- Precise Location -->
-    <string name="preciseLocationSystemDialogTitle">Omogućiti lokaciju uređaja za preglednik privatnosti DuckDuckGo?</string>
+    <string name="preciseLocationSystemDialogTitle">Omogućiti lokaciju uređaja za preglednik privatnosti Kahf?</string>
     <string name="preciseLocationSystemDialogSubtitle" instruction="%1$s and %2$s are both the name of the website requesting the location">%1$s traži lokaciju tvojeg uređaja. Prvo ćeš trebati dopustiti aplikaciji da pošalje lokaciju tvojeg uređaja, a zatim %2$s može zatražiti dopuštenje.</string>
     <string name="preciseLocationSystemDialogAllow">Omogući</string>
     <string name="preciseLocationSystemDialogDeny">Možda kasnije</string>
@@ -540,7 +538,7 @@
     <string name="preciseLocationSiteDialogAllowOnce">Samo za ovu sesiju</string>
     <string name="preciseLocationSiteDialogDenyAlways">Uvijek odbij</string>
     <string name="preciseLocationSiteDialogDenyOnce">Odbij za ovu sesiju</string>
-    <string name="preciseLocationFeatureDescription">Web-mjesta koja posjetiš mogu zatražiti da vide lokaciju tvojeg uređaja. Neće mu moći pristupiti dok to izričito ne odobriš. DuckDuckGo anonimno upotrebljava tvoju lokaciju samo za pružanje lokalnih rezultata pretraživanja.</string>
+    <string name="preciseLocationFeatureDescription">Web-mjesta koja posjetiš mogu zatražiti da vide lokaciju tvojeg uređaja. Neće mu moći pristupiti dok to izričito ne odobriš. Kahf anonimno upotrebljava tvoju lokaciju samo za pružanje lokalnih rezultata pretraživanja.</string>
     <string name="preciseLocationToggleText">Web-mjesta mogu tražiti moju lokaciju</string>
     <string name="preciseLocationEmptyListHint">Niti jednom mrežnom mjestu nije odobren pristup lokaciji</string>
     <string name="preciseLocationNoSystemPermission">Da bi upravljao/la dozvolama za pristup lokaciji koje si dodijelio/la pojedinim web-mjestima, omogući lokaciju za ovu aplikaciju u postavkama uređaja Android.</string>
@@ -556,7 +554,7 @@
 
     <!--  Global Privacy Control-->
     <string name="globalPrivacyControlActivityTitle">Globalna kontrola privatnosti (GPC)</string>
-    <string name="globalPrivacyControlDescription"><![CDATA[DuckDuckGo automatski blokira mnoge alate za indeksiranje. S globalnom kontrolom privatnosti (GPC) također možete tražiti od web-mjesta koja sudjeluju u programu da ograniče prodaju ili dijeljenje vaših osobnih podataka drugim tvrtkama. <u><a href=\"\">Saznajte više</a><u/>]]></string>
+    <string name="globalPrivacyControlDescription"><![CDATA[Kahf automatski blokira mnoge alate za indeksiranje. S globalnom kontrolom privatnosti (GPC) također možete tražiti od web-mjesta koja sudjeluju u programu da ograniče prodaju ili dijeljenje vaših osobnih podataka drugim tvrtkama. <u><a href=\"\">Saznajte više</a><u/>]]></string>
     <string name="globalPrivacyControlSetting">Globalna kontrola privatnosti (GPC)</string>
     <string name="globalPrivacyControlToggle">Globalna kontrola privatnosti (GPC)</string>
     <string name="disabled">Onemogućeno</string>
@@ -594,14 +592,14 @@
     <string name="settingsAccessibility">Pristupačnost</string>
     <string name="accessibilityActivityTitle">Pristupačnost</string>
     <string name="accessibilityFontSizeTitle">Veličina teksta</string>
-    <string name="accessibilityFontSizeHint">Povlači klizač sve dok ovo ne budeš mogao udobno pročitati. Mrežna mjesta koje pregledavaš u DuckDuckGou prilagodit će se ovoj postavci.</string>
+    <string name="accessibilityFontSizeHint">Povlači klizač sve dok ovo ne budeš mogao udobno pročitati. Mrežna mjesta koje pregledavaš u Asilu prilagodit će se ovoj postavci.</string>
     <string name="accessibilityForceZoomTitle">Nametni ručno zumiranje stranice</string>
     <string name="accessibilityForceZoomSubtitle">Stisni i zumiraj na bilo kojem mrežnom mjestu, čak i onima koji bi to inače sprječavali</string>
     <string name="accessibilityTextSizeOverrideTitle">Upravljaj veličinom teksta</string>
-    <string name="accessibilityTextSizeOverrideSubtitle">Tekst na mrežnim mjestima koja pregledavaš u DuckDuckGo prilagodit će se tako da odgovara postavci u nastavku</string>
+    <string name="accessibilityTextSizeOverrideSubtitle">Tekst na mrežnim mjestima koja pregledavaš u Kahf prilagodit će se tako da odgovara postavci u nastavku</string>
 
     <!-- Privacy Policy -->
-    <string name="settingsPrivacyPolicyDuckduckgo">Pravila o zaštiti privatnosti</string>
+    <string name="settingsPrivacyPolicyAsil">Pravila o zaštiti privatnosti</string>
 
     <!-- Home Screen Widget -->
     <string name="homeScreenWidgetAdded" instruction="Placeholder is the name of the widget">%1$s widget dodan na početni zaslon</string>
@@ -609,7 +607,7 @@
 
     <!-- MacOs Settings -->
     <string name="macos_settings_description">Pretražujte privatno s našom aplikacijom za Mac</string>
-    <string name="macos_settings_title">DuckDuckGo preglednik za Mac</string>
+    <string name="macos_settings_title">Kahf preglednik za Mac</string>
 
     <!-- Downloads -->
     <string name="downloadsMenuItem">Preuzimanja</string>
@@ -671,7 +669,7 @@
     <string name="downloadsNotifyMeSubtitle">Primi obavijest kad se preuzimanja završe.</string>
 
     <!-- Windows Settings -->
-    <string name="windows_settings_title">DuckDuckGo preglednik za Windows</string>
+    <string name="windows_settings_title">Kahf preglednik za Windows</string>
     <string name="windows_settings_description">Privatno pregledavanje s našom aplikacijom za Windows</string>
     <string name="windows_settings_description_ready">Preuzimanje je dostupno</string>
     <string name="windows_settings_description_list">Na popisu si!</string>
@@ -686,7 +684,7 @@
     <string name="closeAppTabsConfirmationDialogClose">Zatvori</string>
 
     <!-- Private voice search -->
-    <string name="accessibilityVoiceSearchSubtitle">Dodaj opciju privatnog glasovnog pretraživanja na adresnu traku. Zvuk se ne pohranjuje i ne dijeli ni s kim, uključujući DuckDuckGo.</string>
+    <string name="accessibilityVoiceSearchSubtitle">Dodaj opciju privatnog glasovnog pretraživanja na adresnu traku. Zvuk se ne pohranjuje i ne dijeli ni s kim, uključujući Kahf.</string>
     <string name="accessibilityVoiceSearchTitle">Privatno glasovno pretraživanje</string>
 
     <!-- Uploading an image from the camera or choosing to use existing image -->
@@ -694,8 +692,8 @@
     <string name="imageCaptureCameraGalleryDisambiguationTitle">Učitaj sliku</string>
     <string name="imageCaptureCameraGalleryDisambiguationGalleryOption">Odaberi datoteku</string>
     <string name="imageCaptureCameraGalleryDisambiguationCameraOption">Snimi fotografiju</string>
-    <string name="imageCaptureCameraPermissionDeniedTitle">Dopusti DuckDuckGou da zatraži pristup kameri na ovom uređaju</string>
-    <string name="imageCaptureCameraPermissionDeniedMessage">Stranice mogu koristiti tvoju kameru samo ako dopustiš DuckDuckGou da zatraži pristup.</string>
+    <string name="imageCaptureCameraPermissionDeniedTitle">Dopusti Asilu da zatraži pristup kameri na ovom uređaju</string>
+    <string name="imageCaptureCameraPermissionDeniedMessage">Stranice mogu koristiti tvoju kameru samo ako dopustiš Asilu da zatraži pristup.</string>
     <string name="imageCaptureCameraPermissionDeniedPositiveButton">Otvori postavke</string>
     <string name="imageCaptureCameraPermissionDeniedNegativeButton">Odustani</string>
 
@@ -705,15 +703,15 @@
     <string name="autofillLoginUpdatedSnackbarMessage">Lozinka je ažurirana</string>
 
     <!-- Custom Tab -->
-    <string name="openInDdgMenuItemTitle">Otvori u DuckDuckGou</string>
-    <string name="runningInDdgMenuItemTitle">Izvodi se u DuckDuckGou</string>
+    <string name="openInDdgMenuItemTitle">Otvori u Kahfu</string>
+    <string name="runningInDdgMenuItemTitle">Izvodi se u Kahfu</string>
 
     <!-- SSL Error -->
     <string name="sslErrorTitle">Upozorenje: ova stranica može biti nesigurna</string>
     <string name="sslErrorHeadline" instruction="Placeholder is domain with certificate issues">Certifikat za ovu stranicu nije valjan. Možda se povezuješ s poslužiteljem koji se pretvara da je %1$s, što bi moglo ugroziti tvoje povjerljive podatke.</string>
     <string name="sslErrorLeaveCTA">Napusti ovo web-mjesto</string>
     <string name="sslErrorAdvancedCTA">Napredno</string>
-    <string name="sslErrorExpandedHeadline">DuckDuckGo te upozorava kada web-mjesto ima nevažeći certifikat.</string>
+    <string name="sslErrorExpandedHeadline">Kahf te upozorava kada web-mjesto ima nevažeći certifikat.</string>
     <string name="sslErrorExpandedCTA"><![CDATA[<u>Prihvati rizik i posjeti web-mjesto<u/>]]></string>
     <string name="sslErrorExpiredMessage" instruction="Placeholder is domain with certificate issues">Sigurnosni certifikat za %1$s je istekao. Moguće je da je web-mjesto pogrešno konfigurirano, da je napadač ugrozio tvoju vezu ili da je sat tvog sustava netočan.</string>
     <string name="sslErrorWrongHostMessage" instruction="Placeholder is domain with certificate issues">Sigurnosni certifikat za %1$s ne odgovara *.%2$s. Moguće je da je web-mjesto pogrešno konfigurirano, da je napadač ugrozio tvoju vezu ili da je sat tvog sustava netočan.</string>
@@ -732,7 +730,7 @@
     <string name="preOnboardingDaxDialog3Title">Odlično! Dobrodošli na našu stranu!</string>
     <string name="preOnboardingDaxDialog3Button">Započni pretraživanje</string>
     <string name="onboardingSearchDaxDialogTitle">Isprobajte pretragu!</string>
-    <string name="onboardingSearchDaxDialogDescription">Tvoja su DuckDuckGo pretraživanja uvijek anonimna.</string>
+    <string name="onboardingSearchDaxDialogDescription">Tvoja su Kahf pretraživanja uvijek anonimna.</string>
     <string name="onboardingSearchDaxDialogOption1" instruction="translate &apos;duck&apos; too.">kako se kaže \"patka\" na engleskom</string>
     <string name="onboardingSearchDaxDialogOption1English" instruction="translate &apos;duck&apos; too. Don&apos;t add question mark">kako se kaže \"patka\" na španjolskom</string>
     <string name="onboardingSearchQueryOption1">kako se kaže patka na engleskom</string>
@@ -749,7 +747,7 @@
     <string name="onboardingSitesDaxDialogOption2">yahoo.com</string>
     <string name="onboardingSitesDaxDialogOption3">ebay.com</string>
     <string name="onboardingSitesDaxDialogOption4">Iznenadi me!</string>
-    <string name="onboardingSerpDaxDialogDescription">To je DuckDuckGo Search. Privatno. Brzo. Manje oglasa.</string>
+    <string name="onboardingSerpDaxDialogDescription">To je Kahf Search. Privatno. Brzo. Manje oglasa.</string>
     <string name="onboardingSerpDaxDialogButton">Shvaćam!</string>
     <string name="onboardingSitesSuggestionsDaxDialogTitle">Nakon toga pokušaj posjetiti neko web-mjesto!</string>
     <plurals name="onboardingTrackersBlockedDialogDescription">
@@ -757,6 +755,41 @@
         <item quantity="few"><![CDATA[ I <b>još %1$d drugih</b> pokušavalo te ovdje pratiti. Blokirani su!<br/><br/>☝️ Dodirni štit za više informacija.️]]></item>
         <item quantity="many"><![CDATA[ I <b>još %1$d drugih</b> pokušavalo te ovdje pratiti. Blokirani su!<br/><br/>☝️ Dodirni štit za više informacija.️]]></item>
         <item quantity="other"><![CDATA[ I <b>još %1$d drugih</b> pokušavalo te ovdje pratiti. Blokirani su!<br/><br/>☝️ Dodirni štit za više informacija.️]]></item>
+    </plurals>
+    <string name="safegaze_popup_report_title">Molimo prijavite bilo kakve pogreške ili prijedloge putem ovog obrasca</string>
+    <string name="safegaze_popup_support_title">Podržite ovaj projekt</string>
+    <string name="safegaze_popup_woman_title">Ja sam žena</string>
+    <string name="safegaze_popup_man_title">Ja sam muškarac</string>
+    <string name="safegaze_popup_comingsoon_title">Dolazi uskoro</string>
+    <string name="safegaze_popup_gendermode_title">Način spola</string>
+    <string name="safegaze_popup_sinfulacts_title">Izbjegnute grijehomane radnje</string>
+    <string name="safegaze_popup_thispage_title">Ova stranica</string>
+    <string name="safegaze_popup_lifetime_title">Trajanje života</string>
+    <string name="safegaze_popup_alwayspurify_title">Uvijek pročistite</string>
+    <string name="safegaze_popup_neverpurify_title">Nikada ne pročišćavajte</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Intenzitet zamućenja slike</string>
+    <string name="safegaze_popup_takecontrol_title">Poboljšajte svoje online iskustvo s SafeGazeom, našim produžetkom za pročišćavanje slika koji štiti vaš vid od neprimjerenog sadržaja.</string>
+    <string name="safegaze_popup_turnon_title">Uključite SafeGaze</string>
+
+
+    <!-- Bookmarks -->
+    <string name="searchBookmarks">Pretraži knjižne oznake</string>
+    <string name="deleteFolder" instruction="%1$s is the folder name">"Želiš li izbrisati %1$s?"</string>
+    <string name="deleteBookmark" instruction="%1$s is the bookmark name">"Izbrisati oznaku %1$s ?"</string>
+    <string name="bookmarkAddedInBookmarks" instruction="%1$s is the folder name">Knjižna oznaka dodana u %1$s</string>
+    <string name="addToFavorites">Dodaj u Omiljeno</string>
+    <string name="editBookmark">Uredi knjižnu oznaku</string>
+    <string name="importBookmarksDescription">Ako su tvoje oznake spremljene u drugom pregledniku, možeš ih \n uvesti u Kahf.</string>
+    <string name="importBookmarks">Uvoz knjižnih oznaka</string>
+    <string name="noResultsFor" instruction="%1$s is the search term">Nema rezultata za \"%1$s\"</string>
+    <string name="removeFromFavorites">Ukloni iz omiljenih</string>
+    <string name="addToFavoritesMenu">Dodaj u Omiljeno</string>
+    <plurals name="bookmarkFolderDeleteMessage">
+        <item quantity="one">Jeste li sigurni da želite izbrisati ovu mapu i %1$d stavku?</item>
+        <item quantity="few">Jeste li sigurni da želite izbrisati ovu mapu i %1$d stavke?</item>
+        <item quantity="many">Jeste li sigurni da želite izbrisati ovu mapu i %1$d stavki?</item>
+        <item quantity="other">Jeste li sigurni da želite izbrisati ovu mapu i %1$d stavki?</item>
     </plurals>
     <plurals name="onboardingTrackersBlockedZeroDialogDescription" tools:ignore="ImpliedQuantity">
         <item quantity="one"><![CDATA[ pokušavali su te ovdje pratiti. Blokirani su!<br/><br/>☝️ Dodirni štit za više informacija.️]]></item>

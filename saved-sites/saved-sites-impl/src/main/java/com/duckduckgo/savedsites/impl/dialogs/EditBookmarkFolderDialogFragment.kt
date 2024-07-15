@@ -95,7 +95,7 @@ class EditBookmarkFolderDialogFragment : SavedSiteDialogFragment() {
 
     companion object {
         const val KEY_PARENT_FOLDER_ID = "KEY_PARENT_FOLDER_ID"
-        const val KEY_PARENT_FOLDER_NAME = "KEY_PARENT_FOLDER_NAME"
+        private const val KEY_PARENT_FOLDER_NAME = "KEY_PARENT_FOLDER_NAME"
 
         fun instance(
             parentFolderId: String,

@@ -42,7 +42,7 @@ class BookmarksQueryListener(
             val favorites = viewModel.viewState.value?.favorites
             viewModel.viewState.value?.bookmarkItems?.let { bookmarks ->
                 val filteredBookmarks = filterBookmarks(newText, bookmarks, favorites)
-                bookmarksAdapter.setItems(filteredBookmarks, false, true)
+                bookmarksAdapter.setItems(filteredBookmarks, showEmptyHint = false, showEmptySearchHint = true)
             }
         }
     }

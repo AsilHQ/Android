@@ -165,7 +165,7 @@ class BookmarksAdapter(
 
     fun persistReorderedItems() {
         var parentId = SavedSitesNames.BOOKMARKS_ROOT
-        val reorderedBookmarks = bookmarkItems.mapNotNull { item ->
+        val reorderedBookmarks = bookmarkItems.map { item ->
             when (item) {
                 is BookmarkItem -> {
                     parentId = item.bookmark.parentId

@@ -17,6 +17,7 @@
 package com.duckduckgo.common.ui.view.text
 
 import android.content.Context
+import android.graphics.Typeface
 import android.util.AttributeSet
 import androidx.core.content.ContextCompat
 import com.duckduckgo.common.ui.view.TypedArrayUtils
@@ -39,7 +40,6 @@ constructor(
                 0,
                 0,
             )
-
         val typography = if (typedArray.hasValue(R.styleable.DaxTextView_typography)) {
             Typography.from(typedArray.getInt(R.styleable.DaxTextView_typography, 0))
         } else {
@@ -76,7 +76,7 @@ constructor(
         setTextAppearance(Typography.getTextAppearanceStyle(typography))
     }
 
-    fun setTextColorStateList(textType: TextType) {
+    private fun setTextColorStateList(textType: TextType) {
         setTextColor(
             ContextCompat.getColorStateList(
                 context,

@@ -44,7 +44,7 @@ interface FireproofDialogsEventHandler {
 
     sealed class Event {
         data class FireproofWebSiteSuccess(val fireproofWebsiteEntity: FireproofWebsiteEntity) : Event()
-        object AskToDisableLoginDetection : Event()
+        data object AskToDisableLoginDetection : Event()
     }
 }
 
@@ -144,13 +144,10 @@ class BrowserTabFireproofDialogsEventHandler(
 
     private suspend fun userTriedFireButton() = userEventsStore.getUserEvent(UserEventKey.FIRE_BUTTON_EXECUTED) != null
 
-    @Suppress("UnnecessaryVariable")
     private suspend fun allowUserToDisableFireproofLoginActive(): Boolean {
         val userEnabledLoginDetection = userEventsStore.getUserEvent(UserEventKey.USER_ENABLED_FIREPROOF_LOGIN) != null
         val userDismissedDisableFireproofLoginDialog = userEventsStore.getUserEvent(UserEventKey.FIREPROOF_DISABLE_DIALOG_DISMISSED) != null
-        if (userEnabledLoginDetection || userDismissedDisableFireproofLoginDialog) return false
-
-        return true
+        return !(userEnabledLoginDetection || userDismissedDisableFireproofLoginDialog)
     }
 
     @Suppress("UnnecessaryVariable")

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2022 DuckDuckGo
+  ~ Copyright (c) 2022 Kahf
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@
 <!-- smartling.entity_escaping = false -->
 <!-- smartling.instruction_attributes = instruction -->
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="appName" translatable="false">DuckDuckGo</string>
-    <string name="appDescription" translatable="false">DuckDuckGo</string>
-    <string name="duckDuckGoLogoDescription">Логотип DuckDuckGo</string>
-    <string name="duckDuckGoPrivacySimplified">Максимум конфиденциальности, минимум усилий</string>
+    <string name="asilLogoDescription">Логотип Kahf</string>
+    <string name="asilPrivacySimplified">Максимум конфиденциальности, минимум усилий</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
     <string name="open">Открыть</string>
@@ -28,8 +26,8 @@
     <string name="search">Поиск</string>
 
     <!-- Onboarding Activity -->
-    <string name="onboardingDefaultBrowserDescription">Чтобы сделать DuckDuckGo браузером по умолчанию, перейдите в «Настройки».</string>
-    <string name="onboardingDefaultBrowserTitle">Сделайте DuckDuckGo браузером по умолчанию</string>
+    <string name="onboardingDefaultBrowserDescription">Чтобы сделать Kahf браузером по умолчанию, перейдите в «Настройки».</string>
+    <string name="onboardingDefaultBrowserTitle">Сделайте Kahf браузером по умолчанию</string>
 
     <!-- Default Browser -->
     <string name="cannotLaunchDefaultAppSettings">Не удаётся открыть настройки приложения по умолчанию</string>
@@ -37,7 +35,7 @@
     <string name="defaultBrowserMaybeLater">Позже</string>
     <string name="defaultBrowserLetsDoIt">Сделать браузером по умолчанию</string>
     <string name="defaultBrowserDescriptionNoDefault">Открывайте ссылки, ни о чем не беспокоясь.</string>
-    <string name="defaultBrowserInstructions">Выберите DuckDuckGo и нажмите <font color="#678fff">Всегда</font>.</string>
+    <string name="defaultBrowserInstructions">Выберите Kahf и нажмите <font color="#678fff">Всегда</font>.</string>
 
     <!-- Browser Activity -->
     <string name="browserPopupMenu">Меню браузера</string>
@@ -90,11 +88,11 @@
     <!-- Opening external apps -->
     <string name="openExternalApp">Открыть внешнее приложение</string>
     <string name="launchingExternalApp">Открыть в другом приложении</string>
-    <string name="confirmOpenExternalApp">Выйти из DuckDuckGo для просмотра этого контента?</string>
+    <string name="confirmOpenExternalApp">Выйти из Kahf для просмотра этого контента?</string>
     <string name="unableToOpenLink">Невозможно открыть ссылку этого типа</string>
 
     <!-- Tabs -->
-    <string name="homeTab" translatable="false">DuckDuckGo</string>
+    <string name="homeTab" translatable="false">Kahf</string>
     <string name="tabActivityTitle">Вкладки</string>
     <string name="tabsMenuItem">Вкладки</string>
     <string name="newTabMenuItem">Новая вкладка</string>
@@ -122,12 +120,12 @@
     <string name="settingsHeadingAppearance">Внешний вид</string>
     <string name="settingsHeadingCustomize">Собственная настройка</string>
     <string name="settingsHeadingAbout">О нас</string>
-    <string name="settingsAboutDuckduckgo">Несколько слов о DuckDuckGo</string>
+    <string name="settingsAboutAsil">Несколько слов о Kahf</string>
     <string name="settingsVersion">Версия</string>
     <string name="leaveFeedback">Оставьте нам отзыв</string>
     <string name="settingsEmailProtectionTitle">Защита электронной почты</string>
     <string name="settingsEmailProtectionSubtitle">Блокировка почтовых трекеров и скрытие адреса</string>
-    <string name="settingsHeadingMore">DuckDuckGo также предлагает...</string>
+    <string name="settingsHeadingMore">Kahf также предлагает...</string>
     <string name="settingsLightTheme">Светлая</string>
     <string name="settingsTheme">Тема</string>
     <string name="settingsDarkTheme">Тёмная</string>
@@ -142,7 +140,7 @@
     <string name="settingsSubtitleNotificationsDisabled">Отключено</string>
     <string name="settingsSubtitleNotificationsEnabled">Включено</string>
     <string name="settingsDefaultBrowserTitle">Браузер по умолчанию</string>
-    <string name="settingsDefaultBrowserSetDescription">DuckDuckGo — ваш браузер по умолчанию</string>
+    <string name="settingsDefaultBrowserSetDescription">Kahf — ваш браузер по умолчанию</string>
     <string name="settingsDefaultBrowserNotSetDescription">Выберите DuckGo браузером по умолчанию</string>
     <string name="settingsPrivateSearchTitle">Частный поиск</string>
     <string name="settingsPrivateSearchDescription">Включено по умолчанию</string>
@@ -156,7 +154,7 @@
     <!-- Private Search -->
     <string name="privateSearchActivityTitle">Частный поиск</string>
     <string name="privateSearchTitle">Включена система Private Search</string>
-    <string name="privateSearchDescription">DuckDuckGo Private Search — ваша поисковая система по умолчанию. Вы можете пользоваться поиском в интернете, не опасаясь слежки.</string>
+    <string name="privateSearchDescription">Kahf Private Search — ваша поисковая система по умолчанию. Вы можете пользоваться поиском в интернете, не опасаясь слежки.</string>
     <string name="privateSearchHeadingSearchSettings">Настройки поиска</string>
     <string name="privateSearchMoreSearchSettingsPrimaryText">Дополнительно</string>
     <string name="privateSearchMoreSearchSettingsSecondaryText">Выбор языка поиска, региона и так далее</string>
@@ -173,7 +171,7 @@
     <string name="webTrackingProtectionActivityTitle">Защита от отслеживания онлайн</string>
     <string name="webTrackingProtectionLearnMoreTitle">Защита от отслеживания онлайн</string>
     <string name="webTrackingProtectionTitle">Включена защита от отслеживания онлайн</string>
-    <string name="webTrackingProtectionDescription"><![CDATA[DuckDuckGo не следит за вами онлайн и максимально защищает ваши данные. Мы постоянно укрепляем и развиваем защиту от новых способов отслеживания, которую по умолчанию не предоставляют другие браузеры. <u><a href=\"\">Подробнее...</a><u/>]]></string>
+    <string name="webTrackingProtectionDescription"><![CDATA[Kahf не следит за вами онлайн и максимально защищает ваши данные. Мы постоянно укрепляем и развиваем защиту от новых способов отслеживания, которую по умолчанию не предоставляют другие браузеры. <u><a href=\"\">Подробнее...</a><u/>]]></string>
 
     <!-- Cookie Pop-Up Protection -->
     <string name="cookiePopupProtectionTitle">Защита от всплывающих окон куки</string>
@@ -208,9 +206,9 @@
     <string name="settingsAutomaticallyClearWhenAppExit60Minutes">После выхода из приложения, через 1 час бездействия</string>
 
     <!-- About Activity -->
-    <string name="aboutActivityTitle">Несколько слов о DuckDuckGo</string>
+    <string name="aboutActivityTitle">Несколько слов о Kahf</string>
     <string name="aboutHeader">Добро пожаловать на Утиную сторону!</string>
-    <string name="aboutDescription">DuckDuckGo — основанная в 2008 году независимая компания, специализирующаяся на защите личных данных в Интернете. Мы предлагаем простое решение тем, кто хочет, чтобы за ними перестали следить онлайн. DuckDuckGo своим примером показывает, что защита конфиденциальности онлайн возможна без всяких компромиссов.\n\nВ универсальном браузере DuckDuckGo вы найдете все те же привычные функции — вкладки, закладки, пароли и многое другое, а также <annotation type="privacy_protection_link">более десятка мощных средств защиты личной информации</annotation>, которых нет в стандартных настройках других популярных веб-обозревателей . Такой исчерпывающий набор инструментов может скрыть от посторонних глаз всю сетевую активность, включая поиск, навигацию и почту.\n\nСредства защиты конфиденциальности не требуют от пользователей знания технических особенностей или понимания сложных настроек .Достаточно сменить свой браузер на DuckDuckGo на всех устройствах, и конфиденциальность станет вашим режимом по умолчанию.\n\nЕсли же вас интересует «подноготная», подробную информацию об особенностях защиты DuckDuckGo можно найти на страницах <annotation type="learn_more_link">справки</annotation>.</string>
+    <string name="aboutDescription">Kahf — основанная в 2008 году независимая компания, специализирующаяся на защите личных данных в Интернете. Мы предлагаем простое решение тем, кто хочет, чтобы за ними перестали следить онлайн. Kahf своим примером показывает, что защита конфиденциальности онлайн возможна без всяких компромиссов.\n\nВ универсальном браузере Kahf вы найдете все те же привычные функции — вкладки, закладки, пароли и многое другое, а также <annotation type="privacy_protection_link">более десятка мощных средств защиты личной информации</annotation>, которых нет в стандартных настройках других популярных веб-обозревателей . Такой исчерпывающий набор инструментов может скрыть от посторонних глаз всю сетевую активность, включая поиск, навигацию и почту.\n\nСредства защиты конфиденциальности не требуют от пользователей знания технических особенностей или понимания сложных настроек .Достаточно сменить свой браузер на Kahf на всех устройствах, и конфиденциальность станет вашим режимом по умолчанию.\n\nЕсли же вас интересует «подноготная», подробную информацию об особенностях защиты Kahf можно найти на страницах <annotation type="learn_more_link">справки</annotation>.</string>
     <string name="no_suggestions">Нет предложений</string>
 
     <!-- Broken Site Activity -->
@@ -248,7 +246,7 @@
     <string name="removeAll">Удалить все</string>
 
     <!-- Widget -->
-    <string name="searchWidgetTextHint">Поиск в DuckDuckGo</string>
+    <string name="searchWidgetTextHint">Поиск в Kahf</string>
 
     <!-- Favorites widget -->
     <string name="addFavoriteMenuTitleHighlighted">👋 В избранное</string>
@@ -273,7 +271,7 @@
     <string name="surveyCtaLaunchButton">Участвовать в опросе</string>
     <string name="surveyCtaDismissButton">Нет, спасибо</string>
     <string name="surveyActivityTitle">Опрос пользователей</string>
-    <string name="surveyTitle">Опрос DuckDuckGo</string>
+    <string name="surveyTitle">Опрос Kahf</string>
     <string name="surveyDismissContentDescription">Закрыть опрос</string>
     <string name="surveyLoadingErrorTitle">О нет!</string>
     <string name="surveyLoadingErrorText">Сейчас невозможно загрузить опрос.\nПовторите попытку позже.</string>
@@ -288,14 +286,14 @@
     <string name="addWidgetInstruction1Label">1</string>
     <string name="addWidgetInstruction1">Удерживайте нажатие на главном экране, а затем откройте меню виджетов.</string>
     <string name="addWidgetInstruction2Label">2</string>
-    <string name="addWidgetInstruction2">Найдите виджет DuckDuckGo.</string>
+    <string name="addWidgetInstruction2">Найдите виджет Kahf.</string>
     <string name="addWidgetInstruction3Label">3</string>
     <string name="addWidgetInstruction3">Перетащите виджет на домашний экран.</string>
     <string name="addWidgetInstructionsButtonGoHome">Перейти на домашний экран</string>
     <string name="addWidgetInstructionsButtonClose">Закрыть</string>
 
     <!-- App Enjoyment / Rating / Feedback -->
-    <string name="appEnjoymentDialogTitle">Нравится DuckDuckGo?</string>
+    <string name="appEnjoymentDialogTitle">Нравится Kahf?</string>
     <string name="appEnjoymentDialogMessage">Мы будем рады услышать ваше мнение.</string>
     <string name="appEnjoymentDialogPositiveButton">Мне нравится</string>
     <string name="appEnjoymentDialogNegativeButton">Нужно доработать</string>
@@ -317,15 +315,15 @@
 
     <!-- Clear Notification -->
     <string name="clearNotificationTitle">Сброс данных вручную</string>
-    <string name="clearNotificationDescription">Настройте DuckDuckGo на автоматический сброс данных браузера после каждого сеанса.</string>
+    <string name="clearNotificationDescription">Настройте Kahf на автоматический сброс данных браузера после каждого сеанса.</string>
 
     <!-- Privacy Protection Notification -->
     <string name="privacyProtectionNotificationDefaultTitle">Мы защищаем вашу конфиденциальность</string>
     <string name="privacyProtectionNotificationReportTitle">Ваш отчёт о конфиденциальности</string>
-    <string name="privacyProtectionNotificationDefaultDescription">Приложение DuckDuckGo защищает ваши данные, блокируя трекеры и шифруя соединения.</string>
-    <string name="privacyProtectionNotificationUpgadeDescription" instruction="Placeholder is a the number of connections we have protected">Вы обезопасили свои данные, защитив %1$d незашифрованных соединений при использовании DuckDuckGo.</string>
-    <string name="privacyProtectionNotificationTrackerDescription" instruction="Placeholder is the numer of trackers blocked">Вы обезопасили свои данные, заблокировав %1$d трекеров при использовании DuckDuckGo.</string>
-    <string name="privacyProtectionNotificationBothDescription" instruction="%1$d is the number of trackers blocked and %2$d is the number of unencrypted connections">Вы обезопасили свои данные, заблокировав %1$d трекеров и защитив %2$d незашифрованных соединений при использовании DuckDuckGo.</string>
+    <string name="privacyProtectionNotificationDefaultDescription">Приложение Kahf защищает ваши данные, блокируя трекеры и шифруя соединения.</string>
+    <string name="privacyProtectionNotificationUpgadeDescription" instruction="Placeholder is a the number of connections we have protected">Вы обезопасили свои данные, защитив %1$d незашифрованных соединений при использовании Kahf.</string>
+    <string name="privacyProtectionNotificationTrackerDescription" instruction="Placeholder is the numer of trackers blocked">Вы обезопасили свои данные, заблокировав %1$d трекеров при использовании Kahf.</string>
+    <string name="privacyProtectionNotificationBothDescription" instruction="%1$d is the number of trackers blocked and %2$d is the number of unencrypted connections">Вы обезопасили свои данные, заблокировав %1$d трекеров и защитив %2$d незашифрованных соединений при использовании Kahf.</string>
     <string name="privacyProtectionNotificationLaunchButton">Продолжить</string>
 
     <!-- Authentication -->
@@ -337,7 +335,7 @@
     <string name="authenticationDialogPasswordHint">Пароль</string>
 
     <!-- User-facing label for when a user selects text and might want to search for that text -->
-    <string name="systemTextSearchMessage">Поиск в DuckDuckGo</string>
+    <string name="systemTextSearchMessage">Поиск в Kahf</string>
 
     <!-- App feedback disambiguation -->
     <string name="feedbackActivityTitle">Оставьте нам отзыв</string>
@@ -356,8 +354,8 @@
     <string name="websiteNotLoadingTitleShort">Проблемы с загрузкой сайтов</string>
     <string name="websiteNotLoadingSubtitle">На каком сайте возникает проблема?</string>
 
-    <string name="searchNotGoodEnoughTitleLong">Не устраивает поиск в DuckDuckGo</string>
-    <string name="searchNotGoodEnoughTitleShort">Проблемы с поиском DuckDuckGo</string>
+    <string name="searchNotGoodEnoughTitleLong">Не устраивает поиск в Kahf</string>
+    <string name="searchNotGoodEnoughTitleShort">Проблемы с поиском Kahf</string>
     <string name="searchNotGoodEnoughSubtitle">Какую функцию поиска мы могли бы добавить или улучшить?</string>
     <string name="searchNotGoodEnoughSubReasonTechnicalSearches">Программирование/технический поиск</string>
     <string name="searchNotGoodEnoughSubReasonGoogleLayout">Оформление должно быть больше похоже на поиск Google</string>
@@ -418,8 +416,8 @@
     <!-- System Search-->
     <string name="systemSearchDeviceAppLabel">С этого устройства</string>
     <string name="systemSearchAppNotFound">Приложение не найдено</string>
-    <string name="systemSearchOnboardingText">Спасибо, что выбрали DuckDuckGo!\nТеперь информация о ваших поисковых запросах под надежной защитой.</string>
-    <string name="systemSearchOnboardingFeaturesIntroText">Приложение DuckDuckGo также:</string>
+    <string name="systemSearchOnboardingText">Спасибо, что выбрали Kahf!\nТеперь информация о ваших поисковых запросах под надежной защитой.</string>
+    <string name="systemSearchOnboardingFeaturesIntroText">Приложение Kahf также:</string>
     <string name="systemSearchOnboardingFeatureOneText">Блокирует небезопасные трекеры.</string>
     <string name="systemSearchOnboardingFeatureTwoText">Принудительно использует шифрование на сайтах.</string>
     <string name="systemSearchOnboardingFeatureThreeText">Удаляет данные в одно нажатие.</string>
@@ -437,7 +435,7 @@
     <string name="daxDialogAppTpRetentionSecondaryButtonText">Не сейчас</string>
 
     <!-- New Onboarding Experience -->
-    <string name="onboardingWelcomeTitle">"Добро пожаловать в DuckDuckGo!"</string>
+    <string name="onboardingWelcomeTitle">"Добро пожаловать в Kahf!"</string>
     <string name="onboardingDaxText"><![CDATA[Интернет набит трекерами.<br/><br/>Но выход есть! Пользоваться сетью без слежки проще, чем вы думали.]]></string>
     <string name="onboardingLetsDoItButton">Поехали!</string>
     <string name="daxNonSerpCtaText"><![CDATA[Вы жмете на кнопки и листаете страницы — мы блокируем трекеры. <br/><br/>Пользуйтесь сайтами без страха!]]></string>
@@ -528,7 +526,7 @@
     <string name="dosErrorMessage">Соединение прервано. Этот сайт может навредить вашему устройству.</string>
 
     <!-- Precise Location -->
-    <string name="preciseLocationSystemDialogTitle">Включить определение геопозиции устройства для браузера DuckDuckGo с защитой данных?</string>
+    <string name="preciseLocationSystemDialogTitle">Включить определение геопозиции устройства для браузера Kahf с защитой данных?</string>
     <string name="preciseLocationSystemDialogSubtitle" instruction="%1$s and %2$s are both the name of the website requesting the location">%1$s запрашивает геопозицию вашего устройства. Сначала вам нужно разрешить приложению отправлять геопозицию устройства, затем %2$s сможет запрашивать разрешение.</string>
     <string name="preciseLocationSystemDialogAllow">Включить</string>
     <string name="preciseLocationSystemDialogDeny">Позже</string>
@@ -540,7 +538,7 @@
     <string name="preciseLocationSiteDialogAllowOnce">Только для этой сессии</string>
     <string name="preciseLocationSiteDialogDenyAlways">Всегда отказывать</string>
     <string name="preciseLocationSiteDialogDenyOnce">Отказать для этой сессии</string>
-    <string name="preciseLocationFeatureDescription">Сайты, которые вы посещаете, могут запрашивать информацию о геопозиции вашего устройства. Они не смогут получить к нему доступ, пока вы не предоставите разрешение. DuckDuckGo использует вашу геопозицию анонимно для предоставления результатов местного поиска.</string>
+    <string name="preciseLocationFeatureDescription">Сайты, которые вы посещаете, могут запрашивать информацию о геопозиции вашего устройства. Они не смогут получить к нему доступ, пока вы не предоставите разрешение. Kahf использует вашу геопозицию анонимно для предоставления результатов местного поиска.</string>
     <string name="preciseLocationToggleText">Сайты могут запрашивать моё местоположение</string>
     <string name="preciseLocationEmptyListHint">Ни одному сайту не предоставлено разрешение на доступ к геопозиции</string>
     <string name="preciseLocationNoSystemPermission">Чтобы управлять доступом к геопозиции, который вы предоставили отдельным сайтам, включите определение геопозиции для этого приложения в настройках Android.</string>
@@ -556,7 +554,7 @@
 
     <!--  Global Privacy Control-->
     <string name="globalPrivacyControlActivityTitle">Глобальный контроль конфиденциальности (GPC)</string>
-    <string name="globalPrivacyControlDescription"><![CDATA[DuckDuckGo блокирует многие трекеры автоматически. Функция «Глобальный контроль конфиденциальности» (GPC) позволяет затребовать от участвующих в программе сайтов остановить передачу и продажу ваших личных данных другим компаниям. <u><a href=\"\">Подробнее…</a><u/>]]></string>
+    <string name="globalPrivacyControlDescription"><![CDATA[Kahf блокирует многие трекеры автоматически. Функция «Глобальный контроль конфиденциальности» (GPC) позволяет затребовать от участвующих в программе сайтов остановить передачу и продажу ваших личных данных другим компаниям. <u><a href=\"\">Подробнее…</a><u/>]]></string>
     <string name="globalPrivacyControlSetting">Глобальный контроль конфиденциальности (GPC)</string>
     <string name="globalPrivacyControlToggle">Глобальный контроль конфиденциальности (GPC)</string>
     <string name="disabled">Отключено</string>
@@ -594,14 +592,14 @@
     <string name="settingsAccessibility">Универсальный доступ</string>
     <string name="accessibilityActivityTitle">Универсальный доступ</string>
     <string name="accessibilityFontSizeTitle">Размер текста</string>
-    <string name="accessibilityFontSizeHint">Потяните ползунок, чтобы выбрать приятный для глаз вид. Вид сайтов, которые вы просматриваете в DuckDuckGo, будет соответственно изменен автоматически.</string>
+    <string name="accessibilityFontSizeHint">Потяните ползунок, чтобы выбрать приятный для глаз вид. Вид сайтов, которые вы просматриваете в Kahf, будет соответственно изменен автоматически.</string>
     <string name="accessibilityForceZoomTitle">Масштабирование вручную</string>
     <string name="accessibilityForceZoomSubtitle">Используйте жесты масштабирования на любом сайте, даже если обычно он их не поддерживает</string>
     <string name="accessibilityTextSizeOverrideTitle">Размер текста</string>
-    <string name="accessibilityTextSizeOverrideSubtitle">DuckDuckGo скорректирует размер текста на сайтах согласно настройке ниже</string>
+    <string name="accessibilityTextSizeOverrideSubtitle">Kahf скорректирует размер текста на сайтах согласно настройке ниже</string>
 
     <!-- Privacy Policy -->
-    <string name="settingsPrivacyPolicyDuckduckgo">Политика конфиденциальности</string>
+    <string name="settingsPrivacyPolicyAsil">Политика конфиденциальности</string>
 
     <!-- Home Screen Widget -->
     <string name="homeScreenWidgetAdded" instruction="Placeholder is the name of the widget">Виджет %1$s добавлен на главный экран</string>
@@ -609,7 +607,7 @@
 
     <!-- MacOs Settings -->
     <string name="macos_settings_description">Полная конфиденциальность в Интернете, благодаря нашему приложению для Mac</string>
-    <string name="macos_settings_title">Браузер DuckDuckGo для Mac</string>
+    <string name="macos_settings_title">Браузер Kahf для Mac</string>
 
     <!-- Downloads -->
     <string name="downloadsMenuItem">Загрузки</string>
@@ -671,7 +669,7 @@
     <string name="downloadsNotifyMeSubtitle">Получайте уведомления по окончании загрузок.</string>
 
     <!-- Windows Settings -->
-    <string name="windows_settings_title">Браузер DuckDuckGo для Windows</string>
+    <string name="windows_settings_title">Браузер Kahf для Windows</string>
     <string name="windows_settings_description">Полная конфиденциальность в Интернете, благодаря нашему приложению для Windows</string>
     <string name="windows_settings_description_ready">Готово к загрузке</string>
     <string name="windows_settings_description_list">Теперь вы в списке!</string>
@@ -686,7 +684,7 @@
     <string name="closeAppTabsConfirmationDialogClose">Закрыть</string>
 
     <!-- Private voice search -->
-    <string name="accessibilityVoiceSearchSubtitle">Добавить опцию «Частный голосовой поиск» в адресную строку. Ваш голосовой запрос не сохраняется и никуда не передается, даже в DuckDuckGo.</string>
+    <string name="accessibilityVoiceSearchSubtitle">Добавить опцию «Частный голосовой поиск» в адресную строку. Ваш голосовой запрос не сохраняется и никуда не передается, даже в Kahf.</string>
     <string name="accessibilityVoiceSearchTitle">Конфиденциальный голосовой поиск</string>
 
     <!-- Uploading an image from the camera or choosing to use existing image -->
@@ -694,8 +692,8 @@
     <string name="imageCaptureCameraGalleryDisambiguationTitle">Загрузка изображения</string>
     <string name="imageCaptureCameraGalleryDisambiguationGalleryOption">Выбрать файл</string>
     <string name="imageCaptureCameraGalleryDisambiguationCameraOption">Снять фото</string>
-    <string name="imageCaptureCameraPermissionDeniedTitle">Разрешить DuckDuckGo запрашивать доступ к камере на этом устройстве</string>
-    <string name="imageCaptureCameraPermissionDeniedMessage">Если вы разрешите DuckDuckGo запрашивать доступ, сайты смогут использовать камеру.</string>
+    <string name="imageCaptureCameraPermissionDeniedTitle">Разрешить Kahf запрашивать доступ к камере на этом устройстве</string>
+    <string name="imageCaptureCameraPermissionDeniedMessage">Если вы разрешите Kahf запрашивать доступ, сайты смогут использовать камеру.</string>
     <string name="imageCaptureCameraPermissionDeniedPositiveButton">Открыть Настройки</string>
     <string name="imageCaptureCameraPermissionDeniedNegativeButton">Отменить</string>
 
@@ -705,15 +703,15 @@
     <string name="autofillLoginUpdatedSnackbarMessage">Пароль обновлен</string>
 
     <!-- Custom Tab -->
-    <string name="openInDdgMenuItemTitle">Открыть в DuckDuckGo</string>
-    <string name="runningInDdgMenuItemTitle">Выполняется в DuckDuckGo</string>
+    <string name="openInDdgMenuItemTitle">Открыть в Kahf</string>
+    <string name="runningInDdgMenuItemTitle">Выполняется в Kahf</string>
 
     <!-- SSL Error -->
     <string name="sslErrorTitle">Внимание! Возможно, сайт небезопасен</string>
     <string name="sslErrorHeadline" instruction="Placeholder is domain with certificate issues">Сертификат этого сайта недействителен. Возможно, вы пытаетесь подключиться к серверу, который выдает себя за %1$s, что ставит под угрозу вашу конфиденциальную информацию.</string>
     <string name="sslErrorLeaveCTA">Покинуть сайт</string>
     <string name="sslErrorAdvancedCTA">Дополнительно</string>
-    <string name="sslErrorExpandedHeadline">DuckDuckGo предупредит вас, если у сайта окажется недействительный сертификат.</string>
+    <string name="sslErrorExpandedHeadline">Kahf предупредит вас, если у сайта окажется недействительный сертификат.</string>
     <string name="sslErrorExpandedCTA"><![CDATA[<u>Принять риск и перейти на сайт<u/>]]></string>
     <string name="sslErrorExpiredMessage" instruction="Placeholder is domain with certificate issues">Срок действия сертификата безопасности сайта %1$s истек. Возможно, неверно задана конфигурация сайта, соединение перехвачено злоумышленником либо неправильно настроены системные часы.</string>
     <string name="sslErrorWrongHostMessage" instruction="Placeholder is domain with certificate issues">Сертификат безопасности сайта %1$s не подходит для домена *.%2$s. Возможно, неверно задана конфигурация сайта, соединение перехвачено злоумышленником либо неправильно настроены системные часы.</string>
@@ -732,7 +730,7 @@
     <string name="preOnboardingDaxDialog3Title">Супер! Добро пожаловать в утиную команду!</string>
     <string name="preOnboardingDaxDialog3Button">Начать просмотр</string>
     <string name="onboardingSearchDaxDialogTitle">Попробуйте поискать!</string>
-    <string name="onboardingSearchDaxDialogDescription">Ваши поисковые запросы в DuckDuckGo всегда анонимны.</string>
+    <string name="onboardingSearchDaxDialogDescription">Ваши поисковые запросы в Kahf всегда анонимны.</string>
     <string name="onboardingSearchDaxDialogOption1" instruction="translate &apos;duck&apos; too.">Как сказать «утка» по-английски?</string>
     <string name="onboardingSearchDaxDialogOption1English" instruction="translate &apos;duck&apos; too. Don&apos;t add question mark">Как сказать «утка» по-испански?</string>
     <string name="onboardingSearchQueryOption1">как сказать «утка» на английском?</string>
@@ -749,7 +747,7 @@
     <string name="onboardingSitesDaxDialogOption2">yahoo.com</string>
     <string name="onboardingSitesDaxDialogOption3">ebay.com</string>
     <string name="onboardingSitesDaxDialogOption4">Удиви меня!</string>
-    <string name="onboardingSerpDaxDialogDescription">Это — DuckDuckGo Search. Надежно. Быстро. Меньше рекламы.</string>
+    <string name="onboardingSerpDaxDialogDescription">Это — Kahf Search. Надежно. Быстро. Меньше рекламы.</string>
     <string name="onboardingSerpDaxDialogButton">Понятно</string>
     <string name="onboardingSitesSuggestionsDaxDialogTitle">А теперь попробуйте посетить сайт!</string>
     <plurals name="onboardingTrackersBlockedDialogDescription">
@@ -757,6 +755,41 @@
         <item quantity="few"><![CDATA[ и еще <b>%1$d сервиса</b> пытались вести за вами слежку, но мы их заблокировали.<br/><br/>☝️ Нажмите на щит, чтобы узнать подробности.]]></item>
         <item quantity="many"><![CDATA[ и еще <b>%1$d сервисов</b> пытались вести за вами слежку, но мы их заблокировали.<br/><br/>☝️ Нажмите на щит, чтобы узнать подробности.]]></item>
         <item quantity="other"><![CDATA[ и <b>другие сервисы (еще %1$d)</b> пытались вести за вами слежку, но мы их заблокировали.<br/><br/>☝️ Нажмите на щит, чтобы узнать подробности.]]></item>
+    </plurals>
+    <string name="safegaze_popup_report_title">Пожалуйста, сообщите о любых ошибках или предложениях через эту форму</string>
+    <string name="safegaze_popup_support_title">Поддержите этот проект</string>
+    <string name="safegaze_popup_woman_title">Я - Женщина</string>
+    <string name="safegaze_popup_man_title">Я - Мужчина</string>
+    <string name="safegaze_popup_comingsoon_title">Скоро будет доступно</string>
+    <string name="safegaze_popup_gendermode_title">Режим пола</string>
+    <string name="safegaze_popup_sinfulacts_title">Избежанные греховные поступки</string>
+    <string name="safegaze_popup_thispage_title">Эта страница</string>
+    <string name="safegaze_popup_lifetime_title">Продолжительность жизни</string>
+    <string name="safegaze_popup_alwayspurify_title">Всегда очищать</string>
+    <string name="safegaze_popup_neverpurify_title">Никогда не очищать</string>
+    <string name="safegaze_popup_safegazeup_title">SafeGaze UP</string>
+    <string name="safegaze_popup_imageblur_title">Интенсивность размытия изображения</string>
+    <string name="safegaze_popup_takecontrol_title">Улучшите свой онлайн-опыт с помощью SafeGaze, нашего расширения для очистки изображений, которое защищает ваше зрение от неподходящего контента.</string>
+    <string name="safegaze_popup_turnon_title">Включить SafeGaze</string>
+
+
+    <!-- Bookmarks -->
+    <string name="searchBookmarks">Поиск по закладкам</string>
+    <string name="deleteFolder" instruction="%1$s is the folder name">"Удалить папку «%1$s»?"</string>
+    <string name="deleteBookmark" instruction="%1$s is the bookmark name">"Удалить закладку «%1$s»?"</string>
+    <string name="bookmarkAddedInBookmarks" instruction="%1$s is the folder name">Закладка добавлена в папку «%1$s»</string>
+    <string name="addToFavorites">Добавить в избранное</string>
+    <string name="editBookmark">Редактировать закладку</string>
+    <string name="importBookmarksDescription">Если ваши закладки хранятся в другом браузере, вы можете импортировать их в Kahf.</string>
+    <string name="importBookmarks">Импортировать закладки</string>
+    <string name="noResultsFor" instruction="%1$s is the search term">Поиск «%1$s» не дал результатов</string>
+    <string name="removeFromFavorites">Удалить из избранного</string>
+    <string name="addToFavoritesMenu">Добавить в избранное</string>
+    <plurals name="bookmarkFolderDeleteMessage">
+        <item quantity="one">Вы точно хотите удалить эту папку с %1$d объектом?</item>
+        <item quantity="few">Вы точно хотите удалить эту папку с %1$d объектами?</item>
+        <item quantity="many">Вы точно хотите удалить эту папку с %1$d объектами?</item>
+        <item quantity="other">Вы точно хотите удалить эту папку с объектами (%1$d)?</item>
     </plurals>
     <plurals name="onboardingTrackersBlockedZeroDialogDescription" tools:ignore="ImpliedQuantity">
         <item quantity="one"><![CDATA[ пытался вести за вами слежку, но мы его заблокировали.<br/><br/>☝️ Нажмите на щит, чтобы узнать подробности.]]></item>

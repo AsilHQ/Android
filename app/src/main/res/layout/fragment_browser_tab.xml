@@ -23,6 +23,13 @@
 
     <include layout="@layout/include_omnibar_toolbar" />
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:src="@drawable/background_mosque"
+        android:scaleType="centerCrop"/>
+
     <FrameLayout
         android:id="@+id/webViewFullScreenContainer"
         android:layout_width="match_parent"
@@ -109,6 +116,12 @@
                 <include
                     android:id="@+id/includeErrorView"
                     layout="@layout/include_error_view"
+                    android:visibility="gone" />
+
+                <WebView
+                    android:id="@+id/headerlessKahfTubeWebview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:visibility="gone" />
             </FrameLayout>
         </com.duckduckgo.app.browser.ui.ScrollAwareRefreshLayout>

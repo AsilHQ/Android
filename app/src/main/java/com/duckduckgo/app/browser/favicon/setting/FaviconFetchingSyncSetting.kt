@@ -27,7 +27,6 @@ import com.duckduckgo.app.browser.favicon.setting.FaviconFetchingViewModel.ViewS
 import com.duckduckgo.common.ui.viewbinding.viewBinding
 import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.di.scopes.*
-import com.duckduckgo.saved.sites.impl.databinding.*
 import dagger.android.support.*
 import javax.inject.*
 import kotlinx.coroutines.CoroutineScope
@@ -61,7 +60,7 @@ class FaviconFetchingSyncSetting @JvmOverloads constructor(
         AndroidSupportInjection.inject(this)
         super.onAttachedToWindow()
 
-        binding.syncFaviconsFetching.setOnCheckedChangeListener { buttonView, isChecked ->
+        binding.syncFaviconsFetching.setOnCheckedChangeListener { _, isChecked ->
             viewModel.onFaviconFetchingSettingChanged(isChecked)
         }
 

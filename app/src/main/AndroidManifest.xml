@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.duckduckgo.app.browser">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -76,6 +75,9 @@
         <meta-data
             android:name="android.webkit.WebView.EnableSafeBrowsing"
             android:value="false" />
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
 
         <!-- Renamed to allow for the introduction of custom icons without breaking existing shortcuts -->
         <activity
@@ -109,8 +111,8 @@
             android:name="com.duckduckgo.app.launch.LauncherBlue"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_blue"
-            android:roundIcon="@mipmap/ic_launcher_blue_round"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher_round"
             android:targetActivity="com.duckduckgo.app.launch.LaunchBridgeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -124,8 +126,8 @@
             android:name="com.duckduckgo.app.launch.LauncherBlack"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_black"
-            android:roundIcon="@mipmap/ic_launcher_black_round"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher_round"
             android:targetActivity="com.duckduckgo.app.launch.LaunchBridgeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -139,8 +141,8 @@
             android:name="com.duckduckgo.app.launch.LauncherGold"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_gold"
-            android:roundIcon="@mipmap/ic_launcher_gold_round"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher_round"
             android:targetActivity="com.duckduckgo.app.launch.LaunchBridgeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -154,8 +156,8 @@
             android:name="com.duckduckgo.app.launch.LauncherGreen"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_green"
-            android:roundIcon="@mipmap/ic_launcher_green_round"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher_round"
             android:targetActivity="com.duckduckgo.app.launch.LaunchBridgeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -169,8 +171,8 @@
             android:name="com.duckduckgo.app.launch.LauncherPurple"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_purple"
-            android:roundIcon="@mipmap/ic_launcher_purple_round"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher_round"
             android:targetActivity="com.duckduckgo.app.launch.LaunchBridgeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -184,9 +186,9 @@
             android:name="com.duckduckgo.app.launch.LauncherSilhoutte"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_silhouette"
+            android:icon="@mipmap/ic_launcher"
             android:label="@string/appName"
-            android:roundIcon="@mipmap/ic_launcher_silhouette_round"
+            android:roundIcon="@mipmap/ic_launcher_round"
             android:targetActivity="com.duckduckgo.app.launch.LaunchBridgeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -450,6 +452,20 @@
             android:name="com.duckduckgo.app.downloads.DownloadsActivity"
             android:exported="false"
             android:label="@string/downloadsActivityTitle"
+            android:parentActivityName=".BrowserActivity" />
+
+        <activity
+            android:name="org.halalz.kahftube.view.ProfilePageActivity"
+            android:exported="false"
+            android:label="@string/profile"
+            android:theme="@style/Theme.KahfTube"
+            android:parentActivityName=".BrowserActivity" />
+
+        <activity
+            android:name="org.halalz.kahftube.view.PreferencePageActivity"
+            android:exported="false"
+            android:label="@string/preference"
+            android:theme="@style/Theme.KahfTube"
             android:parentActivityName=".BrowserActivity" />
 
         <service

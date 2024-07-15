@@ -39,8 +39,12 @@ import android.webkit.WebView
 import androidx.annotation.AnyThread
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import androidx.webkit.JavaScriptReplyProxy
 import com.duckduckgo.adclick.api.AdClickManager
 import com.duckduckgo.anvil.annotations.ContributesViewModel
@@ -63,6 +67,7 @@ import com.duckduckgo.app.browser.SSLErrorType.WRONG_HOST
 import com.duckduckgo.app.browser.SpecialUrlDetector.UrlType.AppLink
 import com.duckduckgo.app.browser.SpecialUrlDetector.UrlType.NonHttpAppLink
 import com.duckduckgo.app.browser.SpecialUrlDetector.UrlType.ShouldLaunchPrivacyProLink
+import com.duckduckgo.app.browser.WebViewErrorResponse.BLOCKED
 import com.duckduckgo.app.browser.WebViewErrorResponse.LOADING
 import com.duckduckgo.app.browser.WebViewErrorResponse.OMITTED
 import com.duckduckgo.app.browser.addtohome.AddToHomeCapabilityDetector
@@ -108,13 +113,12 @@ import com.duckduckgo.app.browser.viewstate.PrivacyShieldViewState
 import com.duckduckgo.app.browser.viewstate.SavedSiteChangedViewState
 import com.duckduckgo.app.browser.webview.SslWarningLayout.Action
 import com.duckduckgo.app.cta.ui.*
-import com.duckduckgo.app.cta.ui.OnboardingDaxDialogCta
 import com.duckduckgo.app.di.AppCoroutineScope
+import com.duckduckgo.app.dns.CustomDnsResolver
 import com.duckduckgo.app.fire.fireproofwebsite.data.FireproofWebsiteEntity
 import com.duckduckgo.app.fire.fireproofwebsite.data.FireproofWebsiteRepository
 import com.duckduckgo.app.fire.fireproofwebsite.ui.AutomaticFireproofSetting.ALWAYS
 import com.duckduckgo.app.fire.fireproofwebsite.ui.AutomaticFireproofSetting.ASK_EVERY_TIME
-import com.duckduckgo.app.global.*
 import com.duckduckgo.app.global.events.db.UserEventKey
 import com.duckduckgo.app.global.events.db.UserEventsStore
 import com.duckduckgo.app.global.model.PrivacyShield
@@ -199,17 +203,35 @@ import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import java.net.URI
-import java.net.URISyntaxException
-import java.util.*
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONObject
 import timber.log.Timber
+import java.io.File
+import java.net.URI
+import java.net.URISyntaxException
+import java.util.Locale
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
+import kotlin.collections.set
 
 @ContributesViewModel(FragmentScope::class)
 class BrowserTabViewModel @Inject constructor(
@@ -279,6 +301,7 @@ class BrowserTabViewModel @Inject constructor(
     NavigationHistoryListener {
 
     private var buildingSiteFactoryJob: Job? = null
+    private val dnsResolver = CustomDnsResolver(dispatchers)
     private var hasUserSeenHistoryIAM = false
     private var lastAutoCompleteState: AutoCompleteViewState? = null
 
@@ -305,6 +328,7 @@ class BrowserTabViewModel @Inject constructor(
     var siteLiveData: MutableLiveData<Site> = MutableLiveData()
     val privacyShieldViewState: MutableLiveData<PrivacyShieldViewState> = MutableLiveData()
 
+    var privateDnsEnabled = true
     // if navigating from home, want to know if a site was loaded previously to decide whether to reset WebView
     private var returnedHomeAfterSiteLoaded = false
     var skipHome = false
@@ -330,6 +354,8 @@ class BrowserTabViewModel @Inject constructor(
 
     val url: String?
         get() = site?.url
+
+    val host: String get() = site?.domain ?: ""
 
     val title: String?
         get() = site?.title
@@ -783,7 +809,7 @@ class BrowserTabViewModel @Inject constructor(
 
         val verticalParameter = extractVerticalParameter(url)
         var urlToNavigate = queryUrlConverter.convertQueryToUrl(trimmedInput, verticalParameter, queryOrigin)
-
+        var wvError = OMITTED
         when (val type = specialUrlDetector.determineType(trimmedInput)) {
             is ShouldLaunchPrivacyProLink -> {
                 if (webNavigationState == null || webNavigationState?.hasNavigationHistory == false) {
@@ -824,9 +850,20 @@ class BrowserTabViewModel @Inject constructor(
                     clearPreviousUrl()
                 }
 
-                Timber.w("SSLError: navigate to $urlToNavigate")
-                site?.nextUrl = urlToNavigate
-                command.value = NavigationCommand.Navigate(urlToNavigate, getUrlHeaders(urlToNavigate))
+                    if (privateDnsEnabled) {
+                    runBlocking {
+                        val ip = dnsResolver.sendDnsQueries(urlToNavigate.toUri())
+                        if (ip == "0.0.0.0") {
+                            wvError = BLOCKED
+                        } else {
+                            site?.nextUrl = urlToNavigate
+                            command.value = NavigationCommand.Navigate(urlToNavigate, getUrlHeaders(urlToNavigate))
+                        }
+                    }
+                } else {
+                    site?.nextUrl = urlToNavigate
+                    command.value = NavigationCommand.Navigate(urlToNavigate, getUrlHeaders(urlToNavigate))
+                }
             }
         }
 
@@ -841,7 +878,7 @@ class BrowserTabViewModel @Inject constructor(
             browserShowing = true,
             showClearButton = false,
             showVoiceSearch = voiceSearchAvailability.shouldShowVoiceSearch(urlLoaded = urlToNavigate),
-            browserError = OMITTED,
+            browserError = wvError,
             sslError = NONE,
         )
         autoCompleteViewState.value =
@@ -1884,16 +1921,8 @@ class BrowserTabViewModel @Inject constructor(
             showPrivacyShield = HighlightableButton.Visible(enabled = showPrivacyShield),
             showSearchIcon = showSearchIcon,
             showTabsButton = showControls,
-            fireButton = if (showControls) {
-                HighlightableButton.Visible(highlighted = showPulseAnimation.value ?: false)
-            } else {
-                HighlightableButton.Gone
-            },
-            showMenuButton = if (showControls) {
-                HighlightableButton.Visible()
-            } else {
-                HighlightableButton.Gone
-            },
+            fireButton = HighlightableButton.Visible(highlighted = showPulseAnimation.value ?: false),
+            showMenuButton = HighlightableButton.Visible(),
             showClearButton = showClearButton,
             showVoiceSearch = voiceSearchAvailability.shouldShowVoiceSearch(
                 hasFocus = hasFocus,
@@ -3334,6 +3363,17 @@ class BrowserTabViewModel @Inject constructor(
 
     private fun isUrl(text: String): Boolean {
         return URLUtil.isNetworkUrl(text) || URLUtil.isAssetUrl(text) || URLUtil.isFileUrl(text) || URLUtil.isContentUrl(text)
+    }
+
+    fun removeHostFromSafeGazeWhiteList(hostName: String, filePath: String) {
+        val host = hostName.replace("www.", "")
+        if (host.isNotEmpty()) {
+            val file = File(filePath)
+            if (file.exists()) {
+                // Read lines, filter out the host, and write back to the file
+                file.writeText(file.readLines().filterNot { it == host }.joinToString("\n"))
+            }
+        }
     }
 
     companion object {

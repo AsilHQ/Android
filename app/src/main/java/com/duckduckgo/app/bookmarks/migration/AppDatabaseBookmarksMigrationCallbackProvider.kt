@@ -22,7 +22,7 @@ import com.duckduckgo.appbuildconfig.api.*
 import com.duckduckgo.common.utils.DefaultDispatcherProvider
 import dagger.Lazy
 
-class AppDatabaseBookmarksMigrationCallbackProvider constructor(
+class AppDatabaseBookmarksMigrationCallbackProvider(
     private val appDatabaseProvider: Lazy<AppDatabase>,
     private val appBuildConfig: AppBuildConfig,
 ) {

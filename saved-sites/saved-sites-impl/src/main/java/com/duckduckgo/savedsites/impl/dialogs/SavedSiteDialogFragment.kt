@@ -100,7 +100,7 @@ abstract class SavedSiteDialogFragment : DialogFragment() {
         }
         configureToolbar(binding.savedSiteAppBar.toolbar)
         configureUI()
-        initialTitle = binding.titleInput.text.toString()
+        initialTitle = binding.titleInput.text
         initialParentFolderId = arguments?.getString(EditBookmarkFolderDialogFragment.KEY_PARENT_FOLDER_ID)
         addTextWatchers()
         showKeyboard(binding.titleInput)

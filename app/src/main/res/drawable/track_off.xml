@@ -1,0 +1,4 @@
+<!-- track_off.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="#E1E1E1" /> <!-- Color when switch is "off" -->
+</shape>

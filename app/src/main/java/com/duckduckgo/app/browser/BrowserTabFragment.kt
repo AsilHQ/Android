@@ -22,16 +22,33 @@ import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.app.ActivityOptions
 import android.app.PendingIntent
-import android.content.*
+import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.content.res.AssetManager
+import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
+import android.net.ConnectivityManager
 import android.net.Uri
-import android.os.*
+import android.os.Build
+import android.os.Bundle
+import android.os.Environment
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.print.PrintAttributes
 import android.print.PrintManager
 import android.provider.MediaStore
@@ -40,9 +57,21 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.StyleSpan
-import android.view.*
-import android.view.View.*
+import android.util.DisplayMetrics
+import android.view.ContextMenu
+import android.view.Gravity
+import android.view.KeyEvent
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.View
+import android.view.View.GONE
+import android.view.View.OnFocusChangeListener
+import android.view.View.VISIBLE
+import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
+import android.view.WindowManager
+import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
 import android.webkit.PermissionRequest
 import android.webkit.SslErrorHandler
@@ -53,28 +82,44 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebView.FindListener
 import android.webkit.WebView.HitTestResult
-import android.webkit.WebView.HitTestResult.*
+import android.webkit.WebView.HitTestResult.IMAGE_TYPE
+import android.webkit.WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE
+import android.webkit.WebView.HitTestResult.UNKNOWN_TYPE
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.PopupWindow
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.AnyThread
 import androidx.annotation.StringRes
+import androidx.appcompat.widget.AppCompatImageView
+import androidx.appcompat.widget.SwitchCompat
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import androidx.core.text.toSpannable
-import androidx.core.view.*
+import androidx.core.view.doOnLayout
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
+import androidx.core.view.postDelayed
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commitNow
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.transaction
-import androidx.lifecycle.*
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.webkit.JavaScriptReplyProxy
 import androidx.webkit.WebMessageCompat
@@ -88,6 +133,7 @@ import com.duckduckgo.app.browser.BrowserTabViewModel.FileChooserRequestedParams
 import com.duckduckgo.app.browser.BrowserTabViewModel.LocationPermission
 import com.duckduckgo.app.browser.R.string
 import com.duckduckgo.app.browser.SSLErrorType.NONE
+import com.duckduckgo.app.browser.WebViewErrorResponse.BLOCKED
 import com.duckduckgo.app.browser.WebViewErrorResponse.LOADING
 import com.duckduckgo.app.browser.WebViewErrorResponse.OMITTED
 import com.duckduckgo.app.browser.applinks.AppLinksLauncher
@@ -105,7 +151,11 @@ import com.duckduckgo.app.browser.databinding.ContentSystemLocationPermissionDia
 import com.duckduckgo.app.browser.databinding.FragmentBrowserTabBinding
 import com.duckduckgo.app.browser.databinding.HttpAuthenticationBinding
 import com.duckduckgo.app.browser.databinding.IncludeOmnibarToolbarBinding
+import com.duckduckgo.app.browser.databinding.KahfDnsPopUpBinding
+import com.duckduckgo.app.browser.databinding.KahfDnsSwitchBinding
 import com.duckduckgo.app.browser.databinding.PopupWindowBrowserMenuBinding
+import com.duckduckgo.app.browser.databinding.SafeGazePopUpCloseBinding
+import com.duckduckgo.app.browser.databinding.SafeGazePopUpOpenBinding
 import com.duckduckgo.app.browser.downloader.BlobConverterInjector
 import com.duckduckgo.app.browser.favicon.FaviconManager
 import com.duckduckgo.app.browser.filechooser.FileChooserIntentBuilder
@@ -133,6 +183,7 @@ import com.duckduckgo.app.browser.print.PrintDocumentAdapterFactory
 import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.browser.print.SinglePrintSafeguardFeature
 import com.duckduckgo.app.browser.remotemessage.SharePromoLinkRMFBroadCastReceiver
+import com.duckduckgo.app.browser.safe_gaze.SafeGazeJsInterface
 import com.duckduckgo.app.browser.session.WebViewSessionStorage
 import com.duckduckgo.app.browser.shortcut.ShortcutBuilder
 import com.duckduckgo.app.browser.tabpreview.WebViewPreviewGenerator
@@ -156,8 +207,13 @@ import com.duckduckgo.app.browser.viewstate.SavedSiteChangedViewState
 import com.duckduckgo.app.browser.webshare.WebShareChooser
 import com.duckduckgo.app.browser.webview.WebContentDebugging
 import com.duckduckgo.app.browser.webview.WebViewBlobDownloadFeature
-import com.duckduckgo.app.cta.ui.*
+import com.duckduckgo.app.cta.ui.Cta
+import com.duckduckgo.app.cta.ui.CtaViewModel
+import com.duckduckgo.app.cta.ui.DaxBubbleCta
+import com.duckduckgo.app.cta.ui.HomePanelCta
+import com.duckduckgo.app.cta.ui.OnboardingDaxDialogCta
 import com.duckduckgo.app.di.AppCoroutineScope
+import com.duckduckgo.app.dns.CustomDnsResolver
 import com.duckduckgo.app.fire.fireproofwebsite.data.FireproofWebsiteEntity
 import com.duckduckgo.app.fire.fireproofwebsite.data.website
 import com.duckduckgo.app.global.model.PrivacyShield.UNKNOWN
@@ -170,12 +226,18 @@ import com.duckduckgo.app.global.view.isImmersiveModeEnabled
 import com.duckduckgo.app.global.view.launchDefaultAppActivity
 import com.duckduckgo.app.global.view.renderIfChanged
 import com.duckduckgo.app.global.view.toggleFullScreen
+import com.duckduckgo.app.kahftube.KahfTubeInterface
+import com.duckduckgo.app.kahftube.KahfTubeInterface.JavaScriptCallBack
+import com.duckduckgo.app.kahftube.KahfTubeWebViewClient
+import com.duckduckgo.app.kahftube.SharedPreferenceManager
+import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
 import com.duckduckgo.app.location.data.LocationPermissionType
 import com.duckduckgo.app.pixels.AppPixelName
 import com.duckduckgo.app.privatesearch.PrivateSearchScreenNoParams
+import com.duckduckgo.app.safegaze.genderdetection.GenderDetector
+import com.duckduckgo.app.safegaze.nsfwdetection.NsfwDetector
 import com.duckduckgo.app.settings.db.SettingsDataStore
 import com.duckduckgo.app.statistics.pixels.Pixel
-import com.duckduckgo.app.statistics.pixels.Pixel.PixelParameter.FIRE_BUTTON_STATE
 import com.duckduckgo.app.tabs.model.TabEntity
 import com.duckduckgo.app.tabs.ui.GridViewColumnCalculator
 import com.duckduckgo.app.tabs.ui.TabSwitcherActivity
@@ -236,6 +298,14 @@ import com.duckduckgo.common.ui.viewbinding.viewBinding
 import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.FragmentViewModelFactory
+import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
+import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
+import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
+import com.duckduckgo.common.utils.SAFE_GAZE_INTERFACE
+import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
+import com.duckduckgo.common.utils.SAFE_GAZE_PRIVATE_DNS
+import com.duckduckgo.common.utils.SAFE_GAZE_REPORT_URL
+import com.duckduckgo.common.utils.extensions.dpToPx
 import com.duckduckgo.common.utils.extensions.html
 import com.duckduckgo.common.utils.extensions.websiteFromGeoLocationsApiOrigin
 import com.duckduckgo.common.utils.extractDomain
@@ -280,17 +350,30 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.hoko.blur.HokoBlur
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.halalz.kahftube.network.ApiService
+import org.halalz.kahftube.network.RequestListener
+import org.halalz.kahftube.view.ProfilePageActivity
+import org.json.JSONObject
+import timber.log.Timber
+import java.io.BufferedReader
 import java.io.File
+import java.io.IOException
+import java.io.InputStreamReader
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.cancellable
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import org.json.JSONObject
-import timber.log.Timber
 
 @InjectWith(FragmentScope::class)
 class BrowserTabFragment :
@@ -491,6 +574,15 @@ class BrowserTabFragment :
     @Inject
     lateinit var singlePrintSafeguardFeature: SinglePrintSafeguardFeature
 
+    @Inject
+    lateinit var dnsResolver: CustomDnsResolver
+
+    @Inject
+    lateinit var nsfwDetector: NsfwDetector
+
+    @Inject
+    lateinit var genderDetector: GenderDetector
+
     /**
      * We use this to monitor whether the user was seeing the in-context Email Protection signup prompt
      * This is needed because the activity stack will be cleared if an external link is opened in our browser
@@ -527,6 +619,8 @@ class BrowserTabFragment :
 
     private val downloadMessagesJob = ConflatedJob()
 
+    private lateinit var safeGazeInterface: SafeGazeJsInterface
+
     private val viewModel: BrowserTabViewModel by lazy {
         val viewModel = ViewModelProvider(this, viewModelFactory).get(BrowserTabViewModel::class.java)
         viewModel.loadData(tabId, initialUrl, skipHome)
@@ -539,6 +633,12 @@ class BrowserTabFragment :
     private lateinit var omnibar: IncludeOmnibarToolbarBinding
 
     private lateinit var webViewContainer: FrameLayout
+
+    private lateinit var connectivityManager: ConnectivityManager
+
+    private lateinit var sharedPreferences: SharedPreferences
+
+    private lateinit var editor: SharedPreferences.Editor
 
     private var bookmarksBottomSheetDialog: BookmarksBottomSheetDialog.Builder? = null
 
@@ -571,10 +671,13 @@ class BrowserTabFragment :
     private val tabsButton: TabSwitcherButton?
         get() = omnibar.tabsMenu
 
-    private val fireMenuButton: ViewGroup?
-        get() = omnibar.fireIconMenu
+    private val safeGazeIcon: AppCompatImageView
+        get() = omnibar.safeGazeIcon
 
-    private val menuButton: ViewGroup?
+    private val kahfDnsdIcon: AppCompatImageView
+        get() = omnibar.kahfDnsIcon
+
+    private val menuButton: ViewGroup
         get() = omnibar.browserMenu
 
     private var webView: DuckDuckGoWebView? = null
@@ -779,6 +882,8 @@ class BrowserTabFragment :
         removeDaxDialogFromActivity()
         renderer = BrowserTabFragmentRenderer()
         decorator = BrowserTabFragmentDecorator()
+        sharedPreferences = requireContext().getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
+        editor = sharedPreferences.edit()
         voiceSearchLauncher.registerResultsCallback(this, requireActivity(), BROWSER) {
             when (it) {
                 is VoiceSearchLauncher.Event.VoiceRecognitionSuccess -> {
@@ -810,6 +915,11 @@ class BrowserTabFragment :
             }
             pendingUploadTask = null
         }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        safeGazeInterface.cancelOngoingImageProcessing()
     }
 
     private fun resumeWebView() {
@@ -866,11 +976,409 @@ class BrowserTabFragment :
             (dialog as EditSavedSiteDialogFragment).listener = viewModel
             dialog.deleteBookmarkListener = viewModel
         }
+        handleSafeGazePopUp()
+        prepareHeadlessKahfTubeWebView()
+        handleKahfIconClick()
+    }
+
+    @SuppressLint("InflateParams")
+    private fun handleKahfIconClick(){
+        kahfDnsdIcon.setOnClickListener {
+            val popupView = LayoutInflater.from(context).inflate(R.layout.kahf_dns_pop_up, null)
+            val popupBinding = KahfDnsPopUpBinding.bind(popupView)
+            val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            val iconRect = Rect()
+            kahfDnsdIcon.getGlobalVisibleRect(iconRect)
+            val y = iconRect.top
+            val x = iconRect.left
+            popupWindow.apply {
+                animationStyle = 2132017505
+                isFocusable = true
+            }
+            popupBinding.apply {
+                kahfDnsdIcon.post {
+                    val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
+                    val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
+                    val newPopUpPosition = (x - popUpLayingOut) - 40
+                    popupWindow.showAtLocation(
+                        kahfDnsdIcon,
+                        Gravity.NO_GRAVITY,
+                        newPopUpPosition,
+                        (y + omnibar.toolbar.height) - 20,
+                    )
+                    protectedTextView.setOnClickListener {
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.data = Uri.parse("https://check.kahfdns.com")
+                        startActivity(intent)
+                    }
+                    val pointerArrow =
+                        popupView.findViewById<ImageView>(R.id.pointer_arrow_kahf_dns_image_view)
+                    val pointerArrowParams =
+                        pointerArrow.layoutParams as ConstraintLayout.LayoutParams
+                    pointerArrowParams.rightMargin = leftOverDevicePixel - 93
+                    pointerArrow.layoutParams = pointerArrowParams
+
+                    if (isPrivateDnsEnabled()){
+                        kahfDnsToggleButton.isChecked = true
+                        kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
+                        protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
+                        kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
+                    } else{
+                        kahfDnsToggleButton.isChecked = false
+                        kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
+                        protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
+                        kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.WHITE)
+                    }
+                    handleTrackTint(kahfDnsToggleButton.isChecked, kahfDnsToggleButton)
+                    kahfDnsToggleButton.setOnCheckedChangeListener { _, isChecked ->
+                        handleTrackTint(isChecked, kahfDnsToggleButton)
+                        if (isPrivateDnsEnabled()){
+                            updatePrivateDnsSettings(false)
+
+                            kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
+                            protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
+                        } else{
+                            updatePrivateDnsSettings(true)
+
+                            kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
+                            protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    private fun handleTrackTint(isChecked: Boolean, switch: SwitchCompat){
+        if (isChecked) {
+            switch.trackTintList = ColorStateList.valueOf(0xFF11B9CD.toInt())
+        } else {
+            switch.trackTintList = ColorStateList.valueOf(0xFFE1E1E1.toInt())
+        }
+    }
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun prepareHeadlessKahfTubeWebView() {
+        //showEmailAccessForKahfTubeDialog()
+        binding.headerlessKahfTubeWebview.apply {
+            settings.javaScriptEnabled = true
+            webViewClient = KahfTubeWebViewClient()
+            addJavascriptInterface(
+                KahfTubeInterface(
+                    requireContext(),
+                    object :
+                        JavaScriptCallBack {
+                        override fun showToast(message: String) {
+                            Toast.makeText(context, "KahfTubeInterface: $message", Toast.LENGTH_SHORT).show()
+                        }
+
+                        override fun callHandler(
+                            name: String?,
+                            email: String?,
+                            imgSrc: String?
+                        ) {
+                            var userName = name
+                            var userEmail = email
+
+                            if (userName.isNullOrEmpty() && userEmail.isNullOrEmpty()) {
+                                userName = "Guest"
+                                userEmail = "guest@gmail.com"
+                            }
+                            val sharedPref = SharedPreferenceManager(requireContext())
+                            sharedPref.setValue(KeyString.NAME, userName)
+                            sharedPref.setValue(KeyString.EMAIL, userEmail)
+                            sharedPref.setValue(KeyString.IMAGE_SRC, imgSrc)
+
+                            if (!userName.isNullOrEmpty() && !userEmail.isNullOrEmpty()) {
+                                makeKahfTubeRegisterRequest(userName, userEmail)
+                            }
+                        }
+
+                        override fun shouldRestart() {
+                            //recreate()
+                        }
+                    },
+                ),
+                "KahfTubeInterface",
+            )
+            loadUrl("https://m.youtube.com/?noapp")
+        }
+    }
+
+    private fun makeKahfTubeRegisterRequest(
+        name: String,
+        email: String
+    ) {
+        ApiService().registerApi(
+            name = name, email = email,
+            callback = object : RequestListener {
+                override fun onSuccess(response: String) {
+                    Timber.d("response: $response")
+                    makeKahfTubeLoginRequest(email = email)
+                }
+
+                override fun onError(error: String) {
+                    Timber.e("error: $error")
+                }
+            },
+        )
+    }
+
+    private fun makeKahfTubeLoginRequest(email: String) {
+        ApiService().loginApi(
+            email = email,
+            callback = object : RequestListener {
+                override fun onSuccess(response: String) {
+                    Timber.d("response: $response")
+                    val responseJSONObject = JSONObject(response)
+                    val dataObject = responseJSONObject.getJSONObject("data")
+                    val token = responseJSONObject.getString("token")
+                    Timber.d("response token: $token")
+                    SharedPreferenceManager(requireContext()).setValue(KeyString.TOKEN, token)
+                }
+
+                override fun onError(error: String) {
+                    Timber.e("error: $error")
+                }
+            },
+        )
+    }
+
+    private fun handleSafeGazeOpenView(view: View){
+        val safeGazeOpenViewPopUpBinding = SafeGazePopUpOpenBinding.bind(view)
+        safeGazeOpenViewPopUpBinding.apply {
+            shareCardImageView.setOnClickListener {
+                val shareIntent = Intent(Intent.ACTION_SEND)
+                shareIntent.type = "text/plain"
+                shareIntent.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=org.halalz.kahfbrowser")
+                startActivity(Intent.createChooser(shareIntent, "Share via"))
+            }
+            handleProgressBar(view, blurImageView)
+            loadImageWithBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE), blurImageView)
+            reportTextViewOpen.setOnClickListener {
+                val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                startActivity(intent)
+            }
+            supportThisProjectButton.setOnClickListener {
+                val url = "https://www.patreon.com/SafeGaze"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                if (intent.resolveActivity(requireActivity().packageManager) != null) {
+                    startActivity(intent)
+                }
+            }
+            urlOpenTextView.text = viewModel.host
+            thisPageCounterTextView.text = sharedPreferences.getInt("session_censored_count", 0).toString()
+            lifetimeCounterTextView.text = sharedPreferences.getInt("all_time_censored_count", 0).toString()
+
+            safeGazeOpenSwitchView.setOnCheckedChangeListener { _, _ ->
+                editor.putBoolean(SAFE_GAZE_ACTIVE, false)
+                editor.apply()
+                toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), VISIBLE)
+                toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), GONE)
+                safeGazeOpenSwitchView.isChecked = true
+                webView?.reload()
+            }
+        }
+    }
+
+    private fun loadImageWithBlur(blurRadius: Int, imageView: ImageView) {
+        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.blur_image_background)
+        val blurredBitmap = HokoBlur.with(requireContext())
+            .radius(blurRadius / 5)
+            .sampleFactor(1.0f)
+            .forceCopy(false)
+            .processor()
+            .blur(bitmap)
+
+        val matrix = ColorMatrix();
+        val grayScaleAmount = (1-(blurRadius/100.0))
+        matrix.setSaturation(grayScaleAmount.toFloat())
+        val cf = ColorMatrixColorFilter(matrix);
+        imageView.colorFilter = cf;
+        imageView.setImageBitmap(blurredBitmap)
+    }
+
+    private fun handleSafeGazeCloseView(view: View){
+        val safeGazeOpenViewPopUpBinding = SafeGazePopUpCloseBinding.bind(view)
+        safeGazeOpenViewPopUpBinding.apply {
+            reportTextView.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(SAFE_GAZE_REPORT_URL))
+                startActivity(intent)
+            }
+            urlTextView.text = viewModel.host
+            safeGazeOnImageView.setOnClickListener{
+                editor.putBoolean(SAFE_GAZE_ACTIVE, true)
+                editor.apply()
+                toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), VISIBLE)
+                toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), GONE)
+                webView?.reload()
+
+                viewModel.removeHostFromSafeGazeWhiteList(
+                    viewModel.host, "${requireContext().filesDir}/safe_gaze.txt"
+                )
+            }
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
+    private fun handleProgressBar(view: View, imageView: ImageView) {
+        val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
+        val iconImageView: ImageView = view.findViewById(R.id.icon_image_view)
+        val progress = sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE)
+        progressBar.progress = progress
+        updateViewsPosition(iconImageView, sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE))
+        progressBar.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                    val width = progressBar.width.toFloat()
+                    val x = event.x
+                    val calculatedProgress = (x / width * progressBar.max).toInt()
+                    progressBar.progress = calculatedProgress
+                    updateViewsPosition(iconImageView, calculatedProgress)
+                    safeGazeInterface.updateBlur(calculatedProgress.toFloat())
+                    saveProgressToSharedPreferences(calculatedProgress)
+                    loadImageWithBlur(calculatedProgress, imageView)
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    @SuppressLint("InflateParams")
+    private fun handleSafeGazePopUp() {
+        val popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up_view, null)
+        var currentLayout: View
+        val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        safeGazeIcon.setOnClickListener {
+            safeGazeInterface.updateBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE).toFloat())
+            val iconRect = Rect()
+            safeGazeIcon.getGlobalVisibleRect(iconRect)
+            val x = iconRect.left
+            val y = iconRect.top
+            popupWindow.apply {
+                animationStyle = 2132017505
+                isFocusable = true
+            }
+
+            safeGazeIcon.post {
+                if (sharedPreferences.getBoolean(SAFE_GAZE_ACTIVE, true)) {
+                    currentLayout = popupView.findViewById(R.id.open_view)
+                    popupView.findViewById<View>(R.id.close_view).visibility = GONE
+                    currentLayout.visibility = VISIBLE
+                } else {
+                    currentLayout = popupView.findViewById(R.id.close_view)
+                    popupView.findViewById<View>(R.id.open_view).visibility = GONE
+                    currentLayout.visibility = VISIBLE
+                }
+                handleSafeGazeOpenView(popupView)
+                handleSafeGazeCloseView(popupView)
+                val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
+                val popUpLayingOut = 350.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
+                val newPopUpPosition = (x - popUpLayingOut) - 50
+                popupWindow.showAtLocation(
+                    safeGazeIcon,
+                    Gravity.NO_GRAVITY,
+                    newPopUpPosition,
+                    (y + omnibar.toolbar.height) - 20,
+                )
+                val pointerArrow =
+                    popupView.findViewById<ImageView>(R.id.pointer_arrow_image_view)
+                val pointerArrowParams =
+                    pointerArrow.layoutParams as ConstraintLayout.LayoutParams
+                pointerArrowParams.rightMargin = leftOverDevicePixel - 113
+                pointerArrow.layoutParams = pointerArrowParams
+
+                configureDnsSwitch(popupView.findViewById(R.id.dns_switch))
+            }
+        }
+    }
+
+    private fun configureDnsSwitch(view: View) {
+        val binding = KahfDnsSwitchBinding.bind(view)
+
+        binding.let {
+            it.protectedTextView.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = Uri.parse("https://check.kahfdns.com")
+                startActivity(intent)
+            }
+
+            if (isPrivateDnsEnabled()) {
+                it.kahfDnsToggleButton.isChecked = true
+                it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
+                it.protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
+                it.kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
+            } else {
+                it.kahfDnsToggleButton.isChecked = false
+                it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
+                it.protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
+                it.kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.WHITE)
+            }
+
+            handleTrackTint(it.kahfDnsToggleButton.isChecked, it.kahfDnsToggleButton)
+
+            it.kahfDnsToggleButton.setOnCheckedChangeListener { _, isChecked ->
+                handleTrackTint(isChecked, it.kahfDnsToggleButton)
+
+                if (isPrivateDnsEnabled() && !isChecked) {
+                    updatePrivateDnsSettings(false)
+
+                    it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
+                    it.protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
+                } else if (!isPrivateDnsEnabled() && isChecked) {
+                    updatePrivateDnsSettings(true)
+
+                    it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
+                    it.protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
+                }
+            }
+        }
+    }
+
+    private fun updatePrivateDnsSettings(enabled: Boolean) {
+        editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, enabled)
+        editor.apply()
+        viewModel.privateDnsEnabled = enabled
+    }
+
+    private fun isPrivateDnsEnabled() = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
+
+    private fun toggleVisibilityWithAnimation(view: View, visibility: Int) {
+        val anim = if (visibility == VISIBLE) {
+            AnimationUtils.loadAnimation(context, R.anim.tab_anim_fade_in)
+        } else {
+            AnimationUtils.loadAnimation(context, R.anim.tab_anim_fade_out)
+        }
+        view.startAnimation(anim)
+        view.visibility = visibility
+    }
+
+    private fun updateViewsPosition(iconImageView: ImageView, progress: Int) {
+        val clampedProgress = progress.coerceIn(0, 100)
+
+        val iconLayoutParams = iconImageView.layoutParams as ConstraintLayout.LayoutParams
+        iconLayoutParams.horizontalBias = clampedProgress / 100f
+        iconImageView.layoutParams = iconLayoutParams
+    }
+
+    private fun saveProgressToSharedPreferences(progress: Int) {
+        editor.putInt(SAFE_GAZE_BLUR_PROGRESS, progress)
+        editor.apply()
+    }
+
+    @Suppress("DEPRECATION")
+    private fun getDeviceWidthInPixels(context: Context): Int {
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val displayMetrics = DisplayMetrics()
+
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        return displayMetrics.widthPixels
     }
 
     private fun configureCustomTab() {
         omnibar.omniBarContainer.hide()
-        omnibar.fireIconMenu.hide()
         omnibar.tabsMenu.hide()
 
         omnibar.toolbar.background = ColorDrawable(customTabToolbarColor)
@@ -970,6 +1478,7 @@ class BrowserTabFragment :
         super.onResume()
         omnibar.appBarLayout.setExpanded(true)
         viewModel.onViewResumed()
+        viewModel.privateDnsEnabled = isPrivateDnsEnabled()
 
         // onResume can be called for a hidden/backgrounded fragment, ensure this tab is visible.
         if (fragmentIsVisible()) {
@@ -1188,12 +1697,21 @@ class BrowserTabFragment :
         omnibar.shieldIcon.isInvisible = true
         webView?.onPause()
         webView?.hide()
-        errorView.errorMessage.text = getString(errorType.errorId, url).html(requireContext())
-        if (appTheme.isLightModeEnabled()) {
-            errorView.yetiIcon?.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_light)
+
+        if (errorType.name == BLOCKED.name) {
+            errorView.errorMessage.text = getString(errorType.errorId, url).html(requireContext())
+            errorView.yetiIcon.setImageResource(R.drawable.blocked)
+            errorView.errorTitle.text = getString(string.webViewBlockedTitle)
         } else {
-            errorView.yetiIcon?.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_dark)
+            errorView.errorTitle.text = getString(string.webViewErrorTitle)
+            errorView.errorMessage.text = getString(errorType.errorId, url).html(requireContext())
+            if (appTheme.isLightModeEnabled()) {
+                errorView.yetiIcon.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_light)
+            } else {
+                errorView.yetiIcon.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_dark)
+            }
         }
+
         errorView.errorLayout.show()
     }
 
@@ -2222,7 +2740,7 @@ class BrowserTabFragment :
         viewModel.onUserSubmittedQuery(query)
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
     private fun configureWebView() {
         binding.daxDialogOnboardingCtaContent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
@@ -2230,12 +2748,52 @@ class BrowserTabFragment :
             R.layout.include_duckduckgo_browser_webview,
             binding.webViewContainer,
             true,
-        ).findViewById(R.id.browserWebView) as DuckDuckGoWebView
+        ).findViewById(R.id.browserWebView)
 
         webView?.let {
+            safeGazeInterface = SafeGazeJsInterface(requireContext(), webView!!, nsfwDetector, genderDetector)
+
             it.webViewClient = webViewClient
             it.webChromeClient = webChromeClient
             it.clearSslPreferences()
+            webViewClient.activity = requireActivity()
+
+            it.addJavascriptInterface(safeGazeInterface, SAFE_GAZE_INTERFACE)
+            it.addJavascriptInterface(
+                KahfTubeInterface(
+                    requireContext(),
+                    object :
+                        JavaScriptCallBack {
+                        override fun showToast(message: String) {
+                            Toast.makeText(context, "KahfTubeInterface: $message", Toast.LENGTH_SHORT).show()
+                        }
+
+                        override fun callHandler(
+                            name: String?,
+                            email: String?,
+                            imgSrc: String?
+                        ) {
+                            Timber.tag("KahfTubeInterface").v("name: $name")
+                            Timber.tag("KahfTubeInterface").v("email: $email")
+                            Timber.tag("KahfTubeInterface").v("imgSrc: $imgSrc")
+                        }
+
+                        override fun onHalalzTap() {
+                            Timber.v("SharedPreferenceManager:: ${SharedPreferenceManager(requireContext()).getValue(KeyString.TOKEN)}")
+                            startActivity(Intent(requireContext(), ProfilePageActivity::class.java))
+                        }
+
+                        override fun shouldRestart() {
+                            //recreate()
+                        }
+
+                        override fun fetchYtInitialData(id: String?) {
+                            Timber.v("fetchYtInitialData: id: $id")
+                        }
+                    },
+                ),
+                "KahfTubeInterface",
+            )
 
             it.settings.apply {
                 clientBrandHintProvider.setDefault(this)
@@ -2422,6 +2980,28 @@ class BrowserTabFragment :
         return withContext(dispatchers.io()) { webViewBlobDownloadFeature.self().isEnabled() } &&
             webView.isWebMessageListenerSupported(dispatchers, webViewVersionProvider) &&
             WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
+    }
+
+    private fun readAssetFile(assetManager: AssetManager, fileName: String): String {
+        val stringBuilder = StringBuilder()
+        try {
+            val inputStream = assetManager.open(fileName)
+            val bufferedReader = BufferedReader(InputStreamReader(inputStream))
+
+            var line: String?
+            while (bufferedReader.readLine().also { line = it } != null) {
+                stringBuilder.append(line).append('\n')
+            }
+        } catch (e: IOException) {
+            println("Exception is -> ${e.localizedMessage}")
+            e.printStackTrace()
+        }
+        return stringBuilder.toString()
+    }
+
+
+    private fun webShare(featureName: String, method: String, id: String, data: JSONObject) {
+        webShareRequest.launch(JsCallbackData(data, featureName, method, id))
     }
 
     private fun configureWebViewForAutofill(it: DuckDuckGoWebView) {
@@ -3342,13 +3922,10 @@ class BrowserTabFragment :
 
         fun updateToolbarActionsVisibility(viewState: BrowserViewState) {
             tabsButton?.isVisible = viewState.showTabsButton && !tabDisplayedInCustomTabScreen
-            fireMenuButton?.isVisible = viewState.fireButton is HighlightableButton.Visible && !tabDisplayedInCustomTabScreen
             menuButton?.isVisible = viewState.showMenuButton is HighlightableButton.Visible
 
             val targetView = if (viewState.showMenuButton.isHighlighted()) {
                 omnibar.browserMenuImageView
-            } else if (viewState.fireButton.isHighlighted()) {
-                omnibar.fireIconImageView
             } else if (viewState.showPrivacyShield.isHighlighted()) {
                 omnibar.placeholder
             } else {
@@ -3378,15 +3955,15 @@ class BrowserTabFragment :
         }
 
         private fun decorateToolbarWithButtons() {
-            fireMenuButton?.show()
-            fireMenuButton?.setOnClickListener {
-                browserActivity?.launchFire()
-                pixel.fire(
-                    AppPixelName.MENU_ACTION_FIRE_PRESSED.pixelName,
-                    mapOf(FIRE_BUTTON_STATE to pulseAnimation.isActive.toString()),
-                )
-                viewModel.onFireMenuSelected()
-            }
+            // fireMenuButton?.show()
+            // fireMenuButton?.setOnClickListener {
+            //     browserActivity?.launchFire()
+            //     pixel.fire(
+            //         AppPixelName.MENU_ACTION_FIRE_PRESSED.pixelName,
+            //         mapOf(FIRE_BUTTON_STATE to pulseAnimation.isActive.toString()),
+            //     )
+            //     viewModel.onFireMenuSelected()
+            // }
 
             tabsButton?.show()
         }
@@ -3705,12 +4282,14 @@ class BrowserTabFragment :
         fun renderBrowserViewState(viewState: BrowserViewState) {
             renderIfChanged(viewState, lastSeenBrowserViewState) {
                 val browserShowing = viewState.browserShowing
-                val browserShowingChanged = viewState.browserShowing != lastSeenBrowserViewState?.browserShowing
+                val browserShowingChanged = viewState.browserShowing != (lastSeenBrowserViewState?.browserShowing ?: false)
                 val errorChanged = viewState.browserError != lastSeenBrowserViewState?.browserError
                 val sslErrorChanged = viewState.sslError != lastSeenBrowserViewState?.sslError
 
                 lastSeenBrowserViewState = viewState
-                if (browserShowingChanged) {
+                if (viewState.browserError == BLOCKED) {
+                    showError(viewState.browserError, webView?.url)
+                } else if (browserShowingChanged) {
                     if (browserShowing) {
                         showBrowser()
                     } else {

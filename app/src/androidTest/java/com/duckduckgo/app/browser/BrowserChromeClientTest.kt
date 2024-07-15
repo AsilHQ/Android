@@ -38,7 +38,6 @@ import com.duckduckgo.site.permissions.api.SitePermissionsManager
 import com.duckduckgo.site.permissions.api.SitePermissionsManager.SitePermissions
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -64,12 +63,6 @@ class BrowserChromeClientTest {
     fun setup() {
         mockAppBuildConfig = mock()
         mockSitePermissionsManager = mock()
-        testee = BrowserChromeClient(
-            mockAppBuildConfig,
-            TestScope(),
-            coroutineTestRule.testDispatcherProvider,
-            mockSitePermissionsManager,
-        )
         mockWebViewClientListener = mock()
         mockFilePathCallback = mock()
         mockFileChooserParams = mock()
