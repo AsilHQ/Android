@@ -3,11 +3,13 @@ package com.duckduckgo.app.safegaze.genderdetection
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
+import com.duckduckgo.app.browser.ml.Gender
 import com.duckduckgo.common.utils.SAFE_GAZE_MIN_FACE_SIZE
 import com.duckduckgo.common.utils.SAFE_GAZE_MIN_FEMALE_CONFIDENCE
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import org.tensorflow.lite.DataType
 import org.tensorflow.lite.DataType.FLOAT32
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.support.common.ops.NormalizeOp
@@ -23,13 +25,12 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class GenderDetector (val context: Context) {
-    private val inputImageSize = 224
-    private var interpreter: Interpreter? = null
-
+    private val inputImageSize = 128
     private val imageProcessor = ImageProcessor.Builder()
         .add(ResizeOp(inputImageSize, inputImageSize, BILINEAR))
         .add(NormalizeOp(0f, 255f))
         .build()
+    val model by lazy { Gender.newInstance(context) }
 
     private val faceDetectorOptions = FaceDetectorOptions.Builder()
         .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
@@ -39,24 +40,6 @@ class GenderDetector (val context: Context) {
         .build()
 
     private val faceDetector = FaceDetection.getClient(faceDetectorOptions)
-
-    init {
-        try {
-            val model = context.assets.open("gender_yolo_v8.tflite").use { it.readBytes() }
-            val modelBuffer = ByteBuffer.allocateDirect(model.size)
-            modelBuffer.order(ByteOrder.nativeOrder())
-            modelBuffer.put(model)
-
-            val options = Interpreter.Options().apply{
-                this.setNumThreads(4)
-            }
-            interpreter = Interpreter(modelBuffer, options)
-
-            warmUpModel()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
 
     suspend fun predict(bitmap: Bitmap): GenderPrediction {
 
@@ -96,34 +79,17 @@ class GenderDetector (val context: Context) {
 
     private fun getGenderPrediction(bitmap: Bitmap): Pair<Float, Float> {
         val inputFeature = TensorBuffer.createFixedSize(intArrayOf(1, inputImageSize, inputImageSize, 3), FLOAT32)
+
         val byteBuffer = TensorImage(FLOAT32).let {
             it.load(bitmap)
             imageProcessor.process(it)
         }.tensorBuffer.buffer
+
         inputFeature.loadBuffer(byteBuffer)
+        val outputs = model.process(inputFeature)
+        val outputFeature = outputs.outputFeature0AsTensorBuffer.floatArray
 
-        return try {
-            val outputBuffer = Array(1) { FloatArray(2).apply { fill(0f) } }
-            interpreter?.run(byteBuffer, outputBuffer)
-            Pair(outputBuffer[0][1], outputBuffer[0][0])
-        } catch (e: Exception) {
-            Pair(0f, 0f)
-        }
-    }
-
-    private fun warmUpModel() {
-        val dummyInput = ByteBuffer.allocateDirect(inputImageSize * inputImageSize * 3 * 4).apply {
-            order(ByteOrder.nativeOrder())
-            for (i in 0 until inputImageSize * inputImageSize * 3) {
-                putFloat(0.0f)  // Using zeros as dummy data
-            }
-            rewind()
-        }
-
-        val outputBuffer = Array(1) { FloatArray(2) }
-        interpreter?.run(dummyInput, outputBuffer)
-
-        Timber.d("kLog Gender model wormed up")
+        return Pair(outputFeature[0], outputFeature[1])
     }
 
     private fun cropToBBox(image: Bitmap, boundingBox: Rect): Bitmap? {
@@ -146,7 +112,7 @@ class GenderDetector (val context: Context) {
     }
 
     fun dispose() {
-        interpreter?.close()
+        model.close()
         faceDetector.close()
     }
 }
