@@ -59,7 +59,7 @@ constructor(
         val hasType = attributes.hasValue(R.styleable.MenuItemView_textType)
         if (hasType) {
             val textType = DaxTextView.TextType.from(attributes.getInt(R.styleable.MenuItemView_textType, 0))
-            binding.label.setTextColorStateList(textType)
+            // binding.label.setTextColorStateList(textType)
         }
 
         binding.label.text = attributes.getString(R.styleable.MenuItemView_primaryText) ?: ""

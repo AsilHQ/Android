@@ -101,7 +101,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/daxDialogButtonSpacing"
                         android:visibility="invisible"
-                        app:buttonSize="small"
+                        app:customButtonSize="small"
                         tools:text="Button" />
 
                 </LinearLayout>
