@@ -810,4 +810,67 @@
     <string name="verify_protection">Verify Protection</string>
     <string name="by_halalz_e_ticaret_ltd_ti">by Halalz e-ticaret Ltd Şti</string>
     <string name="kahf_guard">KahfGuard</string>
+
+    <plurals name="bookmarkFolderDeleteDialogMessage" tools:ignore="MissingQuantity">
+        <item quantity="one" instruction="%1$s is the text from bookmarkFolderDeleteDialogMessage, %2$s is the name of the folder and %3$d is the number of items inside the folder">%1$s%2$s و %3$d عنصر؟</item>
+        <item quantity="other" instruction="%1$s is the text from bookmarkFolderDeleteDialogMessage, %2$s is the name of the folder and %3$d is the number of items inside the folder">%1$s%2$s و %3$d عناصر؟</item>
+    </plurals>
+
+    <plurals name="bookmarkFolderItems" tools:ignore="MissingQuantity">
+        <item quantity="one" instruction="Placeholder is the number of items">%1$d عنصر</item>
+        <item quantity="other" instruction="Placeholder is the number of items">%1$d عناصر</item>
+    </plurals>
+    <string name="bookmarksMenuTitle">Bookmarks</string>
+    <string name="bookmarksActivityTitle">Bookmarks</string>
+    <string name="noBookmarks">No bookmarks have been added yet</string>
+    <string name="exportBookmarksMenu">Export</string>
+    <string name="exportBookmarksEmpty">You have no bookmarks, nothing will be exported</string>
+    <string name="exportBookmarksError">No bookmarks were exported, something went wrong</string>
+    <string name="exportBookmarksSuccess">All bookmarks have been successfully exported</string>
+    <string name="importBookmarksMenu">Import</string>
+    <string name="importBookmarksFileTitle">Choose the bookmarks file to import</string>
+    <string name="importBookmarksError">No bookmarks were imported, something went wrong</string>
+    <string name="importBookmarksEmpty">The file contains no bookmarks to import</string>
+    <string name="importBookmarksSuccess">%1$d bookmark was imported successfully</string>
+    <string name="savedSiteDialogTitleHint">Address</string>
+    <string name="savedSiteDialogUrlHint">URL</string>
+    <string name="savedSiteDialogTitleEdit">Amendment</string>
+    <string name="bookmarksSectionTitle">Bookmarks</string>
+    <string name="favoritesSectionTitle">Favorite</string>
+    <string name="bookmarksEmptyHint">No bookmarks have been added yet</string>
+    <string name="favoritesEmptyHint">No favorites have been added yet</string>
+    <string name="bookmarkDialogTitleEdit">Edit bookmark</string>
+    <string name="favoriteDialogTitleEdit">Edit favorites</string>
+    <string name="locationLabel">the site</string>
+    <string name="folderLocationTitle">Choose location</string>
+    <string name="addFolder">Add folder</string>
+    <string name="editFolder">Edit folder</string>
+    <string name="bookmarkFolderDeleteDialogTitle">Delete the folder and its contents?</string>
+    <string name="bookmarkFolderEmpty">Empty</string>
+    <string name="bookmarkFolderDeleteDialogMessage">Are you sure you want to delete</string>
+    <string name="deleteBookmarkConfirmationDialogTitle">Delete this bookmark?</string>
+    <string name="deleteBookmarkConfirmationDialogDescription">This will delete your bookmark for &lt;b>%1$s&lt;/b>.</string>
+    <string name="deleteFavoriteConfirmationDialogTitle">Delete these favorites?</string>
+    <string name="deleteFavoriteConfirmationDialogDescription">This will delete your favorites for &lt;b>%1$s&lt;/b>.</string>
+    <string name="deleteBookmarkFolderConfirmationDialogTitle">Delete this bookmarks folder?</string>
+    <string name="deleteSavedSiteConfirmationDialogCancel">Cancel</string>
+    <string name="deleteSavedSiteConfirmationDialogDelete">Delete</string>
+    <string name="deleteBookmarkFolderConfirmationDialogDescription">This will delete your bookmarks folder &lt;b>%1$s&lt;/b>.</string>
+    <string name="bookmarkDeleteConfirmationMessage">&lt;b>%1$s&lt;/b> has been deleted</string>
+    <string name="bookmarkOverflowContentDescription">More options for bookmark %1$s</string>
+    <string name="searchBookmarks">Search bookmarks</string>
+    <string name="deleteFolder">Do you want to delete the folder \"%1$s\"?</string>
+    <string name="deleteBookmark">Delete bookmark \"%1$s\"?</string>
+    <string name="addToFavorites">Add to favorites</string>
+    <string name="bookmarkAddedInBookmarks">Bookmark added to folder \"%1$s\"</string>
+    <string name="editBookmark">Edit bookmark</string>
+    <string name="importBookmarksDescription">If your bookmarks are stored in another browser, you can import them into Kahf.</string>
+    <string name="importBookmarks">Import bookmarks</string>
+    <string name="noResultsFor">Search \"%1$s\" returned no results</string>
+    <string name="removeFromFavorites">Remove from favorites</string>
+    <string name="addToFavoritesMenu">Add to favorites</string>
+    <plurals name="bookmarkFolderDeleteMessage">
+        <item quantity="one">Are you sure you want to delete this folder and %1$d item?</item>
+        <item quantity="other">Are you sure you want to delete this folder and %1$d items?</item>
+    </plurals>
 </resources>
