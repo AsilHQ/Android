@@ -41,7 +41,7 @@
             android:layout_height="150dp"
             android:layout_gravity="center"
             android:contentDescription="@string/asilLogoDescription"
-            app:srcCompat="@drawable/logo_full" />
+            app:srcCompat="@drawable/ic_dax_icon" />
 
         <com.duckduckgo.common.ui.view.text.DaxTextView
             android:layout_width="match_parent"

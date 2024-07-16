@@ -43,7 +43,7 @@ class ShortcutBuilder @Inject constructor() {
 
         val icon = when {
             homeShortcut.icon != null -> IconCompat.createWithBitmap(homeShortcut.icon)
-            else -> IconCompat.createWithResource(context, R.drawable.logo_mini)
+            else -> IconCompat.createWithResource(context, R.drawable.ic_dax_icon)
         }
 
         return ShortcutInfoCompat.Builder(context, UUID.randomUUID().toString())

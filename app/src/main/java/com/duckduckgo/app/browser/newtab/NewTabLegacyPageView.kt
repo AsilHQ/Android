@@ -122,8 +122,6 @@ class NewTabLegacyPageView @JvmOverloads constructor(
     private lateinit var quickAccessAdapter: FavoritesQuickAccessAdapter
     private lateinit var quickAccessItemTouchHelper: ItemTouchHelper
 
-    private val homeBackgroundLogo by lazy { HomeBackgroundLogo(binding.ddgLogo) }
-
     private val viewModel: NewTabLegacyPageViewModel by lazy {
         ViewModelProvider(findViewTreeViewModelStoreOwner()!!, viewModelFactory)[NewTabLegacyPageViewModel::class.java]
     }
@@ -220,11 +218,6 @@ class NewTabLegacyPageView @JvmOverloads constructor(
 
     private fun render(viewState: ViewState) {
         Timber.d("New Tab: render $viewState")
-        if (viewState.message == null && viewState.favourites.isEmpty()) {
-            homeBackgroundLogo.showLogo()
-        } else {
-            homeBackgroundLogo.hideLogo()
-        }
         if (viewState.message != null && viewState.onboardingComplete) {
             showRemoteMessage(viewState.message, viewState.newMessage)
         } else {

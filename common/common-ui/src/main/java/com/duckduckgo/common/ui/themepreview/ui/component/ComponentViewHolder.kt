@@ -79,7 +79,7 @@ sealed class ComponentViewHolder(val view: View) : RecyclerView.ViewHolder(view)
                 action = "Primary",
             )
             val bigTwoActionsMessage = Message(
-                topIllustration = R.drawable.logo_medium,
+                topIllustration = R.drawable.ic_dax_icon,
                 title = "Big Two Actions Message",
                 subtitle = "Body text goes here. This component has two buttons",
                 action = "Primary",
