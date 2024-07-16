@@ -40,7 +40,7 @@ class SafeGazeJsInterface(
 
     private val urlQueue: ConcurrentLinkedQueue<UrlInfo> = ConcurrentLinkedQueue()
     private var processingJob: Job? = null
-    private val scope = CoroutineScope(dispatcher.computation() + Job())
+    private val scope = CoroutineScope(dispatcher.io() + Job())
 
     private suspend fun shouldBlurImage(url: String, mScope: CoroutineScope): Boolean {
         return suspendCoroutine { continuation ->

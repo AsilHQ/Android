@@ -90,6 +90,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.PopupWindow
 import android.widget.ProgressBar
+import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
@@ -156,6 +157,7 @@ import com.duckduckgo.app.browser.databinding.KahfDnsSwitchBinding
 import com.duckduckgo.app.browser.databinding.PopupWindowBrowserMenuBinding
 import com.duckduckgo.app.browser.databinding.SafeGazePopUpCloseBinding
 import com.duckduckgo.app.browser.databinding.SafeGazePopUpOpenBinding
+import com.duckduckgo.app.browser.databinding.SafeGazePopUpViewBinding
 import com.duckduckgo.app.browser.downloader.BlobConverterInjector
 import com.duckduckgo.app.browser.favicon.FaviconManager
 import com.duckduckgo.app.browser.filechooser.FileChooserIntentBuilder
@@ -978,85 +980,18 @@ class BrowserTabFragment :
         }
         handleSafeGazePopUp()
         prepareHeadlessKahfTubeWebView()
-        handleKahfIconClick()
     }
 
-    @SuppressLint("InflateParams")
-    private fun handleKahfIconClick(){
-        kahfDnsdIcon.setOnClickListener {
-            val popupView = LayoutInflater.from(context).inflate(R.layout.kahf_dns_pop_up, null)
-            val popupBinding = KahfDnsPopUpBinding.bind(popupView)
-            val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            val iconRect = Rect()
-            kahfDnsdIcon.getGlobalVisibleRect(iconRect)
-            val y = iconRect.top
-            val x = iconRect.left
-            popupWindow.apply {
-                animationStyle = 2132017505
-                isFocusable = true
-            }
-            popupBinding.apply {
-                kahfDnsdIcon.post {
-                    val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
-                    val popUpLayingOut = 275.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
-                    val newPopUpPosition = (x - popUpLayingOut) - 40
-                    popupWindow.showAtLocation(
-                        kahfDnsdIcon,
-                        Gravity.NO_GRAVITY,
-                        newPopUpPosition,
-                        (y + omnibar.toolbar.height) - 20,
-                    )
-                    protectedTextView.setOnClickListener {
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.data = Uri.parse("https://check.kahfdns.com")
-                        startActivity(intent)
-                    }
-                    val pointerArrow =
-                        popupView.findViewById<ImageView>(R.id.pointer_arrow_kahf_dns_image_view)
-                    val pointerArrowParams =
-                        pointerArrow.layoutParams as ConstraintLayout.LayoutParams
-                    pointerArrowParams.rightMargin = leftOverDevicePixel - 93
-                    pointerArrow.layoutParams = pointerArrowParams
-
-                    if (isPrivateDnsEnabled()){
-                        kahfDnsToggleButton.isChecked = true
-                        kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
-                        protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
-                        kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
-                    } else{
-                        kahfDnsToggleButton.isChecked = false
-                        kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
-                        protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
-                        kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.WHITE)
-                    }
-                    handleTrackTint(kahfDnsToggleButton.isChecked, kahfDnsToggleButton)
-                    kahfDnsToggleButton.setOnCheckedChangeListener { _, isChecked ->
-                        handleTrackTint(isChecked, kahfDnsToggleButton)
-                        if (isPrivateDnsEnabled()){
-                            updatePrivateDnsSettings(false)
-
-                            kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
-                            protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
-                        } else{
-                            updatePrivateDnsSettings(true)
-
-                            kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
-                            protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-    private fun handleTrackTint(isChecked: Boolean, switch: SwitchCompat){
+    private fun handleTrackTint(isChecked: Boolean, switch: Switch){
         if (isChecked) {
-            switch.trackTintList = ColorStateList.valueOf(0xFF11B9CD.toInt())
+            switch.thumbTintList = ColorStateList.valueOf(0xFF0199b8.toInt())
+            switch.trackTintList = ColorStateList.valueOf(0xFF0199b8.toInt())
         } else {
-            switch.trackTintList = ColorStateList.valueOf(0xFFE1E1E1.toInt())
+            switch.thumbTintList = ColorStateList.valueOf(0xFFE1E1E1.toInt())
+            switch.trackTintList = ColorStateList.valueOf(0xFFB3B3B3.toInt())
         }
     }
+
     @SuppressLint("SetJavaScriptEnabled")
     private fun prepareHeadlessKahfTubeWebView() {
         //showEmailAccessForKahfTubeDialog()
@@ -1144,8 +1079,7 @@ class BrowserTabFragment :
         )
     }
 
-    private fun handleSafeGazeOpenView(view: View){
-        val safeGazeOpenViewPopUpBinding = SafeGazePopUpOpenBinding.bind(view)
+    private fun handleSafeGazeOpenView(safeGazeOpenViewPopUpBinding: SafeGazePopUpViewBinding) {
         safeGazeOpenViewPopUpBinding.apply {
             shareCardImageView.setOnClickListener {
                 val shareIntent = Intent(Intent.ACTION_SEND)
@@ -1153,7 +1087,7 @@ class BrowserTabFragment :
                 shareIntent.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=org.halalz.kahfbrowser")
                 startActivity(Intent.createChooser(shareIntent, "Share via"))
             }
-            handleProgressBar(view, blurImageView)
+            handleProgressBar(safeGazeOpenViewPopUpBinding)
             loadImageWithBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE), blurImageView)
             reportTextViewOpen.setOnClickListener {
                 val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
@@ -1167,16 +1101,35 @@ class BrowserTabFragment :
                     startActivity(intent)
                 }
             }
-            urlOpenTextView.text = viewModel.host
+
             thisPageCounterTextView.text = sharedPreferences.getInt("session_censored_count", 0).toString()
             lifetimeCounterTextView.text = sharedPreferences.getInt("all_time_censored_count", 0).toString()
 
-            safeGazeOpenSwitchView.setOnCheckedChangeListener { _, _ ->
-                editor.putBoolean(SAFE_GAZE_ACTIVE, false)
+            sageGazeSwitch.isChecked = sharedPreferences.getBoolean(SAFE_GAZE_ACTIVE, false)
+
+            if (!sageGazeSwitch.isChecked) {
+                safeGazeCounterCardView.visibility = GONE
+                genderModeCardView.visibility = GONE
+                blurImageGroup.visibility = GONE
+            }
+
+            if (viewModel.host.isEmpty()) {
+                urlCardView.visibility = GONE
+            } else {
+                urlCardView.visibility = VISIBLE
+                urlOpenTextView.text = viewModel.host
+            }
+            handleTrackTint(sageGazeSwitch.isChecked, sageGazeSwitch)
+
+            sageGazeSwitch.setOnCheckedChangeListener { _, checked ->
+                val visibility = if (checked) VISIBLE else GONE
+                toggleVisibilityWithAnimation(safeGazeCounterCardView, visibility)
+                toggleVisibilityWithAnimation(genderModeCardView, visibility)
+                toggleVisibilityWithAnimation(blurImageGroup, visibility)
+                handleTrackTint(checked, sageGazeSwitch)
+
+                editor.putBoolean(SAFE_GAZE_ACTIVE, checked)
                 editor.apply()
-                toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), VISIBLE)
-                toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), GONE)
-                safeGazeOpenSwitchView.isChecked = true
                 webView?.reload()
             }
         }
@@ -1199,46 +1152,22 @@ class BrowserTabFragment :
         imageView.setImageBitmap(blurredBitmap)
     }
 
-    private fun handleSafeGazeCloseView(view: View){
-        val safeGazeOpenViewPopUpBinding = SafeGazePopUpCloseBinding.bind(view)
-        safeGazeOpenViewPopUpBinding.apply {
-            reportTextView.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(SAFE_GAZE_REPORT_URL))
-                startActivity(intent)
-            }
-            urlTextView.text = viewModel.host
-            safeGazeOnImageView.setOnClickListener{
-                editor.putBoolean(SAFE_GAZE_ACTIVE, true)
-                editor.apply()
-                toggleVisibilityWithAnimation(view.findViewById(R.id.open_view), VISIBLE)
-                toggleVisibilityWithAnimation(view.findViewById(R.id.close_view), GONE)
-                webView?.reload()
-
-                viewModel.removeHostFromSafeGazeWhiteList(
-                    viewModel.host, "${requireContext().filesDir}/safe_gaze.txt"
-                )
-            }
-        }
-    }
-
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
-    private fun handleProgressBar(view: View, imageView: ImageView) {
-        val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
-        val iconImageView: ImageView = view.findViewById(R.id.icon_image_view)
+    private fun handleProgressBar(binding: SafeGazePopUpViewBinding) {
         val progress = sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE)
-        progressBar.progress = progress
-        updateViewsPosition(iconImageView, sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE))
-        progressBar.setOnTouchListener { _, event ->
+        binding.progressBar.progress = progress
+        updateViewsPosition(binding.iconImageView, sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE))
+        binding.progressBar.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                    val width = progressBar.width.toFloat()
+                    val width = binding.progressBar.width.toFloat()
                     val x = event.x
-                    val calculatedProgress = (x / width * progressBar.max).toInt()
-                    progressBar.progress = calculatedProgress
-                    updateViewsPosition(iconImageView, calculatedProgress)
+                    val calculatedProgress = (x / width * binding.progressBar.max).toInt()
+                    binding.progressBar.progress = calculatedProgress
+                    updateViewsPosition(binding.iconImageView, calculatedProgress)
                     safeGazeInterface.updateBlur(calculatedProgress.toFloat())
                     saveProgressToSharedPreferences(calculatedProgress)
-                    loadImageWithBlur(calculatedProgress, imageView)
+                    loadImageWithBlur(calculatedProgress, binding.blurImageView)
                     true
                 }
                 else -> false
@@ -1248,9 +1177,9 @@ class BrowserTabFragment :
 
     @SuppressLint("InflateParams")
     private fun handleSafeGazePopUp() {
-        val popupView = LayoutInflater.from(context).inflate(R.layout.safe_gaze_pop_up_view, null)
-        var currentLayout: View
-        val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val popupBinding = SafeGazePopUpViewBinding.inflate(LayoutInflater.from(context))
+        val popupWindow = PopupWindow(popupBinding.root, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+
         safeGazeIcon.setOnClickListener {
             safeGazeInterface.updateBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE).toFloat())
             val iconRect = Rect()
@@ -1263,17 +1192,9 @@ class BrowserTabFragment :
             }
 
             safeGazeIcon.post {
-                if (sharedPreferences.getBoolean(SAFE_GAZE_ACTIVE, true)) {
-                    currentLayout = popupView.findViewById(R.id.open_view)
-                    popupView.findViewById<View>(R.id.close_view).visibility = GONE
-                    currentLayout.visibility = VISIBLE
-                } else {
-                    currentLayout = popupView.findViewById(R.id.close_view)
-                    popupView.findViewById<View>(R.id.open_view).visibility = GONE
-                    currentLayout.visibility = VISIBLE
-                }
-                handleSafeGazeOpenView(popupView)
-                handleSafeGazeCloseView(popupView)
+                configureDnsSwitch(popupBinding)
+                handleSafeGazeOpenView(popupBinding)
+
                 val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
                 val popUpLayingOut = 350.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
                 val newPopUpPosition = (x - popUpLayingOut) - 50
@@ -1283,55 +1204,27 @@ class BrowserTabFragment :
                     newPopUpPosition,
                     (y + omnibar.toolbar.height) - 20,
                 )
-                val pointerArrow =
-                    popupView.findViewById<ImageView>(R.id.pointer_arrow_image_view)
-                val pointerArrowParams =
-                    pointerArrow.layoutParams as ConstraintLayout.LayoutParams
+                val pointerArrow = popupBinding.pointerArrowImageView
+                val pointerArrowParams = pointerArrow.layoutParams as ConstraintLayout.LayoutParams
                 pointerArrowParams.rightMargin = leftOverDevicePixel - 113
                 pointerArrow.layoutParams = pointerArrowParams
-
-                configureDnsSwitch(popupView.findViewById(R.id.dns_switch))
             }
         }
     }
 
-    private fun configureDnsSwitch(view: View) {
-        val binding = KahfDnsSwitchBinding.bind(view)
-
+    private fun configureDnsSwitch(binding: SafeGazePopUpViewBinding) {
         binding.let {
-            it.protectedTextView.setOnClickListener {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = Uri.parse("https://check.kahfdns.com")
-                startActivity(intent)
-            }
+            it.kahfDnsSwitch.isChecked = isPrivateDnsEnabled()
+            handleTrackTint(it.kahfDnsSwitch.isChecked, it.kahfDnsSwitch)
 
-            if (isPrivateDnsEnabled()) {
-                it.kahfDnsToggleButton.isChecked = true
-                it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
-                it.protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
-                it.kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.parseColor("#11B9CD"))
-            } else {
-                it.kahfDnsToggleButton.isChecked = false
-                it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
-                it.protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
-                it.kahfDnsToggleButton.trackTintList = ColorStateList.valueOf(Color.WHITE)
-            }
-
-            handleTrackTint(it.kahfDnsToggleButton.isChecked, it.kahfDnsToggleButton)
-
-            it.kahfDnsToggleButton.setOnCheckedChangeListener { _, isChecked ->
-                handleTrackTint(isChecked, it.kahfDnsToggleButton)
+            it.kahfDnsSwitch.setOnCheckedChangeListener { _, isChecked ->
+                handleTrackTint(isChecked, it.kahfDnsSwitch)
 
                 if (isPrivateDnsEnabled() && !isChecked) {
                     updatePrivateDnsSettings(false)
 
-                    it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
-                    it.protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
                 } else if (!isPrivateDnsEnabled() && isChecked) {
                     updatePrivateDnsSettings(true)
-
-                    it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
-                    it.protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
                 }
             }
         }
