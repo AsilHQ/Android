@@ -133,7 +133,7 @@ class CustomDnsResolver(private val dispatcher: DispatcherProvider) {
             }
         }
 
-        return results.first()
+        return if (results.isEmpty()) null else results.first()
     }
 
     private fun cacheDnsResponse(domain: String, recordType: Int, responseMessage: Message) {
