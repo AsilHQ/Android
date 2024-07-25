@@ -37,12 +37,12 @@ class CustomDnsResolver(private val dispatcher: DispatcherProvider) {
     private val dohServerUrl = "https://sp-dns-doh.kahfguard.com/dns-query"
     private val client = OkHttpClient()
 
-    suspend fun sendDnsQueries(domain: android.net.Uri): String? {
-        val host = domain.host?.plus(".") ?: return null // trailing dot to make absolute URL
+    suspend fun sendDnsQueries(domain: android.net.Uri, visitedDomains: MutableSet<String> = mutableSetOf()): String? {
+        val host = (domain.host ?: domain.toString()).removeSuffix(".").plus(".")
 
-        return checkCacheAndSendRequest(host, Type.A, createDnsQuery(host, Type.A), mutableSetOf())
-            ?: checkCacheAndSendRequest(host, Type.AAAA, createDnsQuery(host, Type.AAAA), mutableSetOf())
-            ?: checkCacheAndSendRequest(host, Type.CNAME, createDnsQuery(host, Type.CNAME), mutableSetOf())
+        return checkCacheAndSendRequest(host, Type.A, createDnsQuery(host, Type.A), visitedDomains)
+            ?: checkCacheAndSendRequest(host, Type.AAAA, createDnsQuery(host, Type.AAAA), visitedDomains)
+            ?: checkCacheAndSendRequest(host, Type.CNAME, createDnsQuery(host, Type.CNAME), visitedDomains)
     }
 
     private suspend fun checkCacheAndSendRequest(
@@ -111,6 +111,12 @@ class CustomDnsResolver(private val dispatcher: DispatcherProvider) {
         val answers = responseMessage.getSection(Section.ANSWER)
         val results = mutableListOf<String?>()
 
+        // Checking for A record when there are multiple answers
+        val aRecord = answers.firstOrNull { it.type == Type.A }
+        if (aRecord != null) {
+            return aRecord.rdataToString()
+        }
+
         for (record in answers) {
             when (record.type) {
                 Type.A -> {
@@ -126,14 +132,16 @@ class CustomDnsResolver(private val dispatcher: DispatcherProvider) {
 
                     if (!visitedDomains.contains(cnameTarget)) {
                         visitedDomains.add(cnameTarget)
-                        sendDnsQueries(cnameTarget.toUri())
+                        results.add(sendDnsQueries(cnameTarget.toUri(), visitedDomains))
+                    } else {
+                        results.add(null)
                     }
                 }
                 else -> results.add(null)
             }
         }
 
-        return if (results.isEmpty()) null else results.first()
+        return results.firstOrNull()
     }
 
     private fun cacheDnsResponse(domain: String, recordType: Int, responseMessage: Message) {

@@ -42,11 +42,11 @@ import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import com.duckduckgo.adclick.api.AdClickManager
 import com.duckduckgo.anrs.api.CrashLogger
+import com.duckduckgo.app.browser.R.string
 import com.duckduckgo.app.browser.SSLErrorType.EXPIRED
 import com.duckduckgo.app.browser.SSLErrorType.GENERIC
 import com.duckduckgo.app.browser.SSLErrorType.UNTRUSTED_HOST
 import com.duckduckgo.app.browser.SSLErrorType.WRONG_HOST
-import com.duckduckgo.app.browser.R.string
 import com.duckduckgo.app.browser.WebViewErrorResponse.BAD_URL
 import com.duckduckgo.app.browser.WebViewErrorResponse.BLOCKED
 import com.duckduckgo.app.browser.WebViewErrorResponse.CONNECTION
@@ -69,7 +69,6 @@ import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.app.dns.CustomDnsResolver
 import com.duckduckgo.app.kahftube.SharedPreferenceManager
 import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
-import com.duckduckgo.app.pixels.remoteconfig.OptimizeTrackerEvaluationRCWrapper
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.autoconsent.api.Autoconsent
 import com.duckduckgo.autofill.api.BrowserAutofill
@@ -463,7 +462,7 @@ class BrowserWebViewClient @Inject constructor(
 
                 val resolvedDomain = when (ip) {
                     null -> uri.toString() // failed to resolve
-                    "0.0.0.0" -> "0.0.0.0"
+                    "172.167.52.249" -> "0.0.0.0"
                     else -> uri.toString() // "${uri.scheme}://${ip}${uri.path}${uri.query?.let { "?$it" } ?: ""}"
                 }
 
