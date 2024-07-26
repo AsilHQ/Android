@@ -37,7 +37,10 @@ class CustomDnsResolver(private val dispatcher: DispatcherProvider) {
     private val dohServerUrl = "https://sp-dns-doh.kahfguard.com/dns-query"
     private val client = OkHttpClient()
 
-    suspend fun sendDnsQueries(domain: android.net.Uri, visitedDomains: MutableSet<String> = mutableSetOf()): String? {
+    /**
+     * @return Pair.first is the IP address, Pair.second is the domain name
+     */
+    suspend fun sendDnsQueries(domain: android.net.Uri, visitedDomains: MutableSet<String> = mutableSetOf()): Pair<String, String>? {
         val host = (domain.host ?: domain.toString()).removeSuffix(".").plus(".")
 
         return checkCacheAndSendRequest(host, Type.A, createDnsQuery(host, Type.A), visitedDomains)
@@ -50,7 +53,7 @@ class CustomDnsResolver(private val dispatcher: DispatcherProvider) {
         recordType: Int,
         queryData: ByteArray,
         visitedDomains: MutableSet<String>
-    ): String? {
+    ): Pair<String, String>? {
         val cacheKey = "$domain-$recordType"
         cache[cacheKey]?.takeUnless { it.isExpired() }?.let { cachedResponse ->
             return getDnsResponse(cachedResponse.message, visitedDomains)
@@ -72,7 +75,7 @@ class CustomDnsResolver(private val dispatcher: DispatcherProvider) {
         recordType: Int,
         domain: String,
         visitedDomains: MutableSet<String>
-    ): String? {
+    ): Pair<String, String>? {
         val request = Request.Builder()
             .url(dohServerUrl)
             .addHeader("Content-Type", "application/dns-message")
@@ -107,25 +110,21 @@ class CustomDnsResolver(private val dispatcher: DispatcherProvider) {
         }
     }
 
-    private suspend fun getDnsResponse(responseMessage: Message, visitedDomains: MutableSet<String>): String? {
+    private suspend fun getDnsResponse(responseMessage: Message, visitedDomains: MutableSet<String>): Pair<String, String>? {
         val answers = responseMessage.getSection(Section.ANSWER)
-        val results = mutableListOf<String?>()
+        val results = mutableListOf<Pair<String, String>?>()
 
         // Checking for A record when there are multiple answers
         val aRecord = answers.firstOrNull { it.type == Type.A }
         if (aRecord != null) {
-            return aRecord.rdataToString()
+            return Pair(aRecord.rdataToString(), aRecord.name.toString(true))
         }
 
         for (record in answers) {
             when (record.type) {
-                Type.A -> {
-                    val ipAddress = record.rdataToString()
-                    results.add(0, ipAddress)
-                }
                 Type.AAAA -> {
                     val ipAddress = record.rdataToString()
-                    results.add(ipAddress)
+                    results.add(Pair(ipAddress, record.name.toString(true)))
                 }
                 Type.CNAME -> {
                     val cnameTarget = record.rdataToString()

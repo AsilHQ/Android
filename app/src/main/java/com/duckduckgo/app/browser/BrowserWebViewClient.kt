@@ -454,20 +454,20 @@ class BrowserWebViewClient @Inject constructor(
         }
     }
 
-    private suspend fun resolveDns(uri: Uri): String {
+    private suspend fun resolveDns(uri: Uri): Pair<String, String> {
         return suspendCoroutine { continuation ->
             CoroutineScope(dispatcherProvider.io()).launch {
                 // val initialTime = System.currentTimeMillis()
                 val ip = dnsResolver.sendDnsQueries(uri)
 
-                val resolvedDomain = when (ip) {
+                /*val resolvedDomain = when (ip?.second) {
                     null -> uri.toString() // failed to resolve
-                    "172.167.52.249" -> "0.0.0.0"
+                    "blocked.kahfguard.com" -> ip.second
                     else -> uri.toString() // "${uri.scheme}://${ip}${uri.path}${uri.query?.let { "?$it" } ?: ""}"
-                }
+                }*/
 
                 // Timber.d("ipLog $ip || lookup time ${System.currentTimeMillis() - initialTime}ms || ${uri.host}")
-                continuation.resume(resolvedDomain)
+                continuation.resume(ip ?: Pair("", uri.toString()))
             }
         }
     }
@@ -589,12 +589,13 @@ class BrowserWebViewClient @Inject constructor(
         request: WebResourceRequest,
     ): WebResourceResponse? {
         val url = request.url.toString()
+        if (url.contains("blocked.kahfguard.com")) return null
         val privateDnsEnabled = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
 
         return runBlocking {
             withContext(dispatcherProvider.io()) {
                 try {
-                    if (privateDnsEnabled && resolveDns(Uri.parse(url)) == "0.0.0.0") {
+                    if (privateDnsEnabled && resolveDns(Uri.parse(url)).second == "blocked.kahfguard.com") {
                         if (request.isForMainFrame) {
                             withContext(dispatcherProvider.main()) {
                                 webViewClientListener?.onReceivedError(BLOCKED, url)

@@ -67,7 +67,6 @@ import com.duckduckgo.app.browser.SSLErrorType.WRONG_HOST
 import com.duckduckgo.app.browser.SpecialUrlDetector.UrlType.AppLink
 import com.duckduckgo.app.browser.SpecialUrlDetector.UrlType.NonHttpAppLink
 import com.duckduckgo.app.browser.SpecialUrlDetector.UrlType.ShouldLaunchPrivacyProLink
-import com.duckduckgo.app.browser.WebViewErrorResponse.BLOCKED
 import com.duckduckgo.app.browser.WebViewErrorResponse.LOADING
 import com.duckduckgo.app.browser.WebViewErrorResponse.OMITTED
 import com.duckduckgo.app.browser.addtohome.AddToHomeCapabilityDetector
@@ -934,15 +933,15 @@ class BrowserTabViewModel @Inject constructor(
                     clearPreviousUrl()
                 }
 
-                    if (privateDnsEnabled) {
+                if (privateDnsEnabled) {
                     runBlocking {
                         val ip = dnsResolver.sendDnsQueries(urlToNavigate.toUri())
-                        if (ip == "172.167.52.249") {
-                            wvError = BLOCKED
-                        } else {
-                            site?.nextUrl = urlToNavigate
-                            command.value = NavigationCommand.Navigate(urlToNavigate, getUrlHeaders(urlToNavigate))
+                        if (ip?.first == "0.0.0.0" || ip?.second == "blocked.kahfguard.com") {
+                            urlToNavigate = "https://${ip.second}"
                         }
+
+                        site?.nextUrl = urlToNavigate
+                        command.value = NavigationCommand.Navigate(urlToNavigate, getUrlHeaders(urlToNavigate))
                     }
                 } else {
                     site?.nextUrl = urlToNavigate
