@@ -117,12 +117,6 @@
                     android:id="@+id/includeErrorView"
                     layout="@layout/include_error_view"
                     android:visibility="gone" />
-
-                <WebView
-                    android:id="@+id/headerlessKahfTubeWebview"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="gone" />
             </FrameLayout>
         </com.duckduckgo.app.browser.ui.ScrollAwareRefreshLayout>
 

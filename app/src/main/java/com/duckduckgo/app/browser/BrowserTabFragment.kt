@@ -222,11 +222,6 @@ import com.duckduckgo.app.global.view.isImmersiveModeEnabled
 import com.duckduckgo.app.global.view.launchDefaultAppActivity
 import com.duckduckgo.app.global.view.renderIfChanged
 import com.duckduckgo.app.global.view.toggleFullScreen
-import com.duckduckgo.app.kahftube.KahfTubeInterface
-import com.duckduckgo.app.kahftube.KahfTubeInterface.JavaScriptCallBack
-import com.duckduckgo.app.kahftube.KahfTubeWebViewClient
-import com.duckduckgo.app.kahftube.SharedPreferenceManager
-import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
 import com.duckduckgo.app.location.data.LocationPermissionType
 import com.duckduckgo.app.pixels.AppPixelName
 import com.duckduckgo.app.privatesearch.PrivateSearchScreenNoParams
@@ -356,9 +351,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.halalz.kahftube.network.ApiService
-import org.halalz.kahftube.network.RequestListener
-import org.halalz.kahftube.view.ProfilePageActivity
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.BufferedReader
@@ -972,7 +964,6 @@ class BrowserTabFragment :
             dialog.deleteBookmarkListener = viewModel
         }
         handleSafeGazePopUp()
-        prepareHeadlessKahfTubeWebView()
     }
 
     private fun handleTrackTint(isChecked: Boolean, switch: Switch){
@@ -983,93 +974,6 @@ class BrowserTabFragment :
             switch.thumbTintList = ColorStateList.valueOf(0xFFE1E1E1.toInt())
             switch.trackTintList = ColorStateList.valueOf(0xFFB3B3B3.toInt())
         }
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun prepareHeadlessKahfTubeWebView() {
-        //showEmailAccessForKahfTubeDialog()
-        binding.headerlessKahfTubeWebview.apply {
-            settings.javaScriptEnabled = true
-            webViewClient = KahfTubeWebViewClient()
-            addJavascriptInterface(
-                KahfTubeInterface(
-                    requireContext(),
-                    object :
-                        JavaScriptCallBack {
-                        override fun showToast(message: String) {
-                            Toast.makeText(context, "KahfTubeInterface: $message", Toast.LENGTH_SHORT).show()
-                        }
-
-                        override fun callHandler(
-                            name: String?,
-                            email: String?,
-                            imgSrc: String?
-                        ) {
-                            var userName = name
-                            var userEmail = email
-
-                            if (userName.isNullOrEmpty() && userEmail.isNullOrEmpty()) {
-                                userName = "Guest"
-                                userEmail = "guest@gmail.com"
-                            }
-                            val sharedPref = SharedPreferenceManager(requireContext())
-                            sharedPref.setValue(KeyString.NAME, userName)
-                            sharedPref.setValue(KeyString.EMAIL, userEmail)
-                            sharedPref.setValue(KeyString.IMAGE_SRC, imgSrc)
-
-                            if (!userName.isNullOrEmpty() && !userEmail.isNullOrEmpty()) {
-                                makeKahfTubeRegisterRequest(userName, userEmail)
-                            }
-                        }
-
-                        override fun shouldRestart() {
-                            //recreate()
-                        }
-                    },
-                ),
-                "KahfTubeInterface",
-            )
-            loadUrl("https://m.youtube.com/?noapp")
-        }
-    }
-
-    private fun makeKahfTubeRegisterRequest(
-        name: String,
-        email: String
-    ) {
-        ApiService().registerApi(
-            name = name, email = email,
-            callback = object : RequestListener {
-                override fun onSuccess(response: String) {
-                    Timber.d("response: $response")
-                    makeKahfTubeLoginRequest(email = email)
-                }
-
-                override fun onError(error: String) {
-                    Timber.e("error: $error")
-                }
-            },
-        )
-    }
-
-    private fun makeKahfTubeLoginRequest(email: String) {
-        ApiService().loginApi(
-            email = email,
-            callback = object : RequestListener {
-                override fun onSuccess(response: String) {
-                    Timber.d("response: $response")
-                    val responseJSONObject = JSONObject(response)
-                    val dataObject = responseJSONObject.getJSONObject("data")
-                    val token = responseJSONObject.getString("token")
-                    Timber.d("response token: $token")
-                    SharedPreferenceManager(requireContext()).setValue(KeyString.TOKEN, token)
-                }
-
-                override fun onError(error: String) {
-                    Timber.e("error: $error")
-                }
-            },
-        )
     }
 
     private fun handleSafeGazeOpenView(safeGazeOpenViewPopUpBinding: SafeGazePopUpViewBinding) {
@@ -2677,41 +2581,6 @@ class BrowserTabFragment :
             webViewClient.activity = requireActivity()
 
             it.addJavascriptInterface(safeGazeInterface, SAFE_GAZE_INTERFACE)
-            it.addJavascriptInterface(
-                KahfTubeInterface(
-                    requireContext(),
-                    object :
-                        JavaScriptCallBack {
-                        override fun showToast(message: String) {
-                            Toast.makeText(context, "KahfTubeInterface: $message", Toast.LENGTH_SHORT).show()
-                        }
-
-                        override fun callHandler(
-                            name: String?,
-                            email: String?,
-                            imgSrc: String?
-                        ) {
-                            Timber.tag("KahfTubeInterface").v("name: $name")
-                            Timber.tag("KahfTubeInterface").v("email: $email")
-                            Timber.tag("KahfTubeInterface").v("imgSrc: $imgSrc")
-                        }
-
-                        override fun onHalalzTap() {
-                            Timber.v("SharedPreferenceManager:: ${SharedPreferenceManager(requireContext()).getValue(KeyString.TOKEN)}")
-                            startActivity(Intent(requireContext(), ProfilePageActivity::class.java))
-                        }
-
-                        override fun shouldRestart() {
-                            //recreate()
-                        }
-
-                        override fun fetchYtInitialData(id: String?) {
-                            Timber.v("fetchYtInitialData: id: $id")
-                        }
-                    },
-                ),
-                "KahfTubeInterface",
-            )
 
             it.settings.apply {
                 clientBrandHintProvider.setDefault(this)
