@@ -40,7 +40,6 @@ import com.duckduckgo.app.browser.mediaplayback.store.ALL_MIGRATIONS
 import com.duckduckgo.app.browser.mediaplayback.store.MediaPlaybackDao
 import com.duckduckgo.app.browser.mediaplayback.store.MediaPlaybackDatabase
 import com.duckduckgo.app.browser.pageloadpixel.PageLoadedPixelDao
-import com.duckduckgo.app.browser.safe_gaze_and_host_blocker.helper.HostBlockerHelper
 import com.duckduckgo.app.browser.session.WebViewSessionInMemoryStorage
 import com.duckduckgo.app.browser.session.WebViewSessionStorage
 import com.duckduckgo.app.browser.tabpreview.FileBasedWebViewPreviewGenerator
@@ -61,6 +60,8 @@ import com.duckduckgo.app.global.install.AppInstallStore
 import com.duckduckgo.app.lifecycle.MainProcessLifecycleObserver
 import com.duckduckgo.app.privacy.db.PrivacyProtectionCountDao
 import com.duckduckgo.app.referral.AppReferrerDataStore
+import com.duckduckgo.app.safegaze.genderdetection.GenderDetector
+import com.duckduckgo.app.safegaze.nsfwdetection.NsfwDetector
 import com.duckduckgo.app.settings.db.SettingsDataStore
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.app.statistics.store.StatisticsDataStore
@@ -89,6 +90,7 @@ import dagger.SingleInstanceIn
 import dagger.multibindings.IntoSet
 import javax.inject.Named
 import kotlinx.coroutines.CoroutineScope
+import timber.log.Timber
 
 @Module
 class BrowserModule {
@@ -329,5 +331,17 @@ class BrowserModule {
     @SingleInstanceIn(AppScope::class)
     fun providesDnsResolver(dispatcherProvider: DispatcherProvider): CustomDnsResolver {
         return CustomDnsResolver(dispatcherProvider)
+    }
+
+    @Provides
+    @SingleInstanceIn(AppScope::class)
+    fun providesNsfwDetector(context: Context): NsfwDetector {
+        return NsfwDetector(context)
+    }
+
+    @Provides
+    @SingleInstanceIn(AppScope::class)
+    fun providesGenderDetector(context: Context): GenderDetector {
+        return GenderDetector(context)
     }
 }

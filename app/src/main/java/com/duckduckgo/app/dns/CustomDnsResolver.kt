@@ -30,10 +30,12 @@ data class CachedDnsResponse(
 }
 
 class CustomDnsResolver(private val dispatcher: DispatcherProvider) {
-    private val dohServerUrl = "https://sp-dns-doh.kahfguard.com/dns-query"
+    companion object {
+        private val cache = ConcurrentHashMap<String, CachedDnsResponse>()
+    }
 
+    private val dohServerUrl = "https://sp-dns-doh.kahfguard.com/dns-query"
     private val client = OkHttpClient()
-    private val cache = ConcurrentHashMap<String, CachedDnsResponse>()
 
     suspend fun sendDnsQueries(domain: android.net.Uri): String? {
         val host = domain.host?.plus(".") ?: return null // trailing dot to make absolute URL
@@ -51,7 +53,6 @@ class CustomDnsResolver(private val dispatcher: DispatcherProvider) {
     ): String? {
         val cacheKey = "$domain-$recordType"
         cache[cacheKey]?.takeUnless { it.isExpired() }?.let { cachedResponse ->
-            Timber.d("ipLog Cache hit!")
             return getDnsResponse(cachedResponse.message, visitedDomains)
         }
 

@@ -116,6 +116,7 @@ import com.duckduckgo.app.browser.BrowserTabViewModel.OmnibarViewState
 import com.duckduckgo.app.browser.BrowserTabViewModel.PrivacyShieldViewState
 import com.duckduckgo.app.browser.BrowserTabViewModel.SavedSiteChangedViewState
 import com.duckduckgo.app.browser.R.string
+import com.duckduckgo.app.browser.WebViewErrorResponse.BLOCKED
 import com.duckduckgo.app.browser.WebViewErrorResponse.LOADING
 import com.duckduckgo.app.browser.WebViewErrorResponse.OMITTED
 import com.duckduckgo.app.browser.applinks.AppLinksLauncher
@@ -162,7 +163,6 @@ import com.duckduckgo.app.browser.omnibar.animations.TrackersAnimatorListener
 import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.browser.remotemessage.SharePromoLinkRMFBroadCastReceiver
 import com.duckduckgo.app.browser.safe_gaze.SafeGazeJsInterface
-import com.duckduckgo.app.browser.safe_gaze_and_host_blocker.helper.HostBlockerHelper
 import com.duckduckgo.app.browser.session.WebViewSessionStorage
 import com.duckduckgo.app.browser.shortcut.ShortcutBuilder
 import com.duckduckgo.app.browser.tabpreview.WebViewPreviewGenerator
@@ -200,6 +200,8 @@ import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
 import com.duckduckgo.app.location.data.LocationPermissionType
 import com.duckduckgo.app.pixels.AppPixelName
 import com.duckduckgo.app.playstore.PlayStoreUtils
+import com.duckduckgo.app.safegaze.genderdetection.GenderDetector
+import com.duckduckgo.app.safegaze.nsfwdetection.NsfwDetector
 import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.app.survey.model.Survey
 import com.duckduckgo.app.survey.ui.SurveyActivity
@@ -325,7 +327,6 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlin.coroutines.resume
 
 @InjectWith(FragmentScope::class)
 class BrowserTabFragment :
@@ -506,14 +507,18 @@ class BrowserTabFragment :
     @Inject
     lateinit var dnsResolver: CustomDnsResolver
 
+    @Inject
+    lateinit var nsfwDetector: NsfwDetector
+
+    @Inject
+    lateinit var genderDetector: GenderDetector
+
     /**
      * We use this to monitor whether the user was seeing the in-context Email Protection signup prompt
      * This is needed because the activity stack will be cleared if an external link is opened in our browser
      * We need to be able to determine if inContextEmailProtection view was showing. If it was, it will consume email verification links.
      */
     var inContextEmailProtectionShowing: Boolean = false
-
-    private val hostBlockerHelper = HostBlockerHelper()
 
     private var urlExtractingWebView: UrlExtractingWebView? = null
 
@@ -806,10 +811,8 @@ class BrowserTabFragment :
         removeDaxDialogFromActivity()
         renderer = BrowserTabFragmentRenderer()
         decorator = BrowserTabFragmentDecorator()
-        safeGazeInterface = SafeGazeJsInterface(requireContext())
         sharedPreferences = requireContext().getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
         editor = sharedPreferences.edit()
-        initSafeGazeAndKhfDns()
         voiceSearchLauncher.registerResultsCallback(this, requireActivity(), BROWSER) {
             when (it) {
                 is VoiceSearchLauncher.Event.VoiceRecognitionSuccess -> {
@@ -846,17 +849,7 @@ class BrowserTabFragment :
 
     override fun onDetach() {
         super.onDetach()
-        safeGazeInterface.closeMlModels()
-    }
-
-    private fun initSafeGazeAndKhfDns() {
-        if (!sharedPreferences.getBoolean("safe_gaze_and_dns_init",false)) {
-            safeGazeInterface.updateBlur(SAFE_GAZE_DEFAULT_BLUR_VALUE.toFloat())
-            editor.putInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE)
-            editor.apply()
-        }
-        editor.putBoolean("safe_gaze_and_dns_init", true)
-        editor.apply()
+        safeGazeInterface.cancelOngoingImageProcessing()
     }
 
     private fun resumeWebView() {
@@ -951,7 +944,7 @@ class BrowserTabFragment :
                     pointerArrowParams.rightMargin = leftOverDevicePixel - 93
                     pointerArrow.layoutParams = pointerArrowParams
 
-                    if (sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)){
+                    if (isPrivateDnsEnabled()){
                         kahfDnsToggleButton.isChecked = true
                         kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
                         protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
@@ -965,15 +958,13 @@ class BrowserTabFragment :
                     handleTrackTint(kahfDnsToggleButton.isChecked, kahfDnsToggleButton)
                     kahfDnsToggleButton.setOnCheckedChangeListener { _, isChecked ->
                         handleTrackTint(isChecked, kahfDnsToggleButton)
-                        if (sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)){
-                            editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, false)
-                            editor.apply()
+                        if (isPrivateDnsEnabled()){
+                            updatePrivateDnsSettings(false)
 
                             kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
                             protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
                         } else{
-                            editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, true)
-                            editor.apply()
+                            updatePrivateDnsSettings(true)
 
                             kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
                             protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
@@ -1090,7 +1081,7 @@ class BrowserTabFragment :
                 startActivity(Intent.createChooser(shareIntent, "Share via"))
             }
             handleProgressBar(view, blurImageView)
-            loadImageWithBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0), blurImageView)
+            loadImageWithBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE), blurImageView)
             reportTextViewOpen.setOnClickListener {
                 val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -1193,9 +1184,9 @@ class BrowserTabFragment :
     private fun handleProgressBar(view: View, imageView: ImageView) {
         val progressBar: ProgressBar = view.findViewById(R.id.progress_bar)
         val iconImageView: ImageView = view.findViewById(R.id.icon_image_view)
-        val progress = sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0)
+        val progress = sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE)
         progressBar.progress = progress
-        updateViewsPosition(iconImageView, sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0))
+        updateViewsPosition(iconImageView, sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE))
         progressBar.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
@@ -1220,7 +1211,7 @@ class BrowserTabFragment :
         var currentLayout: View
         val popupWindow = PopupWindow(popupView, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         safeGazeIcon.setOnClickListener {
-            safeGazeInterface.updateBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, 0).toFloat())
+            safeGazeInterface.updateBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE).toFloat())
             val iconRect = Rect()
             safeGazeIcon.getGlobalVisibleRect(iconRect)
             val x = iconRect.left
@@ -1273,7 +1264,7 @@ class BrowserTabFragment :
                 startActivity(intent)
             }
 
-            if (sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)) {
+            if (isPrivateDnsEnabled()) {
                 it.kahfDnsToggleButton.isChecked = true
                 it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
                 it.protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
@@ -1290,15 +1281,13 @@ class BrowserTabFragment :
             it.kahfDnsToggleButton.setOnCheckedChangeListener { _, isChecked ->
                 handleTrackTint(isChecked, it.kahfDnsToggleButton)
 
-                if (sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false) && !isChecked) {
-                    editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, false)
-                    editor.apply()
+                if (isPrivateDnsEnabled() && !isChecked) {
+                    updatePrivateDnsSettings(false)
 
                     it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_down)
                     it.protectedTextView.text = resources.getString(string.kahf_dns_not_protected_text)
-                } else if (!sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false) && isChecked) {
-                    editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, true)
-                    editor.apply()
+                } else if (!isPrivateDnsEnabled() && isChecked) {
+                    updatePrivateDnsSettings(true)
 
                     it.kahfDnsStateTextView.text = resources.getString(string.kahf_dns_up)
                     it.protectedTextView.text = resources.getString(string.kahf_dns_protected_text)
@@ -1306,6 +1295,14 @@ class BrowserTabFragment :
             }
         }
     }
+
+    private fun updatePrivateDnsSettings(enabled: Boolean) {
+        editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, enabled)
+        editor.apply()
+        viewModel.privateDnsEnabled = enabled
+    }
+
+    private fun isPrivateDnsEnabled() = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
 
     private fun toggleVisibilityWithAnimation(view: View, visibility: Int) {
         val anim = if (visibility == VISIBLE) {
@@ -1388,6 +1385,7 @@ class BrowserTabFragment :
         super.onResume()
         omnibar.appBarLayout.setExpanded(true)
         viewModel.onViewResumed()
+        viewModel.privateDnsEnabled = isPrivateDnsEnabled()
 
         // onResume can be called for a hidden/backgrounded fragment, ensure this tab is visible.
         if (fragmentIsVisible()) {
@@ -1596,12 +1594,21 @@ class BrowserTabFragment :
         omnibar.shieldIcon.isInvisible = true
         webView?.onPause()
         webView?.hide()
-        errorView.errorMessage.text = getString(errorType.errorId, url).html(requireContext())
-        if (appTheme.isLightModeEnabled()) {
-            errorView.yetiIcon.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_light)
+
+        if (errorType.name == BLOCKED.name) {
+            errorView.errorMessage.text = getString(errorType.errorId, url).html(requireContext())
+            errorView.yetiIcon.setImageResource(R.drawable.blocked)
+            errorView.errorTitle.text = getString(string.webViewBlockedTitle)
         } else {
-            errorView.yetiIcon.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_dark)
+            errorView.errorTitle.text = getString(string.webViewErrorTitle)
+            errorView.errorMessage.text = getString(errorType.errorId, url).html(requireContext())
+            if (appTheme.isLightModeEnabled()) {
+                errorView.yetiIcon.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_light)
+            } else {
+                errorView.yetiIcon.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_dark)
+            }
         }
+
         errorView.errorLayout.show()
     }
 
@@ -1616,23 +1623,7 @@ class BrowserTabFragment :
         hideKeyboard()
         renderer.hideFindInPage()
         viewModel.registerDaxBubbleCtaDismissed()
-
-        val privateDnsEnabled = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
-
-        if (privateDnsEnabled) {
-            CoroutineScope(dispatchers.io()).launch {
-                val ip = dnsResolver.sendDnsQueries(url.toUri())
-
-                withContext(dispatchers.main()) {
-                    webView?.loadUrl(
-                        if (ip == "0.0.0.0") hostBlockerHelper.dataUri() else url,
-                        headers
-                    )
-                }
-            }
-        } else {
-            webView?.loadUrl(url, headers)
-        }
+        webView?.loadUrl(url, headers)
     }
 
     private fun onRefreshRequested() {
@@ -2591,10 +2582,10 @@ class BrowserTabFragment :
             R.layout.include_duckduckgo_browser_webview,
             binding.webViewContainer,
             true,
-        ).findViewById(R.id.browserWebView) as DuckDuckGoWebView
+        ).findViewById(R.id.browserWebView)
 
         webView?.let {
-            safeGazeInterface = SafeGazeJsInterface(requireContext(), webView!!)
+            safeGazeInterface = SafeGazeJsInterface(requireContext(), webView!!, nsfwDetector, genderDetector)
 
             it.webViewClient = browserWebViewClient
             browserWebViewClient.activity = requireActivity()
@@ -3983,11 +3974,13 @@ class BrowserTabFragment :
         fun renderBrowserViewState(viewState: BrowserViewState) {
             renderIfChanged(viewState, lastSeenBrowserViewState) {
                 val browserShowing = viewState.browserShowing
-                val browserShowingChanged = viewState.browserShowing != lastSeenBrowserViewState?.browserShowing
+                val browserShowingChanged = viewState.browserShowing != (lastSeenBrowserViewState?.browserShowing ?: false)
                 val errorChanged = viewState.browserError != lastSeenBrowserViewState?.browserError
 
                 lastSeenBrowserViewState = viewState
-                if (browserShowingChanged) {
+                if (viewState.browserError == BLOCKED) {
+                    showError(viewState.browserError, webView?.url)
+                } else if (browserShowingChanged) {
                     if (browserShowing) {
                         showBrowser()
                     } else {
