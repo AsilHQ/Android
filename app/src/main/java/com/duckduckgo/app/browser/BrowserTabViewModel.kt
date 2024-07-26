@@ -242,6 +242,7 @@ import com.duckduckgo.browser.api.brokensite.BrokenSiteData
 import com.duckduckgo.browser.api.brokensite.BrokenSiteData.ReportFlow.MENU
 import com.duckduckgo.common.utils.AppUrl
 import com.duckduckgo.common.utils.DispatcherProvider
+import com.duckduckgo.common.utils.KAHF_GUARD_BLOCKED_URL
 import com.duckduckgo.common.utils.SingleLiveEvent
 import com.duckduckgo.common.utils.baseHost
 import com.duckduckgo.common.utils.device.DeviceInfo
@@ -936,7 +937,7 @@ class BrowserTabViewModel @Inject constructor(
                 if (privateDnsEnabled) {
                     runBlocking {
                         val ip = dnsResolver.sendDnsQueries(urlToNavigate.toUri())
-                        if (ip?.first == "0.0.0.0" || ip?.second == "blocked.kahfguard.com") {
+                        if (ip?.first == "0.0.0.0" || ip?.second == KAHF_GUARD_BLOCKED_URL) {
                             urlToNavigate = "https://${ip.second}"
                         }
 

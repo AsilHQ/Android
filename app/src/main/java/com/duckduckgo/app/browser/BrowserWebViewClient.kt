@@ -76,6 +76,7 @@ import com.duckduckgo.browser.api.JsInjectorPlugin
 import com.duckduckgo.common.ui.view.dialog.TextAlertDialogBuilder
 import com.duckduckgo.common.utils.CurrentTimeProvider
 import com.duckduckgo.common.utils.DispatcherProvider
+import com.duckduckgo.common.utils.KAHF_GUARD_BLOCKED_URL
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
@@ -458,15 +459,9 @@ class BrowserWebViewClient @Inject constructor(
             CoroutineScope(dispatcherProvider.io()).launch {
                 // val initialTime = System.currentTimeMillis()
                 val ip = dnsResolver.sendDnsQueries(uri)
-
-                /*val resolvedDomain = when (ip?.second) {
-                    null -> uri.toString() // failed to resolve
-                    "blocked.kahfguard.com" -> ip.second
-                    else -> uri.toString() // "${uri.scheme}://${ip}${uri.path}${uri.query?.let { "?$it" } ?: ""}"
-                }*/
-
                 // Timber.d("ipLog $ip || lookup time ${System.currentTimeMillis() - initialTime}ms || ${uri.host}")
                 continuation.resume(ip ?: Pair("", uri.toString()))
+                // "${uri.scheme}://${ip}${uri.path}${uri.query?.let { "?$it" } ?: ""}"
             }
         }
     }
@@ -588,13 +583,13 @@ class BrowserWebViewClient @Inject constructor(
         request: WebResourceRequest,
     ): WebResourceResponse? {
         val url = request.url.toString()
-        if (url.contains("blocked.kahfguard.com")) return null
+        if (request.url.host == KAHF_GUARD_BLOCKED_URL) return null
         val privateDnsEnabled = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
 
         return runBlocking {
             withContext(dispatcherProvider.io()) {
                 try {
-                    if (privateDnsEnabled && resolveDns(Uri.parse(url)).second == "blocked.kahfguard.com") {
+                    if (privateDnsEnabled && resolveDns(Uri.parse(url)).second == KAHF_GUARD_BLOCKED_URL) {
                         if (request.isForMainFrame) {
                             withContext(dispatcherProvider.main()) {
                                 webViewClientListener?.loadNewUrl(url)
