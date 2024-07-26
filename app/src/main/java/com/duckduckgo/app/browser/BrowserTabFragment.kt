@@ -16,6 +16,7 @@
 
 package com.duckduckgo.app.browser
 
+import PopupWebViewInterface
 import android.Manifest
 import android.animation.LayoutTransition
 import android.annotation.SuppressLint
@@ -150,6 +151,7 @@ import com.duckduckgo.app.browser.databinding.ContentSystemLocationPermissionDia
 import com.duckduckgo.app.browser.databinding.FragmentBrowserTabBinding
 import com.duckduckgo.app.browser.databinding.HttpAuthenticationBinding
 import com.duckduckgo.app.browser.databinding.IncludeOmnibarToolbarBinding
+import com.duckduckgo.app.browser.databinding.KahfSettingsPopupBinding
 import com.duckduckgo.app.browser.databinding.PopupWindowBrowserMenuBinding
 import com.duckduckgo.app.browser.databinding.SafeGazePopUpViewBinding
 import com.duckduckgo.app.browser.downloader.BlobConverterInjector
@@ -599,6 +601,10 @@ class BrowserTabFragment :
 
     private lateinit var decorator: BrowserTabFragmentDecorator
 
+    private val kahfPopupInterface: PopupWebViewInterface by lazy {
+        PopupWebViewInterface(webView, dispatchers, editor)
+    }
+
     @Inject
     lateinit var autofillFragmentResultListeners: PluginPoint<AutofillFragmentResultsPlugin>
 
@@ -963,7 +969,7 @@ class BrowserTabFragment :
             (dialog as EditSavedSiteDialogFragment).listener = viewModel
             dialog.deleteBookmarkListener = viewModel
         }
-        handleSafeGazePopUp()
+        configureKahfSettingsPopup()
     }
 
     private fun handleTrackTint(isChecked: Boolean, switch: Switch){
@@ -1100,6 +1106,54 @@ class BrowserTabFragment :
                     true
                 }
                 else -> false
+            }
+        }
+    }
+
+    @SuppressLint("JavascriptInterface", "SetJavaScriptEnabled")
+    private fun configureKahfSettingsPopup() {
+        val popupBinding = KahfSettingsPopupBinding.inflate(LayoutInflater.from(context))
+        val popupWindow = PopupWindow(popupBinding.root, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+
+
+        safeGazeIcon.setOnClickListener {
+            val iconRect = Rect()
+            safeGazeIcon.getGlobalVisibleRect(iconRect)
+            val x = iconRect.left
+            val y = iconRect.top
+
+            val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
+            val popUpLayingOut = 350.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
+            val newPopUpPosition = (x - popUpLayingOut) - 50
+
+            popupWindow.apply {
+                animationStyle = 2132017505
+                isFocusable = true
+            }
+
+            safeGazeIcon.post {
+                val safeGazeEnabled = sharedPreferences.getBoolean(SAFE_GAZE_ACTIVE, false)
+                val htmlContent = readAssetFile(requireContext().assets, "kahf_popup.html")
+
+                popupBinding.popupWebview.apply {
+                    settings.javaScriptEnabled = true
+                    // To pass data from JS to Kotlin
+                    addJavascriptInterface(kahfPopupInterface, "Android")
+                    loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+
+                    // To pass data from Kotlin to JS
+                    CoroutineScope(dispatchers.main()).launch {
+                        delay(100)
+                        evaluateJavascript("javascript:setSafeGazeState($safeGazeEnabled);", null)
+                    }
+                }
+
+                popupWindow.showAtLocation(
+                    safeGazeIcon,
+                    Gravity.NO_GRAVITY,
+                    newPopUpPosition,
+                    (y + omnibar.toolbar.height) - 20,
+                )
             }
         }
     }
