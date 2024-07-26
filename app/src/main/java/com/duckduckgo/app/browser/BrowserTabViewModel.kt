@@ -1223,6 +1223,10 @@ class BrowserTabViewModel @Inject constructor(
         navigationAwareLoginDetector.onEvent(NavigationEvent.WebNavigationEvent(stateChange))
     }
 
+    override fun loadNewUrl(url: String) {
+        onUserSubmittedQuery(url)
+    }
+
     override fun onPageContentStart(url: String) {
         showWebContent()
     }

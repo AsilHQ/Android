@@ -48,7 +48,6 @@ import com.duckduckgo.app.browser.SSLErrorType.GENERIC
 import com.duckduckgo.app.browser.SSLErrorType.UNTRUSTED_HOST
 import com.duckduckgo.app.browser.SSLErrorType.WRONG_HOST
 import com.duckduckgo.app.browser.WebViewErrorResponse.BAD_URL
-import com.duckduckgo.app.browser.WebViewErrorResponse.BLOCKED
 import com.duckduckgo.app.browser.WebViewErrorResponse.CONNECTION
 import com.duckduckgo.app.browser.WebViewErrorResponse.OMITTED
 import com.duckduckgo.app.browser.WebViewPixelName.WEB_RENDERER_GONE_CRASH
@@ -598,7 +597,7 @@ class BrowserWebViewClient @Inject constructor(
                     if (privateDnsEnabled && resolveDns(Uri.parse(url)).second == "blocked.kahfguard.com") {
                         if (request.isForMainFrame) {
                             withContext(dispatcherProvider.main()) {
-                                webViewClientListener?.onReceivedError(BLOCKED, url)
+                                webViewClientListener?.loadNewUrl(url)
                             }
                         }
                         WebResourceResponse(null, null, null)
