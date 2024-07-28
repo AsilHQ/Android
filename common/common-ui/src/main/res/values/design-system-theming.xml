@@ -202,6 +202,8 @@
         <item name="daxInfoPanelTooltipBackgroundColor">@color/daxInfoPanelTooltipBackgroundColorDark</item>
         <item name="daxInfoPanelAlertBackgroundColor">@color/daxInfoPanelAlertBackgroundColorDark</item>
 
+        <item name="kahfBottomNavIcon">@color/kahf_bottom_nav_icon</item>
+
     </style>
 
     <style name="Theme.DuckDuckGo.Light" parent="Theme.DuckDuckGo">
@@ -278,6 +280,8 @@
         <!-- Info Panel -->
         <item name="daxInfoPanelTooltipBackgroundColor">@color/daxInfoPanelTooltipBackgroundColorLight</item>
         <item name="daxInfoPanelAlertBackgroundColor">@color/daxInfoPanelAlertBackgroundColorLight</item>
+
+        <item name="kahfBottomNavIcon">@color/kahf_bottom_nav_icon</item>
 
     </style>
 

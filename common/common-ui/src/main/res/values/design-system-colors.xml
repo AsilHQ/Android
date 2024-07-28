@@ -109,6 +109,8 @@
     <color name="daxColorBlurLight">#7A626262</color>
     <color name="daxColorBlurDark">#B3111111</color>
 
+    <attr name="kahfBottomNavIcon" format="color"/>
+
     <!-- Design System Raw Colors -->
     <color name="red20">#F2A18A</color>
     <color name="red30">#EB876C</color>
@@ -221,6 +223,9 @@
     <color name="kahf_gradient_80_start">#803E8DFF</color>
     <color name="kahf_gradient_80_end">#809887FF</color>
     <color name="kahf_blue">#6584EC</color>
+    <color name="kahf_bottom_nav_icon">#C2C2CF</color>
+    <color name="kahf_bottom_nav_icon_inactive">#5C606D</color>
+
 </resources>
 
     <!-- Opacity Prefixes

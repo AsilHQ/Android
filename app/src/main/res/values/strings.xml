@@ -869,6 +869,7 @@
     <string name="noResultsFor">Search \"%1$s\" returned no results</string>
     <string name="removeFromFavorites">Remove from favorites</string>
     <string name="addToFavoritesMenu">Add to favorites</string>
+    <string name="not_implemented">Not implemented yet</string>
     <plurals name="bookmarkFolderDeleteMessage">
         <item quantity="one">Are you sure you want to delete this folder and %1$d item?</item>
         <item quantity="other">Are you sure you want to delete this folder and %1$d items?</item>

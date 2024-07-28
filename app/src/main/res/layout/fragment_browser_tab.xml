@@ -28,6 +28,7 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:src="@drawable/background_mosque"
+        tools:visibility="gone"
         android:scaleType="centerCrop"/>
 
     <FrameLayout
@@ -128,4 +129,7 @@
             android:focusableInTouchMode="true" />
 
     </RelativeLayout>
+
+<!--    <include layout="@layout/include_browser_bottom_nav"/>-->
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
