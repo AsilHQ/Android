@@ -25,6 +25,7 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatDelegate.FEATURE_SUPPORT_ACTION_BAR
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -47,13 +48,14 @@ import com.duckduckgo.common.ui.DuckDuckGoActivity
 import com.duckduckgo.common.ui.view.dialog.TextAlertDialogBuilder
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.ActivityScope
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
-import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 @InjectWith(ActivityScope::class)
 class TabSwitcherActivity : DuckDuckGoActivity(), TabSwitcherListener, CoroutineScope {
@@ -111,6 +113,7 @@ class TabSwitcherActivity : DuckDuckGoActivity(), TabSwitcherListener, Coroutine
         extractIntentExtras()
         configureViewReferences()
         setupToolbar(toolbar)
+        setTranslucentStatusBarAndNavBar()
         configureRecycler()
         configureObservers()
         configureOnBackPressedListener()
@@ -123,6 +126,10 @@ class TabSwitcherActivity : DuckDuckGoActivity(), TabSwitcherListener, Coroutine
     private fun configureViewReferences() {
         tabsRecycler = findViewById(R.id.tabsRecycler)
         toolbar = findViewById(R.id.toolbar)
+
+        findViewById<FloatingActionButton>(R.id.fab).setOnClickListener {
+            onNewTabRequested(fromOverflowMenu = false)
+        }
     }
 
     private fun configureRecycler() {
@@ -353,7 +360,7 @@ class TabSwitcherActivity : DuckDuckGoActivity(), TabSwitcherListener, Coroutine
 
         const val EXTRA_KEY_SELECTED_TAB = "selected"
 
-        private const val TAB_GRID_COLUMN_WIDTH_DP = 180
-        private const val TAB_GRID_MAX_COLUMN_COUNT = 4
+        private const val TAB_GRID_COLUMN_WIDTH_DP = 420
+        private const val TAB_GRID_MAX_COLUMN_COUNT = 2
     }
 }

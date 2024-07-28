@@ -20,8 +20,13 @@ import android.annotation.SuppressLint
 import android.app.UiModeManager
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.graphics.Color
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
+import android.view.WindowManager.LayoutParams
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -85,6 +90,31 @@ abstract class DuckDuckGoActivity : DaggerActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationIcon(R.drawable.ic_arrow_left_24)
+    }
+
+    fun setTranslucentStatusBarAndNavBar() {
+        if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+            window.clearFlags(LayoutParams.FLAG_TRANSLUCENT_STATUS)
+            window.addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+
+            window.statusBarColor = Color.TRANSPARENT
+            window.navigationBarColor = Color.TRANSPARENT
+
+            @Suppress("DEPRECATION")
+            if (VERSION.SDK_INT >= VERSION_CODES.O) {
+                window.decorView.systemUiVisibility = (
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
+            }
+        }
     }
 
     fun isDarkThemeEnabled(): Boolean {

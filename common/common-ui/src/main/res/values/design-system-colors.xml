@@ -217,6 +217,10 @@
     <color name="ic_launcher_purple_background">#7A4BDC</color>
     <color name="ic_launcher_blue_background">#4179ED</color>
     <color name="ic_launcher_black_background">#262626</color>
+
+    <color name="kahf_gradient_80_start">#803E8DFF</color>
+    <color name="kahf_gradient_80_end">#809887FF</color>
+    <color name="kahf_blue">#6584EC</color>
 </resources>
 
     <!-- Opacity Prefixes
