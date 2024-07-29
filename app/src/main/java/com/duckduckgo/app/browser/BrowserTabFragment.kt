@@ -663,7 +663,7 @@ class BrowserTabFragment :
         get() = bottomNav.tabSwitcher
 
     private val safeGazeIcon: AppCompatImageView
-        get() = omnibar.safeGazeIcon
+        get() = omnibar.kahfSettingsButton
 
     private var webView: DuckDuckGoWebView? = null
 
@@ -3609,7 +3609,7 @@ class BrowserTabFragment :
         }
     }
 
-    fun omnibarViews(): List<View> = listOf(omnibar.clearTextButton, omnibar.omnibarTextInput, omnibar.searchIcon)
+    fun omnibarViews(): List<View> = listOf(omnibar.clearTextButton, omnibar.omnibarTextInput, omnibar.searchIcon, omnibar.kahfSettingsButton)
 
     override fun onAnimationFinished() {
         // NO OP
@@ -4165,11 +4165,14 @@ class BrowserTabFragment :
                 omnibar.shieldIcon?.isInvisible = !viewState.showPrivacyShield.isEnabled() || viewState.showDaxIcon
                 omnibar.clearTextButton?.isVisible = viewState.showClearButton
                 omnibar.searchIcon?.isVisible = viewState.showSearchIcon
+                safeGazeIcon.isVisible = !viewState.showClearButton && !omnibar.omnibarTextInput.hasFocus()
+                // TODO change BG based on this condition ?? !viewState.showClearButton && !omnibar.omnibarTextInput.hasFocus()
             } else {
                 omnibar.daxIcon.isVisible = false
                 omnibar.shieldIcon?.isVisible = false
                 omnibar.clearTextButton?.isVisible = viewState.showClearButton
                 omnibar.searchIcon?.isVisible = true
+                safeGazeIcon.isVisible = false
             }
 
             omnibar.spacer.isVisible = viewState.showClearButton && lastSeenBrowserViewState?.showVoiceSearch ?: false
