@@ -41,7 +41,6 @@ import android.graphics.ColorMatrixColorFilter
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
-import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -149,6 +148,7 @@ import com.duckduckgo.app.browser.databinding.ContentSiteLocationPermissionDialo
 import com.duckduckgo.app.browser.databinding.ContentSystemLocationPermissionDialogBinding
 import com.duckduckgo.app.browser.databinding.FragmentBrowserTabBinding
 import com.duckduckgo.app.browser.databinding.HttpAuthenticationBinding
+import com.duckduckgo.app.browser.databinding.IncludeBrowserBottomNavBinding
 import com.duckduckgo.app.browser.databinding.IncludeOmnibarToolbarBinding
 import com.duckduckgo.app.browser.databinding.PopupWindowBrowserMenuBinding
 import com.duckduckgo.app.browser.databinding.SafeGazePopUpViewBinding
@@ -619,9 +619,9 @@ class BrowserTabFragment :
 
     private lateinit var omnibar: IncludeOmnibarToolbarBinding
 
-    private lateinit var webViewContainer: FrameLayout
+    private lateinit var bottomNav: IncludeBrowserBottomNavBinding
 
-    private lateinit var connectivityManager: ConnectivityManager
+    private lateinit var webViewContainer: FrameLayout
 
     private lateinit var sharedPreferences: SharedPreferences
 
@@ -649,6 +649,10 @@ class BrowserTabFragment :
 
     private val smoothProgressAnimator by lazy { SmoothProgressAnimator(omnibar.pageLoadingIndicator) }
 
+    private val activeMenuColor by lazy { ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_bottom_nav_icon) }
+
+    private val inactiveMenuColor by lazy { ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_bottom_nav_icon_inactive) }
+
     // Optimization to prevent against excessive work generating WebView previews; an existing job will be cancelled if a new one is launched
     private var bitmapGeneratorJob: Job? = null
 
@@ -656,13 +660,10 @@ class BrowserTabFragment :
         get() = activity as? BrowserActivity
 
     private val tabsButton: TabSwitcherButton?
-        get() = omnibar.tabsMenu
+        get() = bottomNav.tabSwitcher
 
     private val safeGazeIcon: AppCompatImageView
         get() = omnibar.safeGazeIcon
-
-    private val kahfDnsdIcon: AppCompatImageView
-        get() = omnibar.kahfDnsIcon
 
     private val menuButton: ViewGroup
         get() = omnibar.browserMenu
@@ -918,6 +919,7 @@ class BrowserTabFragment :
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         omnibar = IncludeOmnibarToolbarBinding.bind(binding.rootView)
+        bottomNav = IncludeBrowserBottomNavBinding.bind(binding.rootView)
         webViewContainer = binding.webViewContainer
         configureObservers()
         configurePrivacyShield()
@@ -930,6 +932,7 @@ class BrowserTabFragment :
         configureFocusedView()
         configureNewTab()
         initPrivacyProtectionsPopup()
+        configureBottomNav()
 
         if (tabDisplayedInCustomTabScreen) {
             configureCustomTab()
@@ -1258,6 +1261,20 @@ class BrowserTabFragment :
         privacyProtectionsPopup.events
             .onEach(viewModel::onPrivacyProtectionsPopupUiEvent)
             .launchIn(lifecycleScope)
+    }
+
+    private fun configureBottomNav() {
+        bottomNav.apply {
+            newTabMenuItem.setOnClickListener {
+                launch { viewModel.userRequestedOpeningNewTab(longPress = true) }
+            }
+            homeMenuItem.setOnClickListener(null)
+            timeMenuItem.setOnClickListener {
+                showToast(string.not_implemented)
+            }
+            backMenuItem.setOnClickListener { activity?.onBackPressed() }
+            forwardMenuItem.setOnClickListener { viewModel.onUserPressedForward() }
+        }
     }
 
     private fun getDaxDialogFromActivity(): Fragment? = activity?.supportFragmentManager?.findFragmentByTag(DAX_DIALOG_DIALOG_TAG)
@@ -2486,6 +2503,25 @@ class BrowserTabFragment :
                 omnibar.omnibarTextInput.hideKeyboard()
                 binding.focusDummy.requestFocus()
                 omnibar.omniBarContainer.isPressed = false
+            }
+        }
+    }
+
+    private fun renderBottomNavMenus(viewState: BrowserViewState) {
+        bottomNav.apply {
+            if (viewState.browserShowing) {
+                backMenuItem.visibility = VISIBLE
+                forwardMenuItem.visibility = VISIBLE
+                homeMenuItem.visibility = GONE
+                timeMenuItem.visibility = GONE
+
+                backMenuItem.imageTintList = ColorStateList.valueOf(if (viewState.canGoBack) activeMenuColor else inactiveMenuColor)
+                forwardMenuItem.imageTintList = ColorStateList.valueOf(if (viewState.canGoForward) activeMenuColor else inactiveMenuColor)
+            } else {
+                backMenuItem.visibility = GONE
+                forwardMenuItem.visibility = GONE
+                homeMenuItem.visibility = VISIBLE
+                timeMenuItem.visibility = VISIBLE
             }
         }
     }
@@ -3844,7 +3880,7 @@ class BrowserTabFragment :
                     }
                 }
             }
-            omnibar.browserMenu.setOnClickListener {
+            bottomNav.optionsMenuItem.setOnClickListener {
                 viewModel.onBrowserMenuClicked()
                 hideKeyboardImmediately()
                 launchTopAnchoredPopupMenu()
@@ -3859,7 +3895,7 @@ class BrowserTabFragment :
         }
 
         private fun launchTopAnchoredPopupMenu() {
-            popupMenu.show(binding.rootView, omnibar.toolbar)
+            popupMenu.show(binding.rootView, bottomNav.optionsMenuItem)
             if (isActiveCustomTab()) {
                 pixel.fire(CustomTabPixelNames.CUSTOM_TABS_MENU_OPENED)
             } else {
@@ -3868,13 +3904,13 @@ class BrowserTabFragment :
         }
 
         private fun configureShowTabSwitcherListener() {
-            tabsButton?.setOnClickListener {
+            bottomNav.tabsMenuContainer.setOnClickListener {
                 launch { viewModel.userLaunchingTabSwitcher() }
             }
         }
 
         private fun configureLongClickOpensNewTabListener() {
-            tabsButton?.setOnLongClickListener {
+            bottomNav.tabsMenuContainer.setOnLongClickListener {
                 launch { viewModel.userRequestedOpeningNewTab(longPress = true) }
                 return@setOnLongClickListener true
             }
@@ -4103,6 +4139,7 @@ class BrowserTabFragment :
                 }
 
                 renderToolbarMenus(viewState)
+                renderBottomNavMenus(viewState)
                 popupMenu.renderState(browserShowing, viewState, tabDisplayedInCustomTabScreen)
                 renderFullscreenMode(viewState)
                 renderVoiceSearch(viewState)

@@ -130,6 +130,6 @@
 
     </RelativeLayout>
 
-<!--    <include layout="@layout/include_browser_bottom_nav"/>-->
+    <include layout="@layout/include_browser_bottom_nav"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
