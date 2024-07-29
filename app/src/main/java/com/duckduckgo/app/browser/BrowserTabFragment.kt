@@ -665,9 +665,6 @@ class BrowserTabFragment :
     private val safeGazeIcon: AppCompatImageView
         get() = omnibar.safeGazeIcon
 
-    private val menuButton: ViewGroup
-        get() = omnibar.browserMenu
-
     private var webView: DuckDuckGoWebView? = null
 
     private val activityResultHandlerEmailProtectionInContextSignup = registerForActivityResult(StartActivityForResult()) { result: ActivityResult ->
@@ -1204,7 +1201,6 @@ class BrowserTabFragment :
 
     private fun configureCustomTab() {
         omnibar.omniBarContainer.hide()
-        omnibar.tabsMenu.hide()
 
         omnibar.toolbar.background = ColorDrawable(customTabToolbarColor)
         omnibar.toolbarContainer.background = ColorDrawable(customTabToolbarColor)
@@ -1231,7 +1227,6 @@ class BrowserTabFragment :
         omnibar.customTabToolbarContainer.customTabDomain.setTextColor(foregroundColor)
         omnibar.customTabToolbarContainer.customTabDomainOnly.setTextColor(foregroundColor)
         omnibar.customTabToolbarContainer.customTabTitle.setTextColor(foregroundColor)
-        omnibar.browserMenuImageView.setColorFilter(foregroundColor)
 
         requireActivity().window.navigationBarColor = customTabToolbarColor
         requireActivity().window.statusBarColor = customTabToolbarColor
@@ -3732,7 +3727,6 @@ class BrowserTabFragment :
     inner class BrowserTabFragmentDecorator {
 
         fun decorateWithFeatures() {
-            decorateToolbarWithButtons()
             createPopupMenu()
             configureShowTabSwitcherListener()
             configureLongClickOpensNewTabListener()
@@ -3744,12 +3738,7 @@ class BrowserTabFragment :
         }
 
         fun updateToolbarActionsVisibility(viewState: BrowserViewState) {
-            tabsButton?.isVisible = viewState.showTabsButton && !tabDisplayedInCustomTabScreen
-            menuButton?.isVisible = viewState.showMenuButton is HighlightableButton.Visible
-
-            val targetView = if (viewState.showMenuButton.isHighlighted()) {
-                omnibar.browserMenuImageView
-            } else if (viewState.showPrivacyShield.isHighlighted()) {
+            val targetView = if (viewState.showPrivacyShield.isHighlighted()) {
                 omnibar.placeholder
             } else {
                 null
@@ -3775,20 +3764,6 @@ class BrowserTabFragment :
             omnibar.toolbarContainer.doOnLayout {
                 pulseAnimation.playOn(targetView)
             }
-        }
-
-        private fun decorateToolbarWithButtons() {
-            // fireMenuButton?.show()
-            // fireMenuButton?.setOnClickListener {
-            //     browserActivity?.launchFire()
-            //     pixel.fire(
-            //         AppPixelName.MENU_ACTION_FIRE_PRESSED.pixelName,
-            //         mapOf(FIRE_BUTTON_STATE to pulseAnimation.isActive.toString()),
-            //     )
-            //     viewModel.onFireMenuSelected()
-            // }
-
-            tabsButton?.show()
         }
 
         private fun createPopupMenu() {
