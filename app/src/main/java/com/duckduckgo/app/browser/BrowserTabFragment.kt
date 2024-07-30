@@ -175,6 +175,8 @@ import com.duckduckgo.app.browser.omnibar.OmnibarScrolling
 import com.duckduckgo.app.browser.omnibar.animations.BrowserTrackersAnimatorHelper
 import com.duckduckgo.app.browser.omnibar.animations.PrivacyShieldAnimationHelper
 import com.duckduckgo.app.browser.omnibar.animations.TrackersAnimatorListener
+import com.duckduckgo.app.browser.omnibar.hideIt
+import com.duckduckgo.app.browser.omnibar.showIt
 import com.duckduckgo.app.browser.print.PrintDocumentAdapterFactory
 import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.browser.print.SinglePrintSafeguardFeature
@@ -195,7 +197,6 @@ import com.duckduckgo.app.browser.viewstate.BrowserViewState
 import com.duckduckgo.app.browser.viewstate.CtaViewState
 import com.duckduckgo.app.browser.viewstate.FindInPageViewState
 import com.duckduckgo.app.browser.viewstate.GlobalLayoutViewState
-import com.duckduckgo.app.browser.viewstate.HighlightableButton
 import com.duckduckgo.app.browser.viewstate.LoadingViewState
 import com.duckduckgo.app.browser.viewstate.OmnibarViewState
 import com.duckduckgo.app.browser.viewstate.PrivacyShieldViewState
@@ -2518,6 +2519,13 @@ class BrowserTabFragment :
                 homeMenuItem.visibility = VISIBLE
                 timeMenuItem.visibility = VISIBLE
             }
+
+            // Hide bottom navigation bar when the keyboard is visible
+            if (omnibar.omnibarTextInput.hasFocus()) {
+                bottomNav.botNav.gone()
+            } else {
+                bottomNav.botNav.show()
+            }
         }
     }
 
@@ -4165,7 +4173,7 @@ class BrowserTabFragment :
                 omnibar.shieldIcon?.isInvisible = !viewState.showPrivacyShield.isEnabled() || viewState.showDaxIcon
                 omnibar.clearTextButton?.isVisible = viewState.showClearButton
                 omnibar.searchIcon?.isVisible = viewState.showSearchIcon
-                safeGazeIcon.isVisible = !viewState.showClearButton && !omnibar.omnibarTextInput.hasFocus()
+                safeGazeIcon.isVisible = !omnibar.omnibarTextInput.hasFocus()
                 // TODO change BG based on this condition ?? !viewState.showClearButton && !omnibar.omnibarTextInput.hasFocus()
             } else {
                 omnibar.daxIcon.isVisible = false

@@ -53,18 +53,18 @@ class ScrollAwareBottomNavigationViewBehavior(
         consumed: IntArray
     ) {
         if (dyConsumed > 0) {
-            child.show()
+            child.showIt()
         } else if (dyConsumed < 0 && child.isShown) {
-            child.hide()
+            child.hideIt()
         }
     }
 }
 
-fun BottomNavigationView.hide() {
+fun BottomNavigationView.hideIt() {
     animate().translationY(height.toFloat()).setDuration(250)
 }
 
-fun BottomNavigationView.show() {
+fun BottomNavigationView.showIt() {
     animate().translationY(0f).setDuration(250)
 }
 
