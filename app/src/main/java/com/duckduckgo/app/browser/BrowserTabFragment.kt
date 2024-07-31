@@ -69,6 +69,7 @@ import android.view.View.OnFocusChangeListener
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
+import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
@@ -103,6 +104,8 @@ import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import androidx.core.text.toSpannable
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -175,8 +178,6 @@ import com.duckduckgo.app.browser.omnibar.OmnibarScrolling
 import com.duckduckgo.app.browser.omnibar.animations.BrowserTrackersAnimatorHelper
 import com.duckduckgo.app.browser.omnibar.animations.PrivacyShieldAnimationHelper
 import com.duckduckgo.app.browser.omnibar.animations.TrackersAnimatorListener
-import com.duckduckgo.app.browser.omnibar.hideIt
-import com.duckduckgo.app.browser.omnibar.showIt
 import com.duckduckgo.app.browser.print.PrintDocumentAdapterFactory
 import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.browser.print.SinglePrintSafeguardFeature
@@ -2518,13 +2519,6 @@ class BrowserTabFragment :
                 forwardMenuItem.visibility = GONE
                 homeMenuItem.visibility = VISIBLE
                 timeMenuItem.visibility = VISIBLE
-            }
-
-            // Hide bottom navigation bar when the keyboard is visible
-            if (omnibar.omnibarTextInput.hasFocus()) {
-                bottomNav.botNav.gone()
-            } else {
-                bottomNav.botNav.show()
             }
         }
     }
