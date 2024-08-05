@@ -1108,18 +1108,17 @@ class BrowserTabFragment :
             }
         }
     }
-
     private fun loadImageWithBlur(blurRadius: Int, imageView: ImageView) {
         val bitmap = BitmapFactory.decodeResource(resources, R.drawable.blur_image_background)
         
         // Convert blurRadius to a 0-1 scale to match the JS blurIntensity
         val blurIntensity = blurRadius / 100f
     
-        // Calculate filter values with caps and minimums
-        val blurValue = kotlin.math.min(blurIntensity * 10, 5f) // Max blur is 5px
-        val grayscaleValue = kotlin.math.min(blurIntensity * 100, 100f) // Max grayscale is 100%
-        val contrastValue = kotlin.math.max(kotlin.math.min(blurIntensity * 2, 2f), 1f) // Max contrast is 2, Min is 1
-        val brightnessValue = kotlin.math.max(kotlin.math.min(blurIntensity * 2, 2f), 1f) // Max brightness is 2, Min is 1
+        // Calculate blur value between 2px and 8px
+        val blurValue = 2 + (blurIntensity * 6)
+    
+        // Calculate brightness value between 200% and 800%
+        val brightnessValue = 2 + (blurIntensity * 6)
     
         // Apply blur
         val blurredBitmap = HokoBlur.with(requireContext())
@@ -1132,11 +1131,11 @@ class BrowserTabFragment :
         // Apply grayscale, contrast, and brightness
         val colorMatrix = ColorMatrix()
         
-        // Grayscale
-        colorMatrix.setSaturation(1 - (grayscaleValue / 100f))
+        // Grayscale (100%)
+        colorMatrix.setSaturation(0f)
         
-        // Contrast
-        val scale = contrastValue + 1f
+        // Contrast (500%)
+        val scale = 5f
         val translate = (-.5f * scale + .5f) * 255f
         colorMatrix.postConcat(ColorMatrix(floatArrayOf(
             scale, 0f, 0f, 0f, translate,
@@ -1144,7 +1143,7 @@ class BrowserTabFragment :
             0f, 0f, scale, 0f, translate,
             0f, 0f, 0f, 1f, 0f
         )))
-        
+    
         // Brightness
         colorMatrix.postConcat(ColorMatrix(floatArrayOf(
             brightnessValue, 0f, 0f, 0f, 0f,
@@ -1157,7 +1156,6 @@ class BrowserTabFragment :
         imageView.colorFilter = colorFilter
         imageView.setImageBitmap(blurredBitmap)
     }
-
     private fun handleSafeGazeCloseView(view: View){
         val safeGazeOpenViewPopUpBinding = SafeGazePopUpCloseBinding.bind(view)
         safeGazeOpenViewPopUpBinding.apply {
