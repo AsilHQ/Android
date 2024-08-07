@@ -29,6 +29,7 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:src="@drawable/background_mosque"
         tools:visibility="gone"
+        android:visibility="gone"
         android:scaleType="centerCrop"/>
 
     <FrameLayout
@@ -47,7 +48,8 @@
         android:id="@+id/autoCompleteSuggestionsList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/daxColorSurface"
+        android:layout_margin="10dp"
+        android:background="@android:color/transparent"
         android:clipToPadding="false"
         android:elevation="4dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
@@ -131,5 +133,12 @@
     </RelativeLayout>
 
     <include layout="@layout/include_browser_bottom_nav"/>
+
+    <View
+        android:id="@+id/suggestionListBg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/gradient_kahf"
+        android:visibility="gone"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

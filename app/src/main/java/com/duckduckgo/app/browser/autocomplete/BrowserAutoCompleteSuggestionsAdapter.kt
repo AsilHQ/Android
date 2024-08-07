@@ -16,8 +16,10 @@
 
 package com.duckduckgo.app.browser.autocomplete
 
+import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.UiThread
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteBookmarkSuggestion
@@ -25,6 +27,7 @@ import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.A
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteHistoryRelatedSuggestion.AutoCompleteHistorySearchSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteHistoryRelatedSuggestion.AutoCompleteHistorySuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteHistoryRelatedSuggestion.AutoCompleteInAppMessageSuggestion
+import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.autocomplete.AutoCompleteViewHolder.EmptySuggestionViewHolder
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.BOOKMARK_TYPE
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.DEFAULT_TYPE
@@ -93,6 +96,17 @@ class BrowserAutoCompleteSuggestionsAdapter(
                 deleteClickListener,
                 autoCompleteOpenSettingsClickListener,
             )
+
+            val drawableRes: Int = if (suggestions.size == 1) {
+                R.drawable.suggestion_bg_rounded
+            } else if (position == 0) {
+                R.drawable.suggestion_bg_rounded_top
+            } else if (position == suggestions.size - 1) {
+                R.drawable.suggestion_bg_rounded_bottom
+            } else {
+                R.drawable.suggestion_bg_rectangle
+            }
+            holder.itemView.background = ContextCompat.getDrawable(holder.itemView.context, drawableRes)
         }
     }
 

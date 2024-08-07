@@ -3942,14 +3942,18 @@ class BrowserTabFragment :
                     if (viewState.favorites.isNotEmpty() && viewState.showFavorites) {
                         binding.autoCompleteSuggestionsList.gone()
                         binding.focusedViewContainerLayout.show()
+                        binding.suggestionListBg.gone()
                     } else {
                         binding.autoCompleteSuggestionsList.show()
                         binding.focusedViewContainerLayout.gone()
+                        if (viewState.searchResults.suggestions.isNotEmpty())
+                            binding.suggestionListBg.show()
                         autoCompleteSuggestionsAdapter.updateData(viewState.searchResults.query, viewState.searchResults.suggestions)
                     }
                 } else {
                     binding.autoCompleteSuggestionsList.gone()
                     binding.focusedViewContainerLayout.gone()
+                    binding.suggestionListBg.gone()
                 }
             }
         }
