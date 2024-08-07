@@ -14,17 +14,19 @@ import com.duckduckgo.app.browser.DuckDuckGoWebView
 import com.duckduckgo.app.safegaze.genderdetection.GenderDetector
 import com.duckduckgo.app.safegaze.nsfwdetection.NsfwDetector
 import com.duckduckgo.common.utils.DefaultDispatcherProvider
+// import com.duckduckgo.app.safegaze.personDetection.PersonDetector
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.ConcurrentLinkedQueue
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-internal data class UrlInfo(val url: String, val index: Int)
+internal data class UrlInfo(val url: String, val uid: String)
 
 class SafeGazeJsInterface(
     private val context: Context,
@@ -36,33 +38,52 @@ class SafeGazeJsInterface(
     private val preferences: SharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
 
 
-    private val alreadyProcessedUrls = mutableMapOf<String, Boolean>()
+    private val onDeviceModelCachedResults = mutableMapOf<String, Boolean>()
+    // private val personDetector = PersonDetector(context)
 
     private val urlQueue: ConcurrentLinkedQueue<UrlInfo> = ConcurrentLinkedQueue()
     private var processingJob: Job? = null
     private val scope = CoroutineScope(dispatcher.computation() + Job())
+    private var quotaExceeded = false
+    private var lastResetDate = 0L
+    private val QUOTA_LIMIT = 60
+    private var currentCount = 0
 
-    private suspend fun shouldBlurImage(url: String, mScope: CoroutineScope): Boolean {
+    init {
+        lastResetDate = preferences.getLong("SafeGazeLastResetDate", 0)
+        quotaExceeded = preferences.getBoolean("SafeGazeQuotaExceeded", false)
+        currentCount = preferences.getInt("SafeGazeAPICallsCount", 0)
+        checkAndResetQuota()
+        periodicStateSave()
+    }
+
+    private suspend fun shouldBlurImage(url: String, mScope: CoroutineScope, isPersonCheck: Boolean): Boolean {
         return suspendCoroutine { continuation ->
             mScope.launch {
                 val bitmap = loadImageBitmapFromUrl(url, context)
 
                 if (bitmap != null) {
-                    val nsfwPrediction = nsfwDetector.isNsfw(bitmap)
-
-                    if (nsfwPrediction.isSafe()) {
-                        val genderPrediction = genderDetector.predict(bitmap)
-
-                        if (genderPrediction.hasFemale)
-                            Timber.d("kLog Female (${genderPrediction.femaleConfidence}) $url")
-
-                        continuation.resume(genderPrediction.hasFemale)
-                    } else {
-                        nsfwPrediction.getLabelWithConfidence().let {
-                            Timber.d("kLog Nsfw: ${it.first} (${it.second}) $url")
-                            continuation.resume(true)
+                //NOTE: Person detection is disabled for now
+                //     if (isPersonCheck) {
+                //         val containsHuman = personDetector.hasPerson(bitmap)
+                //         continuation.resume(containsHuman)
+                //    } else {
+                        val nsfwPrediction = nsfwDetector.isNsfw(bitmap)
+                   
+                        if (nsfwPrediction.isSafe()) {
+                            val genderPrediction = genderDetector.predict(bitmap)
+                   
+                            if (genderPrediction.hasFemale)
+                                Timber.d("kLog Female (${genderPrediction.femaleConfidence}) $url")
+                   
+                            continuation.resume(genderPrediction.hasFemale)
+                        } else {
+                            nsfwPrediction.getLabelWithConfidence().let {
+                                Timber.d("kLog Nsfw: ${it.first} (${it.second}) $url")
+                                continuation.resume(true)
+                            }
                         }
-                    }
+                    // }
                 } else {
                     continuation.resume(false)
                 }
@@ -95,8 +116,8 @@ class SafeGazeJsInterface(
     }
 
     @JavascriptInterface
-    fun callSafegazeOnDeviceModelHandler(isExist: Boolean, index: Int) {
-        val jsFunctionCall = "safegazeOnDeviceModelHandler($isExist, $index);"
+    fun callSafegazeOnDeviceModelHandler(isExist: Boolean, uid: String, quotaExceeded: Boolean) {
+        val jsFunctionCall = "safegazeOnDeviceModelHandler($isExist, '$uid', $quotaExceeded);"
         webView.post {
             webView.evaluateJavascript(jsFunctionCall, null)
         }
@@ -116,13 +137,13 @@ class SafeGazeJsInterface(
         if (message.startsWith("coreML/-/")) {
             val parts = message.split("/-/")
             val imageUrl = if (parts.size >= 2) parts[1] else ""
-            val index = (if (parts.size >= 2) parts[2] else "0").toInt()
+            val uid = (if (parts.size >= 2) parts[2] else "0")
 
-            if (alreadyProcessedUrls.containsKey(imageUrl)) {
-                callSafegazeOnDeviceModelHandler(alreadyProcessedUrls[imageUrl]!!, index)
-            } else {
-                addTaskToQueue(imageUrl, index)
-            }
+            // if (onDeviceModelCachedResults.containsKey(imageUrl)) {
+            //     callSafegazeOnDeviceModelHandler(onDeviceModelCachedResults[imageUrl]!!, uid, quotaExceeded)
+            // } else {
+                addTaskToQueue(imageUrl, uid)
+            // }
         }
         if (message.contains("page_refresh")) {
             preferences.edit().putInt("session_censored_count", 0).apply()
@@ -132,25 +153,83 @@ class SafeGazeJsInterface(
         }
     }
 
-    private fun addTaskToQueue(url: String, index: Int) {
-        urlQueue.add(UrlInfo(url, index))
+    private fun addTaskToQueue(url: String, uid: String) {
+        urlQueue.add(UrlInfo(url, uid))
         processQueue()
     }
 
+    private fun checkAndUpdateDailyQuota(): Int {
+        checkAndResetQuota()
+        
+        if (!quotaExceeded) {
+            if (currentCount < QUOTA_LIMIT) {
+                currentCount++
+                
+                if (currentCount == QUOTA_LIMIT) {
+                    quotaExceeded = true
+                    saveQuotaState()
+                }
+                
+                return currentCount - 1
+            } else {
+                quotaExceeded = true
+                saveQuotaState()
+            }
+        }
+        
+        return 9999999
+    }
+
+    private fun saveQuotaState() {
+        preferences.edit()
+            .putInt("SafeGazeAPICallsCount", currentCount)
+            .putBoolean("SafeGazeQuotaExceeded", quotaExceeded)
+            .apply()
+    }
+
+    private fun checkAndResetQuota() {
+        val currentDate = System.currentTimeMillis() / 86400000 // Current day since epoch
+        if (currentDate > lastResetDate) {
+            lastResetDate = currentDate
+            quotaExceeded = false
+            currentCount = 0
+            preferences.edit()
+                .putLong("SafeGazeLastResetDate", lastResetDate)
+                .putBoolean("SafeGazeQuotaExceeded", false)
+                .putInt("SafeGazeAPICallsCount", 0)
+                .apply()
+        }
+    }
+
+    private fun periodicStateSave() {
+        scope.launch {
+            while (true) {
+                delay(60 * 1000) // Save every 1 minutes
+                saveQuotaState()
+            }
+        }
+    }
+    
     private fun processQueue() {
         if (processingJob?.isActive != true) {
-
             processingJob = scope.launch {
                 while (urlQueue.isNotEmpty()) {
                     val task = urlQueue.poll()
-
+    
                     task?.let {
-                        if (alreadyProcessedUrls.containsKey(it.url)) {
-                            callSafegazeOnDeviceModelHandler(alreadyProcessedUrls[it.url]!!, it.index)
+                         if (!quotaExceeded) 
+                         { 
+                            checkAndUpdateDailyQuota()
+                         } 
+
+                        if (!quotaExceeded) {
+                            val shouldBlur = shouldBlurImage(it.url, this, true)
+                            onDeviceModelCachedResults[it.url] = shouldBlur
+                            callSafegazeOnDeviceModelHandler(shouldBlur, it.uid, false)
                         } else {
-                            val shouldBlur = shouldBlurImage(it.url, this)
-                            alreadyProcessedUrls[it.url] = shouldBlur
-                            callSafegazeOnDeviceModelHandler(shouldBlur, it.index)
+                            val shouldBlur = shouldBlurImage(it.url, this, false)
+                            onDeviceModelCachedResults[it.url] = shouldBlur
+                            callSafegazeOnDeviceModelHandler(shouldBlur, it.uid, true)
                         }
                     }
                 }
@@ -190,6 +269,7 @@ class SafeGazeJsInterface(
         // Don't dispose models since these are singleton instances and will affect the other tabs
         // nsfwDetector.dispose()
         // genderDetector.dispose()
+        saveQuotaState()
         scope.cancel()
     }
 }
