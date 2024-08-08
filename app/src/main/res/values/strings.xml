@@ -870,6 +870,10 @@
     <string name="removeFromFavorites">Remove from favorites</string>
     <string name="addToFavoritesMenu">Add to favorites</string>
     <string name="not_implemented">Not implemented yet</string>
+    <string name="haram_ad_blocked">Haram image blocked</string>
+    <string name="haram_site_blocked">Haram site blocked</string>
+    <string name="tracker_blocked">Tracker blocked</string>
+    <string name="_5m">6M+</string>
     <plurals name="bookmarkFolderDeleteMessage">
         <item quantity="one">Are you sure you want to delete this folder and %1$d item?</item>
         <item quantity="other">Are you sure you want to delete this folder and %1$d items?</item>

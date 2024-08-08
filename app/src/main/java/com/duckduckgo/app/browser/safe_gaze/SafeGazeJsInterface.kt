@@ -14,6 +14,7 @@ import com.duckduckgo.app.browser.DuckDuckGoWebView
 import com.duckduckgo.app.safegaze.genderdetection.GenderDetector
 import com.duckduckgo.app.safegaze.nsfwdetection.NsfwDetector
 import com.duckduckgo.common.utils.DefaultDispatcherProvider
+import com.duckduckgo.common.utils.SAFE_GAZE_CENSOR_COUNT
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -171,11 +172,11 @@ class SafeGazeJsInterface(
     }
 
     private fun saveAllTimeCounterValue(value: Int) {
-        preferences.edit().putInt("all_time_censored_count", value).apply()
+        preferences.edit().putInt(SAFE_GAZE_CENSOR_COUNT, value).apply()
     }
 
     private fun getAllTimeCounter(): Int {
-        return preferences.getInt("all_time_censored_count", 0)
+        return preferences.getInt(SAFE_GAZE_CENSOR_COUNT, 0)
     }
 
     private fun saveSessionCounterValue(value: Int) {

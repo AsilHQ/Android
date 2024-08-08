@@ -27,4 +27,4 @@ const val SAFE_GAZE_PREFERENCES = "safe_gaze_preferences"
 const val SAFE_GAZE_DEFAULT_BLUR_VALUE = 50
 const val SAFE_GAZE_MIN_FACE_SIZE = 15
 const val KAHF_GUARD_BLOCKED_URL = "blocked.kahfguard.com"
-const val SAFE_GAZE_MIN_FEMALE_CONFIDENCE = 0.7f
+const val SAFE_GAZE_CENSOR_COUNT = "all_time_censored_count"

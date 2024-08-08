@@ -69,7 +69,6 @@ import android.view.View.OnFocusChangeListener
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
-import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
@@ -104,8 +103,6 @@ import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import androidx.core.text.toSpannable
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -234,6 +231,7 @@ import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.app.tabs.model.TabEntity
 import com.duckduckgo.app.tabs.ui.GridViewColumnCalculator
 import com.duckduckgo.app.tabs.ui.TabSwitcherActivity
+import com.duckduckgo.app.trackerdetection.db.WebTrackersBlockedDao
 import com.duckduckgo.app.widget.AddWidgetLauncher
 import com.duckduckgo.appbuildconfig.api.AppBuildConfig
 import com.duckduckgo.autoconsent.api.Autoconsent
@@ -293,6 +291,7 @@ import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.FragmentViewModelFactory
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
+import com.duckduckgo.common.utils.SAFE_GAZE_CENSOR_COUNT
 import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
 import com.duckduckgo.common.utils.SAFE_GAZE_INTERFACE
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
@@ -571,6 +570,9 @@ class BrowserTabFragment :
 
     @Inject
     lateinit var genderDetector: GenderDetector
+
+    @Inject
+    lateinit var webTrackersBlockedDao: WebTrackersBlockedDao
 
     /**
      * We use this to monitor whether the user was seeing the in-context Email Protection signup prompt
@@ -1002,7 +1004,7 @@ class BrowserTabFragment :
             }
 
             thisPageCounterTextView.text = sharedPreferences.getInt("session_censored_count", 0).toString()
-            lifetimeCounterTextView.text = sharedPreferences.getInt("all_time_censored_count", 0).toString()
+            lifetimeCounterTextView.text = sharedPreferences.getInt(SAFE_GAZE_CENSOR_COUNT, 0).toString()
 
             sageGazeSwitch.isChecked = sharedPreferences.getBoolean(SAFE_GAZE_ACTIVE, false)
 
@@ -4324,7 +4326,7 @@ class BrowserTabFragment :
 
         private fun showNewTab() {
             Timber.d("New Tab: showNewTab")
-            newTabPageProvider.provideNewTabPageVersion().onEach { newTabPage ->
+            /*newTabPageProvider.provideNewTabPageVersion().onEach { newTabPage ->
                 newBrowserTab.newTabContainerLayout.addView(
                     newTabPage.getView(requireContext()),
                     LayoutParams(
@@ -4333,7 +4335,17 @@ class BrowserTabFragment :
                     ),
                 )
             }
-                .launchIn(lifecycleScope)
+                .launchIn(lifecycleScope)*/
+
+            // App Statistics section
+            newBrowserTab.adsBlockedCount.text = sharedPreferences.getInt(SAFE_GAZE_CENSOR_COUNT, 0).toString()
+            lifecycleScope.launch {
+                webTrackersBlockedDao.getTotalTrackerCount().collect{ count ->
+                    Timber.d("New Tab: $count")
+                    newBrowserTab.trackerBlockedCount.text = count.toString()
+                }
+            }
+
             newBrowserTab.newTabContainerLayout.show()
             newBrowserTab.newTabLayout.show()
         }
