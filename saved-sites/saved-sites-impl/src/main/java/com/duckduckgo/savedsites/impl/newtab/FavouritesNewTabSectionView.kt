@@ -326,6 +326,7 @@ class FavouritesNewTabSectionView @JvmOverloads constructor(
         binding.root.makeSnackbarWithNoBottomInset(
             message,
             Snackbar.LENGTH_LONG,
+            showOverBottomNav = true
         ).setAction(R.string.fireproofWebsiteSnackbarAction) {
             viewModel.undoDelete(savedSite)
         }
@@ -336,7 +337,7 @@ class FavouritesNewTabSectionView @JvmOverloads constructor(
                         event: Int,
                     ) {
                         if (event != DISMISS_EVENT_ACTION) {
-                            onDeleteSnackbarDismissed(savedSite)
+                           onDeleteSnackbarDismissed(savedSite)
                         }
                     }
                 },

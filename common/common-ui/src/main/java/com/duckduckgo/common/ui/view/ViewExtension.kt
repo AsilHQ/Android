@@ -24,6 +24,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.CompoundButton
 import androidx.annotation.StringRes
 import androidx.core.view.children
+import com.duckduckgo.mobile.android.R
 import com.google.android.material.slider.Slider
 import com.google.android.material.snackbar.BaseTransientBottomBar.Duration
 import com.google.android.material.snackbar.Snackbar
@@ -118,18 +119,38 @@ fun CompoundButton.quietlySetIsChecked(
 fun View.makeSnackbarWithNoBottomInset(
     text: CharSequence,
     @Duration duration: Int,
+    showOverBottomNav: Boolean = false,
 ): Snackbar {
     val snackbar = Snackbar.make(this, text, duration)
     snackbar.isGestureInsetBottomIgnored = true
+
+    if (showOverBottomNav) {
+        val snackbarView = snackbar.view
+        val params = snackbarView.layoutParams as ViewGroup.MarginLayoutParams
+        val marginBottom = resources.getDimensionPixelSize(R.dimen.bottomNavHeight)
+        params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, marginBottom)
+        snackbarView.layoutParams = params
+    }
+
     return snackbar
 }
 
 fun View.makeSnackbarWithNoBottomInset(
     @StringRes resId: Int,
     @Duration duration: Int,
+    showOverBottomNav: Boolean = false,
 ): Snackbar {
     val snackbar = Snackbar.make(this, resId, duration)
     snackbar.isGestureInsetBottomIgnored = true
+
+    if (showOverBottomNav) {
+        val snackbarView = snackbar.view
+        val params = snackbarView.layoutParams as ViewGroup.MarginLayoutParams
+        val marginBottom = resources.getDimensionPixelSize(R.dimen.bottomNavHeight)
+        params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, marginBottom)
+        snackbarView.layoutParams = params
+    }
+
     return snackbar
 }
 
