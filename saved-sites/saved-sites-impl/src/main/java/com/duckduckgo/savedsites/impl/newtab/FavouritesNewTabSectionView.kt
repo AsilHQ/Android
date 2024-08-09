@@ -18,7 +18,6 @@ package com.duckduckgo.savedsites.impl.newtab
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.text.Html.FROM_HTML_MODE_LEGACY
 import android.text.Spanned
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -69,13 +68,13 @@ import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import dagger.android.support.AndroidSupportInjection
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import logcat.logcat
+import javax.inject.Inject
 
 @InjectWith(ViewScope::class)
 class FavouritesNewTabSectionView @JvmOverloads constructor(
@@ -125,6 +124,7 @@ class FavouritesNewTabSectionView @JvmOverloads constructor(
     }
 
     private fun configureViews() {
+        binding.sectionHeaderText.gone()
         configureHomeTabQuickAccessGrid()
     }
 

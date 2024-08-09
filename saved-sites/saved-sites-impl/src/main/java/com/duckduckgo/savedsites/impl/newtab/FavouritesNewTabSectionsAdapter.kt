@@ -31,19 +31,21 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.duckduckgo.app.browser.favicon.FaviconManager
 import com.duckduckgo.common.ui.menu.PopupMenu
-import com.duckduckgo.common.ui.view.listitem.DaxGridItem.GridItemType.Favicon
+import com.duckduckgo.common.ui.view.hide
 import com.duckduckgo.common.ui.view.listitem.DaxGridItem.GridItemType.Placeholder
+import com.duckduckgo.common.ui.view.show
 import com.duckduckgo.mobile.android.databinding.RowNewTabGridItemBinding
 import com.duckduckgo.saved.sites.impl.R
+import com.duckduckgo.saved.sites.impl.databinding.ItemFavouriteKahfBinding
 import com.duckduckgo.savedsites.api.models.SavedSite.Favorite
 import com.duckduckgo.savedsites.impl.newtab.FavouriteNewTabSectionsItem.FavouriteItemFavourite
 import com.duckduckgo.savedsites.impl.newtab.FavouriteNewTabSectionsItem.PlaceholderItemFavourite
 import com.duckduckgo.savedsites.impl.newtab.FavouritesNewTabSectionsAdapter.FavouriteViewHolder.ItemState.Drag
 import com.duckduckgo.savedsites.impl.newtab.FavouritesNewTabSectionsAdapter.FavouriteViewHolder.ItemState.LongPress
 import com.duckduckgo.savedsites.impl.newtab.FavouritesNewTabSectionsAdapter.FavouriteViewHolder.ItemState.Stale
-import kotlin.math.absoluteValue
 import kotlinx.coroutines.launch
 import logcat.logcat
+import kotlin.math.absoluteValue
 
 class FavouritesNewTabSectionsAdapter(
     private val lifecycleOwner: LifecycleOwner,
@@ -97,7 +99,7 @@ class FavouritesNewTabSectionsAdapter(
             )
 
             FAVORITE_TYPE -> FavouriteViewHolder(
-                RowNewTabGridItemBinding.inflate(LayoutInflater.from(parent.context), parent, false),
+                ItemFavouriteKahfBinding.inflate(LayoutInflater.from(parent.context), parent, false),
                 lifecycleOwner,
                 faviconManager,
                 onMoveListener,
@@ -108,7 +110,7 @@ class FavouritesNewTabSectionsAdapter(
             )
 
             else -> FavouriteViewHolder(
-                RowNewTabGridItemBinding.inflate(LayoutInflater.from(parent.context), parent, false),
+                ItemFavouriteKahfBinding.inflate(LayoutInflater.from(parent.context), parent, false),
                 lifecycleOwner,
                 faviconManager,
                 onMoveListener,
@@ -137,7 +139,7 @@ class FavouritesNewTabSectionsAdapter(
     }
 
     private class FavouriteViewHolder(
-        private val binding: RowNewTabGridItemBinding,
+        private val binding: ItemFavouriteKahfBinding,
         private val lifecycleOwner: LifecycleOwner,
         private val faviconManager: FaviconManager,
         private val onMoveListener: (RecyclerView.ViewHolder) -> Unit,
@@ -174,9 +176,9 @@ class FavouritesNewTabSectionsAdapter(
         fun bind(
             item: FavouriteItemFavourite,
         ) {
-            with(binding.root) {
-                setItemType(Favicon)
-                setPrimaryText(item.favorite.title)
+            with(binding) {
+                //setItemType(Favicon)
+                titleTextView.text = item.favorite.title
                 loadFavicon(item.favorite.url)
                 configureClickListeners(item.favorite)
                 configureTouchListener()
@@ -185,7 +187,7 @@ class FavouritesNewTabSectionsAdapter(
 
         private fun loadFavicon(url: String) {
             lifecycleOwner.lifecycleScope.launch {
-                faviconManager.loadToViewMaybeFromRemoteWithPlaceholder(url = url, view = binding.root.favicon())
+                faviconManager.loadToViewMaybeFromRemoteWithPlaceholder(url = url, view = binding.iconImageView)
             }
         }
 
@@ -202,14 +204,14 @@ class FavouritesNewTabSectionsAdapter(
         }
 
         private fun configureClickListeners(favorite: Favorite) {
-            binding.root.setLongClickListener {
+            binding.root.setOnLongClickListener {
                 logcat { "New Tab: onLongClick" }
                 itemState = LongPress
                 scaleUpFavicon()
                 showOverFlowMenu(binding.root, favorite)
                 false
             }
-            binding.root.setClickListener { onFavoriteSelected(favorite) }
+            binding.root.setOnClickListener { onFavoriteSelected(favorite) }
         }
 
         private fun showOverFlowMenu(
@@ -219,7 +221,7 @@ class FavouritesNewTabSectionsAdapter(
             val popupMenu = PopupMenu(LayoutInflater.from(anchor.context), R.layout.popup_window_edit_remove_favorite_delete_menu)
             val view = popupMenu.contentView
             popupMenu.apply {
-                onMenuItemClicked(view.findViewById(R.id.edit)) { onEditFavoriteSelected(favorite) }
+                // onMenuItemClicked(view.findViewById(R.id.edit)) { onEditFavoriteSelected(favorite) }
                 onMenuItemClicked(view.findViewById(R.id.removeFromFavorites)) { onRemoveFavoriteSelected(favorite) }
                 onMenuItemClicked(view.findViewById(R.id.delete)) { onDeleteFavoriteSelected(favorite) }
             }
@@ -229,10 +231,10 @@ class FavouritesNewTabSectionsAdapter(
 
         @SuppressLint("ClickableViewAccessibility")
         private fun configureTouchListener() {
-            binding.root.setTouchListener { _, event ->
+            binding.root.setOnTouchListener { _, event ->
                 when (event.actionMasked) {
                     MotionEvent.ACTION_MOVE -> {
-                        if (itemState != LongPress) return@setTouchListener false
+                        if (itemState != LongPress) return@setOnTouchListener false
 
                         onMoveListener(this@FavouriteViewHolder)
                     }
@@ -247,7 +249,7 @@ class FavouritesNewTabSectionsAdapter(
 
         override fun onDragStarted() {
             scaleUpFavicon()
-            binding.root.hideTitle()
+            binding.titleTextView.hide()
             itemState = Drag
         }
 
@@ -264,7 +266,7 @@ class FavouritesNewTabSectionsAdapter(
 
         override fun onItemReleased() {
             scaleDownFavicon()
-            binding.root.showTitle()
+            binding.titleTextView.show()
             itemState = Stale
         }
     }

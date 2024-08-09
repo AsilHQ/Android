@@ -159,7 +159,7 @@ class FavoritesQuickAccessAdapter(
             val popupMenu = PopupMenu(layoutInflater, R.layout.popup_window_edit_remove_favorite_delete_menu)
             val view = popupMenu.contentView
             popupMenu.apply {
-                onMenuItemClicked(view.findViewById(R.id.edit)) { onEditClicked(item) }
+                // onMenuItemClicked(view.findViewById(R.id.edit)) { onEditClicked(item) }
                 onMenuItemClicked(view.findViewById(R.id.removeFromFavorites)) { onRemoveFavoriteClicked(item) }
                 onMenuItemClicked(view.findViewById(R.id.delete)) { onDeleteClicked(item) }
             }

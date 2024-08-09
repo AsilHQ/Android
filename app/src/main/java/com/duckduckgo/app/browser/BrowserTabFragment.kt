@@ -4326,7 +4326,7 @@ class BrowserTabFragment :
 
         private fun showNewTab() {
             Timber.d("New Tab: showNewTab")
-            /*newTabPageProvider.provideNewTabPageVersion().onEach { newTabPage ->
+            newTabPageProvider.provideNewTabPageVersion().onEach { newTabPage ->
                 newBrowserTab.newTabContainerLayout.addView(
                     newTabPage.getView(requireContext()),
                     LayoutParams(
@@ -4334,8 +4334,7 @@ class BrowserTabFragment :
                         LayoutParams.MATCH_PARENT,
                     ),
                 )
-            }
-                .launchIn(lifecycleScope)*/
+            }.launchIn(lifecycleScope)
 
             // App Statistics section
             newBrowserTab.adsBlockedCount.text = sharedPreferences.getInt(SAFE_GAZE_CENSOR_COUNT, 0).toString()

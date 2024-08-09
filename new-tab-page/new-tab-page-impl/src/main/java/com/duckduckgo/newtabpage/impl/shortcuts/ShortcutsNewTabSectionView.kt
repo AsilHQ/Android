@@ -133,7 +133,8 @@ class ShortcutsNewTabSectionView @JvmOverloads constructor(
     AppScope::class,
     boundType = NewTabPageSectionPlugin::class,
 )
-class ShortcutsNewTabSectionPlugin @Inject constructor() : NewTabPageSectionPlugin {
+// Commented @Inject constructor() to avoid injecting this plugin in new tab screen
+class ShortcutsNewTabSectionPlugin /*@Inject constructor()*/ : NewTabPageSectionPlugin {
 
     override val name = NewTabPageSection.SHORTCUTS.name
 

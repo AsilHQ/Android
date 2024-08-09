@@ -22,8 +22,7 @@
     android:layout_height="match_parent"
     android:fillViewport="true"
     android:clipChildren="false"
-    tools:context="com.duckduckgo.app.browser.BrowserActivity"
-    tools:showIn="@layout/fragment_browser_tab">
+    tools:context="com.duckduckgo.app.browser.BrowserActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/browserBackground"
@@ -32,10 +31,11 @@
         android:paddingTop="?attr/actionBarSize"
         android:foreground="@android:color/transparent">
 
-        <FrameLayout
+        <LinearLayout
             android:id="@+id/newTabContainerLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -51,7 +51,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#6600000f"
+                    android:background="@drawable/app_statistics_bg"
                     android:baselineAligned="false"
                     android:orientation="horizontal"
                     android:padding="10dp"
@@ -149,7 +149,7 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </FrameLayout>
+        </LinearLayout>
 
         <include
             android:id="@+id/includeDaxDialogIntroBubbleCta"

@@ -29,7 +29,7 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:src="@drawable/background_mosque"
         tools:visibility="gone"
-        android:visibility="gone"
+        android:visibility="visible"
         android:scaleType="centerCrop"/>
 
     <FrameLayout
