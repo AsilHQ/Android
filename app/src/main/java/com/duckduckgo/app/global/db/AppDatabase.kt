@@ -70,7 +70,7 @@ import com.duckduckgo.savedsites.store.SavedSitesRelationsDao
 
 @Database(
     exportSchema = true,
-    version = 54,
+    version = 55,
     entities = [
         TdsTracker::class,
         TdsEntity::class,
@@ -103,6 +103,7 @@ import com.duckduckgo.savedsites.store.SavedSitesRelationsDao
         AuthCookieAllowedDomainEntity::class,
         Entity::class,
         Relation::class,
+        KahfImageBlocked::class
     ],
 )
 
@@ -150,6 +151,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun pagePaintedPixelDao(): PagePaintedPixelDao
     abstract fun authCookiesAllowedDomainsDao(): AuthCookiesAllowedDomainsDao
     abstract fun webTrackersBlockedDao(): WebTrackersBlockedDao
+    abstract fun kahfImageBlockedDao(): KahfImageBlockedDao
 
     abstract fun syncEntitiesDao(): SavedSitesEntitiesDao
 
@@ -660,6 +662,15 @@ class MigrationsProvider(val context: Context, val settingsDataStore: SettingsDa
         }
     }
 
+    private val MIGRATION_54_TO_55: Migration = object : Migration(54, 55) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL(
+                "CREATE TABLE IF NOT EXISTS `kahf_image_blocked` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`imageUrl` TEXT NOT NULL, `tag` TEXT NOT NULL, `score` REAL NOT NULL)",
+            )
+        }
+    }
+
     /**
      * WARNING ⚠️
      * This needs to happen because Room doesn't support UNIQUE (...) ON CONFLICT REPLACE when creating the bookmarks table.
@@ -739,6 +750,7 @@ class MigrationsProvider(val context: Context, val settingsDataStore: SettingsDa
             MIGRATION_51_TO_52,
             MIGRATION_52_TO_53,
             MIGRATION_53_TO_54,
+            MIGRATION_54_TO_55,
         )
 
     @Deprecated(
