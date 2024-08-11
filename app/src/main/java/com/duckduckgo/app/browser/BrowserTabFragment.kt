@@ -117,6 +117,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.webkit.JavaScriptReplyProxy
@@ -231,6 +232,7 @@ import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.app.tabs.model.TabEntity
 import com.duckduckgo.app.tabs.ui.GridViewColumnCalculator
 import com.duckduckgo.app.tabs.ui.TabSwitcherActivity
+import com.duckduckgo.app.trackerdetection.db.KahfImageBlockedDao
 import com.duckduckgo.app.trackerdetection.db.WebTrackersBlockedDao
 import com.duckduckgo.app.widget.AddWidgetLauncher
 import com.duckduckgo.appbuildconfig.api.AppBuildConfig
@@ -291,7 +293,6 @@ import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.FragmentViewModelFactory
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
-import com.duckduckgo.common.utils.SAFE_GAZE_CENSOR_COUNT
 import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
 import com.duckduckgo.common.utils.SAFE_GAZE_INTERFACE
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
@@ -348,6 +349,9 @@ import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -573,6 +577,9 @@ class BrowserTabFragment :
 
     @Inject
     lateinit var webTrackersBlockedDao: WebTrackersBlockedDao
+
+    @Inject
+    lateinit var kahfImageBlockedDao: KahfImageBlockedDao
 
     /**
      * We use this to monitor whether the user was seeing the in-context Email Protection signup prompt
@@ -1004,7 +1011,10 @@ class BrowserTabFragment :
             }
 
             thisPageCounterTextView.text = sharedPreferences.getInt("session_censored_count", 0).toString()
-            lifetimeCounterTextView.text = sharedPreferences.getInt(SAFE_GAZE_CENSOR_COUNT, 0).toString()
+            lifecycleScope.launch {
+                val count = kahfImageBlockedDao.getTotalBlockCount().first()
+                lifetimeCounterTextView.text = count.toString()
+            }
 
             sageGazeSwitch.isChecked = sharedPreferences.getBoolean(SAFE_GAZE_ACTIVE, false)
 
@@ -2608,7 +2618,7 @@ class BrowserTabFragment :
         ).findViewById(R.id.browserWebView)
 
         webView?.let {
-            safeGazeInterface = SafeGazeJsInterface(requireContext(), webView!!, nsfwDetector, genderDetector)
+            safeGazeInterface = SafeGazeJsInterface(requireContext(), webView!!, nsfwDetector, genderDetector, kahfImageBlockedDao)
 
             it.webViewClient = webViewClient
             it.webChromeClient = webChromeClient
@@ -4337,10 +4347,14 @@ class BrowserTabFragment :
             }.launchIn(lifecycleScope)
 
             // App Statistics section
-            newBrowserTab.adsBlockedCount.text = sharedPreferences.getInt(SAFE_GAZE_CENSOR_COUNT, 0).toString()
+            kahfImageBlockedDao.getTotalBlockCount()
+                .flowWithLifecycle(lifecycle)
+                .distinctUntilChanged()
+                .onEach { newBrowserTab.adsBlockedCount.text = it.toString() }
+                .launchIn(lifecycleScope)
+
             lifecycleScope.launch {
-                webTrackersBlockedDao.getTotalTrackerCount().collect{ count ->
-                    Timber.d("New Tab: $count")
+                webTrackersBlockedDao.getTotalTrackerCount().collect { count ->
                     newBrowserTab.trackerBlockedCount.text = count.toString()
                 }
             }

@@ -70,14 +70,20 @@ class GenderDetector (val context: Context) {
                     val face = faces[i]
                     val subjectFace = cropToBBox(bitmap, face.boundingBox) ?: continue
 
-                    val currentTime = System.currentTimeMillis()
+                    // val currentTime = System.currentTimeMillis()
                     val genderPredictions = getGenderPrediction(subjectFace)
-                    Timber.d("kLog elapsed time yolo8: ${System.currentTimeMillis() - currentTime}")
+                    // Timber.d("kLog Time to detect gender: ${System.currentTimeMillis() - currentTime}")
 
-                    val isMale = genderPredictions.first > 0.5
+                    val isMale = if (genderPredictions.first > 0.5) {
+                        prediction.maleConfidence = genderPredictions.first
+                        prediction.femaleConfidence = 1 - genderPredictions.first
+                        true
+                    } else {
+                        prediction.maleConfidence = 1 - genderPredictions.first
+                        prediction.femaleConfidence = genderPredictions.first
+                        false
+                    }
                     prediction.hasMale = prediction.hasMale || isMale
-                    prediction.maleConfidence = if (isMale) genderPredictions.first else 1 - genderPredictions.first
-                    prediction.femaleConfidence = 1 - prediction.maleConfidence
 
                     if (!isMale) {
                         prediction.hasFemale = true

@@ -13,8 +13,9 @@ import com.bumptech.glide.request.transition.Transition
 import com.duckduckgo.app.browser.DuckDuckGoWebView
 import com.duckduckgo.app.safegaze.genderdetection.GenderDetector
 import com.duckduckgo.app.safegaze.nsfwdetection.NsfwDetector
+import com.duckduckgo.app.trackerdetection.db.KahfImageBlocked
+import com.duckduckgo.app.trackerdetection.db.KahfImageBlockedDao
 import com.duckduckgo.common.utils.DefaultDispatcherProvider
-import com.duckduckgo.common.utils.SAFE_GAZE_CENSOR_COUNT
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -31,7 +32,8 @@ class SafeGazeJsInterface(
     private val context: Context,
     private val webView: DuckDuckGoWebView,
     private val nsfwDetector: NsfwDetector,
-    private val genderDetector: GenderDetector
+    private val genderDetector: GenderDetector,
+    private val kahfImageBlockedDao: KahfImageBlockedDao
 ) {
     private val dispatcher: DefaultDispatcherProvider = DefaultDispatcherProvider()
     private val preferences: SharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
@@ -54,13 +56,31 @@ class SafeGazeJsInterface(
                     if (nsfwPrediction.isSafe()) {
                         val genderPrediction = genderDetector.predict(bitmap)
 
-                        if (genderPrediction.hasFemale)
+                        if (genderPrediction.hasFemale) {
                             Timber.d("kLog Female (${genderPrediction.femaleConfidence}) $url")
+
+                            // Insert to local DB
+                            kahfImageBlockedDao.insert(KahfImageBlocked(
+                                imageUrl = url,
+                                tag = "female",
+                                score = genderPrediction.femaleConfidence.toDouble(),
+                            ))
+                        } else {
+                            Timber.d("kLog SFW $url")
+                        }
 
                         continuation.resume(genderPrediction.hasFemale)
                     } else {
                         nsfwPrediction.getLabelWithConfidence().let {
                             Timber.d("kLog Nsfw: ${it.first} (${it.second}) $url")
+
+                            // Insert to local DB
+                            kahfImageBlockedDao.insert(KahfImageBlocked(
+                                imageUrl = url,
+                                tag = it.first,
+                                score = it.second.toDouble(),
+                            ))
+
                             continuation.resume(true)
                         }
                     }
@@ -128,7 +148,6 @@ class SafeGazeJsInterface(
         if (message.contains("page_refresh")) {
             preferences.edit().putInt("session_censored_count", 0).apply()
         } else if(message.contains("replaced")) {
-            handleAllTimeCounter()
             handleCurrentSessionCounter()
         }
     }
@@ -159,24 +178,10 @@ class SafeGazeJsInterface(
         }
     }
 
-    private fun handleAllTimeCounter() {
-        val currentAllTimeCounter = getAllTimeCounter()
-        val newAllTimeCounter = currentAllTimeCounter + 1
-        saveAllTimeCounterValue(newAllTimeCounter)
-    }
-
     private fun handleCurrentSessionCounter() {
         val currentSessionCounter = getCurrentSessionCounter()
         val newSessionCounter = currentSessionCounter + 1
         saveSessionCounterValue(newSessionCounter)
-    }
-
-    private fun saveAllTimeCounterValue(value: Int) {
-        preferences.edit().putInt(SAFE_GAZE_CENSOR_COUNT, value).apply()
-    }
-
-    private fun getAllTimeCounter(): Int {
-        return preferences.getInt(SAFE_GAZE_CENSOR_COUNT, 0)
     }
 
     private fun saveSessionCounterValue(value: Int) {
