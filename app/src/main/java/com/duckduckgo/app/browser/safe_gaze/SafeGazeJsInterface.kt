@@ -37,25 +37,88 @@ class SafeGazeJsInterface(
     private val dispatcher: DefaultDispatcherProvider = DefaultDispatcherProvider()
     private val preferences: SharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
 
-
     private val onDeviceModelCachedResults = mutableMapOf<String, Boolean>()
     // private val personDetector = PersonDetector(context)
 
     private val urlQueue: ConcurrentLinkedQueue<UrlInfo> = ConcurrentLinkedQueue()
     private var processingJob: Job? = null
     private val scope = CoroutineScope(dispatcher.computation() + Job())
-    private var quotaExceeded = false
-    private var lastResetDate = 0L
-    private val QUOTA_LIMIT = 60
-    private var currentCount = 0
+    
+    inner class UnifiedCounter {
+        private var dailyCount = 0
+        private var sessionCount = 0
+        private var allTimeCount = 0
+        private var lastResetDate = 0L
+        private val QUOTA_LIMIT = 60
+        private var dirtyCount = 0
 
-    init {
-        lastResetDate = preferences.getLong("SafeGazeLastResetDate", 0)
-        quotaExceeded = preferences.getBoolean("SafeGazeQuotaExceeded", false)
-        currentCount = preferences.getInt("SafeGazeAPICallsCount", 0)
-        checkAndResetQuota()
-        periodicStateSave()
+        init {
+            // Initialize counters from SharedPreferences
+            lastResetDate = preferences.getLong("SafeGazeLastResetDate", 0)
+            dailyCount = preferences.getInt("SafeGazeAPICallsCount", 0)
+            allTimeCount = preferences.getInt("all_time_censored_count", 0)
+            sessionCount = preferences.getInt("session_censored_count", 0)
+            checkAndResetQuota()
+        }
+
+        fun incrementDailyQuota(isPositiveDetection: Boolean) {
+            if (isPositiveDetection) {
+                dailyCount++
+            }
+            dirtyCount++
+
+            // Save to preferences every 20 images or when quota is exceeded
+            if (dirtyCount >= 20 || dailyCount == QUOTA_LIMIT) {
+                saveToPreferences()
+            }
+        }
+
+        fun incrementSessionAndAllTimeCount(isPositiveDetection: Boolean) {
+            if (isPositiveDetection) {
+                sessionCount++
+                allTimeCount++
+            }
+            dirtyCount++
+
+            // Save to preferences every 20 images
+            if (dirtyCount >= 20) {
+                saveToPreferences()
+            }
+        }
+    
+        fun checkAndResetQuota() {
+            val currentDate = System.currentTimeMillis() / 86400000 // Current day since epoch
+            if (currentDate > lastResetDate) {
+                lastResetDate = currentDate
+                dailyCount = 0
+                sessionCount = 0
+                saveToPreferences()
+            }
+        }
+    
+        fun isQuotaExceeded(): Boolean = dailyCount >= QUOTA_LIMIT
+    
+        fun getDailyCount(): Int = dailyCount
+        fun getSessionCount(): Int = sessionCount
+        fun getAllTimeCount(): Int = allTimeCount
+    
+        fun saveToPreferences() {
+            preferences.edit()
+                .putLong("SafeGazeLastResetDate", lastResetDate)
+                .putInt("SafeGazeAPICallsCount", dailyCount)
+                .putInt("all_time_censored_count", allTimeCount)
+                .putInt("session_censored_count", sessionCount)
+                .apply()
+            dirtyCount = 0
+        }
+    
+        fun resetSession() {
+            sessionCount = 0
+            saveToPreferences()
+        }
     }
+
+    val counter = UnifiedCounter()
 
     private suspend fun shouldBlurImage(url: String, mScope: CoroutineScope, isPersonCheck: Boolean): Boolean {
         return suspendCoroutine { continuation ->
@@ -138,18 +201,14 @@ class SafeGazeJsInterface(
             val parts = message.split("/-/")
             val imageUrl = if (parts.size >= 2) parts[1] else ""
             val uid = (if (parts.size >= 2) parts[2] else "0")
-
-            // if (onDeviceModelCachedResults.containsKey(imageUrl)) {
-            //     callSafegazeOnDeviceModelHandler(onDeviceModelCachedResults[imageUrl]!!, uid, quotaExceeded)
-            // } else {
+            if (onDeviceModelCachedResults.containsKey(imageUrl)) {
+                callSafegazeOnDeviceModelHandler(onDeviceModelCachedResults[imageUrl]!!, uid, counter.isQuotaExceeded())
+            } else {
                 addTaskToQueue(imageUrl, uid)
-            // }
+            }
         }
         if (message.contains("page_refresh")) {
-            preferences.edit().putInt("session_censored_count", 0).apply()
-        } else if(message.contains("replaced")) {
-            handleAllTimeCounter()
-            handleCurrentSessionCounter()
+            counter.resetSession()
         }
     }
 
@@ -158,118 +217,29 @@ class SafeGazeJsInterface(
         processQueue()
     }
 
-    private fun checkAndUpdateDailyQuota(): Int {
-        checkAndResetQuota()
-        
-        if (!quotaExceeded) {
-            if (currentCount < QUOTA_LIMIT) {
-                currentCount++
-                
-                if (currentCount == QUOTA_LIMIT) {
-                    quotaExceeded = true
-                    saveQuotaState()
-                }
-                
-                return currentCount - 1
-            } else {
-                quotaExceeded = true
-                saveQuotaState()
-            }
-        }
-        
-        return 9999999
-    }
-
-    private fun saveQuotaState() {
-        preferences.edit()
-            .putInt("SafeGazeAPICallsCount", currentCount)
-            .putBoolean("SafeGazeQuotaExceeded", quotaExceeded)
-            .apply()
-    }
-
-    private fun checkAndResetQuota() {
-        val currentDate = System.currentTimeMillis() / 86400000 // Current day since epoch
-        if (currentDate > lastResetDate) {
-            lastResetDate = currentDate
-            quotaExceeded = false
-            currentCount = 0
-            preferences.edit()
-                .putLong("SafeGazeLastResetDate", lastResetDate)
-                .putBoolean("SafeGazeQuotaExceeded", false)
-                .putInt("SafeGazeAPICallsCount", 0)
-                .apply()
-        }
-    }
-
-    private fun periodicStateSave() {
-        scope.launch {
-            while (true) {
-                delay(60 * 1000) // Save every 1 minutes
-                saveQuotaState()
-            }
-        }
-    }
-    
     private fun processQueue() {
         if (processingJob?.isActive != true) {
             processingJob = scope.launch {
                 while (urlQueue.isNotEmpty()) {
                     val task = urlQueue.poll()
-    
-                    task?.let {
-                         if (!quotaExceeded) 
-                         { 
-                            checkAndUpdateDailyQuota()
-                         } 
 
-                        if (!quotaExceeded) {
-                            val shouldBlur = shouldBlurImage(it.url, this, true)
-                            onDeviceModelCachedResults[it.url] = shouldBlur
-                            callSafegazeOnDeviceModelHandler(shouldBlur, it.uid, false)
-                        } else {
-                            val shouldBlur = shouldBlurImage(it.url, this, false)
-                            onDeviceModelCachedResults[it.url] = shouldBlur
-                            callSafegazeOnDeviceModelHandler(shouldBlur, it.uid, true)
-                        }
+                    task?.let {
+                        counter.checkAndResetQuota()
+                        val shouldBlur = shouldBlurImage(it.url, this, true)
+                        counter.incrementDailyQuota(shouldBlur)
+                        counter.incrementSessionAndAllTimeCount(shouldBlur)
+
+                        onDeviceModelCachedResults[it.url] = shouldBlur
+                        callSafegazeOnDeviceModelHandler(shouldBlur, it.uid, counter.isQuotaExceeded())
                     }
                 }
             }
         }
     }
 
-    private fun handleAllTimeCounter() {
-        val currentAllTimeCounter = getAllTimeCounter()
-        val newAllTimeCounter = currentAllTimeCounter + 1
-        saveAllTimeCounterValue(newAllTimeCounter)
-    }
-
-    private fun handleCurrentSessionCounter() {
-        val currentSessionCounter = getCurrentSessionCounter()
-        val newSessionCounter = currentSessionCounter + 1
-        saveSessionCounterValue(newSessionCounter)
-    }
-
-    private fun saveAllTimeCounterValue(value: Int) {
-        preferences.edit().putInt("all_time_censored_count", value).apply()
-    }
-
-    private fun getAllTimeCounter(): Int {
-        return preferences.getInt("all_time_censored_count", 0)
-    }
-
-    private fun saveSessionCounterValue(value: Int) {
-        preferences.edit().putInt("session_censored_count", value).apply()
-    }
-
-    private fun getCurrentSessionCounter(): Int {
-        return preferences.getInt("session_censored_count", 0)
-    }
-
+    
     fun cancelOngoingImageProcessing() {
-        // Don't dispose models since these are singleton instances and will affect the other tabs
-        // nsfwDetector.dispose()
-        // genderDetector.dispose()
-        saveQuotaState()
+        counter.saveToPreferences()
         scope.cancel()
     }
 }
