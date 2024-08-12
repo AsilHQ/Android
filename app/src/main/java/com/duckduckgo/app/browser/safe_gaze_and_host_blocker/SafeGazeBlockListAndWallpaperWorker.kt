@@ -21,9 +21,9 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import org.mozilla.fenix.host_blocker.SafeGazeBlockListManager
 
-class SafeGazeBlockListAndHostBlockerWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
+class SafeGazeBlockListAndWallpaperWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     override fun doWork(): Result {
-        HostBlockerManager.fetchAndOverwriteHostFile(applicationContext)
+        WallpaperDownloadManager.fetchWallpapers(applicationContext)
         SafeGazeBlockListManager.fetchAndOverwriteHostFile(applicationContext)
         return Result.success()
     }

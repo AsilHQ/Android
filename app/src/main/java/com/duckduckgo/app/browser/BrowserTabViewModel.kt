@@ -18,6 +18,7 @@ package com.duckduckgo.app.browser
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.net.http.SslCertificate
 import android.os.Message
@@ -316,6 +317,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import kotlin.collections.set
+import kotlin.random.Random
 
 @ContributesViewModel(FragmentScope::class)
 class BrowserTabViewModel @Inject constructor(
@@ -3462,6 +3464,25 @@ class BrowserTabViewModel @Inject constructor(
                 file.writeText(file.readLines().filterNot { it == host }.joinToString("\n"))
             }
         }
+    }
+
+    fun wallPaperBitmap(directory: File): Bitmap? {
+        var filesList: List<File> = emptyList()
+
+        if (directory.exists()) {
+            filesList = directory.listFiles()?.toList() ?: emptyList()
+        } else {
+            Timber.d("fLog Directory not exists")
+        }
+
+        if (filesList.isNotEmpty()) {
+            val randomIndex = Random.nextInt(0, filesList.size)
+            val randomFile = filesList[randomIndex]
+            return BitmapFactory.decodeFile(randomFile.absolutePath)
+        }
+        Timber.d("fLog No downloaded wallpapers found")
+
+        return null
     }
 
     companion object {

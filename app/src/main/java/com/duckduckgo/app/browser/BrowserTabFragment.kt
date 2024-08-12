@@ -125,6 +125,8 @@ import androidx.webkit.WebMessageCompat
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.duckduckgo.anvil.annotations.InjectWith
 import com.duckduckgo.app.accessibility.data.AccessibilitySettingsDataStore
 import com.duckduckgo.app.brokensite.BrokenSiteActivity
@@ -941,6 +943,7 @@ class BrowserTabFragment :
         configureNewTab()
         initPrivacyProtectionsPopup()
         configureBottomNav()
+        loadWallpaper()
 
         if (tabDisplayedInCustomTabScreen) {
             configureCustomTab()
@@ -1434,6 +1437,16 @@ class BrowserTabFragment :
         )
 
         addTabsObserver()
+    }
+
+    private fun loadWallpaper() {
+        val bmp = viewModel.wallPaperBitmap(File("${requireContext().filesDir}/wp"))
+
+        Glide.with(requireContext())
+            .load(bmp ?: R.drawable.background_mosque)
+            .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+            .skipMemoryCache(false)
+            .into(binding.newTabWallpaper)
     }
 
     private fun processFileDownloadedCommand(command: DownloadCommand) {

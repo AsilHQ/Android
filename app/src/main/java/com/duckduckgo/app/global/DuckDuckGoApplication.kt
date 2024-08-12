@@ -21,11 +21,10 @@ import android.os.StrictMode.ThreadPolicy
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequest
-import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.duckduckgo.app.browser.BuildConfig
 import com.duckduckgo.app.browser.safe_gaze.JsDownloadWorker
-import com.duckduckgo.app.browser.safe_gaze_and_host_blocker.SafeGazeBlockListAndHostBlockerWorker
+import com.duckduckgo.app.browser.safe_gaze_and_host_blocker.SafeGazeBlockListAndWallpaperWorker
 import com.duckduckgo.app.di.AppComponent
 import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.app.di.DaggerAppComponent
@@ -39,11 +38,11 @@ import dagger.android.AndroidInjector
 import dagger.android.HasDaggerInjector
 import io.reactivex.exceptions.UndeliverableException
 import io.reactivex.plugins.RxJavaPlugins
-import java.io.File
-import javax.inject.Inject
 import kotlinx.coroutines.*
 import timber.log.Timber
+import java.io.File
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 private const val VPN_PROCESS_NAME = "vpn"
 
@@ -137,7 +136,7 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
 
     private fun scheduleTasks() {
         val periodicWorkRequest = PeriodicWorkRequest.Builder(
-            SafeGazeBlockListAndHostBlockerWorker::class.java, 7, TimeUnit.DAYS
+            SafeGazeBlockListAndWallpaperWorker::class.java, 1, TimeUnit.DAYS
         ).build()
 
         val jsDownloadWorkReq = OneTimeWorkRequestBuilder<JsDownloadWorker>().addTag("jsDownloader").build()
@@ -146,14 +145,6 @@ open class DuckDuckGoApplication : HasDaggerInjector, MultiProcessApplication() 
         workManager.apply {
             enqueue(jsDownloadWorkReq)
             enqueue(periodicWorkRequest)
-        }
-
-        val periodicWorkRequestStatus = workManager.getWorkInfoById(periodicWorkRequest.id).get()
-
-        if (periodicWorkRequestStatus.state == WorkInfo.State.SUCCEEDED) {
-            println("periodicWorkRequestStatus worked")
-        } else if (periodicWorkRequestStatus.state == WorkInfo.State.FAILED) {
-            println("periodicWorkRequestStatus failed")
         }
     }
 
