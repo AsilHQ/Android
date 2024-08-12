@@ -847,7 +847,7 @@ class BrowserTabFragment :
     }
 
     private val ctaViewStateObserver = Observer<CtaViewState> {
-        it?.let { renderer.renderCtaViewState(it) }
+        // it?.let { renderer.renderCtaViewState(it) }
     }
 
     private var alertDialog: DaxAlertDialog? = null
