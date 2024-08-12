@@ -847,7 +847,7 @@ class BrowserTabFragment :
     }
 
     private val ctaViewStateObserver = Observer<CtaViewState> {
-        // it?.let { renderer.renderCtaViewState(it) }
+        it?.let { renderer.renderCtaViewState(it) }
     }
 
     private var alertDialog: DaxAlertDialog? = null
@@ -4221,16 +4221,17 @@ class BrowserTabFragment :
                 lastSeenCtaViewState = viewState
                 when {
                     viewState.cta != null -> {
-                        hideNewTab()
-                        showCta(viewState.cta)
+                        showNewTab() // Keyboard not popping up on the New Tab because of this change
+                        // hideNewTab()
+                        // showCta(viewState.cta)
                     }
 
                     viewState.isBrowserShowing -> {
-                        hideNewTab()
+                        // hideNewTab()
                     }
 
                     viewState.daxOnboardingComplete -> {
-                        showNewTab()
+                        // showNewTab()
                     }
                 }
             }
