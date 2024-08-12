@@ -824,7 +824,6 @@ enum class WebViewErrorResponse(@StringRes val errorId: Int) {
     OMITTED(string.webViewErrorNoConnection),
     LOADING(string.webViewErrorNoConnection),
     SSL_PROTOCOL_ERROR(string.webViewErrorSslProtocol),
-    BLOCKED(string.webViewErrorBlocked),
 }
 
 data class SslErrorResponse(val error: SslError, val errorType: SSLErrorType, val url: String)

@@ -134,7 +134,6 @@ import com.duckduckgo.app.browser.BrowserTabViewModel.FileChooserRequestedParams
 import com.duckduckgo.app.browser.BrowserTabViewModel.LocationPermission
 import com.duckduckgo.app.browser.R.string
 import com.duckduckgo.app.browser.SSLErrorType.NONE
-import com.duckduckgo.app.browser.WebViewErrorResponse.BLOCKED
 import com.duckduckgo.app.browser.WebViewErrorResponse.LOADING
 import com.duckduckgo.app.browser.WebViewErrorResponse.OMITTED
 import com.duckduckgo.app.browser.applinks.AppLinksLauncher
@@ -1523,6 +1522,7 @@ class BrowserTabFragment :
         errorSnackbar.dismiss()
         newBrowserTab.newTabLayout.show()
         newBrowserTab.newTabContainerLayout.show()
+        binding.newTabWallpaper.show()
         binding.browserLayout.gone()
         webViewContainer.gone()
         omnibar.appBarLayout.setExpanded(true)
@@ -1536,6 +1536,7 @@ class BrowserTabFragment :
         Timber.d("New Tab: showBrowser")
         newBrowserTab.newTabLayout.gone()
         newBrowserTab.newTabContainerLayout.gone()
+        binding.newTabWallpaper.gone()
         binding.browserLayout.show()
         webViewContainer.show()
         webView?.show()
@@ -1552,24 +1553,19 @@ class BrowserTabFragment :
         webViewContainer.gone()
         newBrowserTab.newTabLayout.gone()
         newBrowserTab.newTabContainerLayout.gone()
+        binding.newTabWallpaper.gone()
         sslErrorView.gone()
         omnibar.appBarLayout.setExpanded(true)
         omnibar.shieldIcon.isInvisible = true
         webView?.onPause()
         webView?.hide()
 
-        if (errorType.name == BLOCKED.name) {
-            errorView.errorMessage.text = getString(errorType.errorId, url).html(requireContext())
-            errorView.yetiIcon.setImageResource(R.drawable.blocked)
-            errorView.errorTitle.text = getString(string.webViewBlockedTitle)
+        errorView.errorTitle.text = getString(string.webViewErrorTitle)
+        errorView.errorMessage.text = getString(errorType.errorId, url).html(requireContext())
+        if (appTheme.isLightModeEnabled()) {
+            errorView.yetiIcon.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_light)
         } else {
-            errorView.errorTitle.text = getString(string.webViewErrorTitle)
-            errorView.errorMessage.text = getString(errorType.errorId, url).html(requireContext())
-            if (appTheme.isLightModeEnabled()) {
-                errorView.yetiIcon.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_light)
-            } else {
-                errorView.yetiIcon.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_dark)
-            }
+            errorView.yetiIcon.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_yeti_dark)
         }
 
         errorView.errorLayout.show()
@@ -1582,6 +1578,7 @@ class BrowserTabFragment :
         webViewContainer.gone()
         newBrowserTab.newTabLayout.gone()
         newBrowserTab.newTabContainerLayout.gone()
+        binding.newTabWallpaper.gone()
         webView?.onPause()
         webView?.hide()
         omnibar.appBarLayout.setExpanded(true)
@@ -4115,9 +4112,7 @@ class BrowserTabFragment :
                 val sslErrorChanged = viewState.sslError != lastSeenBrowserViewState?.sslError
 
                 lastSeenBrowserViewState = viewState
-                if (viewState.browserError == BLOCKED) {
-                    showError(viewState.browserError, webView?.url)
-                } else if (browserShowingChanged) {
+                if (browserShowingChanged) {
                     if (browserShowing) {
                         showBrowser()
                     } else {
@@ -4374,11 +4369,13 @@ class BrowserTabFragment :
 
             newBrowserTab.newTabContainerLayout.show()
             newBrowserTab.newTabLayout.show()
+            binding.newTabWallpaper.show()
         }
 
         private fun hideNewTab() {
             Timber.d("New Tab: hideNewTab")
             newBrowserTab.newTabContainerLayout.gone()
+            binding.newTabWallpaper.gone()
         }
 
         private fun hideDaxCta() {
