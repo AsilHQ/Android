@@ -30,7 +30,7 @@
         android:adjustViewBounds="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_ddg_comparison_chart" />
+        app:srcCompat="@drawable/ic_dax_icon" />
 
     <ImageView
         android:id="@+id/chromeLogo"
