@@ -21,12 +21,16 @@
     <attr name="preferDarkNavigationBarIcons" format="boolean" />
     <attr name="preferredStatusBarColor" format="color" />
     <attr name="preferredNavigationBarColor" format="color" />
+    <attr name="kahfStatusBarColor" format="color" />
+    <attr name="kahfNavBarColor" format="color" />
 
     <!-- The platform theme is where OS version specific flags are used. -->
     <style name="Platform.Theme.DuckDuckGo" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowLightStatusBar">?attr/preferDarkStatusBarIcons</item>
         <item name="preferDarkNavigationBarIcons">false</item>
         <item name="preferredNavigationBarColor">?attr/daxColorBlack</item>
+        <item name="kahfStatusBarColor">@color/white</item>
+        <item name="kahfNavBarColor">@color/black</item>
     </style>
 
     <!--  Our base theme, Base.Theme.DuckDuckGo,
@@ -131,6 +135,8 @@
         <item name="android:isLightTheme" tools:ignore="NewApi">false</item>
         <item name="preferDarkStatusBarIcons">false</item>
         <item name="preferDarkNavigationBarIcons">false</item>
+        <item name="kahfStatusBarColor">@color/black</item>
+        <item name="kahfNavBarColor">@color/black</item>
 
         <!-- Feature specific colors -->
         <!-- Autofill -->
@@ -210,6 +216,8 @@
         <item name="android:isLightTheme" tools:ignore="NewApi">true</item>
         <item name="preferDarkStatusBarIcons">true</item>
         <item name="preferDarkNavigationBarIcons">true</item>
+        <item name="kahfStatusBarColor">@color/white</item>
+        <item name="kahfNavBarColor">@color/black</item>
 
         <!-- Feature specific colors -->
         <!-- Autofill -->
