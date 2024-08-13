@@ -25,7 +25,7 @@
     </item>
     <item>
         <shape>
-            <solid android:color="?attr/daxColorContainer" />
+            <solid android:color="?attr/kahfAppBarColor" />
             <corners android:radius="@dimen/tinyShapeCornerRadius" />
         </shape>
     </item>

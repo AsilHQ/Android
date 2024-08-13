@@ -209,6 +209,7 @@
         <item name="daxInfoPanelAlertBackgroundColor">@color/daxInfoPanelAlertBackgroundColorDark</item>
 
         <item name="kahfBottomNavIcon">@color/kahf_bottom_nav_icon</item>
+        <item name="kahfAppBarColor">@color/gray86</item>
 
     </style>
 
@@ -290,6 +291,7 @@
         <item name="daxInfoPanelAlertBackgroundColor">@color/daxInfoPanelAlertBackgroundColorLight</item>
 
         <item name="kahfBottomNavIcon">@color/kahf_bottom_nav_icon</item>
+        <item name="kahfAppBarColor">@color/kahf_appbar_light</item>
 
     </style>
 

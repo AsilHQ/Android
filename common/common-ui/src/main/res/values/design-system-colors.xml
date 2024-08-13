@@ -230,6 +230,9 @@
     <color name="kahf_suggestion_bg">@color/black18</color>
     <color name="kahf_suggestion_text">@color/white</color>
     <color name="kahf_suggestion_url">#3F8DFF</color>
+    <color name="kahf_appbar_light">#F2F2F2</color>
+
+    <attr name="kahfAppBarColor" format="color"/>
 
 </resources>
 
