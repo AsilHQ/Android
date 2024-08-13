@@ -89,14 +89,15 @@ object WallpaperDownloadManager {
 
 
     fun fetchWallpapers(context: Context){
-        val jsonUrl = URL("https://www.dropbox.com/scl/fi/3vgohzo12m7odvaktfn0m/wp-list.txt?rlkey=4hkafx3dcy3umgpuuse5l31a9&st=4c3lpysc&dl=1")
+        val jsonUrl = URL("https://api.github.com/repos/Kahf-Browser/public/contents/wallpapers?ref=main")
 
         try {
+            val gson = Gson()
             val jsonString = jsonUrl.readBytes().decodeToString()
-            val jsonArray: JsonArray = Gson().fromJson(jsonString, JsonArray::class.java)
+            val jsonArray: JsonArray = gson.fromJson(jsonString, JsonArray::class.java)
 
             Timber.d("fLog Wallpaper's list downloaded successfully.")
-            downloadImages(context, jsonArray.map { it.asString })
+            downloadImages(context, jsonArray.map { it.asJsonObject.get("download_url").asString })
         } catch (e: IOException) {
             Timber.d("fLog Error downloading wallpaper's list: $e")
         }
