@@ -898,7 +898,6 @@ class BrowserTabViewModel @Inject constructor(
 
         val verticalParameter = extractVerticalParameter(url)
         var urlToNavigate = queryUrlConverter.convertQueryToUrl(trimmedInput, verticalParameter, queryOrigin)
-        var wvError = OMITTED
         when (val type = specialUrlDetector.determineType(trimmedInput)) {
             is ShouldLaunchPrivacyProLink -> {
                 if (webNavigationState == null || webNavigationState?.hasNavigationHistory == false) {
@@ -967,7 +966,7 @@ class BrowserTabViewModel @Inject constructor(
             browserShowing = true,
             showClearButton = false,
             showVoiceSearch = voiceSearchAvailability.shouldShowVoiceSearch(urlLoaded = urlToNavigate),
-            browserError = wvError,
+            browserError = OMITTED,
             sslError = NONE,
         )
         autoCompleteViewState.value =
