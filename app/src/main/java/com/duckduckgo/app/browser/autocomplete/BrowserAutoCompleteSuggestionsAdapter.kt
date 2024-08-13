@@ -16,13 +16,13 @@
 
 package com.duckduckgo.app.browser.autocomplete
 
-import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.UiThread
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteBookmarkSuggestion
+import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteClipboardSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteDefaultSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteHistoryRelatedSuggestion.AutoCompleteHistorySearchSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteHistoryRelatedSuggestion.AutoCompleteHistorySuggestion
@@ -30,6 +30,7 @@ import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.A
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.autocomplete.AutoCompleteViewHolder.EmptySuggestionViewHolder
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.BOOKMARK_TYPE
+import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.CLIPBOARD_TYPE
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.DEFAULT_TYPE
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.EMPTY_TYPE
 import com.duckduckgo.app.browser.autocomplete.BrowserAutoCompleteSuggestionsAdapter.Type.HISTORY_SEARCH_TYPE
@@ -57,6 +58,7 @@ class BrowserAutoCompleteSuggestionsAdapter(
         HISTORY_TYPE to HistorySuggestionViewHolderFactory(),
         HISTORY_SEARCH_TYPE to HistorySearchSuggestionViewHolderFactory(),
         IN_APP_MESSAGE_TYPE to InAppMessageViewHolderFactory(),
+        CLIPBOARD_TYPE to ClipboardSuggestionViewHolderFactory(),
         DEFAULT_TYPE to DefaultSuggestionViewHolderFactory(),
     )
 
@@ -77,6 +79,7 @@ class BrowserAutoCompleteSuggestionsAdapter(
             suggestions[position] is AutoCompleteHistorySearchSuggestion -> HISTORY_SEARCH_TYPE
             suggestions[position] is AutoCompleteInAppMessageSuggestion -> IN_APP_MESSAGE_TYPE
             suggestions[position] is AutoCompleteDefaultSuggestion -> DEFAULT_TYPE
+            suggestions[position] is AutoCompleteClipboardSuggestion -> CLIPBOARD_TYPE
             else -> SUGGESTION_TYPE
         }
     }
@@ -136,5 +139,6 @@ class BrowserAutoCompleteSuggestionsAdapter(
         const val HISTORY_SEARCH_TYPE = 5
         const val IN_APP_MESSAGE_TYPE = 6
         const val DEFAULT_TYPE = 7
+        const val CLIPBOARD_TYPE = 8
     }
 }

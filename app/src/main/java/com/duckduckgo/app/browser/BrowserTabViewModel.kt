@@ -17,6 +17,7 @@
 package com.duckduckgo.app.browser
 
 import android.annotation.SuppressLint
+import android.content.ClipData
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -54,6 +55,7 @@ import com.duckduckgo.app.autocomplete.api.AutoComplete
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteResult
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteBookmarkSuggestion
+import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteClipboardSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteDefaultSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteHistoryRelatedSuggestion.AutoCompleteHistorySearchSuggestion
 import com.duckduckgo.app.autocomplete.api.AutoComplete.AutoCompleteSuggestion.AutoCompleteHistoryRelatedSuggestion.AutoCompleteHistorySuggestion
@@ -832,6 +834,7 @@ class BrowserTabViewModel @Inject constructor(
                     is AutoCompleteSearchSuggestion -> onUserSubmittedQuery(suggestion.phrase, FromAutocomplete(isNav = suggestion.isUrl))
                     is AutoCompleteHistorySuggestion -> onUserSubmittedQuery(suggestion.url, FromAutocomplete(isNav = true))
                     is AutoCompleteHistorySearchSuggestion -> onUserSubmittedQuery(suggestion.phrase, FromAutocomplete(isNav = false))
+                    is AutoCompleteClipboardSuggestion -> onUserSubmittedQuery(suggestion.phrase, FromAutocomplete(isNav = suggestion.isUrl))
                     is AutoCompleteInAppMessageSuggestion -> return@withContext
                 }
             }
@@ -3483,6 +3486,28 @@ class BrowserTabViewModel @Inject constructor(
         Timber.d("fLog No downloaded wallpapers found")
 
         return null
+    }
+
+    fun appendClipboardUrlToSuggestions(
+        clip: ClipData?,
+        data: List<AutoCompleteSuggestion>
+    ): List<AutoCompleteSuggestion> {
+        clip?.let {
+            if (it.itemCount == 0) {
+                return data
+            }
+
+            val clipboardText = it.getItemAt(0).text.toString()
+            if (clipboardText.isEmpty()) {
+                return data
+            }
+
+            return data.toMutableList().also { list ->
+                list.add(0, AutoCompleteClipboardSuggestion(clipboardText, Patterns.WEB_URL.matcher(clipboardText).matches()))
+            }
+        }
+
+        return data
     }
 
     companion object {

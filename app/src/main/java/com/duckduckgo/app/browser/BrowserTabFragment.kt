@@ -3973,9 +3973,15 @@ class BrowserTabFragment :
                     } else {
                         binding.autoCompleteSuggestionsList.show()
                         binding.focusedViewContainerLayout.gone()
-                        if (viewState.searchResults.suggestions.isNotEmpty())
+
+                        val suggestionsWithClipboardContent = viewModel.appendClipboardUrlToSuggestions(
+                            clipboardManager.primaryClip,
+                            viewState.searchResults.suggestions
+                        )
+                        autoCompleteSuggestionsAdapter.updateData(viewState.searchResults.query, suggestionsWithClipboardContent)
+
+                        if (suggestionsWithClipboardContent.isNotEmpty())
                             binding.suggestionListBg.show()
-                        autoCompleteSuggestionsAdapter.updateData(viewState.searchResults.query, viewState.searchResults.suggestions)
                     }
                 } else {
                     binding.autoCompleteSuggestionsList.gone()

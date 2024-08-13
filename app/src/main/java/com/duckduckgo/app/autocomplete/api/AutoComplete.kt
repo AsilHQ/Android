@@ -73,6 +73,11 @@ interface AutoComplete {
             val isUrl: Boolean,
         ) : AutoCompleteSuggestion(phrase)
 
+        data class AutoCompleteClipboardSuggestion(
+            override val phrase: String,
+            val isUrl: Boolean,
+        ) : AutoCompleteSuggestion(phrase)
+
         data class AutoCompleteDefaultSuggestion(
             override val phrase: String,
         ) : AutoCompleteSuggestion(phrase)

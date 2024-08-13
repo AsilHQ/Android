@@ -874,6 +874,7 @@
     <string name="haram_site_blocked">Haram site blocked</string>
     <string name="tracker_blocked">Tracker blocked</string>
     <string name="_5m">6M+</string>
+    <string name="clipboardYouCopied">Paste from clipboard</string>
     <plurals name="bookmarkFolderDeleteMessage">
         <item quantity="one">Are you sure you want to delete this folder and %1$d item?</item>
         <item quantity="other">Are you sure you want to delete this folder and %1$d items?</item>
