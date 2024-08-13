@@ -3878,6 +3878,12 @@ class BrowserTabFragment :
                     }
                 }
             }
+
+            omnibar.kahfShareButton.setOnClickListener {
+                pixel.fire(AppPixelName.MENU_ACTION_SHARE_PRESSED)
+                viewModel.onShareSelected()
+            }
+
             bottomNav.optionsMenuItem.setOnClickListener {
                 viewModel.onBrowserMenuClicked()
                 hideKeyboardImmediately()
@@ -4190,14 +4196,13 @@ class BrowserTabFragment :
                 omnibar.shieldIcon?.isInvisible = !viewState.showPrivacyShield.isEnabled() || viewState.showDaxIcon
                 omnibar.clearTextButton?.isVisible = viewState.showClearButton
                 omnibar.searchIcon?.isVisible = viewState.showSearchIcon
-                safeGazeIcon.isVisible = !omnibar.omnibarTextInput.hasFocus()
-                // TODO change BG based on this condition ?? !viewState.showClearButton && !omnibar.omnibarTextInput.hasFocus()
+                omnibar.omnibarButtons.isVisible = !omnibar.omnibarTextInput.hasFocus()
             } else {
                 omnibar.daxIcon.isVisible = false
                 omnibar.shieldIcon?.isVisible = false
                 omnibar.clearTextButton?.isVisible = viewState.showClearButton
                 omnibar.searchIcon?.isVisible = true
-                safeGazeIcon.isVisible = false
+                omnibar.omnibarButtons.isVisible = false
             }
 
             omnibar.spacer.isVisible = viewState.showClearButton && lastSeenBrowserViewState?.showVoiceSearch ?: false
