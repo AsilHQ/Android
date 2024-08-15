@@ -92,6 +92,7 @@ import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.AnyThread
 import androidx.annotation.StringRes
@@ -166,6 +167,7 @@ import com.duckduckgo.app.browser.history.NavigationHistorySheet
 import com.duckduckgo.app.browser.history.NavigationHistorySheet.NavigationHistorySheetListener
 import com.duckduckgo.app.browser.httpauth.WebViewHttpAuthStore
 import com.duckduckgo.app.browser.logindetection.DOMLoginDetector
+import com.duckduckgo.app.browser.menu.BrowserMenuActivity
 import com.duckduckgo.app.browser.menu.BrowserPopupMenu
 import com.duckduckgo.app.browser.model.BasicAuthenticationCredentials
 import com.duckduckgo.app.browser.model.BasicAuthenticationRequest
@@ -667,6 +669,8 @@ class BrowserTabFragment :
     // Optimization to prevent against excessive work generating WebView previews; an existing job will be cancelled if a new one is launched
     private var bitmapGeneratorJob: Job? = null
 
+    private lateinit var resultLauncher: ActivityResultLauncher<Intent>
+
     private val browserActivity
         get() = activity as? BrowserActivity
 
@@ -911,6 +915,8 @@ class BrowserTabFragment :
             }
             pendingUploadTask = null
         }
+
+        configMenuActivityResult()
     }
 
     override fun onDetach() {
@@ -976,6 +982,69 @@ class BrowserTabFragment :
             dialog.deleteBookmarkListener = viewModel
         }
         handleSafeGazePopUp()
+    }
+
+    private fun configMenuActivityResult() {
+        resultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+
+                when (result.data?.getIntExtra("menu_id", 0)) {
+                    R.id.newTabMenuItem -> {
+                        viewModel.userRequestedOpeningNewTab()
+                        pixel.fire(AppPixelName.MENU_ACTION_NEW_TAB_PRESSED.pixelName)
+                    }
+                    R.id.bookmarksMenuItem -> {
+                        browserActivity?.launchBookmarks()
+                        pixel.fire(AppPixelName.MENU_ACTION_BOOKMARKS_PRESSED.pixelName)
+                    }
+                    R.id.fireproofWebsiteMenuItem -> {
+                        viewModel.onFireproofWebsiteMenuClicked()
+                    }
+                    R.id.addBookmarksMenuItem ->
+                        viewModel.onBookmarkMenuClicked()
+                    R.id.findInPageMenuItem -> {
+                        pixel.fire(AppPixelName.MENU_ACTION_FIND_IN_PAGE_PRESSED)
+                        viewModel.onFindInPageSelected()
+                    }
+                    R.id.privacyProtectionMenuItem ->
+                        viewModel.onPrivacyProtectionMenuClicked(isActiveCustomTab())
+                    R.id.brokenSiteMenuItem -> {
+                        pixel.fire(AppPixelName.MENU_ACTION_REPORT_BROKEN_SITE_PRESSED)
+                        viewModel.onBrokenSiteSelected()
+                    }
+                    R.id.downloadsMenuItem -> {
+                        pixel.fire(AppPixelName.MENU_ACTION_DOWNLOADS_PRESSED)
+                        browserActivity?.launchDownloads()
+                    }
+                    R.id.settingsMenuItem -> {
+                        pixel.fire(AppPixelName.MENU_ACTION_SETTINGS_PRESSED)
+                        browserActivity?.launchSettings()
+                    }
+                    R.id.changeBrowserModeMenuItem -> {
+                        viewModel.onChangeBrowserModeClicked()
+                    }
+                    R.id.sharePageMenuItem -> {
+                        pixel.fire(AppPixelName.MENU_ACTION_SHARE_PRESSED)
+                        viewModel.onShareSelected()
+                    }
+                    R.id.addToHomeMenuItem -> {
+                        pixel.fire(AppPixelName.MENU_ACTION_ADD_TO_HOME_PRESSED)
+                        viewModel.onPinPageToHomeSelected()
+                    }
+                    R.id.openInAppMenuItem -> {
+                        pixel.fire(AppPixelName.MENU_ACTION_APP_LINKS_OPEN_PRESSED)
+                        viewModel.openAppLink()
+                    }
+                    R.id.printPageMenuItem -> {
+                        viewModel.onPrintSelected()
+                    }
+                    R.id.autofillMenuItem -> {
+                        pixel.fire(AppPixelName.MENU_ACTION_AUTOFILL_PRESSED)
+                        viewModel.onAutofillMenuSelected()
+                    }
+                }
+            }
+        }
     }
 
     private fun handleTrackTint(isChecked: Boolean, switch: Switch){
@@ -1322,6 +1391,12 @@ class BrowserTabFragment :
         activity.overridePendingTransition(R.anim.tab_anim_fade_in, R.anim.slide_to_bottom)
     }
 
+    private fun launchMenuActivity() {
+        val activity = activity ?: return
+        activity.overridePendingTransition(R.anim.tab_anim_fade_in, R.anim.slide_to_bottom)
+        resultLauncher.launch(BrowserMenuActivity.intent(activity, tabDisplayedInCustomTabScreen))
+    }
+
     override fun onResume() {
         super.onResume()
         omnibar.appBarLayout.setExpanded(true)
@@ -1385,7 +1460,10 @@ class BrowserTabFragment :
         viewModel.browserViewState.observe(
             viewLifecycleOwner,
             Observer {
-                it?.let { renderer.renderBrowserViewState(it) }
+                it?.let {
+                    renderer.renderBrowserViewState(it)
+                    viewStateForMenuActivity = it.copy()
+                }
             },
         )
 
@@ -3710,6 +3788,8 @@ class BrowserTabFragment :
 
         private const val WEB_MESSAGE_LISTENER_WEBVIEW_VERSION = "126.0.6478.40"
 
+        var viewStateForMenuActivity : BrowserViewState? = null
+
         fun newInstance(
             tabId: String,
             query: String? = null,
@@ -3884,9 +3964,10 @@ class BrowserTabFragment :
             }
 
             bottomNav.optionsMenuItem.setOnClickListener {
-                viewModel.onBrowserMenuClicked()
+                // viewModel.onBrowserMenuClicked()
                 hideKeyboardImmediately()
-                launchTopAnchoredPopupMenu()
+                launchMenuActivity()
+                // launchTopAnchoredPopupMenu()
             }
         }
 
@@ -4354,6 +4435,12 @@ class BrowserTabFragment :
 
         private fun showNewTab() {
             Timber.d("New Tab: showNewTab")
+
+            // Remove all views except AppStatistics from the container
+            for (i in newBrowserTab.newTabContainerLayout.childCount - 1 downTo 1) {
+                newBrowserTab.newTabContainerLayout.removeViewAt(i)
+            }
+
             newTabPageProvider.provideNewTabPageVersion().onEach { newTabPage ->
                 newBrowserTab.newTabContainerLayout.addView(
                     newTabPage.getView(requireContext()),

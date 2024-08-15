@@ -231,6 +231,8 @@
     <color name="kahf_suggestion_text">@color/white</color>
     <color name="kahf_suggestion_url">#3F8DFF</color>
     <color name="kahf_appbar_light">#F2F2F2</color>
+    <color name="kahf_unselected_icon_color">#9CB0CD</color>
+    <color name="kahf_tab_text_color">#b3b3b3</color>
 
     <attr name="kahfAppBarColor" format="color"/>
 

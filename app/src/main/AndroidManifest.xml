@@ -315,7 +315,12 @@
         <activity
             android:name="com.duckduckgo.app.tabs.ui.TabSwitcherActivity"
             android:exported="false"
-            android:label="@string/tabActivityTitle" />
+            android:label="" />
+
+        <activity
+            android:name="com.duckduckgo.app.browser.menu.BrowserMenuActivity"
+            android:exported="false" />
+
         <activity
             android:name="com.duckduckgo.app.settings.SettingsActivity"
             android:exported="true"
