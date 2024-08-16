@@ -31,12 +31,12 @@ class ViewPagerAdapter(
 
     override fun createFragment(position: Int): Fragment {
         return when (position) {
-            0 -> MenuFragment(displayedInCustomTabScreen)
+            0 -> MenuFragment.newInstance(displayedInCustomTabScreen)
             1 -> BookmarkFragment()
-            2 -> BookmarkFragment()
-            3 -> BookmarkFragment()
-            4 -> BookmarkFragment()
-            else -> BookmarkFragment()
+            2 -> MenuFragment.newInstance(displayedInCustomTabScreen)
+            3 -> MenuFragment.newInstance(displayedInCustomTabScreen)
+            4 -> MenuFragment.newInstance(displayedInCustomTabScreen)
+            else -> MenuFragment.newInstance(displayedInCustomTabScreen)
         }
 
         /*return when (position) {

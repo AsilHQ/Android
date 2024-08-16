@@ -22,19 +22,29 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.duckduckgo.adclick.store.AdClickDatabase.Companion.MIGRATION_1_2
+import com.duckduckgo.anvil.annotations.InjectWith
 import com.duckduckgo.app.browser.BrowserTabFragment
 import com.duckduckgo.app.browser.R
-import com.duckduckgo.mobile.android.R as RR
-import com.duckduckgo.autofill.impl.R as RRR
+import com.duckduckgo.app.browser.databinding.FragmentBookmarkBinding
 import com.duckduckgo.app.browser.databinding.FragmentMenuBinding
 import com.duckduckgo.app.browser.menu.adapter.MenuItem
 import com.duckduckgo.app.browser.menu.adapter.MenuRvAdapter
+import com.duckduckgo.common.ui.DuckDuckGoFragment
+import com.duckduckgo.di.scopes.FragmentScope
+import com.duckduckgo.savedsites.impl.bookmarks.BookmarksViewModel
+import timber.log.Timber
+import kotlin.properties.Delegates
+import com.duckduckgo.autofill.impl.R as RRR
+import com.duckduckgo.mobile.android.R as RR
 
-class MenuFragment(private val displayedInCustomTabScreen: Boolean) : Fragment() {
+@InjectWith(FragmentScope::class)
+class MenuFragment : DuckDuckGoFragment(R.layout.fragment_menu) {
 
     lateinit var binding: FragmentMenuBinding
+    private var displayedInCustomTabScreen by Delegates.notNull<Boolean>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,6 +52,7 @@ class MenuFragment(private val displayedInCustomTabScreen: Boolean) : Fragment()
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentMenuBinding.inflate(inflater, container, false)
+        displayedInCustomTabScreen = arguments?.getBoolean(DISPLAYS_IN_CUSTOM_TAB_SCREEN) ?: false
         configureRecyclerView()
 
         return binding.root
@@ -148,6 +159,18 @@ class MenuFragment(private val displayedInCustomTabScreen: Boolean) : Fragment()
             requireActivity().apply {
                 setResult(RESULT_OK, intent)
                 finish()
+            }
+        }
+    }
+
+    companion object {
+        private const val DISPLAYS_IN_CUSTOM_TAB_SCREEN = "displayedInCustomTabScreen"
+
+        fun newInstance(displayedInCustomTabScreen: Boolean): MenuFragment {
+            return MenuFragment().apply {
+                arguments = Bundle().apply {
+                    putBoolean(DISPLAYS_IN_CUSTOM_TAB_SCREEN, displayedInCustomTabScreen)
+                }
             }
         }
     }
