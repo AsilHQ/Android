@@ -228,11 +228,13 @@
     <color name="kahf_bottom_nav_icon_inactive">#5C606D</color>
     <color name="kahf_suggestion_icon">#C6C6C6</color>
     <color name="kahf_suggestion_bg">@color/black18</color>
+    <color name="kahf_suggestion_bg_ripple">@color/black36</color>
     <color name="kahf_suggestion_text">@color/white</color>
     <color name="kahf_suggestion_url">#3F8DFF</color>
     <color name="kahf_appbar_light">#F2F2F2</color>
     <color name="kahf_unselected_icon_color">#9CB0CD</color>
     <color name="kahf_tab_text_color">#b3b3b3</color>
+    <color name="kahf_bookmark_badge_color">#9ca6bd</color>
 
     <attr name="kahfAppBarColor" format="color"/>
 

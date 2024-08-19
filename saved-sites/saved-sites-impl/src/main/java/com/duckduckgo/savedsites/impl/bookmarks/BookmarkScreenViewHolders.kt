@@ -21,17 +21,19 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
+import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.duckduckgo.app.browser.favicon.FaviconManager
 import com.duckduckgo.common.ui.menu.PopupMenu
 import com.duckduckgo.common.ui.view.PopupMenuItemView
-import com.duckduckgo.common.ui.view.getColorFromAttr
+import com.duckduckgo.common.ui.view.gone
+import com.duckduckgo.common.ui.view.show
 import com.duckduckgo.common.utils.baseHost
-import com.duckduckgo.mobile.android.databinding.RowTwoLineItemBinding
+import com.duckduckgo.common.utils.domain
+import com.duckduckgo.mobile.android.databinding.BookmarkListItemBinding
 import com.duckduckgo.saved.sites.impl.R
-import com.duckduckgo.saved.sites.impl.databinding.RowBookmarkTwoLineItemBinding
 import com.duckduckgo.saved.sites.impl.databinding.ViewSavedSiteEmptyHintBinding
 import com.duckduckgo.saved.sites.impl.databinding.ViewSavedSiteEmptySearchHintBinding
 import com.duckduckgo.savedsites.api.models.BookmarkFolder
@@ -74,7 +76,7 @@ sealed class BookmarkScreenViewHolders(itemView: View) : RecyclerView.ViewHolder
 
     class BookmarksViewHolder(
         private val layoutInflater: LayoutInflater,
-        private val binding: RowBookmarkTwoLineItemBinding,
+        private val binding: BookmarkListItemBinding,
         private val viewModel: BookmarksViewModel,
         private val lifecycleOwner: LifecycleOwner,
         private val faviconManager: FaviconManager,
@@ -87,41 +89,35 @@ sealed class BookmarkScreenViewHolders(itemView: View) : RecyclerView.ViewHolder
 
         fun showDragHandle(show: Boolean, bookmark: SavedSite.Bookmark) {
             if (show) {
-                binding.root.setTrailingIconResource(com.duckduckgo.mobile.android.R.drawable.ic_menu_hamburger_24)
-                binding.root.setTrailingIconClickListener {}
+                binding.dragHandle.show()
+                binding.itemCount.gone()
+                binding.checkedIcon.gone()
             } else {
-                binding.root.setTrailingIconResource(com.duckduckgo.mobile.android.R.drawable.ic_menu_vertical_24)
-                binding.root.setTrailingIconClickListener { anchor ->
-                    showOverFlowMenu(anchor, bookmark)
-                }
+                binding.dragHandle.gone()
+                binding.itemCount.gone()
             }
         }
 
         fun update(bookmark: SavedSite.Bookmark) {
-            val listItem = binding.root
-            listItem.setBackgroundColor(context.getColorFromAttr(com.duckduckgo.mobile.android.R.attr.daxColorBackground))
-            listItem.setLeadingIconContentDescription(
-                context.getString(
-                    R.string.bookmarkOverflowContentDescription,
-                    bookmark.title,
-                ),
-            )
-            listItem.setPrimaryText(bookmark.title)
-            listItem.setSecondaryText(parseDisplayUrl(bookmark.url))
+            binding.itemCount.gone()
+            binding.subLabel.show()
+
+            binding.label.text = bookmark.title
+            binding.subLabel.text = bookmark.url.toUri().domain()
 
             if (this.bookmark?.url != bookmark.url) {
-                loadFavicon(bookmark.url, listItem.leadingIcon())
+                loadFavicon(bookmark.url, binding.icon)
                 faviconLoaded = true
             }
-            listItem.setTrailingIconResource(com.duckduckgo.mobile.android.R.drawable.ic_menu_vertical_24)
-            listItem.setTrailingIconClickListener { anchor ->
-                showOverFlowMenu(anchor, bookmark)
-            }
-            listItem.setClickListener {
+            // listItem.setTrailingIconResource(com.duckduckgo.mobile.android.R.drawable.ic_menu_vertical_24)
+            // listItem.setTrailingIconClickListener { anchor ->
+            //     showOverFlowMenu(anchor, bookmark)
+            // }
+            binding.root.setOnClickListener {
                 viewModel.onSelected(bookmark)
             }
             isFavorite = bookmark.isFavorite
-            listItem.setFavoriteStarVisible(isFavorite)
+            // listItem.setFavoriteStarVisible(isFavorite)
 
             this.bookmark = bookmark
         }
@@ -178,42 +174,40 @@ sealed class BookmarkScreenViewHolders(itemView: View) : RecyclerView.ViewHolder
 
     class BookmarkFoldersViewHolder(
         private val layoutInflater: LayoutInflater,
-        private val binding: RowTwoLineItemBinding,
+        private val binding: BookmarkListItemBinding,
         private val viewModel: BookmarksViewModel,
     ) : BookmarkScreenViewHolders(binding.root) {
 
-        private val context: Context = binding.root.context
+        // private val context: Context = binding.root.context
 
         fun showDragHandle(show: Boolean, bookmarkFolder: BookmarkFolder) {
             if (show) {
-                binding.root.setTrailingIconResource(com.duckduckgo.mobile.android.R.drawable.ic_menu_hamburger_24)
-                binding.root.setTrailingIconClickListener {}
+                binding.dragHandle.show()
+                binding.itemCount.gone()
+                binding.checkedIcon.gone()
             } else {
-                binding.root.setTrailingIconResource(com.duckduckgo.mobile.android.R.drawable.ic_menu_vertical_24)
-                binding.root.setTrailingIconClickListener {
-                    showOverFlowMenu(binding.root, bookmarkFolder)
-                }
+                binding.dragHandle.gone()
+                binding.itemCount.show()
             }
         }
 
         fun update(bookmarkFolder: BookmarkFolder) {
             val listItem = binding.root
-            listItem.setBackgroundColor(context.getColorFromAttr(com.duckduckgo.mobile.android.R.attr.daxColorBackground))
 
-            listItem.setPrimaryText(bookmarkFolder.name)
+            binding.label.text = bookmarkFolder.name
 
             val totalItems = bookmarkFolder.numBookmarks + bookmarkFolder.numFolders
             if (totalItems == 0) {
-                listItem.setSecondaryText(context.getString(R.string.bookmarkFolderEmpty))
+                binding.itemCount.text = "0"
             } else {
-                listItem.setSecondaryText(context.resources.getQuantityString(R.plurals.bookmarkFolderItems, totalItems, totalItems))
+                binding.itemCount.text = totalItems.toString()
             }
-            listItem.setLeadingIconResource(R.drawable.ic_folder_24)
+            binding.icon.setImageResource(R.drawable.ic_folder_24)
 
-            listItem.showTrailingIcon()
+            /*listItem.showTrailingIcon()
             listItem.setTrailingIconClickListener {
                 showOverFlowMenu(listItem, bookmarkFolder)
-            }
+            }*/
             listItem.setOnClickListener {
                 viewModel.onBookmarkFolderSelected(bookmarkFolder)
             }

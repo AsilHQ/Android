@@ -22,6 +22,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.duckduckgo.app.browser.favicon.FaviconManager
+import com.duckduckgo.mobile.android.databinding.BookmarkListItemBinding
 import com.duckduckgo.mobile.android.databinding.RowTwoLineItemBinding
 import com.duckduckgo.saved.sites.impl.databinding.RowBookmarkTwoLineItemBinding
 import com.duckduckgo.saved.sites.impl.databinding.ViewSavedSiteEmptyHintBinding
@@ -92,7 +93,7 @@ class BookmarksAdapter(
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {
             BOOKMARK_TYPE -> {
-                val binding = RowBookmarkTwoLineItemBinding.inflate(inflater, parent, false)
+                val binding = BookmarkListItemBinding.inflate(inflater, parent, false)
                 return BookmarksViewHolder(
                     layoutInflater,
                     binding,
@@ -102,7 +103,7 @@ class BookmarksAdapter(
                 )
             }
             BOOKMARK_FOLDER_TYPE -> {
-                val binding = RowTwoLineItemBinding.inflate(inflater, parent, false)
+                val binding = BookmarkListItemBinding.inflate(inflater, parent, false)
                 return BookmarkFoldersViewHolder(
                     layoutInflater,
                     binding,

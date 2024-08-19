@@ -14,7 +14,12 @@
   ~ limitations under the License.
   -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/kahf_suggestion_bg" />
-    <corners android:radius="8dp" />
-</shape>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/kahf_suggestion_bg_ripple">
+    <item>
+        <shape>
+            <solid android:color="@color/kahf_suggestion_bg" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+</ripple>

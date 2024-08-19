@@ -988,60 +988,67 @@ class BrowserTabFragment :
         resultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
 
-                when (result.data?.getIntExtra("menu_id", 0)) {
-                    R.id.newTabMenuItem -> {
-                        viewModel.userRequestedOpeningNewTab()
-                        pixel.fire(AppPixelName.MENU_ACTION_NEW_TAB_PRESSED.pixelName)
+                if (result?.data?.hasExtra("menu_id") == true) {
+                    when (result.data?.getIntExtra("menu_id", 0)) {
+                        R.id.newTabMenuItem -> {
+                            viewModel.userRequestedOpeningNewTab()
+                            pixel.fire(AppPixelName.MENU_ACTION_NEW_TAB_PRESSED.pixelName)
+                        }
+                        R.id.bookmarksMenuItem -> {
+                            browserActivity?.launchBookmarks()
+                            pixel.fire(AppPixelName.MENU_ACTION_BOOKMARKS_PRESSED.pixelName)
+                        }
+                        R.id.fireproofWebsiteMenuItem -> {
+                            viewModel.onFireproofWebsiteMenuClicked()
+                        }
+                        R.id.addBookmarksMenuItem ->
+                            viewModel.onBookmarkMenuClicked()
+                        R.id.findInPageMenuItem -> {
+                            pixel.fire(AppPixelName.MENU_ACTION_FIND_IN_PAGE_PRESSED)
+                            viewModel.onFindInPageSelected()
+                        }
+                        R.id.privacyProtectionMenuItem ->
+                            viewModel.onPrivacyProtectionMenuClicked(isActiveCustomTab())
+                        R.id.brokenSiteMenuItem -> {
+                            pixel.fire(AppPixelName.MENU_ACTION_REPORT_BROKEN_SITE_PRESSED)
+                            viewModel.onBrokenSiteSelected()
+                        }
+                        R.id.downloadsMenuItem -> {
+                            pixel.fire(AppPixelName.MENU_ACTION_DOWNLOADS_PRESSED)
+                            browserActivity?.launchDownloads()
+                        }
+                        R.id.settingsMenuItem -> {
+                            pixel.fire(AppPixelName.MENU_ACTION_SETTINGS_PRESSED)
+                            browserActivity?.launchSettings()
+                        }
+                        R.id.changeBrowserModeMenuItem -> {
+                            viewModel.onChangeBrowserModeClicked()
+                        }
+                        R.id.sharePageMenuItem -> {
+                            pixel.fire(AppPixelName.MENU_ACTION_SHARE_PRESSED)
+                            viewModel.onShareSelected()
+                        }
+                        R.id.addToHomeMenuItem -> {
+                            pixel.fire(AppPixelName.MENU_ACTION_ADD_TO_HOME_PRESSED)
+                            viewModel.onPinPageToHomeSelected()
+                        }
+                        R.id.openInAppMenuItem -> {
+                            pixel.fire(AppPixelName.MENU_ACTION_APP_LINKS_OPEN_PRESSED)
+                            viewModel.openAppLink()
+                        }
+                        R.id.printPageMenuItem -> {
+                            viewModel.onPrintSelected()
+                        }
+                        R.id.autofillMenuItem -> {
+                            pixel.fire(AppPixelName.MENU_ACTION_AUTOFILL_PRESSED)
+                            viewModel.onAutofillMenuSelected()
+                        }
                     }
-                    R.id.bookmarksMenuItem -> {
-                        browserActivity?.launchBookmarks()
-                        pixel.fire(AppPixelName.MENU_ACTION_BOOKMARKS_PRESSED.pixelName)
-                    }
-                    R.id.fireproofWebsiteMenuItem -> {
-                        viewModel.onFireproofWebsiteMenuClicked()
-                    }
-                    R.id.addBookmarksMenuItem ->
-                        viewModel.onBookmarkMenuClicked()
-                    R.id.findInPageMenuItem -> {
-                        pixel.fire(AppPixelName.MENU_ACTION_FIND_IN_PAGE_PRESSED)
-                        viewModel.onFindInPageSelected()
-                    }
-                    R.id.privacyProtectionMenuItem ->
-                        viewModel.onPrivacyProtectionMenuClicked(isActiveCustomTab())
-                    R.id.brokenSiteMenuItem -> {
-                        pixel.fire(AppPixelName.MENU_ACTION_REPORT_BROKEN_SITE_PRESSED)
-                        viewModel.onBrokenSiteSelected()
-                    }
-                    R.id.downloadsMenuItem -> {
-                        pixel.fire(AppPixelName.MENU_ACTION_DOWNLOADS_PRESSED)
-                        browserActivity?.launchDownloads()
-                    }
-                    R.id.settingsMenuItem -> {
-                        pixel.fire(AppPixelName.MENU_ACTION_SETTINGS_PRESSED)
-                        browserActivity?.launchSettings()
-                    }
-                    R.id.changeBrowserModeMenuItem -> {
-                        viewModel.onChangeBrowserModeClicked()
-                    }
-                    R.id.sharePageMenuItem -> {
-                        pixel.fire(AppPixelName.MENU_ACTION_SHARE_PRESSED)
-                        viewModel.onShareSelected()
-                    }
-                    R.id.addToHomeMenuItem -> {
-                        pixel.fire(AppPixelName.MENU_ACTION_ADD_TO_HOME_PRESSED)
-                        viewModel.onPinPageToHomeSelected()
-                    }
-                    R.id.openInAppMenuItem -> {
-                        pixel.fire(AppPixelName.MENU_ACTION_APP_LINKS_OPEN_PRESSED)
-                        viewModel.openAppLink()
-                    }
-                    R.id.printPageMenuItem -> {
-                        viewModel.onPrintSelected()
-                    }
-                    R.id.autofillMenuItem -> {
-                        pixel.fire(AppPixelName.MENU_ACTION_AUTOFILL_PRESSED)
-                        viewModel.onAutofillMenuSelected()
-                    }
+                }
+
+                else if (result?.data?.hasExtra("open_in_browser") == true) {
+                    val url = result.data?.getStringExtra("open_in_browser")
+                    viewModel.onUserSubmittedQuery(url!!)
                 }
             }
         }
