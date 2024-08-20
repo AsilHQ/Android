@@ -1290,6 +1290,7 @@ class BrowserTabFragment :
     }
 
     private fun configureCustomTab() {
+        bottomNav.botNav.hide()
         omnibar.omniBarContainer.hide()
 
         omnibar.toolbar.background = ColorDrawable(customTabToolbarColor)
