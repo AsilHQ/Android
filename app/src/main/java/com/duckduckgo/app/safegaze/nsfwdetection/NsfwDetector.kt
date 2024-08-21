@@ -15,13 +15,18 @@ import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 class NsfwDetector(val context: Context) {
     private val inputImageSize = 224
 
-    var model: Nsfw  = Nsfw.newInstance(context)
+    lateinit var model: Nsfw
     private val imageProcessor = ImageProcessor.Builder()
         .add(ResizeOp(inputImageSize, inputImageSize, BILINEAR))
         .add(NormalizeOp(0f, 255f))
         .build()
 
     fun isNsfw(bitmap: Bitmap): NsfwPrediction {
+        // initializing mode in IO thread
+        if (!::model.isInitialized) {
+            model = Nsfw.newInstance(context)
+        }
+
         val inputFeature = TensorBuffer.createFixedSize(intArrayOf(1, inputImageSize, inputImageSize, 3), DataType.FLOAT32)
 
         val buffer = TensorImage(FLOAT32).let {

@@ -39,7 +39,7 @@ class GenderDetector (val context: Context) {
 
     private val faceDetector = FaceDetection.getClient(faceDetectorOptions)
 
-    init {
+    private fun initializeModel() {
         try {
             val model = context.assets.open("mobilenetv2_finetuned.tflite").use { it.readBytes() }
             val modelBuffer = ByteBuffer.allocateDirect(model.size)
@@ -51,13 +51,18 @@ class GenderDetector (val context: Context) {
             }
             interpreter = Interpreter(modelBuffer, options)
 
-            warmUpModel()
+            // warmUpModel()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     suspend fun predict(bitmap: Bitmap): GenderPrediction {
+
+        // initializing mode in IO thread
+        if (interpreter == null) {
+            initializeModel()
+        }
 
         return suspendCoroutine { continuation ->
             val prediction = GenderPrediction()
