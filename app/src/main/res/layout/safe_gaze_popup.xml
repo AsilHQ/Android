@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2024 DuckDuckGo
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/pointer_arrow_image_view"
+        android:layout_width="14dp"
+        android:layout_height="9dp"
+        android:layout_marginTop="2dp"
+        android:contentDescription="@string/pointer_arrow"
+        android:src="@drawable/pointer_arrow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/popup_card"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="?attr/kahfCardBackground"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="3dp"
+        app:cardUseCompatPadding="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="10dp">
+
+            <ImageView
+                android:id="@+id/kahf_guard_logo"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:contentDescription="@string/asilLogoDescription"
+                android:scaleType="fitStart"
+                android:src="@drawable/kahf_guard_logo_with_text"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.duckduckgo.common.ui.view.divider.HorizontalDivider
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="10dp"
+                android:background="?attr/kahfDivider"
+                app:layout_constraintTop_toBottomOf="@id/kahf_guard_logo" />
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/poppins_bold"
+                android:text="@string/kahf_safer_internet"
+                android:textColor="?attr/kahfPrimaryText"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/divider"
+                tools:ignore="DeprecatedWidgetInXml" />
+
+
+            <LinearLayout
+                android:id="@+id/button_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/title">
+
+                <include
+                    android:id="@+id/btnHigh"
+                    layout="@layout/safegaze_button" />
+
+                <include
+                    android:id="@+id/btnMedium"
+                    layout="@layout/safegaze_button" />
+
+                <include
+                    android:id="@+id/btnLow"
+                    layout="@layout/safegaze_button" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/suggestion_bg_rounded"
+                android:backgroundTint="@color/kahf_green"
+                android:fontFamily="@font/lato"
+                android:gravity="center_vertical"
+                android:maxLines="3"
+                android:minLines="3"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="10dp"
+                android:textColor="?attr/kahfPrimaryText"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/button_container"
+                tools:ignore="DeprecatedWidgetInXml,InvalidColorAttribute"
+                tools:text="@string/kahf_mode_desc_high" />
+
+            <com.duckduckgo.common.ui.view.divider.HorizontalDivider
+                android:id="@+id/divider2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="10dp"
+                android:background="?attr/kahfDivider"
+                app:layout_constraintTop_toBottomOf="@id/tvDescription" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/blurContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/divider2">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintEnd_toStartOf="@id/ivFullBlurContainer"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/tvDecent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:fontFamily="@font/poppins_bold"
+                        android:text="@string/kahf_decent_internet"
+                        android:textColor="?attr/kahfPrimaryText"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:ignore="DeprecatedWidgetInXml" />
+
+                    <TextView
+                        android:id="@+id/blueIndecentPhotosText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:fontFamily="@font/lato"
+                        android:text="@string/kahf_desc_blur_full_image"
+                        android:textColor="?attr/kahfPrimaryText"
+                        android:textSize="14sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/tvDecent"
+                        tools:ignore="DeprecatedWidgetInXml" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_bar"
+                        style="@android:style/Widget.ProgressBar.Horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="10dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="15dp"
+                        android:background="@drawable/progress_bar_background"
+                        android:progressDrawable="@drawable/progress_bar"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/blueIndecentPhotosText" />
+
+                    <ImageView
+                        android:id="@+id/icon_image_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:importantForAccessibility="no"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/progress_thumb"
+                        app:layout_constraintBottom_toBottomOf="@id/progress_bar"
+                        app:layout_constraintEnd_toEndOf="@id/progress_bar"
+                        app:layout_constraintStart_toStartOf="@id/progress_bar"
+                        app:layout_constraintTop_toTopOf="@id/progress_bar" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <FrameLayout
+                    android:id="@+id/ivFullBlurContainer"
+                    android:layout_width="85dp"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginEnd="10dp"
+                    app:layout_constraintEnd_toStartOf="@id/ivHumanBlurContainer"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/ivFullBlur"
+                        android:layout_width="85dp"
+                        android:layout_height="85dp"
+                        android:src="@drawable/blur_image_background" />
+
+                    <ImageView
+                        android:id="@+id/iv_check"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="bottom|center"
+                        android:layout_marginBottom="0dp"
+                        android:contentDescription="@string/checkbox_label_title"
+                        android:elevation="5dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_check_green"
+                        android:visibility="visible"
+                        tools:visibility="visible" />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/ivHumanBlurContainer"
+                    android:layout_width="85dp"
+                    android:layout_height="100dp"
+                    android:layout_marginTop="15dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/ivHumanBlur"
+                        android:layout_width="85dp"
+                        android:layout_height="85dp"
+                        android:src="@drawable/blur_image_background" />
+
+                    <ImageView
+                        android:id="@+id/iv_check_human"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="bottom|center"
+                        android:layout_marginBottom="0dp"
+                        android:contentDescription="@string/checkbox_label_title"
+                        android:elevation="5dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_check_green"
+                        android:visibility="gone" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvHumanOnly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/poppins_bold"
+                    android:gravity="center"
+                    android:text="@string/kahf_human_only"
+                    android:textColor="?attr/kahfPrimaryText"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/ivHumanBlurContainer"
+                    app:layout_constraintTop_toBottomOf="@id/ivHumanBlurContainer"
+                    tools:ignore="DeprecatedWidgetInXml" />
+
+                <TextView
+                    android:id="@+id/tvHumanOnlyLine2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lato"
+                    android:gravity="center"
+                    android:text="@string/kahf_premium"
+                    android:textColor="?attr/kahfSecondaryText"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/ivHumanBlurContainer"
+                    app:layout_constraintTop_toBottomOf="@id/tvHumanOnly"
+                    tools:ignore="DeprecatedWidgetInXml" />
+
+                <TextView
+                    android:id="@+id/fullImageText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="@font/poppins_bold"
+                    android:gravity="center"
+                    android:text="@string/kahf_full_image"
+                    android:textColor="?attr/kahfPrimaryText"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="@id/ivFullBlurContainer"
+                    app:layout_constraintStart_toStartOf="@id/ivFullBlurContainer"
+                    app:layout_constraintTop_toBottomOf="@id/ivFullBlurContainer"
+                    tools:ignore="DeprecatedWidgetInXml" />
+
+                <TextView
+                    android:id="@+id/fullImageTextLine2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lato"
+                    android:gravity="center"
+                    android:text="@string/kahf_free"
+                    android:textColor="?attr/kahfSecondaryText"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="@id/ivFullBlurContainer"
+                    app:layout_constraintStart_toStartOf="@id/ivFullBlurContainer"
+                    app:layout_constraintTop_toBottomOf="@id/fullImageText"
+                    tools:ignore="DeprecatedWidgetInXml" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.duckduckgo.common.ui.view.divider.HorizontalDivider
+                android:id="@+id/divider3"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="10dp"
+                android:background="?attr/kahfDivider"
+                app:layout_constraintTop_toBottomOf="@id/blurContainer" />
+
+            <TextView
+                android:id="@+id/statTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/poppins_bold"
+                android:text="@string/kahf_harm_avoided"
+                android:textColor="?attr/kahfPrimaryText"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/divider3"
+                tools:ignore="DeprecatedWidgetInXml" />
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/appStat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/statTitle">
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline_33"
+                    android:layout_width="1dp"
+                    android:layout_height="1dp"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.33" />
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline_66"
+                    android:layout_width="1dp"
+                    android:layout_height="1dp"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.66" />
+
+                <com.duckduckgo.common.ui.view.divider.VerticalDivider
+                    android:id="@+id/divider4"
+                    android:layout_width="1dp"
+                    android:layout_height="0dp"
+                    android:background="?attr/kahfDivider"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/guideline_33"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.duckduckgo.common.ui.view.divider.VerticalDivider
+                    android:id="@+id/divider5"
+                    android:layout_width="1dp"
+                    android:layout_height="0dp"
+                    android:background="?attr/kahfDivider"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/guideline_66"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/adsBlockedCount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="5dp"
+                    android:textColor="?attr/kahfPrimaryText"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toStartOf="@id/divider4"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="DeprecatedWidgetInXml"
+                    tools:text="514" />
+
+                <TextView
+                    android:id="@+id/adsBlockedLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lato"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="5dp"
+                    android:text="@string/kahf_harmful_sites"
+                    android:textColor="?attr/kahfPrimaryText"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toStartOf="@id/divider4"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/adsBlockedCount"
+                    tools:ignore="DeprecatedWidgetInXml" />
+
+                <TextView
+                    android:id="@+id/siteBlockCount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:paddingHorizontal="5dp"
+                    android:textColor="?attr/kahfPrimaryText"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toStartOf="@id/divider5"
+                    app:layout_constraintStart_toEndOf="@id/divider4"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="DeprecatedWidgetInXml"
+                    tools:text="123" />
+
+                <TextView
+                    android:id="@+id/siteBlockLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lato"
+                    android:paddingHorizontal="5dp"
+                    android:text="@string/kahf_indecent_pictures"
+                    android:textColor="?attr/kahfPrimaryText"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toStartOf="@id/divider5"
+                    app:layout_constraintStart_toEndOf="@id/divider4"
+                    app:layout_constraintTop_toBottomOf="@id/siteBlockCount"
+                    tools:ignore="DeprecatedWidgetInXml" />
+
+                <TextView
+                    android:id="@+id/trackerBlockedCount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="0dp"
+                    android:textColor="?attr/kahfPrimaryText"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/divider5"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="DeprecatedWidgetInXml"
+                    tools:text="860" />
+
+                <TextView
+                    android:id="@+id/trackerBlockedLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/lato"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="0dp"
+                    android:text="@string/kahf_ads_trackers"
+                    android:textColor="?attr/kahfPrimaryText"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/divider5"
+                    app:layout_constraintTop_toBottomOf="@id/trackerBlockedCount"
+                    tools:ignore="DeprecatedWidgetInXml" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.duckduckgo.common.ui.view.divider.HorizontalDivider
+                android:id="@+id/divider6"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="10dp"
+                android:background="?attr/kahfDivider"
+                app:layout_constraintTop_toBottomOf="@id/appStat" />
+
+            <Button
+                android:id="@+id/btnShare"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/app_bar_menu_share"
+                android:drawableTop="@drawable/ic_share_kahf"
+                android:drawablePadding="0dp"
+                android:drawableTint="?attr/kahfPrimaryIcon"
+                android:fontFamily="@font/lato"
+                android:text="@string/kahf_share"
+                android:textColor="?attr/kahfSecondaryText"
+                android:textSize="13sp"
+                android:textStyle="normal"
+                app:layout_constraintEnd_toStartOf="@id/btnSupport"
+                app:layout_constraintTop_toBottomOf="@id/divider6"
+                tools:ignore="DeprecatedWidgetInXml" />
+
+            <Button
+                android:id="@+id/btnSupport"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/app_bar_menu_share"
+                android:drawableTop="@drawable/ic_support"
+                android:drawablePadding="0dp"
+                android:drawableTint="?attr/kahfPrimaryIcon"
+                android:fontFamily="@font/lato"
+                android:text="@string/kahf_support"
+                android:textColor="?attr/kahfSecondaryText"
+                android:textSize="13sp"
+                android:textStyle="normal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/divider6"
+                tools:ignore="DeprecatedWidgetInXml" />
+
+            <Button
+                android:id="@+id/btnTheme"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/app_bar_menu_share"
+                android:drawableTop="@drawable/ic_moon"
+                android:drawablePadding="0dp"
+                android:drawableTint="?attr/kahfPrimaryIcon"
+                android:fontFamily="@font/lato"
+                android:text="@string/kahf_dark_mode"
+                android:textColor="?attr/kahfSecondaryText"
+                android:textSize="13sp"
+                android:textStyle="normal"
+                app:layout_constraintStart_toEndOf="@id/btnSupport"
+                app:layout_constraintTop_toBottomOf="@id/divider6"
+                tools:ignore="DeprecatedWidgetInXml" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

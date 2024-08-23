@@ -28,14 +28,11 @@ import com.duckduckgo.adclick.store.AdClickDatabase.Companion.MIGRATION_1_2
 import com.duckduckgo.anvil.annotations.InjectWith
 import com.duckduckgo.app.browser.BrowserTabFragment
 import com.duckduckgo.app.browser.R
-import com.duckduckgo.app.browser.databinding.FragmentBookmarkBinding
 import com.duckduckgo.app.browser.databinding.FragmentMenuBinding
 import com.duckduckgo.app.browser.menu.adapter.MenuItem
 import com.duckduckgo.app.browser.menu.adapter.MenuRvAdapter
 import com.duckduckgo.common.ui.DuckDuckGoFragment
 import com.duckduckgo.di.scopes.FragmentScope
-import com.duckduckgo.savedsites.impl.bookmarks.BookmarksViewModel
-import timber.log.Timber
 import kotlin.properties.Delegates
 import com.duckduckgo.autofill.impl.R as RRR
 import com.duckduckgo.mobile.android.R as RR

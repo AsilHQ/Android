@@ -110,6 +110,12 @@
     <color name="daxColorBlurDark">#B3111111</color>
 
     <attr name="kahfBottomNavIcon" format="color"/>
+    <attr name="kahfDivider" format="color"/>
+    <attr name="kahfPrimaryText" format="color"/>
+    <attr name="kahfSecondaryText" format="color"/>
+    <attr name="kahfPrimaryIcon" format="color"/>
+    <attr name="kahfCardBackground" format="color"/>
+    <attr name="kahfCardBackgroundInv" format="color"/>
 
     <!-- Design System Raw Colors -->
     <color name="red20">#F2A18A</color>
@@ -233,6 +239,9 @@
     <color name="kahf_appbar_light">#F2F2F2</color>
     <color name="kahf_unselected_icon_color">#9CB0CD</color>
     <color name="kahf_tab_text_color">#b3b3b3</color>
+    <color name="kahf_red">#FE102A</color>
+    <color name="kahf_green">#FF4CAF50</color>
+    <color name="kahf_orange">#FFAA46</color>
 
     <attr name="kahfAppBarColor" format="color"/>
 

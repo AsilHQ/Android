@@ -208,8 +208,15 @@
         <item name="daxInfoPanelTooltipBackgroundColor">@color/daxInfoPanelTooltipBackgroundColorDark</item>
         <item name="daxInfoPanelAlertBackgroundColor">@color/daxInfoPanelAlertBackgroundColorDark</item>
 
+        <!-- Kahf Specific colors for Dark Model  -->
         <item name="kahfBottomNavIcon">@color/kahf_bottom_nav_icon</item>
         <item name="kahfAppBarColor">@color/gray86</item>
+        <item name="kahfDivider">#222222</item>
+        <item name="kahfPrimaryText">@color/white</item>
+        <item name="kahfSecondaryText">#BDBDBD</item>
+        <item name="kahfPrimaryIcon">@color/white</item>
+        <item name="kahfCardBackground">#363636</item>
+        <item name="kahfCardBackgroundInv">#FFFFFF</item>
 
     </style>
 
@@ -290,9 +297,15 @@
         <item name="daxInfoPanelTooltipBackgroundColor">@color/daxInfoPanelTooltipBackgroundColorLight</item>
         <item name="daxInfoPanelAlertBackgroundColor">@color/daxInfoPanelAlertBackgroundColorLight</item>
 
+        <!-- Kahf Specific colors for Light Model  -->
         <item name="kahfBottomNavIcon">@color/kahf_bottom_nav_icon</item>
         <item name="kahfAppBarColor">@color/kahf_appbar_light</item>
-
+        <item name="kahfDivider">#E5E5E5</item>
+        <item name="kahfPrimaryText">@color/black</item>
+        <item name="kahfSecondaryText">#828282</item>
+        <item name="kahfPrimaryIcon">@color/black</item>
+        <item name="kahfCardBackground">@color/white</item>
+        <item name="kahfCardBackgroundInv">#363636</item>
     </style>
 
     <style name="Theme.DuckDuckGo.Survey" parent="Theme.DuckDuckGo.Light">
