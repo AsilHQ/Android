@@ -7,7 +7,8 @@
 <item android:id="@android:id/progress">
     <clip>
         <shape>
-            <solid android:color="#0FB2C9"/> <!-- Replace with your desired color -->
+            <corners android:radius="10dp"/>
+            <solid android:color="@color/kahf_green"/>
         </shape>
     </clip>
 </item>

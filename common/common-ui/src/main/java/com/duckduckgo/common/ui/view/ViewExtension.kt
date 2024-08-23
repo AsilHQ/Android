@@ -22,6 +22,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.CompoundButton
+import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.core.view.children
 import com.duckduckgo.mobile.android.R
@@ -215,4 +216,13 @@ private inline fun <reified T : ViewGroup.LayoutParams> updateLayoutParam(
     val params = view.layoutParams as T
     block(params)
     view.layoutParams = params
+}
+
+fun TextView.setFormattedCount(number: Int) {
+    this.text = when {
+        number < 10 -> String.format("%02d", number)
+        number < 10000 -> number.toString()
+        number < 1000000 -> String.format("%.1fk", number / 1000.0)
+        else -> String.format("%.1fM", number /1000000.0)
+    }
 }

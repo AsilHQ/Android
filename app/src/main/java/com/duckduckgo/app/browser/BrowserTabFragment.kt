@@ -34,10 +34,7 @@ import android.content.pm.ResolveInfo
 import android.content.res.AssetManager
 import android.content.res.ColorStateList
 import android.content.res.Configuration
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
 import android.graphics.Rect
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
@@ -62,7 +59,6 @@ import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.view.View
 import android.view.View.GONE
 import android.view.View.OnFocusChangeListener
@@ -70,7 +66,6 @@ import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.WindowManager
-import android.view.animation.AnimationUtils
 import android.view.inputmethod.EditorInfo
 import android.webkit.PermissionRequest
 import android.webkit.SslErrorHandler
@@ -86,9 +81,7 @@ import android.webkit.WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE
 import android.webkit.WebView.HitTestResult.UNKNOWN_TYPE
 import android.widget.EditText
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.PopupWindow
-import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
@@ -154,7 +147,7 @@ import com.duckduckgo.app.browser.databinding.HttpAuthenticationBinding
 import com.duckduckgo.app.browser.databinding.IncludeBrowserBottomNavBinding
 import com.duckduckgo.app.browser.databinding.IncludeOmnibarToolbarBinding
 import com.duckduckgo.app.browser.databinding.PopupWindowBrowserMenuBinding
-import com.duckduckgo.app.browser.databinding.SafeGazePopUpViewBinding
+import com.duckduckgo.app.browser.databinding.SafeGazePopupBinding
 import com.duckduckgo.app.browser.downloader.BlobConverterInjector
 import com.duckduckgo.app.browser.favicon.FaviconManager
 import com.duckduckgo.app.browser.filechooser.FileChooserIntentBuilder
@@ -225,6 +218,8 @@ import com.duckduckgo.app.global.view.isImmersiveModeEnabled
 import com.duckduckgo.app.global.view.launchDefaultAppActivity
 import com.duckduckgo.app.global.view.renderIfChanged
 import com.duckduckgo.app.global.view.toggleFullScreen
+import com.duckduckgo.app.kahftube.PopupButtonType
+import com.duckduckgo.app.kahftube.SafeGazePopupHandler
 import com.duckduckgo.app.location.data.LocationPermissionType
 import com.duckduckgo.app.pixels.AppPixelName
 import com.duckduckgo.app.privatesearch.PrivateSearchScreenNoParams
@@ -288,6 +283,7 @@ import com.duckduckgo.common.ui.view.gone
 import com.duckduckgo.common.ui.view.hide
 import com.duckduckgo.common.ui.view.hideKeyboard
 import com.duckduckgo.common.ui.view.makeSnackbarWithNoBottomInset
+import com.duckduckgo.common.ui.view.setFormattedCount
 import com.duckduckgo.common.ui.view.show
 import com.duckduckgo.common.ui.view.showKeyboard
 import com.duckduckgo.common.ui.viewbinding.viewBinding
@@ -297,6 +293,7 @@ import com.duckduckgo.common.utils.FragmentViewModelFactory
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
+import com.duckduckgo.common.utils.SAFE_GAZE_INTENSITY
 import com.duckduckgo.common.utils.SAFE_GAZE_INTERFACE
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import com.duckduckgo.common.utils.SAFE_GAZE_PRIVATE_DNS
@@ -345,7 +342,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
-import com.hoko.blur.HokoBlur
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
@@ -1047,149 +1043,9 @@ class BrowserTabFragment :
         }
     }
 
-    private fun handleTrackTint(isChecked: Boolean, switch: Switch){
-        if (isChecked) {
-            switch.thumbTintList = ColorStateList.valueOf(0xFF0199b8.toInt())
-            switch.trackTintList = ColorStateList.valueOf(0xFF0199b8.toInt())
-        } else {
-            switch.thumbTintList = ColorStateList.valueOf(0xFFE1E1E1.toInt())
-            switch.trackTintList = ColorStateList.valueOf(0xFFB3B3B3.toInt())
-        }
-    }
-
-    private fun handleSafeGazeOpenView(safeGazeOpenViewPopUpBinding: SafeGazePopUpViewBinding) {
-        safeGazeOpenViewPopUpBinding.apply {
-            shareCardImageView.setOnClickListener {
-                val shareIntent = Intent(Intent.ACTION_SEND)
-                shareIntent.type = "text/plain"
-                shareIntent.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=org.halalz.kahfbrowser")
-                startActivity(Intent.createChooser(shareIntent, "Share via"))
-            }
-            handleProgressBar(safeGazeOpenViewPopUpBinding)
-            loadImageWithBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE), blurImageView)
-            reportTextViewOpen.setOnClickListener {
-                val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                startActivity(intent)
-            }
-            supportThisProjectButton.setOnClickListener {
-                val url = "https://www.patreon.com/SafeGaze"
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                if (intent.resolveActivity(requireActivity().packageManager) != null) {
-                    startActivity(intent)
-                }
-            }
-
-            thisPageCounterTextView.text = sharedPreferences.getInt("session_censored_count", 0).toString()
-            lifecycleScope.launch {
-                val count = kahfImageBlockedDao.getTotalBlockCount().first()
-                lifetimeCounterTextView.text = count.toString()
-            }
-
-            sageGazeSwitch.isChecked = sharedPreferences.getBoolean(SAFE_GAZE_ACTIVE, false)
-
-            if (!sageGazeSwitch.isChecked) {
-                safeGazeCounterCardView.visibility = GONE
-                genderModeCardView.visibility = GONE
-                blurImageGroup.visibility = GONE
-            }
-
-            if (viewModel.host.isEmpty()) {
-                urlCardView.visibility = GONE
-            } else {
-                urlCardView.visibility = VISIBLE
-                urlOpenTextView.text = viewModel.host
-            }
-            handleTrackTint(sageGazeSwitch.isChecked, sageGazeSwitch)
-
-            sageGazeSwitch.setOnCheckedChangeListener { _, checked ->
-                val visibility = if (checked) VISIBLE else GONE
-                toggleVisibilityWithAnimation(safeGazeCounterCardView, visibility)
-                toggleVisibilityWithAnimation(genderModeCardView, visibility)
-                toggleVisibilityWithAnimation(blurImageGroup, visibility)
-                handleTrackTint(checked, sageGazeSwitch)
-
-                editor.putBoolean(SAFE_GAZE_ACTIVE, checked)
-                editor.apply()
-                webView?.reload()
-            }
-        }
-    }
-    private fun loadImageWithBlur(blurRadius: Int, imageView: ImageView) {
-        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.blur_image_background)
-        
-        // Convert blurRadius to a 0-1 scale to match the JS blurIntensity
-        val blurIntensity = blurRadius / 100f
-    
-        // Calculate blur value between 2px and 8px
-        val blurValue = 2 + (blurIntensity * 6)
-
-        // Calculate brightness value between 200% and 800%
-        val brightnessValue = 2 + (blurIntensity * 6)
-    
-        // Apply blur
-        val blurredBitmap = HokoBlur.with(requireContext())
-            .radius(blurValue.toInt())
-            .sampleFactor(1.0f)
-            .forceCopy(false)
-            .processor()
-            .blur(bitmap)
-    
-        // Apply grayscale, contrast, and brightness
-        val colorMatrix = ColorMatrix()
-        
-        // Grayscale (100%)
-        colorMatrix.setSaturation(0f)
-        
-        // Contrast (500%)
-        val scale = 5f
-        val translate = (-.5f * scale + .5f) * 255f
-        colorMatrix.postConcat(ColorMatrix(floatArrayOf(
-            scale, 0f, 0f, 0f, translate,
-            0f, scale, 0f, 0f, translate,
-            0f, 0f, scale, 0f, translate,
-            0f, 0f, 0f, 1f, 0f
-        )))
-
-        // Brightness
-        colorMatrix.postConcat(ColorMatrix(floatArrayOf(
-            brightnessValue, 0f, 0f, 0f, 0f,
-            0f, brightnessValue, 0f, 0f, 0f,
-            0f, 0f, brightnessValue, 0f, 0f,
-            0f, 0f, 0f, 1f, 0f
-        )))
-    
-        val colorFilter = ColorMatrixColorFilter(colorMatrix)
-        imageView.colorFilter = colorFilter
-        imageView.setImageBitmap(blurredBitmap)
-    }
-
-    @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
-    private fun handleProgressBar(binding: SafeGazePopUpViewBinding) {
-        val progress = sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE)
-        binding.progressBar.progress = progress
-        updateViewsPosition(binding.iconImageView, sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE))
-        binding.progressBar.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                    val width = binding.progressBar.width.toFloat()
-                    val x = event.x
-                    val calculatedProgress = (x / width * binding.progressBar.max).toInt()
-                    binding.progressBar.progress = calculatedProgress
-                    updateViewsPosition(binding.iconImageView, calculatedProgress)
-                    safeGazeInterface.updateBlur(calculatedProgress.toFloat())
-                    saveProgressToSharedPreferences(calculatedProgress)
-                    loadImageWithBlur(calculatedProgress, binding.blurImageView)
-                    true
-                }
-                else -> false
-            }
-        }
-    }
-
     @SuppressLint("InflateParams")
     private fun handleSafeGazePopUp() {
-        val popupBinding = SafeGazePopUpViewBinding.inflate(LayoutInflater.from(context))
+        val popupBinding = SafeGazePopupBinding.inflate(LayoutInflater.from(context))
         val popupWindow = PopupWindow(popupBinding.root, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
 
         safeGazeIcon.setOnClickListener {
@@ -1204,8 +1060,43 @@ class BrowserTabFragment :
             }
 
             safeGazeIcon.post {
-                configureDnsSwitch(popupBinding)
-                handleSafeGazeOpenView(popupBinding)
+                SafeGazePopupHandler(
+                    binding = popupBinding,
+                    sharedPreferences = sharedPreferences,
+                    safeGazeInterface = safeGazeInterface,
+                    editor = editor,
+                    onModeChanged = {
+                        updateDnsAndSafeGazeSettings(it)
+                        webView?.reload()
+                    },
+                    onShareClicked = {
+                        val shareIntent = Intent(Intent.ACTION_SEND)
+                        shareIntent.type = "text/plain"
+                        shareIntent.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=org.halalz.kahfbrowser")
+                        startActivity(Intent.createChooser(shareIntent, "Share via"))
+                    },
+                    onSupportClicked = {
+                        viewModel.onUserSubmittedQuery("https://www.patreon.com/SafeGaze")
+                    },
+                    onThemeChanged = {
+                        val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        startActivity(intent)
+                    }
+                )
+
+                lifecycleScope.launch {
+                    val count = kahfImageBlockedDao.getTotalBlockCount().first()
+                    popupBinding.imageBlurCount.setFormattedCount(count)
+
+                    webTrackersBlockedDao.getTotalTrackerCount().collect {
+                        popupBinding.trackerBlockedCount.setFormattedCount(it)
+                    }
+                }
+
+                popupBinding.siteBlockedCount.setFormattedCount(1234567)
+
+                // thisPageCounterTextView.text = sharedPreferences.getInt("session_censored_count", 0).toString()
 
                 val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
                 val popUpLayingOut = 350.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
@@ -1224,53 +1115,20 @@ class BrowserTabFragment :
         }
     }
 
-    private fun configureDnsSwitch(binding: SafeGazePopUpViewBinding) {
-        binding.let {
-            it.kahfDnsSwitch.isChecked = isPrivateDnsEnabled()
-            handleTrackTint(it.kahfDnsSwitch.isChecked, it.kahfDnsSwitch)
+    private fun updateDnsAndSafeGazeSettings(selection: PopupButtonType) {
+        val privateDnsEnabled = selection == PopupButtonType.High || selection == PopupButtonType.Medium
+        val safeGazeEnabled = selection == PopupButtonType.High
 
-            it.kahfDnsSwitch.setOnCheckedChangeListener { _, isChecked ->
-                handleTrackTint(isChecked, it.kahfDnsSwitch)
+        editor.putString(SAFE_GAZE_INTENSITY, selection.name)
+        editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, privateDnsEnabled)
+        editor.putBoolean(SAFE_GAZE_ACTIVE, safeGazeEnabled)
 
-                if (isPrivateDnsEnabled() && !isChecked) {
-                    updatePrivateDnsSettings(false)
-
-                } else if (!isPrivateDnsEnabled() && isChecked) {
-                    updatePrivateDnsSettings(true)
-                }
-            }
-        }
-    }
-
-    private fun updatePrivateDnsSettings(enabled: Boolean) {
-        editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, enabled)
         editor.apply()
-        viewModel.privateDnsEnabled = enabled
+        viewModel.privateDnsEnabled = privateDnsEnabled
     }
 
-    private fun isPrivateDnsEnabled() = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
-
-    private fun toggleVisibilityWithAnimation(view: View, visibility: Int) {
-        val anim = if (visibility == VISIBLE) {
-            AnimationUtils.loadAnimation(context, R.anim.tab_anim_fade_in)
-        } else {
-            AnimationUtils.loadAnimation(context, R.anim.tab_anim_fade_out)
-        }
-        view.startAnimation(anim)
-        view.visibility = visibility
-    }
-
-    private fun updateViewsPosition(iconImageView: ImageView, progress: Int) {
-        val clampedProgress = progress.coerceIn(0, 100)
-
-        val iconLayoutParams = iconImageView.layoutParams as ConstraintLayout.LayoutParams
-        iconLayoutParams.horizontalBias = clampedProgress / 100f
-        iconImageView.layoutParams = iconLayoutParams
-    }
-
-    private fun saveProgressToSharedPreferences(progress: Int) {
-        editor.putInt(SAFE_GAZE_BLUR_PROGRESS, progress)
-        editor.apply()
+    private fun isPrivateDnsEnabled(): Boolean {
+        return sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
     }
 
     @Suppress("DEPRECATION")
@@ -4456,12 +4314,12 @@ class BrowserTabFragment :
             kahfImageBlockedDao.getTotalBlockCount()
                 .flowWithLifecycle(lifecycle)
                 .distinctUntilChanged()
-                .onEach { newBrowserTab.adsBlockedCount.text = it.toString() }
+                .onEach { newBrowserTab.adsBlockedCount.setFormattedCount(it) }
                 .launchIn(lifecycleScope)
 
             lifecycleScope.launch {
                 webTrackersBlockedDao.getTotalTrackerCount().collect { count ->
-                    newBrowserTab.trackerBlockedCount.text = count.toString()
+                    newBrowserTab.trackerBlockedCount.setFormattedCount(count)
                 }
             }
 

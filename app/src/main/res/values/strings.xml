@@ -893,6 +893,9 @@
     <string name="kahf_share">Share</string>
     <string name="kahf_support">Support</string>
     <string name="kahf_dark_mode">Dark Mode</string>
+    <string name="kahf_high">HIGH</string>
+    <string name="kahf_medium">MEDIUM</string>
+    <string name="kahf_low">LOW</string>
     <plurals name="bookmarkFolderDeleteMessage">
         <item quantity="one">Are you sure you want to delete this folder and %1$d item?</item>
         <item quantity="other">Are you sure you want to delete this folder and %1$d items?</item>

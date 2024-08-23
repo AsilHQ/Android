@@ -181,24 +181,25 @@
                         android:layout_width="match_parent"
                         android:layout_height="10dp"
                         android:layout_marginTop="10dp"
-                        android:layout_marginEnd="15dp"
                         android:background="@drawable/progress_bar_background"
                         android:progressDrawable="@drawable/progress_bar"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/blueIndecentPhotosText" />
 
-                    <ImageView
-                        android:id="@+id/icon_image_view"
-                        android:layout_width="wrap_content"
+                    <SeekBar
+                        android:id="@+id/blurSeekbar"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:importantForAccessibility="no"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/progress_thumb"
-                        app:layout_constraintBottom_toBottomOf="@id/progress_bar"
-                        app:layout_constraintEnd_toEndOf="@id/progress_bar"
-                        app:layout_constraintStart_toStartOf="@id/progress_bar"
-                        app:layout_constraintTop_toTopOf="@id/progress_bar" />
+                        android:thumb="@drawable/progress_thumb"
+                        android:progressDrawable="@color/zxing_transparent"
+                        tools:progress="10"
+                        android:layout_marginTop="2dp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/blueIndecentPhotosText"/>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <FrameLayout
@@ -382,7 +383,7 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/adsBlockedCount"
+                    android:id="@+id/siteBlockedCount"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/poppins_bold"
@@ -409,11 +410,11 @@
                     android:textSize="14sp"
                     app:layout_constraintEnd_toStartOf="@id/divider4"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/adsBlockedCount"
+                    app:layout_constraintTop_toBottomOf="@id/siteBlockedCount"
                     tools:ignore="DeprecatedWidgetInXml" />
 
                 <TextView
-                    android:id="@+id/siteBlockCount"
+                    android:id="@+id/imageBlurCount"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/poppins_bold"
@@ -428,7 +429,7 @@
                     tools:text="123" />
 
                 <TextView
-                    android:id="@+id/siteBlockLabel"
+                    android:id="@+id/imageBlurLabel"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/lato"
@@ -438,7 +439,7 @@
                     android:textSize="14sp"
                     app:layout_constraintEnd_toStartOf="@id/divider5"
                     app:layout_constraintStart_toEndOf="@id/divider4"
-                    app:layout_constraintTop_toBottomOf="@id/siteBlockCount"
+                    app:layout_constraintTop_toBottomOf="@id/imageBlurCount"
                     tools:ignore="DeprecatedWidgetInXml" />
 
                 <TextView
