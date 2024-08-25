@@ -28,3 +28,4 @@ const val SAFE_GAZE_INTENSITY = "SafeGazeIntensity"
 const val SAFE_GAZE_DEFAULT_BLUR_VALUE = 50
 const val SAFE_GAZE_MIN_FACE_SIZE = 15
 const val KAHF_GUARD_BLOCKED_URL = "blocked.kahfguard.com"
+const val KAHF_BLOCKED_COUNT = "kahf_blocked_count"

@@ -290,6 +290,7 @@ import com.duckduckgo.common.ui.viewbinding.viewBinding
 import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.FragmentViewModelFactory
+import com.duckduckgo.common.utils.KAHF_BLOCKED_COUNT
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
@@ -1066,8 +1067,8 @@ class BrowserTabFragment :
                     safeGazeInterface = safeGazeInterface,
                     editor = editor,
                     onModeChanged = {
-                        updateDnsAndSafeGazeSettings(it)
-                        webView?.reload()
+                        val updated = updateDnsAndSafeGazeSettings(it)
+                        if (updated) webView?.reload()
                     },
                     onShareClicked = {
                         val shareIntent = Intent(Intent.ACTION_SEND)
@@ -1094,9 +1095,9 @@ class BrowserTabFragment :
                     }
                 }
 
-                popupBinding.siteBlockedCount.setFormattedCount(1234567)
-
-                // thisPageCounterTextView.text = sharedPreferences.getInt("session_censored_count", 0).toString()
+                popupBinding.siteBlockedCount.setFormattedCount(
+                    sharedPreferences.getInt(KAHF_BLOCKED_COUNT, 0)
+                )
 
                 val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
                 val popUpLayingOut = 350.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
@@ -1115,16 +1116,22 @@ class BrowserTabFragment :
         }
     }
 
-    private fun updateDnsAndSafeGazeSettings(selection: PopupButtonType) {
-        val privateDnsEnabled = selection == PopupButtonType.High || selection == PopupButtonType.Medium
-        val safeGazeEnabled = selection == PopupButtonType.High
+    private fun updateDnsAndSafeGazeSettings(selection: PopupButtonType): Boolean {
+        val currentMode = sharedPreferences.getString(SAFE_GAZE_INTENSITY, "") ?: ""
+        if (PopupButtonType.get(currentMode) == selection) {
+            return false
+        }
+
+        val privateDnsEnabled =  PopupButtonType.isKahfGuardActive(selection.name)
+        val safeGazeEnabled =  PopupButtonType.isSafeGazeActive(selection.name)
 
         editor.putString(SAFE_GAZE_INTENSITY, selection.name)
         editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, privateDnsEnabled)
         editor.putBoolean(SAFE_GAZE_ACTIVE, safeGazeEnabled)
-
         editor.apply()
+
         viewModel.privateDnsEnabled = privateDnsEnabled
+        return true
     }
 
     private fun isPrivateDnsEnabled(): Boolean {
@@ -1369,6 +1376,11 @@ class BrowserTabFragment :
                 it.let { renderer.renderPrivacyShield(it) }
             },
         )
+
+        viewModel.kahfBlockCountUpdate.observe(viewLifecycleOwner) {
+            val lastCount = sharedPreferences.getInt(KAHF_BLOCKED_COUNT, 0)
+            editor.putInt(KAHF_BLOCKED_COUNT, lastCount + 1).apply()
+        }
 
         addTabsObserver()
     }

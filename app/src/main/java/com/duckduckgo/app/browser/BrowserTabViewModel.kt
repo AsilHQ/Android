@@ -427,6 +427,7 @@ class BrowserTabViewModel @Inject constructor(
     private var refreshOnViewVisible = MutableStateFlow(true)
     private var ctaChangedTicker = MutableStateFlow("")
     val hiddenIds = MutableStateFlow(HiddenBookmarksIds())
+    val kahfBlockCountUpdate: SingleLiveEvent<String> = SingleLiveEvent()
 
     data class HiddenBookmarksIds(
         val favorites: List<String> = emptyList(),
@@ -943,6 +944,7 @@ class BrowserTabViewModel @Inject constructor(
                         val ip = dnsResolver.sendDnsQueries(urlToNavigate.toUri())
                         if (ip?.first == "0.0.0.0" || ip?.second == KAHF_GUARD_BLOCKED_URL) {
                             urlToNavigate = "https://${ip.second}"
+                            kahfBlockCountUpdate.value = urlToNavigate
                         }
 
                         site?.nextUrl = urlToNavigate
@@ -1228,8 +1230,9 @@ class BrowserTabViewModel @Inject constructor(
         navigationAwareLoginDetector.onEvent(NavigationEvent.WebNavigationEvent(stateChange))
     }
 
-    override fun loadNewUrl(url: String) {
+    override fun onUrlBlocked(url: String) {
         onUserSubmittedQuery(url)
+        kahfBlockCountUpdate.value = url
     }
 
     override fun onPageContentStart(url: String) {

@@ -66,6 +66,7 @@ import com.duckduckgo.app.browser.pageloadpixel.firstpaint.PagePaintedHandler
 import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.app.dns.CustomDnsResolver
+import com.duckduckgo.app.kahftube.PopupButtonType
 import com.duckduckgo.app.kahftube.SharedPreferenceManager
 import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
 import com.duckduckgo.app.statistics.pixels.Pixel
@@ -80,6 +81,7 @@ import com.duckduckgo.common.utils.KAHF_GUARD_BLOCKED_URL
 import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
+import com.duckduckgo.common.utils.SAFE_GAZE_INTENSITY
 import com.duckduckgo.common.utils.SAFE_GAZE_JS_FILENAME
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import com.duckduckgo.common.utils.SAFE_GAZE_PRIVATE_DNS
@@ -327,6 +329,12 @@ class BrowserWebViewClient @Inject constructor(
 
     @SuppressLint("SdCardPath")
     private fun shouldBlockSafeGaze(url: String?): Boolean {
+        // Skip check if safe gaze is disabled
+        val currentMode = sharedPreferences.getString(SAFE_GAZE_INTENSITY, "") ?: ""
+        if (!PopupButtonType.isSafeGazeActive(currentMode)) {
+            return false
+        }
+
         try {
             val safeGazeTxtFilePath = "${context.filesDir}/safe_gaze.txt"
             val host = extractHost(url)
@@ -592,7 +600,7 @@ class BrowserWebViewClient @Inject constructor(
                     if (privateDnsEnabled && resolveDns(Uri.parse(url)).second == KAHF_GUARD_BLOCKED_URL) {
                         if (request.isForMainFrame) {
                             withContext(dispatcherProvider.main()) {
-                                webViewClientListener?.loadNewUrl(url)
+                                webViewClientListener?.onUrlBlocked(url)
                             }
                         }
                         WebResourceResponse(null, null, null)

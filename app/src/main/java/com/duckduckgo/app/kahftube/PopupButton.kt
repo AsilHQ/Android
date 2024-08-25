@@ -39,6 +39,10 @@ sealed class PopupButtonType(val name: String) {
             "Low" -> Low
             else -> Low
         }
+
+        fun isSafeGazeActive(name: String) = get(name) == High
+
+        fun isKahfGuardActive(name: String) = get(name) == High || get(name) == Medium
     }
 }
 

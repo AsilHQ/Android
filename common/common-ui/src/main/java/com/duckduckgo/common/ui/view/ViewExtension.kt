@@ -16,6 +16,7 @@
 
 package com.duckduckgo.common.ui.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
 import android.view.View
@@ -218,10 +219,12 @@ private inline fun <reified T : ViewGroup.LayoutParams> updateLayoutParam(
     view.layoutParams = params
 }
 
+@SuppressLint("DefaultLocale")
 fun TextView.setFormattedCount(number: Int) {
     this.text = when {
+        number == 0 -> "0"
         number < 10 -> String.format("%02d", number)
-        number < 10000 -> number.toString()
+        number < 1000 -> number.toString()
         number < 1000000 -> String.format("%.1fk", number / 1000.0)
         else -> String.format("%.1fM", number /1000000.0)
     }
