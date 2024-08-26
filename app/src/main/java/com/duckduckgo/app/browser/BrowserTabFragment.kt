@@ -218,7 +218,7 @@ import com.duckduckgo.app.global.view.isImmersiveModeEnabled
 import com.duckduckgo.app.global.view.launchDefaultAppActivity
 import com.duckduckgo.app.global.view.renderIfChanged
 import com.duckduckgo.app.global.view.toggleFullScreen
-import com.duckduckgo.app.kahftube.PopupButtonType
+import com.duckduckgo.app.kahftube.SafetyLevel
 import com.duckduckgo.app.kahftube.SafeGazePopupHandler
 import com.duckduckgo.app.location.data.LocationPermissionType
 import com.duckduckgo.app.pixels.AppPixelName
@@ -1116,14 +1116,14 @@ class BrowserTabFragment :
         }
     }
 
-    private fun updateDnsAndSafeGazeSettings(selection: PopupButtonType): Boolean {
+    private fun updateDnsAndSafeGazeSettings(selection: SafetyLevel): Boolean {
         val currentMode = sharedPreferences.getString(SAFE_GAZE_INTENSITY, "") ?: ""
-        if (PopupButtonType.get(currentMode) == selection) {
+        if (SafetyLevel.get(currentMode) == selection) {
             return false
         }
 
-        val privateDnsEnabled =  PopupButtonType.isKahfGuardActive(selection.name)
-        val safeGazeEnabled =  PopupButtonType.isSafeGazeActive(selection.name)
+        val privateDnsEnabled =  SafetyLevel.isKahfGuardActive(selection.name)
+        val safeGazeEnabled =  SafetyLevel.isSafeGazeActive(selection.name)
 
         editor.putString(SAFE_GAZE_INTENSITY, selection.name)
         editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, privateDnsEnabled)

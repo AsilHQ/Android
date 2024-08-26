@@ -41,7 +41,7 @@ class SafeGazePopupHandler(
     private val sharedPreferences: SharedPreferences,
     private val safeGazeInterface: SafeGazeJsInterface,
     val editor: Editor,
-    onModeChanged: (mode: PopupButtonType) -> Unit,
+    onModeChanged: (mode: SafetyLevel) -> Unit,
     onShareClicked: () -> Unit,
     onSupportClicked: () -> Unit,
     onThemeChanged: () -> Unit
@@ -51,41 +51,41 @@ class SafeGazePopupHandler(
         var btnMed: PopupButton? = null
         var btnLow: PopupButton? = null
 
-        val preSelected: PopupButtonType = PopupButtonType.get(sharedPreferences.getString(SAFE_GAZE_INTENSITY, "")!!)
+        val preSelected: SafetyLevel = SafetyLevel.get(sharedPreferences.getString(SAFE_GAZE_INTENSITY, "")!!)
 
         btnHigh = PopupButton(
             binding.btnHigh,
-            PopupButtonType.High,
-            preSelected == PopupButtonType.High,
+            SafetyLevel.High,
+            preSelected == SafetyLevel.High,
         ) {
             btnHigh?.updateState(true)
             btnMed?.updateState(false)
             btnLow?.updateState(false)
-            updateDescription(binding, PopupButtonType.High)
-            onModeChanged(PopupButtonType.High)
+            updateDescription(binding, SafetyLevel.High)
+            onModeChanged(SafetyLevel.High)
         }
         btnMed = PopupButton(
             binding.btnMedium,
-            PopupButtonType.Medium,
-            preSelected == PopupButtonType.Medium,
+            SafetyLevel.Medium,
+            preSelected == SafetyLevel.Medium,
         ) {
             btnHigh.updateState(false)
             btnMed?.updateState(true)
             btnLow?.updateState(false)
-            updateDescription(binding, PopupButtonType.Medium)
-            onModeChanged(PopupButtonType.Medium)
+            updateDescription(binding, SafetyLevel.Medium)
+            onModeChanged(SafetyLevel.Medium)
         }
 
         btnLow = PopupButton(
             binding.btnLow,
-            PopupButtonType.Low,
-            preSelected == PopupButtonType.Low,
+            SafetyLevel.Low,
+            preSelected == SafetyLevel.Low,
         ) {
             btnHigh.updateState(false)
             btnMed.updateState(false)
             btnLow?.updateState(true)
-            updateDescription(binding, PopupButtonType.Low)
-            onModeChanged(PopupButtonType.Low)
+            updateDescription(binding, SafetyLevel.Low)
+            onModeChanged(SafetyLevel.Low)
         }
 
         // set initially selected item
@@ -102,23 +102,23 @@ class SafeGazePopupHandler(
         binding.btnTheme.setOnClickListener { onThemeChanged() }
     }
 
-    private fun updateDescription(binding: SafeGazePopupBinding, type: PopupButtonType) {
+    private fun updateDescription(binding: SafeGazePopupBinding, type: SafetyLevel) {
         when (type) {
-            PopupButtonType.High -> {
+            SafetyLevel.High -> {
                 binding.tvDescription.text = binding.root.context.getString(R.string.kahf_mode_desc_high)
                 binding.tvDescription.backgroundTintList =
                     ColorStateList.valueOf(
                         ContextCompat.getColor(binding.root.context, com.duckduckgo.mobile.android.R.color.kahf_green),
                     )
             }
-            PopupButtonType.Medium -> {
+            SafetyLevel.Medium -> {
                 binding.tvDescription.text = binding.root.context.getString(R.string.kahf_mode_desc_medium)
                 binding.tvDescription.backgroundTintList =
                     ColorStateList.valueOf(
                         ContextCompat.getColor(binding.root.context, com.duckduckgo.mobile.android.R.color.kahf_orange),
                     )
             }
-            PopupButtonType.Low -> {
+            SafetyLevel.Low -> {
                 binding.tvDescription.text = binding.root.context.getString(R.string.kahf_mode_desc_low)
                 binding.tvDescription.backgroundTintList =
                     ColorStateList.valueOf(

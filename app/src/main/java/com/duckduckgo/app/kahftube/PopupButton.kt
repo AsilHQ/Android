@@ -21,16 +21,16 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.databinding.SafegazeButtonBinding
-import com.duckduckgo.app.kahftube.PopupButtonType.High
-import com.duckduckgo.app.kahftube.PopupButtonType.Low
-import com.duckduckgo.app.kahftube.PopupButtonType.Medium
+import com.duckduckgo.app.kahftube.SafetyLevel.High
+import com.duckduckgo.app.kahftube.SafetyLevel.Low
+import com.duckduckgo.app.kahftube.SafetyLevel.Medium
 import com.duckduckgo.common.ui.view.hide
 import com.duckduckgo.common.ui.view.show
 
-sealed class PopupButtonType(val name: String) {
-    data object High : PopupButtonType("High")
-    data object Medium : PopupButtonType("Medium")
-    data object Low : PopupButtonType("Low")
+sealed class SafetyLevel(val name: String) {
+    data object High : SafetyLevel("High")
+    data object Medium : SafetyLevel("Medium")
+    data object Low : SafetyLevel("Low")
 
     companion object {
         fun get(name: String) = when (name) {
@@ -48,7 +48,7 @@ sealed class PopupButtonType(val name: String) {
 
 class PopupButton(
     private val binding: SafegazeButtonBinding,
-    type: PopupButtonType,
+    type: SafetyLevel,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {

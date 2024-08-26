@@ -66,7 +66,7 @@ import com.duckduckgo.app.browser.pageloadpixel.firstpaint.PagePaintedHandler
 import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.app.dns.CustomDnsResolver
-import com.duckduckgo.app.kahftube.PopupButtonType
+import com.duckduckgo.app.kahftube.SafetyLevel
 import com.duckduckgo.app.kahftube.SharedPreferenceManager
 import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
 import com.duckduckgo.app.statistics.pixels.Pixel
@@ -331,7 +331,7 @@ class BrowserWebViewClient @Inject constructor(
     private fun shouldBlockSafeGaze(url: String?): Boolean {
         // Skip check if safe gaze is disabled
         val currentMode = sharedPreferences.getString(SAFE_GAZE_INTENSITY, "") ?: ""
-        if (!PopupButtonType.isSafeGazeActive(currentMode)) {
+        if (!SafetyLevel.isSafeGazeActive(currentMode)) {
             return false
         }
 
