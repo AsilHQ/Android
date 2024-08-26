@@ -360,7 +360,7 @@ class TabSwitcherActivity : DuckDuckGoActivity(), TabSwitcherListener, Coroutine
 
         const val EXTRA_KEY_SELECTED_TAB = "selected"
 
-        private const val TAB_GRID_COLUMN_WIDTH_DP = 420
-        private const val TAB_GRID_MAX_COLUMN_COUNT = 2
+        private const val TAB_GRID_COLUMN_WIDTH_DP = 180
+        private const val TAB_GRID_MAX_COLUMN_COUNT = 4
     }
 }

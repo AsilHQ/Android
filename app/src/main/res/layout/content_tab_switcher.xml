@@ -31,4 +31,4 @@
     tools:itemCount="3"
     tools:listitem="@layout/item_tab"
     tools:showIn="@layout/activity_tab_switcher"
-    tools:spanCount="1" />
+    tools:spanCount="2" />
