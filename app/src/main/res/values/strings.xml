@@ -896,6 +896,11 @@
     <string name="kahf_high">HIGH</string>
     <string name="kahf_medium">MEDIUM</string>
     <string name="kahf_low">LOW</string>
+    <string name="kahf_onboarding_get_what_you_want">Get what you\nwant twice\nas fast</string>
+    <string name="kahf_onboarding_lets_go">Let\'s Go</string>
+    <string name="kahf_onboarding_skip">Skip</string>
+    <string name="kahf_onboarding_subtitle">Start exploring the halal web\nand browse the internet without\nworrying about haram content,\nharam ad and adult sites.</string>
+    <string name="kahf_onboarding_title">Search \nquickly and \nprivately</string>
     <plurals name="bookmarkFolderDeleteMessage">
         <item quantity="one">Are you sure you want to delete this folder and %1$d item?</item>
         <item quantity="other">Are you sure you want to delete this folder and %1$d items?</item>

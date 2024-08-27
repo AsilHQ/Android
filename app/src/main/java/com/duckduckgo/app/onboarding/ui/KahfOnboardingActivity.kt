@@ -21,20 +21,24 @@ import android.content.Intent
 import android.os.Bundle
 import com.duckduckgo.anvil.annotations.InjectWith
 import com.duckduckgo.app.browser.BrowserActivity
-import com.duckduckgo.app.browser.databinding.ActivityOnboardingBinding
+import com.duckduckgo.app.browser.databinding.ActivityKahfOnboardingBinding
+import com.duckduckgo.app.browser.defaultbrowsing.DefaultBrowserDetector
 import com.duckduckgo.common.ui.DuckDuckGoActivity
 import com.duckduckgo.common.ui.viewbinding.viewBinding
 import com.duckduckgo.di.scopes.ActivityScope
-import timber.log.Timber
+import javax.inject.Inject
 
 @InjectWith(ActivityScope::class)
-class OnboardingActivity : DuckDuckGoActivity() {
+class KahfOnboardingActivity : DuckDuckGoActivity() {
 
-    private lateinit var viewPageAdapter: PagerAdapter
+    @Inject
+    lateinit var defaultWebBrowserCapability: DefaultBrowserDetector
 
-    private val viewModel: OnboardingViewModel by bindViewModel()
+    private lateinit var viewPageAdapter: OnboardingAdapter
 
-    private val binding: ActivityOnboardingBinding by viewBinding()
+    // private val viewModel: OnboardingViewModel by bindViewModel()
+
+    private val binding: ActivityKahfOnboardingBinding by viewBinding()
 
     private val viewPager
         get() = binding.viewPager
@@ -42,12 +46,13 @@ class OnboardingActivity : DuckDuckGoActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        setTranslucentStatusBarAndNavBar()
         configurePager()
     }
 
     fun onContinueClicked() {
         val next = viewPager.currentItem + 1
-        if (next < viewPager.adapter!!.count) {
+        if (next < viewPager.adapter!!.itemCount) {
             viewPager.setCurrentItem(next, true)
         } else {
             onOnboardingDone()
@@ -55,20 +60,26 @@ class OnboardingActivity : DuckDuckGoActivity() {
     }
 
     private fun onOnboardingDone() {
-        viewModel.onOnboardingDone()
-        startActivity(BrowserActivity.intent(this@OnboardingActivity))
+        // viewModel.onOnboardingDone()
+        startActivity(BrowserActivity.intent(this@KahfOnboardingActivity))
         finish()
     }
 
     private fun configurePager() {
-        viewModel.initializePages()
+        val showDefaultBrowserPage =
+            defaultWebBrowserCapability.deviceSupportsDefaultBrowserConfiguration() && !defaultWebBrowserCapability.isDefaultBrowser()
 
-        viewPageAdapter = PagerAdapter(supportFragmentManager, viewModel)
+        viewPageAdapter = OnboardingAdapter(
+            supportFragmentManager,
+            lifecycle,
+            showDefaultBrowserPage
+        )
         viewPager.offscreenPageLimit = 1
         viewPager.adapter = viewPageAdapter
-        viewPager.setSwipingEnabled(false)
+        viewPager.setUserInputEnabled(false)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         val currentPage = viewPager.currentItem
         if (currentPage == 0) {
@@ -79,9 +90,10 @@ class OnboardingActivity : DuckDuckGoActivity() {
     }
 
     companion object {
-
         fun intent(context: Context): Intent {
-            return Intent(context, OnboardingActivity::class.java)
+            return Intent(context, KahfOnboardingActivity::class.java)
         }
     }
 }
+
+

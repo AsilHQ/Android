@@ -227,6 +227,11 @@
             android:label="@string/appName" />
 
         <activity
+            android:name="com.duckduckgo.app.onboarding.ui.KahfOnboardingActivity"
+            android:exported="false"
+            android:label="@string/appName" />
+
+        <activity
             android:name="com.duckduckgo.app.browser.customtabs.CustomTabActivity"
             android:windowSoftInputMode="adjustResize|stateAlwaysHidden"
             android:exported="false"

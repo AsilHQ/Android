@@ -242,6 +242,10 @@
     <color name="kahf_red">#FE102A</color>
     <color name="kahf_green">#FF4CAF50</color>
     <color name="kahf_orange">#FFAA46</color>
+    <color name="kahf_onboarding_button_1">#192677</color>
+    <color name="kahf_onboarding_button_2">#4554F5</color>
+    <color name="kahf_onboarding_skip">#222222</color>
+    <color name="kahf_onboarding_title">#BB5cF1</color>
 
     <attr name="kahfAppBarColor" format="color"/>
 
