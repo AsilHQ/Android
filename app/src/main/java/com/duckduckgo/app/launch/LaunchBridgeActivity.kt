@@ -21,6 +21,7 @@ import androidx.lifecycle.lifecycleScope
 import com.duckduckgo.anvil.annotations.InjectWith
 import com.duckduckgo.app.browser.BrowserActivity
 import com.duckduckgo.app.browser.R
+import com.duckduckgo.app.onboarding.ui.KahfOnboardingActivity
 import com.duckduckgo.app.onboarding.ui.OnboardingActivity
 import com.duckduckgo.common.ui.DuckDuckGoActivity
 import com.duckduckgo.di.scopes.ActivityScope
@@ -59,7 +60,7 @@ class LaunchBridgeActivity : DuckDuckGoActivity() {
     }
 
     private fun showOnboarding() {
-        startActivity(OnboardingActivity.intent(this))
+        startActivity(KahfOnboardingActivity.intent(this))
         finish()
     }
 

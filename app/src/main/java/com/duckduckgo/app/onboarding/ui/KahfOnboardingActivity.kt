@@ -36,7 +36,7 @@ class KahfOnboardingActivity : DuckDuckGoActivity() {
 
     private lateinit var viewPageAdapter: OnboardingAdapter
 
-    // private val viewModel: OnboardingViewModel by bindViewModel()
+    private val viewModel: OnboardingViewModel by bindViewModel()
 
     private val binding: ActivityKahfOnboardingBinding by viewBinding()
 
@@ -60,7 +60,7 @@ class KahfOnboardingActivity : DuckDuckGoActivity() {
     }
 
     private fun onOnboardingDone() {
-        // viewModel.onOnboardingDone()
+        viewModel.onOnboardingDone()
         startActivity(BrowserActivity.intent(this@KahfOnboardingActivity))
         finish()
     }

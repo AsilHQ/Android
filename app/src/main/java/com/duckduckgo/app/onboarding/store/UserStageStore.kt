@@ -34,7 +34,7 @@ class AppUserStageStore @Inject constructor(
     override suspend fun getUserAppStage(): AppStage {
         return withContext(dispatcher.io()) {
             val userStage = userStageDao.currentUserAppStage()
-            return@withContext userStage?.appStage ?: AppStage.ESTABLISHED // AppStage.NEW to enable onboarding
+            return@withContext userStage?.appStage ?: AppStage.NEW
         }
     }
 
