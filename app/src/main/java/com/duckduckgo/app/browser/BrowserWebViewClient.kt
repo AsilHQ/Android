@@ -386,7 +386,7 @@ class BrowserWebViewClient @Inject constructor(
 
     private fun handleSafeGaze(webView: WebView) {
         val sharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
-        val isSafeGazeActive = sharedPreferences.getBoolean(SAFE_GAZE_ACTIVE, true)
+        val isSafeGazeActive = sharedPreferences.getBoolean(SAFE_GAZE_ACTIVE, false)
 
         if (isSafeGazeActive) {
             // Set blur intensity
