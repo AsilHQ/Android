@@ -20,31 +20,32 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.duckduckgo.app.onboarding.ui.pages.OnboardingBookmarkFragment
 import com.duckduckgo.app.onboarding.ui.pages.OnboardingFragment1
 import com.duckduckgo.app.onboarding.ui.pages.OnboardingFragment2
+import com.duckduckgo.common.ui.DuckDuckGoFragment
 
 class OnboardingAdapter(
     fragmentManager: FragmentManager,
     lifecycle: Lifecycle,
     private val showDefaultBrowserPage: Boolean
 ) : FragmentStateAdapter(fragmentManager, lifecycle) {
+    val pages = mutableListOf<Fragment>()
+
+    init {
+        pages.add(OnboardingFragment1())
+        if (showDefaultBrowserPage) {
+            pages.add(OnboardingFragment2())
+        }
+
+        pages.add(OnboardingBookmarkFragment())
+    }
 
     override fun getItemCount(): Int {
-        return if (showDefaultBrowserPage) 4 else 3
+        return pages.size
     }
 
     override fun createFragment(position: Int): Fragment {
-        return when (position) {
-            0 -> OnboardingFragment1()
-            1 -> {
-                if (showDefaultBrowserPage) {
-                    OnboardingFragment2()
-                } else {
-                    OnboardingFragment1()
-                }
-            }
-            2 -> OnboardingFragment1()
-            else -> OnboardingFragment1()
-        }
+        return pages[position]
     }
 }
