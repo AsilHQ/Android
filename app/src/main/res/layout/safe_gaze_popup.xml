@@ -215,7 +215,7 @@
                         android:id="@+id/ivFullBlur"
                         android:layout_width="85dp"
                         android:layout_height="85dp"
-                        android:src="@drawable/blur_image_background" />
+                        android:src="@drawable/full_image_blur" />
 
                     <ImageView
                         android:id="@+id/iv_check"
@@ -244,7 +244,7 @@
                         android:id="@+id/ivHumanBlur"
                         android:layout_width="85dp"
                         android:layout_height="85dp"
-                        android:src="@drawable/blur_image_background" />
+                        android:src="@drawable/human_only_blur" />
 
                     <ImageView
                         android:id="@+id/iv_check_human"

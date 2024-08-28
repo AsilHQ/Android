@@ -468,7 +468,7 @@
                         android:id="@+id/blur_image_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/blur_image_background"
+                        android:src="@drawable/full_image_blur"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"

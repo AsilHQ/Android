@@ -186,7 +186,7 @@ class SafeGazePopupHandler(
     }
 
     private fun loadImageWithBlur(blurRadius: Int, imageView: ImageView) {
-        val bitmap = BitmapFactory.decodeResource(binding.root.context.resources, R.drawable.blur_image_background)
+        val bitmap = BitmapFactory.decodeResource(binding.root.context.resources, R.drawable.full_image_blur)
 
         // Convert blurRadius to a 0-1 scale to match the JS blurIntensity
         val blurIntensity = blurRadius / 100f
