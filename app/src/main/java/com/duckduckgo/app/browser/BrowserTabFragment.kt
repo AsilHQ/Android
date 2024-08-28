@@ -2480,6 +2480,10 @@ class BrowserTabFragment :
                 forwardMenuItem.visibility = VISIBLE
                 homeMenuItem.visibility = GONE
                 timeMenuItem.visibility = GONE
+                newTabMenuItem.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_new_tab)
+                newTabMenuItem.setOnClickListener {
+                    launch { viewModel.userRequestedOpeningNewTab(longPress = true) }
+                }
 
                 backMenuItem.imageTintList = ColorStateList.valueOf(if (viewState.canGoBack) activeMenuColor else inactiveMenuColor)
                 forwardMenuItem.imageTintList = ColorStateList.valueOf(if (viewState.canGoForward) activeMenuColor else inactiveMenuColor)
@@ -2488,6 +2492,8 @@ class BrowserTabFragment :
                 forwardMenuItem.visibility = GONE
                 homeMenuItem.visibility = VISIBLE
                 timeMenuItem.visibility = VISIBLE
+                newTabMenuItem.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_new_tab_filled)
+                newTabMenuItem.setOnClickListener(null)
             }
         }
     }
