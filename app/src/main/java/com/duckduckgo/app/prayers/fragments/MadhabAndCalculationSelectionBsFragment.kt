@@ -27,7 +27,7 @@ import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.databinding.MadhabAndCalculationSelectionBsFragmentBinding
 import com.duckduckgo.app.prayers.adapters.CalculationMethodRecyclerAdapter
 import com.duckduckgo.app.prayers.adapters.MadhabAsrTimeRecyclerAdapter
-import com.duckduckgo.app.prayers.landing.PrayersLandingFragment.ItemOffsetDecoration
+import com.duckduckgo.app.prayers.landing.PrayersTimeFragment.ItemOffsetDecoration
 import com.duckduckgo.app.prayers.listeners.OnCalculationMethodClickedListener
 import com.duckduckgo.app.prayers.listeners.OnMadhabMethodClickedListener
 import com.duckduckgo.common.ui.view.toDp

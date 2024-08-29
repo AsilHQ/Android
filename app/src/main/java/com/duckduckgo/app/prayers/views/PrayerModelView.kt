@@ -11,7 +11,7 @@ import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.databinding.PrayerModelViewBinding
 import com.duckduckgo.app.prayers.constants.PrayersConstants
 import com.duckduckgo.app.prayers.fragments.AdhanAndNotificationBottomSheetFragment
-import com.duckduckgo.app.prayers.landing.PrayersLandingFragment
+import com.duckduckgo.app.prayers.landing.PrayersTimeFragment
 import com.duckduckgo.app.prayers.listeners.OnNotificationTypeSelectedListener
 import com.duckduckgo.app.prayers.utils.NotificationUtils
 import java.util.Date
@@ -19,7 +19,7 @@ import java.util.Date
 class PrayerModelView(
     context: Context,
     val prayerModel: PrayerModel,
-    private val fragment: PrayersLandingFragment
+    private val fragment: PrayersTimeFragment
 ) : ConstraintLayout(context) {
 
     private var binding: PrayerModelViewBinding

@@ -67,7 +67,7 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.ceil
 
-class PrayersLandingFragment : Fragment() {
+class PrayersTimeFragment : Fragment() {
 
     private lateinit var binding: PrayersLandingFragmentBinding
     private var prayerModelViews: List<PrayerModelView>? = null
@@ -295,7 +295,7 @@ class PrayersLandingFragment : Fragment() {
                             append(str)
                         }
                     }
-                    this@PrayersLandingFragment.fullAddress = sb.toString()
+                    this@PrayersTimeFragment.fullAddress = sb.toString()
                 }
             }
 
@@ -330,7 +330,7 @@ class PrayersLandingFragment : Fragment() {
                     getNotificationPreference(prayerTimes.fajr),
                     prayerTimes.fajr,
                 ),
-                this@PrayersLandingFragment,
+                this@PrayersTimeFragment,
             ),
         )
         calendar.time = prayerTimes.sunrise
@@ -344,7 +344,7 @@ class PrayersLandingFragment : Fragment() {
                     getNotificationPreference(prayerTimes.sunrise),
                     prayerTimes.sunrise,
                 ),
-                this@PrayersLandingFragment,
+                this@PrayersTimeFragment,
             ),
         )
         calendar.time = prayerTimes.dhuhr
@@ -358,7 +358,7 @@ class PrayersLandingFragment : Fragment() {
                     getNotificationPreference(prayerTimes.dhuhr),
                     prayerTimes.dhuhr,
                 ),
-                this@PrayersLandingFragment,
+                this@PrayersTimeFragment,
             ),
         )
         calendar.time = prayerTimes.asr
@@ -372,7 +372,7 @@ class PrayersLandingFragment : Fragment() {
                     getNotificationPreference(prayerTimes.asr),
                     prayerTimes.asr,
                 ),
-                this@PrayersLandingFragment,
+                this@PrayersTimeFragment,
             ),
         )
         calendar.time = prayerTimes.maghrib
@@ -386,7 +386,7 @@ class PrayersLandingFragment : Fragment() {
                     getNotificationPreference(prayerTimes.maghrib),
                     prayerTimes.maghrib,
                 ),
-                this@PrayersLandingFragment,
+                this@PrayersTimeFragment,
             ),
         )
         calendar.time = prayerTimes.isha
@@ -400,7 +400,7 @@ class PrayersLandingFragment : Fragment() {
                     getNotificationPreference(prayerTimes.isha),
                     prayerTimes.isha,
                 ),
-                this@PrayersLandingFragment,
+                this@PrayersTimeFragment,
             ),
         )
 
