@@ -246,6 +246,8 @@
     <color name="kahf_onboarding_button_2">#4554F5</color>
     <color name="kahf_onboarding_skip">#222222</color>
     <color name="kahf_onboarding_title">#BB5cF1</color>
+    <color name="kahf_selected_icon_blue">#3E8DFF</color>
+    <color name="kahf_deselected_icon_gray">#828282</color>
 
     <attr name="kahfAppBarColor" format="color"/>
 

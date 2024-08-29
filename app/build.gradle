@@ -451,6 +451,11 @@ dependencies {
     // Browser
     implementation "androidx.browser:browser:_"
 
+    // Prayer time
+    implementation 'com.batoulapps.adhan:adhan:1.2.1'
+    implementation 'com.google.android.gms:play-services-location:21.3.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
     // Flipper
     internalImplementation "com.facebook.flipper:flipper:_"
     internalImplementation "com.facebook.soloader:soloader:_"
