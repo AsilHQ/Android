@@ -906,6 +906,7 @@
     <string name="kahf_onboarding_choose">Choose\nthe app you \nuse most</string>
     <string name="kahf_onboarding_choose_details">Select your favorite apps to keep them handy in your home screen</string>
     <string name="kahf_running_prayer">Running Prayer</string>
+    <string name="kahf_running">Running…</string>
     <string name="kahf_fajr">Fajr</string>
     <string name="kahf_sunrise">Sunrise</string>
     <string name="kahf_dhuhr">Dhuhr</string>

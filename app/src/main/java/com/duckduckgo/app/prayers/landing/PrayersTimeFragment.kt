@@ -329,6 +329,7 @@ class PrayersTimeFragment : Fragment() {
                     getTimeString(calendar),
                     getNotificationPreference(prayerTimes.fajr),
                     prayerTimes.fajr,
+                    prayerTimes.currentPrayer() == Prayer.FAJR
                 ),
                 this@PrayersTimeFragment,
             ),
@@ -343,6 +344,7 @@ class PrayersTimeFragment : Fragment() {
                     getTimeString(calendar),
                     getNotificationPreference(prayerTimes.sunrise),
                     prayerTimes.sunrise,
+                    prayerTimes.currentPrayer() == Prayer.SUNRISE
                 ),
                 this@PrayersTimeFragment,
             ),
@@ -357,6 +359,7 @@ class PrayersTimeFragment : Fragment() {
                     getTimeString(calendar),
                     getNotificationPreference(prayerTimes.dhuhr),
                     prayerTimes.dhuhr,
+                    prayerTimes.currentPrayer() == Prayer.DHUHR
                 ),
                 this@PrayersTimeFragment,
             ),
@@ -371,6 +374,7 @@ class PrayersTimeFragment : Fragment() {
                     getTimeString(calendar),
                     getNotificationPreference(prayerTimes.asr),
                     prayerTimes.asr,
+                    prayerTimes.currentPrayer() == Prayer.ASR
                 ),
                 this@PrayersTimeFragment,
             ),
@@ -385,6 +389,7 @@ class PrayersTimeFragment : Fragment() {
                     getTimeString(calendar),
                     getNotificationPreference(prayerTimes.maghrib),
                     prayerTimes.maghrib,
+                    prayerTimes.currentPrayer() == Prayer.MAGHRIB
                 ),
                 this@PrayersTimeFragment,
             ),
@@ -399,6 +404,7 @@ class PrayersTimeFragment : Fragment() {
                     getTimeString(calendar),
                     getNotificationPreference(prayerTimes.isha),
                     prayerTimes.isha,
+                    prayerTimes.currentPrayer() == Prayer.ISHA || prayerTimes.currentPrayer() == Prayer.NONE
                 ),
                 this@PrayersTimeFragment,
             ),

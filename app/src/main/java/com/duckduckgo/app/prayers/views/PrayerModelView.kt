@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import androidx.core.widget.ImageViewCompat
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.databinding.PrayerModelViewBinding
 import com.duckduckgo.app.prayers.constants.PrayersConstants
@@ -49,16 +48,27 @@ class PrayerModelView(
             } else {
                 changeToDisabledModel()
             }
+
+            if (prayerModel.isRunning) {
+                containerView.background = ContextCompat.getDrawable(context, R.drawable.running_prayer_background)
+                runningText.visibility = VISIBLE
+
+                val white = ColorStateList.valueOf(Color.parseColor("#FFFFFF"))
+                timeNameLabel.setTextColor(white)
+                runningText.setTextColor(white)
+                timeLabel.setTextColor(white)
+            }
         }
     }
 
     private fun changeToDisabledModel() {
-        binding.apply {
+        // Not going to change the disabled item's color for now.
+        /*binding.apply {
             ImageViewCompat.setImageTintList(notificationTypeImage, ColorStateList.valueOf(Color.parseColor("#CCCCCC")))
             containerView.background = ContextCompat.getDrawable(context, R.drawable.disabled_prayer_rounded_background)
             timeNameLabel.setTextColor(Color.parseColor("#CCCCCC"))
             timeLabel.setTextColor(Color.parseColor("#CCCCCC"))
-        }
+        }*/
     }
 
     private fun prepareOnNotificationSelectedListener(): OnNotificationTypeSelectedListener {
@@ -105,5 +115,6 @@ data class PrayerModel(
     val label: String?,
     val time: String?,
     var notificationType: String,
-    var date: Date
+    var date: Date,
+    var isRunning: Boolean
 )
