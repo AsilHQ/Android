@@ -40,7 +40,8 @@
             android:layout_weight="1"
             tools:text="Fajr"
             android:textSize="16sp"
-            android:textColor="#333333" />
+            android:fontFamily="@font/inter"
+            android:textColor="?daxColorPrimaryText" />
 
         <TextView
             android:id="@+id/time_label"
@@ -48,7 +49,8 @@
             android:layout_height="wrap_content"
             tools:text="03:43 AM"
             android:textSize="12sp"
-            android:textColor="#4f4f4f" />
+            android:fontFamily="@font/inter"
+            android:textColor="?daxColorPrimaryText" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/notification_type_image"

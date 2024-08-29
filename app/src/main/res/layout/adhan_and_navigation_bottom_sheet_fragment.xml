@@ -44,15 +44,16 @@
             android:layout_height="wrap_content"
             tools:text="Dhuhr Time"
             android:textSize="14sp"
-            android:textColor="#333333" />
+            android:fontFamily="@font/lato"
+            android:textColor="?daxColorPrimaryText" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/kahf_adhan_and_notification"
             android:textSize="24sp"
-            android:textColor="#333333"
-            android:textStyle="bold"
+            android:fontFamily="@font/poppins_bold"
+            android:textColor="?daxColorPrimaryText"
             android:layout_marginTop="5dp"/>
 
         <LinearLayout
@@ -83,15 +84,17 @@
                     android:layout_height="wrap_content"
                     android:text="@string/kahf_silent"
                     android:textSize="14sp"
-                    android:textColor="#3E8DFF"
-                    android:textStyle="bold" />
+                    android:textColor="@color/kahf_selected_icon_blue"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/lato"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/kahf_no_notification_adhan"
                     android:textSize="12sp"
-                    android:textColor="#828282" />
+                    android:fontFamily="@font/lato"
+                    android:textColor="?daxColorPrimaryText" />
 
             </LinearLayout>
 
@@ -125,7 +128,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/kahf_notification"
                     android:textSize="14sp"
-                    android:textColor="#333333"
+                    android:fontFamily="@font/lato"
+                    android:textColor="?daxColorPrimaryText"
                     android:textStyle="bold" />
 
                 <TextView
@@ -133,7 +137,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/kahf_notification_message"
                     android:textSize="12sp"
-                    android:textColor="#828282" />
+                    android:fontFamily="@font/lato"
+                    android:textColor="?daxColorPrimaryText" />
 
             </LinearLayout>
 
@@ -167,7 +172,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/kahf_adhan"
                     android:textSize="14sp"
-                    android:textColor="#333333"
+                    android:fontFamily="@font/lato"
+                    android:textColor="?daxColorPrimaryText"
                     android:textStyle="bold" />
 
                 <TextView
@@ -175,7 +181,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/kahf_full_adhan_notification"
                     android:textSize="12sp"
-                    android:textColor="#828282" />
+                    android:fontFamily="@font/lato"
+                    android:textColor="?daxColorPrimaryText" />
 
             </LinearLayout>
 

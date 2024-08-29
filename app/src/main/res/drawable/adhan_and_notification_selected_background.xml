@@ -18,8 +18,8 @@
     <!-- Background shape -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#ECF4FF" /> <!-- Background color -->
-            <corners android:radius="10dp" /> <!-- Corner radius -->
+            <solid android:color="?kahfCardBackground2" />
+            <corners android:radius="10dp" />
         </shape>
     </item>
     <!-- Border stroke -->
@@ -27,8 +27,8 @@
         <shape android:shape="rectangle">
             <stroke
                 android:width="3dp"
-                android:color="#3E8DFF" /> <!-- Border color -->
-            <corners android:radius="10dp" /> <!-- Corner radius -->
+                android:color="@color/kahf_selected_icon_blue" />
+            <corners android:radius="10dp" />
         </shape>
     </item>
 </layer-list>

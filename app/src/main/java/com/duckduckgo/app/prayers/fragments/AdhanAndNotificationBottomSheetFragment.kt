@@ -11,8 +11,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.duckduckgo.app.prayers.constants.PrayersConstants.NotificationTypes
 import com.duckduckgo.app.prayers.listeners.OnNotificationTypeSelectedListener
 
-class AdhanAndNotificationBottomSheetFragment constructor(private val notificationType: String,
-                                                          private val onNotificationTypeSelectedListener: OnNotificationTypeSelectedListener
+class AdhanAndNotificationBottomSheetFragment(
+    private val notificationType: String,
+    private val onNotificationTypeSelectedListener: OnNotificationTypeSelectedListener
 ): BottomSheetDialogFragment() {
 
     private lateinit var binding: AdhanAndNavigationBottomSheetFragmentBinding

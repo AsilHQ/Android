@@ -217,6 +217,7 @@
         <item name="kahfPrimaryIcon">@color/white</item>
         <item name="kahfCardBackground">#363636</item>
         <item name="kahfCardBackgroundInv">#FFFFFF</item>
+        <item name="kahfCardBackground2">#080909</item>
 
     </style>
 
@@ -306,6 +307,7 @@
         <item name="kahfPrimaryIcon">@color/black</item>
         <item name="kahfCardBackground">@color/white</item>
         <item name="kahfCardBackgroundInv">#363636</item>
+        <item name="kahfCardBackground2">#ECF4FF</item>
     </style>
 
     <style name="Theme.DuckDuckGo.Survey" parent="Theme.DuckDuckGo.Light">

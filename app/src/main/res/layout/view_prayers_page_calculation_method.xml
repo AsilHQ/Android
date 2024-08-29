@@ -40,7 +40,8 @@
             android:layout_height="wrap_content"
             tools:text="Fajr"
             android:textSize="16sp"
-            android:textColor="#333333" />
+            android:fontFamily="@font/inter"
+            android:textColor="?daxColorPrimaryText"/>
 
     </LinearLayout>
 

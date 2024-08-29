@@ -25,7 +25,6 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.batoulapps.adhan.CalculationMethod
 import com.batoulapps.adhan.CalculationParameters
@@ -36,8 +35,6 @@ import com.batoulapps.adhan.PrayerTimes
 import com.batoulapps.adhan.data.DateComponents
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.databinding.PrayersLandingFragmentBinding
-import com.duckduckgo.app.prayers.adapters.CalculationMethodRecyclerAdapter
-import com.duckduckgo.app.prayers.adapters.MadhabAsrTimeRecyclerAdapter
 import com.duckduckgo.app.prayers.constants.PrayersConstants
 import com.duckduckgo.app.prayers.constants.PrayersConstants.PrayerTime.ASR
 import com.duckduckgo.app.prayers.constants.PrayersConstants.PrayerTime.DHUHR
@@ -64,6 +61,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -92,6 +90,7 @@ class PrayersLandingFragment : Fragment() {
     private var madhabTitles = mutableMapOf<Madhab, String>()
     private var fullAddress: String? = null
     private var cityName: String? = null
+    private val dateFormat: SimpleDateFormat by lazy { SimpleDateFormat("hh:mm a", Locale.getDefault()) }
     private var fusedLocationClient: FusedLocationProviderClient? = null
 
     private var settingsActivityResult: ActivityResultLauncher<Intent>? = null
@@ -642,28 +641,7 @@ class PrayersLandingFragment : Fragment() {
             ?: PrayersConstants.NotificationTypes.MUTED
     }
 
-    private fun getTimeString(calendar: Calendar): String {
-        val calendarHour = calendar.get(Calendar.HOUR_OF_DAY)
-        val calendarMinute = calendar.get(Calendar.MINUTE)
-        val ampm = calendar.get(Calendar.AM_PM)
-
-        val hour = when (calendarHour < 10) {
-            true -> "0${calendarHour}"
-            else -> "$calendarHour"
-        }
-
-        val minute = when (calendarMinute < 10) {
-            true -> "0${calendarMinute}"
-            else -> "$calendarMinute"
-        }
-
-        val text = when (ampm) {
-            0 -> "AM"
-            else -> "PM"
-        }
-
-        return "$hour:$minute $text"
-    }
+    private fun getTimeString(calendar: Calendar) = dateFormat.format(calendar.time)
 
     /**
      * @param n send negative to go back, send positive to go ahead
