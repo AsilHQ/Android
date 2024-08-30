@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 object NotificationUtils {
 
     private const val CHANNEL_ID = "PrayerChannelId"
-    private const val CHANNEL_NAME = "PrayerChannelName"
+    private const val CHANNEL_NAME = "Prayer-Time-Reminder"
 
     fun createNotificationChannel(context: Context) {
         val importance = NotificationManager.IMPORTANCE_HIGH
@@ -27,8 +27,7 @@ object NotificationUtils {
         val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle("Prayer Time")
             .setContentText(prayerTime)
-            .setSmallIcon(R.drawable.ic_kahf)
-        // Add other notification configuration here as needed
+            .setSmallIcon(R.drawable.ic_kahf_light)
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
         notificationManager?.notify(notificationId, notificationBuilder.build())

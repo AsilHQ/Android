@@ -24,7 +24,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.batoulapps.adhan.CalculationMethod
@@ -330,6 +329,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
             2 -> tomorrowPrayerTimes
             else -> todayPrayerTimes
         }
+        val todaySelected = dateIndex == 1
 
         val calendar = Calendar.getInstance()
         calendar.time = prayerTimes.fajr
@@ -342,7 +342,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
                     getTimeString(calendar),
                     getNotificationPreference(prayerTimes.fajr),
                     prayerTimes.fajr,
-                    prayerTimes.currentPrayer() == Prayer.FAJR
+                    isRunning = todaySelected && prayerTimes.currentPrayer() == Prayer.FAJR
                 ),
                 this@PrayersTimeFragment,
             ),
@@ -357,7 +357,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
                     getTimeString(calendar),
                     getNotificationPreference(prayerTimes.sunrise),
                     prayerTimes.sunrise,
-                    isSunriseOngoing(),
+                    isRunning = todaySelected && isSunriseOngoing(),
                 ),
                 this@PrayersTimeFragment,
             ),
@@ -372,7 +372,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
                     getTimeString(calendar),
                     getNotificationPreference(prayerTimes.dhuhr),
                     prayerTimes.dhuhr,
-                    prayerTimes.currentPrayer() == Prayer.DHUHR
+                    isRunning = todaySelected && prayerTimes.currentPrayer() == Prayer.DHUHR
                 ),
                 this@PrayersTimeFragment,
             ),
@@ -387,7 +387,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
                     getTimeString(calendar),
                     getNotificationPreference(prayerTimes.asr),
                     prayerTimes.asr,
-                    prayerTimes.currentPrayer() == Prayer.ASR
+                    isRunning = todaySelected && prayerTimes.currentPrayer() == Prayer.ASR
                 ),
                 this@PrayersTimeFragment,
             ),
@@ -402,7 +402,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
                     getTimeString(calendar),
                     getNotificationPreference(prayerTimes.maghrib),
                     prayerTimes.maghrib,
-                    prayerTimes.currentPrayer() == Prayer.MAGHRIB
+                    isRunning = todaySelected && prayerTimes.currentPrayer() == Prayer.MAGHRIB
                 ),
                 this@PrayersTimeFragment,
             ),
@@ -417,7 +417,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
                     getTimeString(calendar),
                     getNotificationPreference(prayerTimes.isha),
                     prayerTimes.isha,
-                    prayerTimes.currentPrayer() == Prayer.ISHA || prayerTimes.currentPrayer() == Prayer.NONE
+                    isRunning = todaySelected && prayerTimes.currentPrayer() == Prayer.ISHA
                 ),
                 this@PrayersTimeFragment,
             ),
