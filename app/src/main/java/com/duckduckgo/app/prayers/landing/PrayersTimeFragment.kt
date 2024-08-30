@@ -7,7 +7,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.graphics.Rect
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
@@ -20,12 +19,12 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.RecyclerView
 import com.batoulapps.adhan.CalculationMethod
 import com.batoulapps.adhan.CalculationParameters
 import com.batoulapps.adhan.Coordinates
@@ -142,21 +141,17 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
     ) {
         super.onViewCreated(view, savedInstanceState)
         settingsActivityResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
-            requestLocationPermission()
+            checkLocationPermissionAndService()
         }
 
         requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-            when (it) {
-                true -> {
-                    checkIfLocationServicesEnabled()
-                }
-
-                else -> {
-                    if (!shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                        showAppLocationPermissionNotGranted()
-                    } else {
-                        requestLocationPermission()
-                    }
+            if (it) {
+                checkIfLocationServicesEnabled()
+            } else {
+                if (!shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    showAppLocationPermissionNotGranted()
+                } else {
+                    requestLocationPermission()
                 }
             }
         }
@@ -181,7 +176,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
         val calendar = Calendar.getInstance()
         currentDay = calendar.get(Calendar.DAY_OF_MONTH)
 
-        requestLocationPermission()
+        checkForSavedLocation()
         NotificationUtils.createNotificationChannel(requireContext())
 
         initViews()
@@ -195,12 +190,30 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
         }
     }
 
-    private fun requestLocationPermission() {
+    private fun checkForSavedLocation() {
+        val savedLatitude = sharedPreferences?.getString("latitude", null)
+        val savedLongitude = sharedPreferences?.getString("longitude", null)
+        cityName = sharedPreferences?.getString("location_city", "") ?: ""
+        fullAddress = sharedPreferences?.getString("location_address", "") ?: ""
+
+        if (savedLatitude != null && savedLongitude != null) {
+            coordinates = Coordinates(savedLatitude.toDouble(), savedLongitude.toDouble())
+            prepareData(initialCall = true)
+        } else {
+            checkLocationPermissionAndService()
+        }
+    }
+
+    private fun checkLocationPermissionAndService() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             checkIfLocationServicesEnabled()
         } else {
-            requestPermissionLauncher?.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            requestLocationPermission()
         }
+    }
+
+    private fun requestLocationPermission() {
+        requestPermissionLauncher?.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
     private fun checkIfLocationServicesEnabled() {
@@ -215,7 +228,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
         lifecycleScope.launch(Dispatchers.Main) {
             val location = getLastLocation()
             location?.let {
-                // Handle the obtained location
+                saveLocationToSharedPreferences(it)
                 prepareLocationInformation(it)
             }
         }
@@ -245,8 +258,24 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
         }
     }
 
+    private fun saveLocationToSharedPreferences(location: Location) {
+        sharedPreferences?.edit()?.apply {
+            putString("latitude", location.latitude.toString())
+            putString("longitude", location.longitude.toString())
+            apply()
+        }
+    }
+
+    private fun saveLocationNameSharedPreferences(city: String?, fullAddress: String?) {
+        sharedPreferences?.edit()?.apply {
+            putString("location_city", city ?: "")
+            putString("location_address", fullAddress ?: "")
+            apply()
+        }
+    }
+
     private fun showLocationServicesDisabledPopUp() {
-        MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.kahf_alert))
+        val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.kahf_alert))
             .setMessage(getString(R.string.kahf_location_could_not_get))
             .setPositiveButton(
                 R.string.kahf_ok,
@@ -259,7 +288,12 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
                     }
                 }
             }
-            .show()
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.window?.setBackgroundDrawableResource(R.drawable.kahf_item_border_gradient)
+        }
+        dialog.show()
     }
 
     private fun showAppLocationPermissionNotGranted() {
@@ -306,6 +340,8 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
                     }
 
                     fullAddress = addressParts.joinToString(", ")
+
+                    saveLocationNameSharedPreferences(cityName, fullAddress)
                 }
             }
 
@@ -540,6 +576,11 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
                         true
                     }
 
+                    R.id.prayers_page_popup_update_location -> {
+                        checkLocationPermissionAndService()
+                        true
+                    }
+
                     else -> false
                 }
             }
@@ -721,44 +762,6 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
             ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         } else {
             true
-        }
-    }
-
-    class ItemOffsetDecoration(private val context: Context) : RecyclerView.ItemDecoration() {
-
-        private val spacing: Int = dpToPx(10) // Convert dp to pixels
-
-        override fun getItemOffsets(
-            outRect: Rect,
-            view: View,
-            parent: RecyclerView,
-            state: RecyclerView.State
-        ) {
-            super.getItemOffsets(outRect, view, parent, state)
-            val itemPosition = parent.getChildAdapterPosition(view)
-
-            // Add top spacing for the first item
-            if (itemPosition == 0) {
-                outRect.top = spacing * 2
-                outRect.bottom = spacing / 2
-            }
-
-            // Add bottom spacing for the last item
-            if (itemPosition == parent.adapter?.itemCount?.minus(1)) {
-                outRect.top = spacing / 2
-                outRect.bottom = spacing * 2
-            }
-
-            // Add spacing between items
-            if (itemPosition > 0 && itemPosition < (parent.adapter?.itemCount?.minus(1) ?: 0)) {
-                outRect.top = spacing / 2
-                outRect.bottom = spacing / 2
-            }
-        }
-
-        private fun dpToPx(dp: Int): Int {
-            val density = context.resources.displayMetrics.density
-            return (dp * density).toInt()
         }
     }
 }

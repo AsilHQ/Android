@@ -16,18 +16,20 @@
 
 package com.duckduckgo.app.prayers.fragments
 
+import android.content.Context
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.batoulapps.adhan.CalculationMethod
 import com.batoulapps.adhan.Madhab
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.databinding.MadhabAndCalculationSelectionBsFragmentBinding
 import com.duckduckgo.app.prayers.adapters.CalculationMethodRecyclerAdapter
 import com.duckduckgo.app.prayers.adapters.MadhabAsrTimeRecyclerAdapter
-import com.duckduckgo.app.prayers.landing.PrayersTimeFragment.ItemOffsetDecoration
 import com.duckduckgo.app.prayers.listeners.OnCalculationMethodClickedListener
 import com.duckduckgo.app.prayers.listeners.OnMadhabMethodClickedListener
 import com.duckduckgo.common.ui.view.toDp
@@ -117,6 +119,44 @@ class MadhabAndCalculationSelectionBsFragment: BottomSheetDialogFragment() {
             fragment.onMadhabClicked = onMadhabClicked
             fragment.onCalculationClicked = onCalculationClicked
             return fragment
+        }
+    }
+
+    class ItemOffsetDecoration(private val context: Context) : RecyclerView.ItemDecoration() {
+
+        private val spacing: Int = dpToPx(10) // Convert dp to pixels
+
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State
+        ) {
+            super.getItemOffsets(outRect, view, parent, state)
+            val itemPosition = parent.getChildAdapterPosition(view)
+
+            // Add top spacing for the first item
+            if (itemPosition == 0) {
+                outRect.top = spacing * 2
+                outRect.bottom = spacing / 2
+            }
+
+            // Add bottom spacing for the last item
+            if (itemPosition == parent.adapter?.itemCount?.minus(1)) {
+                outRect.top = spacing / 2
+                outRect.bottom = spacing * 2
+            }
+
+            // Add spacing between items
+            if (itemPosition > 0 && itemPosition < (parent.adapter?.itemCount?.minus(1) ?: 0)) {
+                outRect.top = spacing / 2
+                outRect.bottom = spacing / 2
+            }
+        }
+
+        private fun dpToPx(dp: Int): Int {
+            val density = context.resources.displayMetrics.density
+            return (dp * density).toInt()
         }
     }
 }

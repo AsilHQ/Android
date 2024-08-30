@@ -936,6 +936,7 @@
     <string name="kahf_silent">Silent</string>
     <string name="kahf_no_notification_adhan">No Notification and Adhan</string>
     <string name="kahf_adhan_and_notification">Adhan &amp; Notification</string>
+    <string name="kahf_update_location">Update location</string>
     <plurals name="bookmarkFolderDeleteMessage">
         <item quantity="one">Are you sure you want to delete this folder and %1$d item?</item>
         <item quantity="other">Are you sure you want to delete this folder and %1$d items?</item>
