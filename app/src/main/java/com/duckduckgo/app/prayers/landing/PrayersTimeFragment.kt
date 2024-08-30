@@ -1,6 +1,7 @@
 package com.duckduckgo.app.prayers.landing
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -33,6 +34,7 @@ import com.batoulapps.adhan.Madhab
 import com.batoulapps.adhan.Prayer
 import com.batoulapps.adhan.PrayerTimes
 import com.batoulapps.adhan.data.DateComponents
+import com.duckduckgo.anvil.annotations.InjectWith
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.databinding.PrayersLandingFragmentBinding
 import com.duckduckgo.app.prayers.constants.PrayersConstants
@@ -51,6 +53,9 @@ import com.duckduckgo.app.prayers.listeners.OnMadhabMethodClickedListener
 import com.duckduckgo.app.prayers.utils.NotificationUtils
 import com.duckduckgo.app.prayers.views.PrayerModel
 import com.duckduckgo.app.prayers.views.PrayerModelView
+import com.duckduckgo.appbuildconfig.api.AppBuildConfig
+import com.duckduckgo.common.ui.DuckDuckGoFragment
+import com.duckduckgo.di.scopes.FragmentScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -66,9 +71,14 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 import kotlin.math.ceil
 
-class PrayersTimeFragment : Fragment() {
+@InjectWith(FragmentScope::class)
+class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment) {
+
+    @Inject
+    lateinit var appBuildConfig: AppBuildConfig
 
     private lateinit var binding: PrayersLandingFragmentBinding
     private var prayerModelViews: List<PrayerModelView>? = null
@@ -78,6 +88,8 @@ class PrayersTimeFragment : Fragment() {
                 preparePrayerTimesView()
             }
         }
+
+    private val requestPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
     var dateIndex = 1
     private lateinit var todayPrayerTimes: PrayerTimes
@@ -695,6 +707,22 @@ class PrayersTimeFragment : Fragment() {
             "Isha" -> getString(R.string.kahf_isha)
             "None" -> getString(R.string.kahf_isha)
             else -> words.joinToString(" ")
+        }
+    }
+
+    @SuppressLint("InlinedApi")
+    fun requestNotificationsPermissions() {
+        if (appBuildConfig.sdkInt >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            requestPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    @SuppressLint("InlinedApi")
+    fun isNotificationPermissionGranted(): Boolean {
+        return if (appBuildConfig.sdkInt >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
         }
     }
 

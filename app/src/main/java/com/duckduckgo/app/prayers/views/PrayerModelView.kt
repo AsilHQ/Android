@@ -41,8 +41,12 @@ class PrayerModelView(
                     changeToDisabledModel()
                 } else {
                     notificationTypeImage.setOnClickListener {
-                        val bottomSheetFragment = AdhanAndNotificationBottomSheetFragment(prayerModel.notificationType, prepareOnNotificationSelectedListener())
-                        bottomSheetFragment.show(fragment.parentFragmentManager, bottomSheetFragment.tag)
+                        if (fragment.isNotificationPermissionGranted()) {
+                            val bottomSheetFragment = AdhanAndNotificationBottomSheetFragment(prayerModel.notificationType, prepareOnNotificationSelectedListener())
+                            bottomSheetFragment.show(fragment.parentFragmentManager, bottomSheetFragment.tag)
+                        } else {
+                            fragment.requestNotificationsPermissions()
+                        }
                     }
                 }
             } else {
