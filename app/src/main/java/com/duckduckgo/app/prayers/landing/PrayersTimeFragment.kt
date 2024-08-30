@@ -250,7 +250,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
             .setMessage(getString(R.string.kahf_location_could_not_get))
             .setPositiveButton(
                 R.string.kahf_ok,
-            ) { d: DialogInterface, w: Int ->
+            ) { _: DialogInterface, _: Int ->
                 val packageManager = context?.packageManager
                 if (packageManager != null) {
                     val locationSettingsIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
@@ -291,23 +291,21 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
             addresses?.let {
                 if (it.isNotEmpty()) {
                     val address: Address = it[0]
+                    val addressParts = mutableListOf<String>()
 
-                    cityName = address.adminArea
-                    val sb = StringBuilder()
-                    sb.apply {
-                        address.subLocality?.let { str ->
-                            append(str)
-                            append(", ")
-                        }
-                        address.thoroughfare?.let { str ->
-                            append(str)
-                            append(", ")
-                        }
-                        address.postalCode?.let { str ->
-                            append(str)
-                        }
+                    cityName = address.adminArea ?: ""
+
+                    if (address.subLocality?.isEmpty() == false) {
+                        addressParts.add(address.subLocality)
                     }
-                    this@PrayersTimeFragment.fullAddress = sb.toString()
+                    if (address.thoroughfare?.isEmpty() == false) {
+                        addressParts.add(address.thoroughfare)
+                    }
+                    if (address.postalCode?.isEmpty() == false) {
+                        addressParts.add(address.postalCode)
+                    }
+
+                    fullAddress = addressParts.joinToString(", ")
                 }
             }
 
