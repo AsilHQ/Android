@@ -65,6 +65,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import kotlin.math.ceil
 
 class PrayersTimeFragment : Fragment() {
@@ -344,7 +345,7 @@ class PrayersTimeFragment : Fragment() {
                     getTimeString(calendar),
                     getNotificationPreference(prayerTimes.sunrise),
                     prayerTimes.sunrise,
-                    prayerTimes.currentPrayer() == Prayer.SUNRISE
+                    isSunriseOngoing(),
                 ),
                 this@PrayersTimeFragment,
             ),
@@ -421,7 +422,10 @@ class PrayersTimeFragment : Fragment() {
                         delay(5000)
                     } else {
                         if (dateIndex == 1) {
-                            binding.bannerPrayerTime.text = convertToTitleText(prayerTimes.currentPrayer().name)
+                            binding.bannerPrayerTime.text =
+                                if (prayerTimes.currentPrayer() == Prayer.SUNRISE) " --- "
+                                else convertToTitleText(prayerTimes.currentPrayer().name)
+
                             binding.bannerRemainingTimeText.text = getNextPrayerTimeText(Date())
                         }
                         delay(1000)
@@ -429,6 +433,17 @@ class PrayersTimeFragment : Fragment() {
                 }
             }
         }
+    }
+
+    // Considering that sunrise takes 15 minutes to complete. Fatwa: https://islamqa.info/en/48998
+    private fun isSunriseOngoing(): Boolean {
+        val currentTime = Date().time
+        val sunriseTime = todayPrayerTimes.sunrise.time
+
+        val timeDifference = currentTime - sunriseTime
+        val twentyMinutesInMillis = TimeUnit.MINUTES.toMillis(15)
+
+        return timeDifference in 0..twentyMinutesInMillis
     }
 
     private fun getDataFromApi() {
@@ -587,6 +602,12 @@ class PrayersTimeFragment : Fragment() {
 
     private fun getNextPrayerTimeText(now: Date): CharSequence {
         var nextPrayer = todayPrayerTimes.nextPrayer()
+
+        // Sunrise is not a prayer time. So pointing the nextPrayer to Dhuhr
+        if (nextPrayer == Prayer.SUNRISE) {
+            nextPrayer = todayPrayerTimes.nextPrayer(todayPrayerTimes.timeForPrayer(Prayer.SUNRISE))
+        }
+
         val remainingSecs = when (nextPrayer) {
             Prayer.NONE -> {
                 val calendar = Calendar.getInstance()
