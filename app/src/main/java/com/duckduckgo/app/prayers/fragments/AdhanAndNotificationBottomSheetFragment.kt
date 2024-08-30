@@ -34,42 +34,42 @@ class AdhanAndNotificationBottomSheetFragment(
                 NotificationTypes.MUTED -> {
                     silent.background = ContextCompat.getDrawable(requireContext(), R.drawable.adhan_and_notification_selected_background)
                     notification.background = ContextCompat.getDrawable(requireContext(), R.drawable.adhan_and_notification_unselected_background)
-                    adhan.background = ContextCompat.getDrawable(requireContext(), R.drawable.adhan_and_notification_unselected_background)
+                    // adhan.background = ContextCompat.getDrawable(requireContext(), R.drawable.adhan_and_notification_unselected_background)
 
                     silentIcon.setColorFilter(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_selected_icon_blue))
                     notificationIcon.setColorFilter(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
-                    adhanIcon.setColorFilter(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
+                    // adhanIcon.setColorFilter(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
 
                     silentText.setTextColor(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_selected_icon_blue))
                     notificationText.setTextColor(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
-                    adhanText.setTextColor(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
+                    // adhanText.setTextColor(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
                 }
                 NotificationTypes.UNMUTED -> {
                     silent.background = ContextCompat.getDrawable(requireContext(), R.drawable.adhan_and_notification_unselected_background)
                     notification.background = ContextCompat.getDrawable(requireContext(), R.drawable.adhan_and_notification_selected_background)
-                    adhan.background = ContextCompat.getDrawable(requireContext(), R.drawable.adhan_and_notification_unselected_background)
+                    // adhan.background = ContextCompat.getDrawable(requireContext(), R.drawable.adhan_and_notification_unselected_background)
 
                     silentIcon.setColorFilter(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
                     notificationIcon.setColorFilter(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_selected_icon_blue))
-                    adhanIcon.setColorFilter(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
+                    // adhanIcon.setColorFilter(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
 
                     silentText.setTextColor(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
                     notificationText.setTextColor(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_selected_icon_blue))
-                    adhanText.setTextColor(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
+                    // adhanText.setTextColor(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
                 }
-                NotificationTypes.VOICE_ENABLED -> {
-                    silent.background = ContextCompat.getDrawable(requireContext(), R.drawable.adhan_and_notification_unselected_background)
-                    notification.background = ContextCompat.getDrawable(requireContext(), R.drawable.adhan_and_notification_unselected_background)
-                    adhan.background = ContextCompat.getDrawable(requireContext(), R.drawable.adhan_and_notification_selected_background)
-
-                    silentIcon.setColorFilter(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
-                    notificationIcon.setColorFilter(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
-                    adhanIcon.setColorFilter(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_selected_icon_blue))
-
-                    silentText.setTextColor(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
-                    notificationText.setTextColor(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
-                    adhanText.setTextColor(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_selected_icon_blue))
-                }
+                // NotificationTypes.VOICE_ENABLED -> {
+                //     silent.background = ContextCompat.getDrawable(requireContext(), R.drawable.adhan_and_notification_unselected_background)
+                //     notification.background = ContextCompat.getDrawable(requireContext(), R.drawable.adhan_and_notification_unselected_background)
+                //     adhan.background = ContextCompat.getDrawable(requireContext(), R.drawable.adhan_and_notification_selected_background)
+                //
+                //     silentIcon.setColorFilter(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
+                //     notificationIcon.setColorFilter(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
+                //     adhanIcon.setColorFilter(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_selected_icon_blue))
+                //
+                //     silentText.setTextColor(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
+                //     notificationText.setTextColor(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_deselected_icon_gray))
+                //     adhanText.setTextColor(ContextCompat.getColor(requireContext(), com.duckduckgo.mobile.android.R.color.kahf_selected_icon_blue))
+                // }
             }
 
             silent.setOnClickListener {
@@ -82,10 +82,10 @@ class AdhanAndNotificationBottomSheetFragment(
                 dismiss()
             }
 
-            adhan.setOnClickListener {
-                onNotificationTypeSelectedListener.onNotificationTypeSelected(NotificationTypes.VOICE_ENABLED)
-                dismiss()
-            }
+            // adhan.setOnClickListener {
+            //     onNotificationTypeSelectedListener.onNotificationTypeSelected(NotificationTypes.VOICE_ENABLED)
+            //     dismiss()
+            // }
         }
     }
 }
