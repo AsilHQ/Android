@@ -1128,6 +1128,13 @@ class BrowserTabViewModel @Inject constructor(
      * @return true if navigation handled, otherwise false
      */
     fun onUserPressedBack(isCustomTab: Boolean = false): Boolean {
+        if (currentBrowserViewState().prayerTimeShowing) {
+            browserViewState.value = currentBrowserViewState().copy(
+                prayerTimeShowing = false
+            )
+            return true
+        }
+
         navigationAwareLoginDetector.onEvent(NavigationEvent.UserAction.NavigateBack)
         val navigation = webNavigationState ?: return false
         val hasSourceTab = tabRepository.liveSelectedTab.value?.sourceTabId != null
@@ -2029,6 +2036,12 @@ class BrowserTabViewModel @Inject constructor(
         )
 
         Timber.d("showPrivacyShield=$showPrivacyShield, showSearchIcon=$showSearchIcon, showClearButton=$showClearButton")
+    }
+
+    fun onPrayerTimeClicked() {
+        browserViewState.value = currentBrowserViewState().copy(
+            prayerTimeShowing = currentBrowserViewState().prayerTimeShowing.not()
+        )
     }
 
     fun onBookmarkMenuClicked() {

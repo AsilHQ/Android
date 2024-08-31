@@ -222,6 +222,7 @@ import com.duckduckgo.app.kahftube.SafetyLevel
 import com.duckduckgo.app.kahftube.SafeGazePopupHandler
 import com.duckduckgo.app.location.data.LocationPermissionType
 import com.duckduckgo.app.pixels.AppPixelName
+import com.duckduckgo.app.prayers.landing.PrayersTimeFragment
 import com.duckduckgo.app.privatesearch.PrivateSearchScreenNoParams
 import com.duckduckgo.app.safegaze.genderdetection.GenderDetector
 import com.duckduckgo.app.safegaze.nsfwdetection.NsfwDetector
@@ -1478,6 +1479,7 @@ class BrowserTabFragment :
         webView?.hide()
         errorView.errorLayout.gone()
         sslErrorView.gone()
+        setPrayerTimeVisibility(false)
     }
 
     private fun showBrowser() {
@@ -1491,6 +1493,7 @@ class BrowserTabFragment :
         webView?.onResume()
         errorView.errorLayout.gone()
         sslErrorView.gone()
+        setPrayerTimeVisibility(false)
     }
 
     private fun showError(
@@ -1507,6 +1510,7 @@ class BrowserTabFragment :
         omnibar.shieldIcon.isInvisible = true
         webView?.onPause()
         webView?.hide()
+        setPrayerTimeVisibility(false)
 
         errorView.errorTitle.text = getString(string.webViewErrorTitle)
         errorView.errorMessage.text = getString(errorType.errorId, url).html(requireContext())
@@ -2480,10 +2484,6 @@ class BrowserTabFragment :
                 forwardMenuItem.visibility = VISIBLE
                 homeMenuItem.visibility = GONE
                 timeMenuItem.visibility = GONE
-                newTabMenuItem.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_new_tab)
-                newTabMenuItem.setOnClickListener {
-                    launch { viewModel.userRequestedOpeningNewTab(longPress = true) }
-                }
 
                 backMenuItem.imageTintList = ColorStateList.valueOf(if (viewState.canGoBack) activeMenuColor else inactiveMenuColor)
                 forwardMenuItem.imageTintList = ColorStateList.valueOf(if (viewState.canGoForward) activeMenuColor else inactiveMenuColor)
@@ -2492,9 +2492,56 @@ class BrowserTabFragment :
                 forwardMenuItem.visibility = GONE
                 homeMenuItem.visibility = VISIBLE
                 timeMenuItem.visibility = VISIBLE
-                newTabMenuItem.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_new_tab_filled)
-                newTabMenuItem.setOnClickListener(null)
+                timeMenuItem.setOnClickListener {
+                    if (!viewState.prayerTimeShowing) {
+                        viewModel.onPrayerTimeClicked()
+                    }
+                }
             }
+
+            timeMenuItem.setImageResource(
+                if (viewState.prayerTimeShowing) com.duckduckgo.mobile.android.R.drawable.ic_clock_filled
+                else com.duckduckgo.mobile.android.R.drawable.ic_clock_outlined,
+            )
+
+            // Icon and onClick action of new tab button
+            newTabMenuItem.setOnClickListener {
+                if (viewState.prayerTimeShowing) {
+                    viewModel.onPrayerTimeClicked()
+                } else if (viewState.browserShowing) {
+                    launch { viewModel.userRequestedOpeningNewTab(longPress = true) }
+                }
+            }
+
+            if (viewState.prayerTimeShowing || viewState.browserShowing) {
+                newTabMenuItem.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_new_tab)
+            } else {
+                newTabMenuItem.setImageResource(com.duckduckgo.mobile.android.R.drawable.ic_new_tab_filled)
+            }
+        }
+    }
+
+    private fun setPrayerTimeVisibility(setVisible: Boolean) {
+        if (setVisible) {
+            val fragmentTransaction = childFragmentManager.beginTransaction()
+
+            val myFragment = PrayersTimeFragment()
+            fragmentTransaction.add(binding.prayerFragmentContainer.id, myFragment, PrayersTimeFragment::class.java.simpleName)
+            fragmentTransaction.commit()
+
+            binding.prayerFragmentContainer.visibility = VISIBLE
+            omnibar.appBarLayout.visibility = GONE
+        } else {
+            val fragmentTransaction = childFragmentManager.beginTransaction()
+
+            val myFragment = childFragmentManager.findFragmentByTag(PrayersTimeFragment::class.java.simpleName)
+            if (myFragment != null) {
+                fragmentTransaction.remove(myFragment)
+                fragmentTransaction.commit()
+            }
+
+            binding.prayerFragmentContainer.visibility = GONE
+            omnibar.appBarLayout.visibility = VISIBLE
         }
     }
 
@@ -4079,9 +4126,12 @@ class BrowserTabFragment :
                 val browserShowingChanged = viewState.browserShowing != (lastSeenBrowserViewState?.browserShowing ?: false)
                 val errorChanged = viewState.browserError != lastSeenBrowserViewState?.browserError
                 val sslErrorChanged = viewState.sslError != lastSeenBrowserViewState?.sslError
+                val prayerTimeShowingChanged = viewState.prayerTimeShowing != (lastSeenBrowserViewState?.prayerTimeShowing ?: false)
 
                 lastSeenBrowserViewState = viewState
-                if (browserShowingChanged) {
+                if (prayerTimeShowingChanged) {
+                    setPrayerTimeVisibility(viewState.prayerTimeShowing)
+                } else if (browserShowingChanged) {
                     if (browserShowing) {
                         showBrowser()
                     } else {
