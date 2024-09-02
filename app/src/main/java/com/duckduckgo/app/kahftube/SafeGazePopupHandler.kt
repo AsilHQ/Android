@@ -26,7 +26,6 @@ import android.graphics.ColorMatrixColorFilter
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.databinding.SafeGazePopupBinding
@@ -88,6 +87,10 @@ class SafeGazePopupHandler(
             onModeChanged(SafetyLevel.Low)
         }
 
+        binding.kahfSwitch.setOnCheckedChangeListener { _, isChecked ->
+
+        }
+
         // set initially selected item
         updateDescription(binding, preSelected)
 
@@ -132,6 +135,7 @@ class SafeGazePopupHandler(
     private fun handleProgressBar() {
         val progress = sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE)
         binding.progressBar.progress = progress
+        binding.blurSeekbar.progress = progress
         binding.blurSeekbar.setOnSeekBarChangeListener(
             object : OnSeekBarChangeListener {
                 override fun onProgressChanged(
@@ -140,6 +144,7 @@ class SafeGazePopupHandler(
                     fromUser: Boolean
                 ) {
                     binding.progressBar.progress = progress
+                    binding.blurSeekbar.progress = progress
                     safeGazeInterface.updateBlur(progress.toFloat())
                     loadImageWithBlur(progress, binding.ivFullBlur)
                 }
@@ -152,32 +157,6 @@ class SafeGazePopupHandler(
                 }
             },
         )
-
-        // updateViewsPosition(binding.iconImageView, sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE))
-        /*binding.progressBar.setOnTouchListener { _, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                    val width = binding.progressBar.width.toFloat()
-                    val x = event.x
-                    val calculatedProgress = (x / width * binding.progressBar.max).toInt()
-                    binding.progressBar.progress = calculatedProgress
-                    // updateViewsPosition(binding.iconImageView, calculatedProgress)
-                    safeGazeInterface.updateBlur(calculatedProgress.toFloat())
-                    saveProgressToSharedPreferences(calculatedProgress)
-                    loadImageWithBlur(calculatedProgress, binding.ivFullBlur)
-                    true
-                }
-                else -> false
-            }
-        }*/
-    }
-
-    private fun updateViewsPosition(iconImageView: ImageView, progress: Int) {
-        val clampedProgress = progress.coerceIn(0, 100)
-
-        val iconLayoutParams = iconImageView.layoutParams as ConstraintLayout.LayoutParams
-        iconLayoutParams.horizontalBias = clampedProgress / 100f
-        iconImageView.layoutParams = iconLayoutParams
     }
 
     private fun saveProgressToSharedPreferences(progress: Int) {

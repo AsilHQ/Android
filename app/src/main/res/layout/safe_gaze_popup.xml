@@ -56,7 +56,37 @@
                 android:scaleType="fitStart"
                 android:src="@drawable/kahf_guard_logo_with_text"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/tvOnOff"/>
+
+            <TextView
+                android:id="@+id/tvOnOff"
+                android:text="@string/kahf_on_off"
+                android:fontFamily="@font/lato"
+                android:textColor="#828282"
+                android:textSize="14sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toStartOf="@+id/kahfSwitch"
+                app:layout_constraintTop_toTopOf="@id/kahf_guard_logo"
+                app:layout_constraintBottom_toBottomOf="@id/kahf_guard_logo"/>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/kahfSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:track="@drawable/switch_track"
+                app:trackTint="@color/switch_track_color"
+                app:thumbTint="?attr/kahfCardBackground"
+                android:checked="false"
+                tools:checked="true"
+                android:scaleX="0.75"
+                android:scaleY="0.75"
+                android:layout_marginEnd="-5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/kahf_guard_logo"
+                app:layout_constraintBottom_toBottomOf="@id/kahf_guard_logo"
+                tools:ignore="UseSwitchCompatOrMaterialXml" />
 
             <com.duckduckgo.common.ui.view.divider.HorizontalDivider
                 android:id="@+id/divider"
@@ -181,7 +211,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="10dp"
                         android:layout_marginTop="10dp"
-                        android:background="@drawable/progress_bar_background"
+                        tools:progress="73"
                         android:progressDrawable="@drawable/progress_bar"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -193,7 +223,7 @@
                         android:layout_height="wrap_content"
                         android:thumb="@drawable/progress_thumb"
                         android:progressDrawable="@color/zxing_transparent"
-                        tools:progress="10"
+                        tools:progress="73"
                         android:layout_marginTop="2dp"
                         android:paddingStart="12dp"
                         android:paddingEnd="12dp"
