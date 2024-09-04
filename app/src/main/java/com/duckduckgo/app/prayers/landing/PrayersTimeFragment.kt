@@ -20,10 +20,12 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.batoulapps.adhan.CalculationMethod
 import com.batoulapps.adhan.CalculationParameters
@@ -346,6 +348,11 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
             }
 
             prepareData(initialCall = true)
+
+            // show toast that location is updated
+            if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                Toast.makeText(requireContext(), R.string.kahf_location_updated, Toast.LENGTH_SHORT).show()
+            }
         } catch (error: Exception) {
             prepareData(initialCall = true)
             println("geocoder error " + error.message)
@@ -577,6 +584,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
                     }
 
                     R.id.prayers_page_popup_update_location -> {
+                        removeAllAlarms()
                         checkLocationPermissionAndService()
                         true
                     }
