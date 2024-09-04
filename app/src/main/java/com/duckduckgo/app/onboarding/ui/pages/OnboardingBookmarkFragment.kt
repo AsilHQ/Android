@@ -27,6 +27,7 @@ import com.duckduckgo.app.browser.databinding.FragmentOnboardingBookmarkBinding
 import com.duckduckgo.app.onboarding.model.PredefinedBookmark
 import com.duckduckgo.app.onboarding.ui.KahfOnboardingActivity
 import com.duckduckgo.app.onboarding.ui.page.PredefinedBookmarkAdapter
+import com.duckduckgo.common.ui.DuckDuckGoActivity
 import com.duckduckgo.common.ui.DuckDuckGoFragment
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.FragmentScope
@@ -56,6 +57,13 @@ class OnboardingBookmarkFragment: DuckDuckGoFragment(R.layout.fragment_onboardin
 
         setupButtonClicks()
         setupRecyclerView()
+
+        // To avoid the 'Skip' button being hidden behind the navigation bar
+        (requireActivity() as DuckDuckGoActivity).getNavigationBarHeight {
+            binding.guidelineBottom.setGuidelinePercent(
+                if (it > 100) 0.85f else 0.9f
+            )
+        }
 
         return binding.root
     }

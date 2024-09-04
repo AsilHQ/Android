@@ -14,6 +14,7 @@ import com.duckduckgo.app.browser.databinding.FragmentOnboarding2Binding
 import com.duckduckgo.app.browser.defaultbrowsing.DefaultBrowserDetector
 import com.duckduckgo.app.browser.defaultbrowsing.DefaultBrowserSystemSettings
 import com.duckduckgo.app.onboarding.ui.KahfOnboardingActivity
+import com.duckduckgo.common.ui.DuckDuckGoActivity
 import com.duckduckgo.common.ui.DuckDuckGoFragment
 import com.duckduckgo.di.scopes.FragmentScope
 import kotlinx.coroutines.delay
@@ -54,6 +55,13 @@ class OnboardingFragment2 : DuckDuckGoFragment(R.layout.fragment_onboarding2) {
 
         binding.btnDefaultBrowser.setOnClickListener {
             onLaunchDefaultBrowserSettingsClicked()
+        }
+
+        // To avoid the 'Skip' button being hidden behind the navigation bar
+        (requireActivity() as DuckDuckGoActivity).getNavigationBarHeight {
+            binding.guidelineBottom.setGuidelinePercent(
+                if (it > 100) 0.85f else 0.9f
+            )
         }
 
         return binding.root
