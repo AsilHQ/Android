@@ -1049,9 +1049,9 @@ class BrowserTabFragment :
     private fun handleSafeGazePopUp() {
         val popupBinding = SafeGazePopupBinding.inflate(LayoutInflater.from(context))
         val popupWindow = PopupWindow(popupBinding.root, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+        safeGazeInterface.updateBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE).toFloat())
 
         safeGazeIcon.setOnClickListener {
-            safeGazeInterface.updateBlur(sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE).toFloat())
             val iconRect = Rect()
             safeGazeIcon.getGlobalVisibleRect(iconRect)
             val x = iconRect.left
@@ -4364,9 +4364,9 @@ class BrowserTabFragment :
             Timber.d("New Tab: showNewTab")
 
             // Remove all views except AppStatistics from the container
-            for (i in newBrowserTab.newTabContainerLayout.childCount - 1 downTo 1) {
+            /*for (i in newBrowserTab.newTabContainerLayout.childCount - 1 downTo 1) {
                 newBrowserTab.newTabContainerLayout.removeViewAt(i)
-            }
+            }*/
 
             newTabPageProvider.provideNewTabPageVersion().onEach { newTabPage ->
                 newBrowserTab.newTabContainerLayout.addView(
