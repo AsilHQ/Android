@@ -753,12 +753,17 @@ class BrowserTabViewModel @Inject constructor(
         setAdClickActiveTabData(url)
 
         // we expect refreshCta to be called when a site is fully loaded if browsingShowing -trackers data available-.
-        if (!currentBrowserViewState().browserShowing) {
+        /*if (!currentBrowserViewState().browserShowing) {
             viewModelScope.launch {
                 val cta = refreshCta()
                 showOrHideKeyboard(cta) // we hide the keyboard when showing a DialogCta and HomeCta type in the home screen otherwise we show it
             }
         } else {
+            command.value = HideKeyboard
+        }*/
+        // Kafh: We don't want to popup up the keyboard when the new tab is opened. refreshCta() needs to be called in order to show the bookmarks on Home
+        viewModelScope.launch {
+            refreshCta()
             command.value = HideKeyboard
         }
 
