@@ -10,12 +10,11 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.duckduckgo.app.browser.DuckDuckGoWebView
 import com.duckduckgo.app.safegaze.genderdetection.GenderDetector
 import com.duckduckgo.app.safegaze.nsfwdetection.NsfwDetector
 import com.duckduckgo.app.trackerdetection.db.KahfImageBlocked
 import com.duckduckgo.app.trackerdetection.db.KahfImageBlockedDao
-import com.duckduckgo.common.utils.DefaultDispatcherProvider
+import com.duckduckgo.common.utils.DispatcherProvider
 // import com.duckduckgo.app.safegaze.personDetection.PersonDetector
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import kotlinx.coroutines.CoroutineScope
@@ -24,6 +23,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -31,12 +31,13 @@ internal data class UrlInfo(val url: String, val uid: String)
 
 class SafeGazeJsInterface(
     private val context: Context,
-    private val webView: DuckDuckGoWebView,
     private val nsfwDetector: NsfwDetector,
     private val genderDetector: GenderDetector,
-    private val kahfImageBlockedDao: KahfImageBlockedDao
+    private val kahfImageBlockedDao: KahfImageBlockedDao,
+    dispatcher: DispatcherProvider,
+    private val onUpdateBlur: (blur: Float) -> Unit,
+    private val onImageClassified: (isExist: Boolean, uid: String, quotaExceeded: Boolean) -> Unit
 ) {
-    private val dispatcher: DefaultDispatcherProvider = DefaultDispatcherProvider()
     private val preferences: SharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
 
     private val onDeviceModelCachedResults = mutableMapOf<String, Boolean>()
@@ -46,6 +47,7 @@ class SafeGazeJsInterface(
     private var processingJob: Job? = null
     private val scope = CoroutineScope(dispatcher.io() + Job())
     val counter = UnifiedCounter(preferences)
+    private var paused: AtomicBoolean = AtomicBoolean(false)
 
     private suspend fun shouldBlurImage(url: String, mScope: CoroutineScope, isPersonCheck: Boolean): Boolean {
         return suspendCoroutine { continuation ->
@@ -126,19 +128,12 @@ class SafeGazeJsInterface(
 
     @JavascriptInterface
     fun callSafegazeOnDeviceModelHandler(isExist: Boolean, uid: String, quotaExceeded: Boolean) {
-        val jsFunctionCall = "safegazeOnDeviceModelHandler($isExist, '$uid', $quotaExceeded);"
-        webView.post {
-            webView.evaluateJavascript(jsFunctionCall, null)
-        }
+        onImageClassified(isExist, uid, quotaExceeded)
     }
 
     @JavascriptInterface
     fun updateBlur(blur: Float){
-        val trimmedBlur = blur / 100
-        val jsFunction = "window.blurIntensity = $trimmedBlur; updateBluredImageOpacity();"
-        webView.post {
-            webView.evaluateJavascript(jsFunction, null)
-        }
+        onUpdateBlur(blur)
     }
 
     @JavascriptInterface
@@ -164,7 +159,7 @@ class SafeGazeJsInterface(
     }
 
     private fun processQueue() {
-        if (processingJob?.isActive != true) {
+        if (!paused.get() && processingJob?.isActive != true) {
             processingJob = scope.launch {
                 while (urlQueue.isNotEmpty()) {
                     val task = urlQueue.poll()
@@ -188,4 +183,22 @@ class SafeGazeJsInterface(
         counter.saveToPreferences()
         scope.cancel()
     }
+
+    fun onTabPaused(tabId: String) {
+        paused.set(true)
+        processingJob?.cancel()
+        counter.saveToPreferences()
+    }
+
+    fun onTabResumed(tabId: String) {
+        paused.set(false)
+
+        processingJob?.let {
+            if (urlQueue.isNotEmpty() && !it.isActive) {
+                processQueue()
+                Timber.d("kLog processing job resumed for $tabId")
+            }
+        }
+    }
+
 }

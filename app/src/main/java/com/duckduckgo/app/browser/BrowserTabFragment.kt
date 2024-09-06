@@ -2628,7 +2628,22 @@ class BrowserTabFragment :
         ).findViewById(R.id.browserWebView)
 
         webView?.let {
-            safeGazeInterface = SafeGazeJsInterface(requireContext(), webView!!, nsfwDetector, genderDetector, kahfImageBlockedDao)
+            safeGazeInterface = SafeGazeJsInterface(
+                requireContext(), nsfwDetector, genderDetector, kahfImageBlockedDao, dispatchers,
+                onUpdateBlur = { blur ->
+                    val trimmedBlur = blur / 100
+                    val jsFunction = "window.blurIntensity = $trimmedBlur; updateBluredImageOpacity();"
+                    webView?.post {
+                        webView?.evaluateJavascript(jsFunction, null)
+                    }
+                },
+                onImageClassified = { isExist, uid, quotaExceeded ->
+                    val jsFunctionCall = "safegazeOnDeviceModelHandler($isExist, '$uid', $quotaExceeded);"
+                    webView?.post {
+                        webView?.evaluateJavascript(jsFunctionCall, null)
+                    }
+                },
+            )
 
             it.webViewClient = webViewClient
             it.webChromeClient = webChromeClient
@@ -3361,6 +3376,7 @@ class BrowserTabFragment :
         viewModel.onViewHidden()
         downloadMessagesJob.cancel()
         webView?.onPause()
+        safeGazeInterface.onTabPaused(tabId)
     }
 
     private fun onTabVisible() {
@@ -3368,6 +3384,7 @@ class BrowserTabFragment :
         webView?.onResume()
         launchDownloadMessagesJob()
         viewModel.onViewVisible()
+        safeGazeInterface.onTabResumed(tabId)
     }
 
     private fun launchDownloadMessagesJob() {
