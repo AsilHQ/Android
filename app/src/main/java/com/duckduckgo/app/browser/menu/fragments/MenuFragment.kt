@@ -60,7 +60,7 @@ class MenuFragment : DuckDuckGoFragment(R.layout.fragment_menu) {
 
         val itemList = mutableListOf<MenuItem>()
 
-        BrowserTabFragment.viewStateForMenuActivity?.apply {
+        /*BrowserTabFragment.viewStateForMenuActivity?.apply {
             // New Tab
             if (browserShowing && !displayedInCustomTabScreen)
                 itemList.add(MenuItem(RR.drawable.ic_add_16, getString(R.string.newTabMenuItem), R.id.newTabMenuItem))
@@ -147,7 +147,7 @@ class MenuFragment : DuckDuckGoFragment(R.layout.fragment_menu) {
             if (!displayedInCustomTabScreen)
                 itemList.add(MenuItem(RR.drawable.ic_settings_16, getString(R.string.settingsMenuItemTitle), R.id.settingsMenuItem))
 
-        }
+        }*/
 
         binding.rvMenu.adapter = MenuRvAdapter(itemList) {
             val intent = Intent()
