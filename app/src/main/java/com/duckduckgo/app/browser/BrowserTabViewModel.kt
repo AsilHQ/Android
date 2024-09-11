@@ -946,7 +946,7 @@ class BrowserTabViewModel @Inject constructor(
 
                 if (privateDnsEnabled) {
                     runBlocking {
-                        val ip = dnsResolver.sendDnsQueries(urlToNavigate.toUri())
+                        val ip = dnsResolver.resolveDomain(urlToNavigate.toUri())
                         if (ip?.first == "0.0.0.0" || ip?.second == KAHF_GUARD_BLOCKED_URL) {
                             urlToNavigate = "https://${ip.second}"
                             kahfBlockCountUpdate.value = urlToNavigate

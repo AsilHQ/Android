@@ -83,6 +83,7 @@ class UrlExtractingWebViewClient(
                 webView,
                 documentUrl,
                 null,
+                false,
             )
         }
     }

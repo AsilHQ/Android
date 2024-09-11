@@ -2,155 +2,98 @@ package com.duckduckgo.app.dns
 
 import androidx.core.net.toUri
 import com.duckduckgo.common.utils.DispatcherProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import org.xbill.DNS.DClass
-import org.xbill.DNS.Message
+import okhttp3.Dns
+import org.xbill.DNS.CNAMERecord
+import org.xbill.DNS.ExtendedResolver
+import org.xbill.DNS.Lookup
 import org.xbill.DNS.Record
-import org.xbill.DNS.Section
+import org.xbill.DNS.Resolver
+import org.xbill.DNS.SimpleResolver
 import org.xbill.DNS.Type
 import timber.log.Timber
-import java.io.IOException
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
+import java.net.InetAddress
 
-data class CachedDnsResponse(
-    val message: Message,
-    val expirationTimeMillis: Long
-) {
-    fun isExpired() = System.currentTimeMillis() > expirationTimeMillis
-}
+class CustomDnsResolver(private val dispatcher: DispatcherProvider): Dns {
 
-class CustomDnsResolver(private val dispatcher: DispatcherProvider) {
-    companion object {
-        private val cache = ConcurrentHashMap<String, CachedDnsResponse>()
+    private val dnsResolverHigh: Resolver = SimpleResolver("low.kahfguard.com").apply {
+        timeout = java.time.Duration.ofSeconds(3)
     }
 
-    private val dohServerUrl = "https://sp-dns-doh.kahfguard.com/dns-query"
-    private val client = OkHttpClient()
+    init {
+        Lookup.setDefaultResolver(
+            ExtendedResolver(arrayOf(dnsResolverHigh)),
+        )
+    }
+
+    override fun lookup(hostname: String): List<InetAddress> {
+        val resolvedIp = resolveDomain(hostname.toUri())
+
+        return if (resolvedIp != null) {
+            listOf(InetAddress.getByName(resolvedIp.first))
+        } else {
+            Dns.SYSTEM.lookup(hostname)  // FIXME return empty list
+        }
+    }
 
     /**
-     * @return Pair.first is the IP address, Pair.second is the domain name
+     * Resolves a domain name to its IP address, following CNAME records if needed.
+     * @param domain The domain name to resolve.
+     * @return Pair.first is the IP/CNAME, Pair.second is the domain name.
      */
-    suspend fun sendDnsQueries(domain: android.net.Uri, visitedDomains: MutableSet<String> = mutableSetOf()): Pair<String, String>? {
-        val host = (domain.host ?: domain.toString()).removeSuffix(".").plus(".")
-
-        return checkCacheAndSendRequest(host, Type.A, createDnsQuery(host, Type.A), visitedDomains)
-            ?: checkCacheAndSendRequest(host, Type.AAAA, createDnsQuery(host, Type.AAAA), visitedDomains)
-            ?: checkCacheAndSendRequest(host, Type.CNAME, createDnsQuery(host, Type.CNAME), visitedDomains)
+    fun resolveDomain(domain: android.net.Uri): Pair<String, String>? {
+        val host = (domain.host ?: domain.toString()).removeSuffix(".")
+        return resolveDomainRecursive(host, 0)
     }
 
-    private suspend fun checkCacheAndSendRequest(
-        domain: String,
-        recordType: Int,
-        queryData: ByteArray,
-        visitedDomains: MutableSet<String>
-    ): Pair<String, String>? {
-        val cacheKey = "$domain-$recordType"
-        cache[cacheKey]?.takeUnless { it.isExpired() }?.let { cachedResponse ->
-            return getDnsResponse(cachedResponse.message, visitedDomains)
+    private fun resolveDomainRecursive(domain: String, depth: Int): Pair<String, String>? {
+        if (depth > MAX_DEPTH) {
+            Timber.d("ipLog Exceeded maximum CNAME resolution depth for $domain")
+            return null
         }
 
-        return sendDoHRequest(queryData, recordType, domain, visitedDomains)
-    }
+        try {
+            val lookup = Lookup(domain, Type.A)
+            val records: Array<Record>? = lookup.run()
 
-    private fun createDnsQuery(domain: String, type: Int): ByteArray {
-        val name = org.xbill.DNS.Name.fromString(domain, org.xbill.DNS.Name.root)
-        val record = Record.newRecord(name, type, DClass.IN)
-        val query = Message.newQuery(record)
-
-        return query.toWire()
-    }
-
-    private suspend fun sendDoHRequest(
-        queryData: ByteArray,
-        recordType: Int,
-        domain: String,
-        visitedDomains: MutableSet<String>
-    ): Pair<String, String>? {
-        val request = Request.Builder()
-            .url(dohServerUrl)
-            .addHeader("Content-Type", "application/dns-message")
-            .addHeader("Accept", "application/dns-message")
-            .post(queryData.toRequestBody("application/dns-message".toMediaTypeOrNull())) // Simplified request body
-            .build()
-
-        return suspendCoroutine { continuation ->
-            client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    Timber.e(e)
-                    continuation.resume(null)
-                }
-
-                override fun onResponse(call: Call, response: Response) {
-                    if (response.isSuccessful) {
-                        response.body?.bytes()?.let { responseBytes ->
-                            val responseMessage = Message(responseBytes)
-                            cacheDnsResponse(domain, recordType, responseMessage)
-
-                            CoroutineScope(dispatcher.io()).launch {
-                                val dnsResponse = getDnsResponse(responseMessage, visitedDomains)
-                                continuation.resume(dnsResponse)
-                            }
-                        } ?: continuation.resume(null)
-                    } else {
-                        continuation.resume(null)
-                        Timber.e("DoH query failed with status code ${response.code}")
-                    }
-                }
-            })
-        }
-    }
-
-    private suspend fun getDnsResponse(responseMessage: Message, visitedDomains: MutableSet<String>): Pair<String, String>? {
-        val answers = responseMessage.getSection(Section.ANSWER)
-        val results = mutableListOf<Pair<String, String>?>()
-
-        // Checking for A record when there are multiple answers
-        val aRecord = answers.firstOrNull { it.type == Type.A }
-        if (aRecord != null) {
-            return Pair(aRecord.rdataToString(), aRecord.name.toString(true))
-        }
-
-        for (record in answers) {
-            when (record.type) {
-                Type.AAAA -> {
-                    val ipAddress = record.rdataToString()
-                    results.add(Pair(ipAddress, record.name.toString(true)))
-                }
-                Type.CNAME -> {
-                    val cnameTarget = record.rdataToString()
-
-                    if (!visitedDomains.contains(cnameTarget)) {
-                        visitedDomains.add(cnameTarget)
-                        results.add(sendDnsQueries(cnameTarget.toUri(), visitedDomains))
-                    } else {
-                        results.add(null)
-                    }
-                }
-                else -> results.add(null)
+            if (lookup.result == Lookup.SUCCESSFUL) {
+                val ipAddress = records?.firstOrNull()?.rdataToString() ?: ""
+                return Pair(ipAddress, domain)
+            } else {
+                Timber.d("ipLog Failed to resolve domain: $domain. Reason: ${lookup.errorString}")
+                // Try resolving CNAME if no A records found
+                return resolveCname(domain, depth)
             }
+        } catch (e: Exception) {
+            Timber.d("ipLog Exception occurred: ${e.message}")
+            return null
         }
-
-        return results.firstOrNull()
     }
 
-    private fun cacheDnsResponse(domain: String, recordType: Int, responseMessage: Message) {
-        val cacheKey = "$domain-$recordType"
-        val ttl = responseMessage.getMinTTL()
-        val cachedResponse = CachedDnsResponse(responseMessage, System.currentTimeMillis() + ttl * 1000)
-        cache[cacheKey] = cachedResponse
+    private fun resolveCname(domain: String, depth: Int): Pair<String, String>? {
+        return try {
+            val lookup = Lookup(domain, Type.CNAME)
+            val records: Array<Record>? = lookup.run()
+
+            if (lookup.result == Lookup.SUCCESSFUL) {
+                val cnameRecord = records?.firstOrNull() as? CNAMERecord
+                cnameRecord?.let {
+                    val cnameTarget = it.target.toString()
+                    resolveDomainRecursive(cnameTarget, depth + 1)
+                } ?: run {
+                    Timber.d("ipLog No CNAME record found for $domain")
+                    null
+                }
+            } else {
+                Timber.d("ipLog Failed to resolve CNAME for $domain. Reason: ${lookup.errorString}")
+                null
+            }
+        } catch (e: Exception) {
+            Timber.d("ipLog Exception occurred while resolving CNAME: ${e.message}")
+            null
+        }
     }
 
-    private fun Message.getMinTTL(): Long {
-        return getSection(Section.ANSWER).minOfOrNull { it.ttl } ?: 0L
+    companion object {
+        const val MAX_DEPTH: Int = 5
     }
 }

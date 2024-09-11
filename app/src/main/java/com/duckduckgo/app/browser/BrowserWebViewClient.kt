@@ -465,11 +465,11 @@ class BrowserWebViewClient @Inject constructor(
     private suspend fun resolveDns(uri: Uri): Pair<String, String> {
         return suspendCoroutine { continuation ->
             CoroutineScope(dispatcherProvider.io()).launch {
-                // val initialTime = System.currentTimeMillis()
-                val ip = dnsResolver.sendDnsQueries(uri)
-                // Timber.d("ipLog $ip || lookup time ${System.currentTimeMillis() - initialTime}ms || ${uri.host}")
+                val initialTime = System.currentTimeMillis()
+                val ip = dnsResolver.resolveDomain(uri)
+                Timber.d("ipLog $ip || lookup time ${System.currentTimeMillis() - initialTime}ms || ${uri.host}")
                 continuation.resume(ip ?: Pair("", uri.toString()))
-                // "${uri.scheme}://${ip}${uri.path}${uri.query?.let { "?$it" } ?: ""}"
+                "${uri.scheme}://${ip}${uri.path}${uri.query?.let { "?$it" } ?: ""}"
             }
         }
     }
@@ -610,7 +610,7 @@ class BrowserWebViewClient @Inject constructor(
                             loginDetector.onEvent(WebNavigationEvent.ShouldInterceptRequest(webView, request))
                         }
                         Timber.v("Intercepting resource ${request.url} type:${request.method} on page $documentUrl")
-                        requestInterceptor.shouldIntercept(request, webView, documentUrl?.toUri(), webViewClientListener)
+                        requestInterceptor.shouldIntercept(request, webView, documentUrl?.toUri(), webViewClientListener, privateDnsEnabled)
                     }
                 } catch (e: Exception) {
                     null

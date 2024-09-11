@@ -22,6 +22,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import androidx.annotation.WorkerThread
 import com.duckduckgo.adclick.api.AdClickManager
+import com.duckduckgo.app.dns.CustomDnsResolver
 import com.duckduckgo.app.privacy.db.PrivacyProtectionCountDao
 import com.duckduckgo.app.privacy.model.TrustedSites
 import com.duckduckgo.app.surrogates.ResourceSurrogates
@@ -38,7 +39,14 @@ import com.duckduckgo.privacy.config.api.Gpc
 import com.duckduckgo.request.filterer.api.RequestFilterer
 import com.duckduckgo.user.agent.api.UserAgentProvider
 import kotlinx.coroutines.withContext
+import okhttp3.Cache
+import okhttp3.Headers
+import okhttp3.Headers.Companion.toHeaders
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import timber.log.Timber
+import java.io.File
+import java.nio.charset.Charset
 
 interface RequestInterceptor {
 
@@ -48,6 +56,7 @@ interface RequestInterceptor {
         webView: WebView,
         documentUri: Uri?,
         webViewClientListener: WebViewClientListener?,
+        privateDnsEnabled: Boolean,
     ): WebResourceResponse?
 
     @WorkerThread
@@ -70,7 +79,12 @@ class WebViewRequestInterceptor(
     private val cloakedCnameDetector: CloakedCnameDetector,
     private val requestFilterer: RequestFilterer,
     private val dispatchers: DispatcherProvider = DefaultDispatcherProvider(),
+    private val dnsResolver: CustomDnsResolver
 ) : RequestInterceptor {
+
+    private lateinit var appCache: Cache
+    private lateinit var bootstrapClient: OkHttpClient
+    private lateinit var client: OkHttpClient
 
     override fun onPageStarted(url: String) {
         requestFilterer.registerOnPageCreated(url)
@@ -91,6 +105,7 @@ class WebViewRequestInterceptor(
         webView: WebView,
         documentUri: Uri?,
         webViewClientListener: WebViewClientListener?,
+        privateDnsEnabled: Boolean
     ): WebResourceResponse? {
         val url = request.url
 
@@ -128,17 +143,17 @@ class WebViewRequestInterceptor(
             return WebResourceResponse(null, null, null)
         }
 
-        if (documentUri == null) return null
+        if (documentUri == null) return if (privateDnsEnabled) loadContentFromResolvedIp(request) else null
 
         if (TrustedSites.isTrusted(documentUri)) {
-            return null
+            return if (privateDnsEnabled) loadContentFromResolvedIp(request) else null
         }
 
         if (url != null && url.isHttp) {
             webViewClientListener?.pageHasHttpResources(documentUri)
         }
 
-        return getWebResourceResponse(request, documentUri, webViewClientListener)
+        return getWebResourceResponse(request, documentUri, webViewClientListener, privateDnsEnabled)
     }
 
     override suspend fun shouldInterceptFromServiceWorker(
@@ -152,13 +167,14 @@ class WebViewRequestInterceptor(
             return null
         }
 
-        return getWebResourceResponse(request, documentUrl, null)
+        return getWebResourceResponse(request, documentUrl, null, false)
     }
 
     private fun getWebResourceResponse(
         request: WebResourceRequest,
         documentUrl: Uri,
         webViewClientListener: WebViewClientListener?,
+        privateDnsEnabled: Boolean
     ): WebResourceResponse? {
         val trackingEvent = trackingEvent(request, documentUrl, webViewClientListener)
         if (trackingEvent?.status == TrackerStatus.BLOCKED) {
@@ -175,7 +191,7 @@ class WebViewRequestInterceptor(
                 }
             }
         }
-        return null
+        return if (privateDnsEnabled) loadContentFromResolvedIp(request) else null
     }
 
     private fun blockRequest(
@@ -276,4 +292,47 @@ class WebViewRequestInterceptor(
 
     private fun appUrlPixel(url: Uri?): Boolean =
         url?.toString()?.startsWith(AppUrl.Url.PIXEL) == true
+
+    private fun getClient(): OkHttpClient {
+        if (!::client.isInitialized) {
+            appCache = Cache(File("cacheDir", "okhttpcache"), 10 * 1024 * 1024)
+            bootstrapClient = OkHttpClient.Builder().cache(appCache).build()
+            client = bootstrapClient.newBuilder().dns(dnsResolver).build()
+        }
+
+        return client
+    }
+
+    // Load the content from the resolved IP but with the original host as Host header
+    private fun loadContentFromResolvedIp(webResourceRequest: WebResourceRequest): WebResourceResponse? {
+        try {
+            val url: String = webResourceRequest.url.toString()
+
+            // if (url.contains("recaptcha")) return null
+
+            val headers: Headers? = webResourceRequest.requestHeaders?.toHeaders()
+
+            val newRequest = headers?.let {
+                Request.Builder()
+                    .url(url)
+                    .headers(headers)
+                    .build()
+            }
+
+            val response = newRequest?.let { getClient().newCall(newRequest).execute() }
+
+            return response?.let { it ->
+                WebResourceResponse(
+                    /* mimeType = */ it.body?.contentType()?.let { "${it.type}/${it.subtype}" },
+                    /* encoding = */ it.body?.contentType()?.charset(Charset.defaultCharset())?.name(),
+                    /* statusCode = */ it.code,
+                    /* reasonPhrase = */ "OK",
+                    /* responseHeaders = */ it.headers.toMap(),
+                    /* data = */ it.body?.byteStream()
+                )
+            }
+        } catch (e: Exception) {
+            return null
+        }
+    }
 }

@@ -198,6 +198,7 @@ class BrowserModule {
         adClickManager: AdClickManager,
         cloakedCnameDetector: CloakedCnameDetector,
         requestFilterer: RequestFilterer,
+        customDnsResolver: CustomDnsResolver
     ): RequestInterceptor =
         WebViewRequestInterceptor(
             resourceSurrogates,
@@ -209,6 +210,7 @@ class BrowserModule {
             adClickManager,
             cloakedCnameDetector,
             requestFilterer,
+            dnsResolver = customDnsResolver
         )
 
     @Provides
