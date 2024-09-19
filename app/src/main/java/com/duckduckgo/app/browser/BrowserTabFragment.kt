@@ -1000,7 +1000,7 @@ class BrowserTabFragment :
                     editor = editor,
                     onModeChanged = {
                         val updated = updateDnsAndSafeGazeSettings(it)
-                        if (updated) webView?.reload()
+                        if (updated) (requireActivity() as BrowserActivity).updateVpnMode(it)
                     },
                     onShareClicked = {
                         val shareIntent = Intent(Intent.ACTION_SEND)
@@ -1048,6 +1048,16 @@ class BrowserTabFragment :
         }
     }
 
+    fun modeChanged() {
+        lifecycleScope.launch {
+            withContext(dispatchers.main()) {
+                if (isVisible) {
+                    webView?.reload()
+                }
+            }
+        }
+    }
+
     private fun updateDnsAndSafeGazeSettings(selection: SafetyLevel): Boolean {
         val currentMode = sharedPreferences.getString(SAFE_GAZE_INTENSITY, "") ?: ""
         if (SafetyLevel.get(currentMode) == selection) {
@@ -1067,7 +1077,7 @@ class BrowserTabFragment :
     }
 
     private fun isPrivateDnsEnabled(): Boolean {
-        return sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
+        return false// sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
     }
 
     @Suppress("DEPRECATION")

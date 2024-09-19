@@ -17,9 +17,13 @@
 package com.duckduckgo.app.browser
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.EXTRA_TEXT
+import android.content.IntentFilter
+import android.net.ConnectivityManager
+import android.net.VpnService
 import android.os.Bundle
 import android.os.Handler
 import android.os.Message
@@ -30,7 +34,12 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.webkit.ServiceWorkerClientCompat
 import androidx.webkit.ServiceWorkerControllerCompat
 import androidx.webkit.WebViewFeature
@@ -41,16 +50,20 @@ import com.duckduckgo.app.browser.databinding.ActivityBrowserBinding
 import com.duckduckgo.app.browser.databinding.IncludeOmnibarToolbarMockupBinding
 import com.duckduckgo.app.browser.shortcut.ShortcutBuilder
 import com.duckduckgo.app.di.AppCoroutineScope
+import com.duckduckgo.app.dns.DnsOverVpnService
 import com.duckduckgo.app.downloads.DownloadsActivity
 import com.duckduckgo.app.feedback.ui.common.FeedbackActivity
 import com.duckduckgo.app.fire.DataClearer
 import com.duckduckgo.app.fire.DataClearerForegroundAppRestartPixel
-import com.duckduckgo.app.global.*
+import com.duckduckgo.app.global.ApplicationClearDataState
 import com.duckduckgo.app.global.events.db.UserEventsStore
+import com.duckduckgo.app.global.intentText
 import com.duckduckgo.app.global.rating.PromptCount
+import com.duckduckgo.app.global.sanitize
 import com.duckduckgo.app.global.view.ClearDataAction
 import com.duckduckgo.app.global.view.FireDialog
 import com.duckduckgo.app.global.view.renderIfChanged
+import com.duckduckgo.app.kahftube.SafetyLevel
 import com.duckduckgo.app.onboarding.ui.page.DefaultBrowserPage
 import com.duckduckgo.app.pixels.AppPixelName
 import com.duckduckgo.app.pixels.AppPixelName.FIRE_DIALOG_CANCEL
@@ -67,16 +80,18 @@ import com.duckduckgo.common.ui.view.gone
 import com.duckduckgo.common.ui.view.show
 import com.duckduckgo.common.ui.viewbinding.viewBinding
 import com.duckduckgo.common.utils.DispatcherProvider
+import com.duckduckgo.common.utils.SAFE_GAZE_INTENSITY
+import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import com.duckduckgo.common.utils.playstore.PlayStoreUtils
 import com.duckduckgo.di.scopes.ActivityScope
 import com.duckduckgo.navigation.api.GlobalActivityStarter
 import com.duckduckgo.privacy.dashboard.api.ui.PrivacyDashboardHybridScreen.PrivacyDashboardHybridWithTabIdParam
 import com.duckduckgo.savedsites.impl.bookmarks.BookmarksActivity.Companion.SAVED_SITE_URL_EXTRA
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 // open class so that we can test BrowserApplicationStateInfo
 @InjectWith(ActivityScope::class)
@@ -136,6 +151,24 @@ open class BrowserActivity : DuckDuckGoActivity() {
 
     private var openMessageInNewTabJob: Job? = null
 
+    private val connectivityManager by lazy { this.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager }
+
+    private val sharedPreference by lazy { getSharedPreferences(SAFE_GAZE_PREFERENCES, MODE_PRIVATE) }
+
+    private val receiveBroadcastMessageFromVpnService: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(
+            context: Context,
+            intent: Intent
+        ) {
+            if (intent.action == DnsOverVpnService.INTENT_VPN_STATUS_CHANGED) {
+                val newStatus = intent.getBooleanExtra("status", false)
+                println("Broadcast Receiver status -> $newStatus")
+            } else if (intent.action == DnsOverVpnService.INTENT_VPN_MODE_CHANGED) {
+                currentTab?.modeChanged()
+            }
+        }
+    }
+
     @VisibleForTesting
     var destroyedByBackPress: Boolean = false
 
@@ -171,6 +204,13 @@ open class BrowserActivity : DuckDuckGoActivity() {
             viewModel.onLaunchedFromNotification(it)
         }
         configureOnBackPressedListener()
+
+        LocalBroadcastManager.getInstance(this).apply {
+            registerReceiver(receiveBroadcastMessageFromVpnService, IntentFilter(DnsOverVpnService.INTENT_VPN_STATUS_CHANGED))
+            registerReceiver(receiveBroadcastMessageFromVpnService, IntentFilter(DnsOverVpnService.INTENT_VPN_MODE_CHANGED))
+        }
+
+        observeVpnService()
     }
 
     override fun onStop() {
@@ -200,6 +240,71 @@ open class BrowserActivity : DuckDuckGoActivity() {
         }
 
         viewModel.launchFromThirdParty()
+    }
+
+    private fun observeVpnService() {
+        ProcessLifecycleOwner.get().lifecycle.addObserver(
+            object : LifecycleEventObserver {
+                override fun onStateChanged(
+                    source: LifecycleOwner,
+                    event: Lifecycle.Event
+                ) {
+                    if (event == Lifecycle.Event.ON_START && !DnsOverVpnService.isVpnRunning(connectivityManager)) {
+                        val safetyLevel = SafetyLevel.get(sharedPreference.getString(SAFE_GAZE_INTENSITY, "") ?: "")
+                        connectVpn(safetyLevel)
+                    } else if (event == Lifecycle.Event.ON_STOP && DnsOverVpnService.isVpnRunning(connectivityManager)) {
+                        disconnectVpn()
+                    }
+                }
+            }
+        )
+    }
+
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?,
+    ) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == RESULT_OK) {
+            Timber.d("vpnLog mode: ${requestedLevel.name}")
+
+            val intent = Intent(this, DnsOverVpnService::class.java).also {
+                it.putExtra("mode", requestedLevel.name)
+                it.setAction(DnsOverVpnService.INTENT_ACTION_START_VPN)
+            }
+            startService(intent)
+        }
+    }
+
+    private var requestedLevel: SafetyLevel = SafetyLevel.Low
+
+    @Suppress("DEPRECATION")
+    private fun connectVpn(level: SafetyLevel) {
+        requestedLevel = level
+
+        val intent = VpnService.prepare(applicationContext)
+        if (intent != null) {
+            startActivityForResult(intent, 0)
+        } else {
+            onActivityResult(0, RESULT_OK, null)
+        }
+    }
+
+    private fun disconnectVpn() {
+        val intent = Intent(this, DnsOverVpnService::class.java)
+        intent.setAction(DnsOverVpnService.INTENT_ACTION_STOP_VPN)
+        startService(intent)
+    }
+
+    fun updateVpnMode(level: SafetyLevel) {
+        startService(Intent(this, DnsOverVpnService::class.java).also {
+            it.putExtra("mode", level.name)
+            it.setAction(DnsOverVpnService.INTENT_CHANGE_MODE)
+        })
     }
 
     private fun initializeServiceWorker() {

@@ -592,7 +592,7 @@ class BrowserWebViewClient @Inject constructor(
     ): WebResourceResponse? {
         val url = request.url.toString()
         if (request.url.host == KAHF_GUARD_BLOCKED_URL) return null
-        val privateDnsEnabled = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
+        val privateDnsEnabled = false //sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
 
         return runBlocking {
             withContext(dispatcherProvider.io()) {
