@@ -308,7 +308,8 @@ class WebViewRequestInterceptor(
         try {
             val url: String = webResourceRequest.url.toString()
 
-            // if (url.contains("recaptcha")) return null
+            // Timber.d("tpLog $url")
+            if (url.contains("google.com/recaptcha")) return null
 
             val headers: Headers? = webResourceRequest.requestHeaders?.toHeaders()
 
