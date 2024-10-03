@@ -590,11 +590,35 @@ class BrowserWebViewClient @Inject constructor(
         webView: WebView,
         request: WebResourceRequest,
     ): WebResourceResponse? {
-        // val url = request.url.toString()
+        val url = request.url.toString()
         if (request.url.host == KAHF_GUARD_BLOCKED_URL) return null
         val privateDnsEnabled = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
 
         return runBlocking {
+            withContext(dispatcherProvider.io()) {
+                try {
+                    if (privateDnsEnabled && resolveDns(Uri.parse(url)).second == KAHF_GUARD_BLOCKED_URL) {
+                        if (request.isForMainFrame) {
+                            withContext(dispatcherProvider.main()) {
+                                webViewClientListener?.onUrlBlocked(url)
+                            }
+                        }
+                        WebResourceResponse(null, null, null)
+                    } else {
+                        val documentUrl = withContext(dispatcherProvider.main()) { webView.url }
+                        withContext(dispatcherProvider.main()) {
+                            loginDetector.onEvent(WebNavigationEvent.ShouldInterceptRequest(webView, request))
+                        }
+                        Timber.v("Intercepting resource ${request.url} type:${request.method} on page $documentUrl")
+                        requestInterceptor.shouldIntercept(request, webView, documentUrl?.toUri(), webViewClientListener, privateDnsEnabled)
+                    }
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        }
+
+        /*return runBlocking {
             withContext(dispatcherProvider.io()) {
                 try {
                     val documentUrl = withContext(dispatcherProvider.main()) { webView.url }
@@ -607,7 +631,7 @@ class BrowserWebViewClient @Inject constructor(
                     null
                 }
             }
-        }
+        }*/
     }
 
     private fun isImageUrl(url: String): Boolean {

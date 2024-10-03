@@ -17,6 +17,7 @@
 package com.duckduckgo.app.browser
 
 import android.net.Uri
+import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -47,6 +48,12 @@ import okhttp3.Request
 import timber.log.Timber
 import java.io.File
 import java.nio.charset.Charset
+
+data class SafeSearchCandidate(
+    val domain: String,
+    val pathContains: String? = null,
+    val queryParam: String? = null
+)
 
 interface RequestInterceptor {
 
@@ -85,6 +92,18 @@ class WebViewRequestInterceptor(
     private lateinit var appCache: Cache
     private lateinit var bootstrapClient: OkHttpClient
     private lateinit var client: OkHttpClient
+    private val cookieManager: CookieManager = CookieManager.getInstance()
+
+    private val safeSearchCandidates = listOf(
+        SafeSearchCandidate("google.com", pathContains = "search", queryParam = "q"),
+        SafeSearchCandidate("bing.com", pathContains = "search", queryParam = "q"),
+        SafeSearchCandidate("ecosia.org", queryParam = "q"),
+        SafeSearchCandidate("duckduckgo.com", queryParam = "q"),
+        SafeSearchCandidate("ask.com", queryParam = "q"),
+        SafeSearchCandidate("search.yahoo.com", queryParam = "p"), // intentionally kept 'p'
+        SafeSearchCandidate("search.brave.com", pathContains = "", queryParam = ""), // not working even in system level private DNS
+        SafeSearchCandidate("youtube.com"),
+    )
 
     override fun onPageStarted(url: String) {
         requestFilterer.registerOnPageCreated(url)
@@ -303,20 +322,36 @@ class WebViewRequestInterceptor(
         return client
     }
 
+    private fun shouldEnforceSafeSearch(url: Uri): Boolean {
+        return try {
+            val host = url.host ?: ""
+            val path = url.path
+            val query = url.query
+
+            safeSearchCandidates.any { engine ->
+                host.contains(engine.domain) &&
+                    (engine.pathContains?.let { path?.contains(it) } ?: true) &&
+                    engine.queryParam?.let { query?.contains("$it=") } ?: true
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     // Load the content from the resolved IP but with the original host as Host header
     private fun loadContentFromResolvedIp(webResourceRequest: WebResourceRequest): WebResourceResponse? {
         try {
-            val url: String = webResourceRequest.url.toString()
+            val urlString: String = webResourceRequest.url.toString()
 
-            // Timber.d("tpLog $url")
-            if (url.contains("google.com/recaptcha")) return null
+            if (!shouldEnforceSafeSearch(webResourceRequest.url)) return null
 
             val headers: Headers? = webResourceRequest.requestHeaders?.toHeaders()
 
             val newRequest = headers?.let {
                 Request.Builder()
-                    .url(url)
+                    .url(urlString)
                     .headers(headers)
+                    .addHeader("Cookie", cookieManager.getCookie(urlString))
                     .build()
             }
 
