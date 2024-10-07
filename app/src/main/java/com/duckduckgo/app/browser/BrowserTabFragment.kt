@@ -1108,24 +1108,54 @@ class BrowserTabFragment :
             }
         }
     }
-
     private fun loadImageWithBlur(blurRadius: Int, imageView: ImageView) {
         val bitmap = BitmapFactory.decodeResource(resources, R.drawable.blur_image_background)
+        
+        // Convert blurRadius to a 0-1 scale to match the JS blurIntensity
+        val blurIntensity = blurRadius / 100f
+    
+        // Calculate blur value between 2px and 8px
+        val blurValue = 2 + (blurIntensity * 6)
+    
+        // Calculate brightness value between 200% and 800%
+        val brightnessValue = 2 + (blurIntensity * 6)
+    
+        // Apply blur
         val blurredBitmap = HokoBlur.with(requireContext())
-            .radius(blurRadius / 5)
+            .radius(blurValue.toInt())
             .sampleFactor(1.0f)
             .forceCopy(false)
             .processor()
             .blur(bitmap)
-
-        val matrix = ColorMatrix();
-        val grayScaleAmount = (1-(blurRadius/100.0))
-        matrix.setSaturation(grayScaleAmount.toFloat())
-        val cf = ColorMatrixColorFilter(matrix);
-        imageView.colorFilter = cf;
+    
+        // Apply grayscale, contrast, and brightness
+        val colorMatrix = ColorMatrix()
+        
+        // Grayscale (100%)
+        colorMatrix.setSaturation(0f)
+        
+        // Contrast (500%)
+        val scale = 5f
+        val translate = (-.5f * scale + .5f) * 255f
+        colorMatrix.postConcat(ColorMatrix(floatArrayOf(
+            scale, 0f, 0f, 0f, translate,
+            0f, scale, 0f, 0f, translate,
+            0f, 0f, scale, 0f, translate,
+            0f, 0f, 0f, 1f, 0f
+        )))
+    
+        // Brightness
+        colorMatrix.postConcat(ColorMatrix(floatArrayOf(
+            brightnessValue, 0f, 0f, 0f, 0f,
+            0f, brightnessValue, 0f, 0f, 0f,
+            0f, 0f, brightnessValue, 0f, 0f,
+            0f, 0f, 0f, 1f, 0f
+        )))
+    
+        val colorFilter = ColorMatrixColorFilter(colorMatrix)
+        imageView.colorFilter = colorFilter
         imageView.setImageBitmap(blurredBitmap)
     }
-
     private fun handleSafeGazeCloseView(view: View){
         val safeGazeOpenViewPopUpBinding = SafeGazePopUpCloseBinding.bind(view)
         safeGazeOpenViewPopUpBinding.apply {
