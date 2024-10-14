@@ -150,7 +150,11 @@ class BrowserWebViewClient @Inject constructor(
     lateinit var activity: FragmentActivity
     private var start: Long? = null
     private var sharedPreferences: SharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
-    private var editor: SharedPreferences.Editor = sharedPreferences.edit()
+    private var safeGazeWhiteList: MutableSet<String> = mutableSetOf()
+
+    init {
+        loadSafeGazeWhiteList()
+    }
 
     /**
      * This is the method of url overriding available from API 24 onwards
@@ -173,8 +177,6 @@ class BrowserWebViewClient @Inject constructor(
         isForMainFrame: Boolean,
     ): Boolean {
         try {
-            // shouldBlockSafeGaze(url.toString())
-
             Timber.v("shouldOverride webViewUrl: ${webView.url} URL: $url")
             webViewClientListener?.onShouldOverride()
             if (isForMainFrame && dosDetector.isUrlGeneratingDos(url)) {
@@ -329,21 +331,13 @@ class BrowserWebViewClient @Inject constructor(
         }
     }
 
-    /*@SuppressLint("SdCardPath")
-    private fun shouldBlockSafeGaze(url: String?): Boolean {
-        // Skip check if safe gaze is disabled
-        val sharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
-        val currentMode = sharedPreferences.getString(SAFE_GAZE_MODE, SAFE_GAZE_DEFAULT) ?: SAFE_GAZE_DEFAULT
-        if (!SafeGazeLevel.isEnabled(currentMode)) {
-            return false
-        }
-
+    @SuppressLint("SdCardPath")
+    private fun loadSafeGazeWhiteList() {
         try {
             val safeGazeTxtFilePath = "${context.filesDir}/safe_gaze.txt"
-            val host = extractHost(url)
             val file = File(safeGazeTxtFilePath)
             if (!file.exists()) {
-                return false
+                return
             }
 
             val inputStream = FileInputStream(file)
@@ -357,25 +351,15 @@ class BrowserWebViewClient @Inject constructor(
                 val components = line?.split("\\s+".toRegex())
                 if (components != null) {
                     val domain = components[0]
-                    if (host.contains(domain)) {
-                        // handleSafeGazeActivation(false)
-                        return true
-                    } else {
-                        // handleSafeGazeActivation(true)
-                    }
+                    safeGazeWhiteList.add(domain)
                 }
             }
-            return false
+
+            Timber.d("SG_BlockList: ${safeGazeWhiteList.joinToString(", ")}")
         } catch (e: Exception) {
-            Timber.d("Safe Gaze Blocker Catch: ${e.localizedMessage ?: e.message ?: e}")
-            return false
+            Timber.d("SG_BlockList Catch: ${e.localizedMessage ?: e.message ?: e}")
         }
     }
-
-    private fun handleSafeGazeActivation(shouldBeActive: Boolean){
-        editor.putBoolean(SAFE_GAZE_MODE, shouldBeActive)
-        editor.apply()
-    }*/
 
     private fun extractHost(url: String?): String {
         return try {
@@ -387,11 +371,11 @@ class BrowserWebViewClient @Inject constructor(
         }
     }
 
-    private fun handleSafeGaze(webView: WebView) {
-        val sharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
+    private fun handleSafeGaze(webView: WebView, url: String?) {
         val currentMode = sharedPreferences.getString(SAFE_GAZE_MODE, SAFE_GAZE_DEFAULT) ?: SAFE_GAZE_DEFAULT
+        val isUrlWhiteListed = safeGazeWhiteList.contains(extractHost(url))
 
-        if (SafeGazeLevel.isEnabled(currentMode)) {
+        if (SafeGazeLevel.isEnabled(currentMode) && !isUrlWhiteListed) {
             // Set blur intensity
             val blurIntensity = sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE).toFloat() / 100f
             val jsFunction = "window.blurIntensity = $blurIntensity;"
@@ -486,7 +470,7 @@ class BrowserWebViewClient @Inject constructor(
         isMainJSLoaded = false
         Timber.v("onPageStarted webViewUrl: ${webView.url} URL: $url progress: ${webView.progress}")
         if (url?.contains("m.youtube.com") != true) {
-            handleSafeGaze(webView)
+            handleSafeGaze(webView, url)
         }
         //handleKahfTube(webView, url)
         url?.let {
