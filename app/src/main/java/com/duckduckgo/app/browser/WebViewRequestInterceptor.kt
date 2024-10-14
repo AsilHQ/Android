@@ -41,8 +41,6 @@ import com.duckduckgo.request.filterer.api.RequestFilterer
 import com.duckduckgo.user.agent.api.UserAgentProvider
 import kotlinx.coroutines.withContext
 import okhttp3.Cache
-import okhttp3.Headers
-import okhttp3.Headers.Companion.toHeaders
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import timber.log.Timber
@@ -52,7 +50,8 @@ import java.nio.charset.Charset
 data class SafeSearchCandidate(
     val domain: String,
     val pathContains: String? = null,
-    val queryParam: String? = null
+    val queryParam: String? = null,
+    val exclude: List<String>? = null
 )
 
 interface RequestInterceptor {
@@ -95,14 +94,14 @@ class WebViewRequestInterceptor(
     private val cookieManager: CookieManager = CookieManager.getInstance()
 
     private val safeSearchCandidates = listOf(
-        SafeSearchCandidate("google.com", pathContains = "search", queryParam = "q"),
+        SafeSearchCandidate("google.com", pathContains = "search", queryParam = "q", exclude = listOf("captcha")),
         SafeSearchCandidate("bing.com", pathContains = "search", queryParam = "q"),
         SafeSearchCandidate("ecosia.org", queryParam = "q"),
         SafeSearchCandidate("duckduckgo.com", queryParam = "q"),
         SafeSearchCandidate("ask.com", queryParam = "q"),
         SafeSearchCandidate("search.yahoo.com", queryParam = "p"), // intentionally kept 'p'
         SafeSearchCandidate("search.brave.com", pathContains = "", queryParam = ""), // not working even in system level private DNS
-        SafeSearchCandidate("youtube.com"),
+        SafeSearchCandidate("youtube.com", exclude = listOf("youtubei/v1")),
     )
 
     override fun onPageStarted(url: String) {
@@ -324,6 +323,8 @@ class WebViewRequestInterceptor(
 
     private fun shouldEnforceSafeSearch(url: Uri): Boolean {
         return try {
+            val urlString = url.toString()
+
             val host = url.host ?: ""
             val path = url.path
             val query = url.query
@@ -331,7 +332,8 @@ class WebViewRequestInterceptor(
             safeSearchCandidates.any { engine ->
                 host.contains(engine.domain) &&
                     (engine.pathContains?.let { path?.contains(it) } ?: true) &&
-                    engine.queryParam?.let { query?.contains("$it=") } ?: true
+                    engine.queryParam?.let { query?.contains("$it=") } ?: true &&
+                    engine.exclude?.let { excludes -> excludes.none { urlString.contains(it) } } ?: true
             }
         } catch (e: Exception) {
             false
@@ -345,19 +347,25 @@ class WebViewRequestInterceptor(
 
             if (!shouldEnforceSafeSearch(webResourceRequest.url)) return null
 
-            val headers: Headers? = webResourceRequest.requestHeaders?.toHeaders()
+            val newRequest = Request.Builder().url(urlString).also { requestBuilder ->
+                // Prepare request header
+                val headers = webResourceRequest.requestHeaders.toMutableMap()
+                if (!headers.containsKey("Cookie")) {
+                    cookieManager.getCookie(urlString)?.let { cookie ->
+                        headers["Cookie"] = cookie
+                    }
+                }
 
-            val newRequest = headers?.let {
-                Request.Builder()
-                    .url(urlString)
-                    .headers(headers)
-                    .addHeader("Cookie", cookieManager.getCookie(urlString))
-                    .build()
-            }
+                headers.forEach { (key, value) ->
+                    requestBuilder.addHeader(key, value)
+                }
+            }.build()
 
-            val response = newRequest?.let { getClient().newCall(newRequest).execute() }
+            val response = newRequest.let { getClient().newCall(newRequest).execute() }
 
-            return response?.let { it ->
+            // Timber.d("zkLog ${response.code} -- $urlString")
+
+            return response.let { it ->
                 WebResourceResponse(
                     /* mimeType = */ it.body?.contentType()?.let { "${it.type}/${it.subtype}" },
                     /* encoding = */ it.body?.contentType()?.charset(Charset.defaultCharset())?.name(),
@@ -368,6 +376,7 @@ class WebViewRequestInterceptor(
                 )
             }
         } catch (e: Exception) {
+            Timber.e(e, "Error in loadContentFromResolvedIp")
             return null
         }
     }
