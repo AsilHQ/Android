@@ -66,7 +66,8 @@ import com.duckduckgo.app.browser.pageloadpixel.firstpaint.PagePaintedHandler
 import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.di.AppCoroutineScope
 import com.duckduckgo.app.dns.CustomDnsResolver
-import com.duckduckgo.app.kahftube.SafetyLevel
+import com.duckduckgo.app.kahftube.PrivateDnsLevel
+import com.duckduckgo.app.kahftube.SafeGazeLevel
 import com.duckduckgo.app.kahftube.SharedPreferenceManager
 import com.duckduckgo.app.kahftube.SharedPreferenceManager.KeyString
 import com.duckduckgo.app.statistics.pixels.Pixel
@@ -78,13 +79,14 @@ import com.duckduckgo.common.ui.view.dialog.TextAlertDialogBuilder
 import com.duckduckgo.common.utils.CurrentTimeProvider
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.KAHF_GUARD_BLOCKED_URL
-import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
+import com.duckduckgo.common.utils.KAHF_GUARD_DEFAULT
+import com.duckduckgo.common.utils.SAFE_GAZE_MODE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
-import com.duckduckgo.common.utils.SAFE_GAZE_INTENSITY
+import com.duckduckgo.common.utils.KAHF_GUARD_INTENSITY
+import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT
 import com.duckduckgo.common.utils.SAFE_GAZE_JS_FILENAME
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
-import com.duckduckgo.common.utils.SAFE_GAZE_PRIVATE_DNS
 import com.duckduckgo.common.utils.plugins.PluginPoint
 import com.duckduckgo.cookies.api.CookieManagerProvider
 import com.duckduckgo.history.api.NavigationHistory
@@ -137,7 +139,7 @@ class BrowserWebViewClient @Inject constructor(
     private val navigationHistory: NavigationHistory,
     private val mediaPlayback: MediaPlayback,
     private val subscriptions: Subscriptions,
-    private val dnsResolver: CustomDnsResolver
+    private val dnsResolver: CustomDnsResolver,
 ) : WebViewClient() {
 
     var webViewClientListener: WebViewClientListener? = null
@@ -171,7 +173,7 @@ class BrowserWebViewClient @Inject constructor(
         isForMainFrame: Boolean,
     ): Boolean {
         try {
-            shouldBlockSafeGaze(url.toString())
+            // shouldBlockSafeGaze(url.toString())
 
             Timber.v("shouldOverride webViewUrl: ${webView.url} URL: $url")
             webViewClientListener?.onShouldOverride()
@@ -327,11 +329,12 @@ class BrowserWebViewClient @Inject constructor(
         }
     }
 
-    @SuppressLint("SdCardPath")
+    /*@SuppressLint("SdCardPath")
     private fun shouldBlockSafeGaze(url: String?): Boolean {
         // Skip check if safe gaze is disabled
-        val currentMode = sharedPreferences.getString(SAFE_GAZE_INTENSITY, "") ?: ""
-        if (!SafetyLevel.isSafeGazeActive(currentMode)) {
+        val sharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
+        val currentMode = sharedPreferences.getString(SAFE_GAZE_MODE, SAFE_GAZE_DEFAULT) ?: SAFE_GAZE_DEFAULT
+        if (!SafeGazeLevel.isEnabled(currentMode)) {
             return false
         }
 
@@ -355,10 +358,10 @@ class BrowserWebViewClient @Inject constructor(
                 if (components != null) {
                     val domain = components[0]
                     if (host.contains(domain)) {
-                        handleSafeGazeActivation(false)
+                        // handleSafeGazeActivation(false)
                         return true
                     } else {
-                        handleSafeGazeActivation(true)
+                        // handleSafeGazeActivation(true)
                     }
                 }
             }
@@ -370,9 +373,9 @@ class BrowserWebViewClient @Inject constructor(
     }
 
     private fun handleSafeGazeActivation(shouldBeActive: Boolean){
-        editor.putBoolean(SAFE_GAZE_ACTIVE, shouldBeActive)
+        editor.putBoolean(SAFE_GAZE_MODE, shouldBeActive)
         editor.apply()
-    }
+    }*/
 
     private fun extractHost(url: String?): String {
         return try {
@@ -386,9 +389,9 @@ class BrowserWebViewClient @Inject constructor(
 
     private fun handleSafeGaze(webView: WebView) {
         val sharedPreferences = context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
-        val isSafeGazeActive = sharedPreferences.getBoolean(SAFE_GAZE_ACTIVE, false)
+        val currentMode = sharedPreferences.getString(SAFE_GAZE_MODE, SAFE_GAZE_DEFAULT) ?: SAFE_GAZE_DEFAULT
 
-        if (isSafeGazeActive) {
+        if (SafeGazeLevel.isEnabled(currentMode)) {
             // Set blur intensity
             val blurIntensity = sharedPreferences.getInt(SAFE_GAZE_BLUR_PROGRESS, SAFE_GAZE_DEFAULT_BLUR_VALUE).toFloat() / 100f
             val jsFunction = "window.blurIntensity = $blurIntensity;"
@@ -592,7 +595,8 @@ class BrowserWebViewClient @Inject constructor(
     ): WebResourceResponse? {
         val url = request.url.toString()
         if (request.url.host == KAHF_GUARD_BLOCKED_URL) return null
-        val privateDnsEnabled = sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
+        val privateDnsMode = sharedPreferences.getString(KAHF_GUARD_INTENSITY, KAHF_GUARD_DEFAULT) ?: KAHF_GUARD_DEFAULT
+        val privateDnsEnabled = PrivateDnsLevel.isEnabled(privateDnsMode)
 
         return runBlocking {
             withContext(dispatcherProvider.io()) {

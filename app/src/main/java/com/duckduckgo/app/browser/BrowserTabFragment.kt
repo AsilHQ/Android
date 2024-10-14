@@ -217,7 +217,8 @@ import com.duckduckgo.app.global.view.launchDefaultAppActivity
 import com.duckduckgo.app.global.view.renderIfChanged
 import com.duckduckgo.app.global.view.toggleFullScreen
 import com.duckduckgo.app.kahftube.SafeGazePopupHandler
-import com.duckduckgo.app.kahftube.SafetyLevel
+import com.duckduckgo.app.kahftube.PrivateDnsLevel
+import com.duckduckgo.app.kahftube.SafeGazeLevel
 import com.duckduckgo.app.location.data.LocationPermissionType
 import com.duckduckgo.app.pixels.AppPixelName
 import com.duckduckgo.app.prayers.landing.PrayersTimeFragment
@@ -290,13 +291,14 @@ import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.FragmentViewModelFactory
 import com.duckduckgo.common.utils.KAHF_BLOCKED_COUNT
-import com.duckduckgo.common.utils.SAFE_GAZE_ACTIVE
+import com.duckduckgo.common.utils.KAHF_GUARD_DEFAULT
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
-import com.duckduckgo.common.utils.SAFE_GAZE_INTENSITY
+import com.duckduckgo.common.utils.KAHF_GUARD_INTENSITY
+import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT
 import com.duckduckgo.common.utils.SAFE_GAZE_INTERFACE
+import com.duckduckgo.common.utils.SAFE_GAZE_MODE
 import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
-import com.duckduckgo.common.utils.SAFE_GAZE_PRIVATE_DNS
 import com.duckduckgo.common.utils.extensions.dpToPx
 import com.duckduckgo.common.utils.extensions.html
 import com.duckduckgo.common.utils.extensions.websiteFromGeoLocationsApiOrigin
@@ -998,8 +1000,12 @@ class BrowserTabFragment :
                     sharedPreferences = sharedPreferences,
                     safeGazeInterface = safeGazeInterface,
                     editor = editor,
-                    onModeChanged = {
-                        val updated = updateDnsAndSafeGazeSettings(it)
+                    onDnsModeChanged = {
+                        val updated = updateDnsSettings(it)
+                        if (updated) webView?.reload()
+                    },
+                    onSafeGazeModeChanged = {
+                        val updated = updateSafeGazeSettings(it)
                         if (updated) webView?.reload()
                     },
                     onShareClicked = {
@@ -1048,26 +1054,34 @@ class BrowserTabFragment :
         }
     }
 
-    private fun updateDnsAndSafeGazeSettings(selection: SafetyLevel): Boolean {
-        val currentMode = sharedPreferences.getString(SAFE_GAZE_INTENSITY, "") ?: ""
-        if (SafetyLevel.get(currentMode) == selection) {
+    private fun updateDnsSettings(selection: PrivateDnsLevel): Boolean {
+        val currentMode = sharedPreferences.getString(KAHF_GUARD_INTENSITY, KAHF_GUARD_DEFAULT) ?: KAHF_GUARD_DEFAULT
+        if (PrivateDnsLevel.get(currentMode) == selection) {
             return false
         }
 
-        val privateDnsEnabled =  SafetyLevel.isKahfGuardActive(selection.name)
-        val safeGazeEnabled =  SafetyLevel.isSafeGazeActive(selection.name)
-
-        editor.putString(SAFE_GAZE_INTENSITY, selection.name)
-        editor.putBoolean(SAFE_GAZE_PRIVATE_DNS, privateDnsEnabled)
-        editor.putBoolean(SAFE_GAZE_ACTIVE, safeGazeEnabled)
+        editor.putString(KAHF_GUARD_INTENSITY, selection.name)
         editor.apply()
 
-        viewModel.privateDnsEnabled = privateDnsEnabled
+        viewModel.privateDnsEnabled = PrivateDnsLevel.isEnabled(currentMode)
+        return true
+    }
+
+    private fun updateSafeGazeSettings(selection: SafeGazeLevel): Boolean {
+        val currentMode = sharedPreferences.getString(SAFE_GAZE_MODE, SAFE_GAZE_DEFAULT) ?: SAFE_GAZE_DEFAULT
+
+        if (SafeGazeLevel.get(currentMode) == selection) {
+            return false
+        }
+
+        // val safeGazeEnabled = SafeGazeLevel.isEnabled(selection.name)
+        editor.putString(SAFE_GAZE_MODE, selection.name).apply()
         return true
     }
 
     private fun isPrivateDnsEnabled(): Boolean {
-        return sharedPreferences.getBoolean(SAFE_GAZE_PRIVATE_DNS, false)
+        val level = sharedPreferences.getString(KAHF_GUARD_INTENSITY, KAHF_GUARD_DEFAULT) ?: KAHF_GUARD_DEFAULT
+        return PrivateDnsLevel.get(level) != PrivateDnsLevel.Off
     }
 
     @Suppress("DEPRECATION")

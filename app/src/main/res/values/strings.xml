@@ -896,6 +896,7 @@
     <string name="kahf_high">HIGH</string>
     <string name="kahf_medium">MEDIUM</string>
     <string name="kahf_low">LOW</string>
+    <string name="kahf_off">Off</string>
     <string name="kahf_onboarding_get_what_you_want">Get what you\nwant twice\nas fast</string>
     <string name="kahf_onboarding_lets_go">Let\'s Go</string>
     <string name="kahf_onboarding_skip">Skip</string>

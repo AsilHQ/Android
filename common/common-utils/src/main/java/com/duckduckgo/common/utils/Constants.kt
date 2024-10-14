@@ -20,12 +20,17 @@ const val SAFE_GAZE_REPORT_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7
 const val SAFE_GAZE_JS_URL = "https://raw.githubusercontent.com/AsilHQ/Android/js_code_dev/node_modules/%40duckduckgo/privacy-dashboard/build/app/safe_gaze_v2.js"
 const val SAFE_GAZE_JS_FILENAME = "safe_gaze.js"
 const val SAFE_GAZE_BLUR_PROGRESS = "safe_gaze_blur_progress"
-const val SAFE_GAZE_ACTIVE = "safe_gaze_active"
-const val SAFE_GAZE_PRIVATE_DNS = "private_dns"
 const val SAFE_GAZE_INTERFACE = "SafeGazeInterface"
 const val SAFE_GAZE_PREFERENCES = "safe_gaze_preferences"
-const val SAFE_GAZE_INTENSITY = "SafeGazeIntensity"
 const val SAFE_GAZE_DEFAULT_BLUR_VALUE = 50
 const val SAFE_GAZE_MIN_FACE_SIZE = 15
 const val KAHF_GUARD_BLOCKED_URL = "blocked.kahfguard.com"
 const val KAHF_BLOCKED_COUNT = "kahf_blocked_count"
+
+// Private DNS Settings
+const val KAHF_GUARD_INTENSITY = "kahf_guard_intensity"
+const val KAHF_GUARD_DEFAULT = "Off"
+
+// SafeGaze (image blur) Settings
+const val SAFE_GAZE_DEFAULT = "Off"
+const val SAFE_GAZE_MODE = "safe_gaze_mode"

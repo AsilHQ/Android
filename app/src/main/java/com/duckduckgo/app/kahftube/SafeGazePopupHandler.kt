@@ -27,12 +27,16 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.databinding.SafeGazePopupBinding
 import com.duckduckgo.app.browser.safe_gaze.SafeGazeJsInterface
+import com.duckduckgo.common.utils.KAHF_GUARD_DEFAULT
+import com.duckduckgo.common.utils.SAFE_GAZE_MODE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
-import com.duckduckgo.common.utils.SAFE_GAZE_INTENSITY
+import com.duckduckgo.common.utils.KAHF_GUARD_INTENSITY
+import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT
 import com.hoko.blur.HokoBlur
 
 class SafeGazePopupHandler(
@@ -40,7 +44,8 @@ class SafeGazePopupHandler(
     private val sharedPreferences: SharedPreferences,
     private val safeGazeInterface: SafeGazeJsInterface,
     val editor: Editor,
-    onModeChanged: (mode: SafetyLevel) -> Unit,
+    onDnsModeChanged: (mode: PrivateDnsLevel) -> Unit,
+    onSafeGazeModeChanged: (mode: SafeGazeLevel) -> Unit,
     onShareClicked: () -> Unit,
     onSupportClicked: () -> Unit,
     onThemeChanged: () -> Unit
@@ -50,49 +55,46 @@ class SafeGazePopupHandler(
         var btnMed: PopupButton? = null
         var btnLow: PopupButton? = null
 
-        val preSelected: SafetyLevel = SafetyLevel.get(sharedPreferences.getString(SAFE_GAZE_INTENSITY, "")!!)
+        val preSelectedDns: PrivateDnsLevel = PrivateDnsLevel.get(sharedPreferences.getString(KAHF_GUARD_INTENSITY, KAHF_GUARD_DEFAULT)!!)
+        val preSelectedSG: SafeGazeLevel = SafeGazeLevel.get(sharedPreferences.getString(SAFE_GAZE_MODE, SAFE_GAZE_DEFAULT)!!)
 
         btnHigh = PopupButton(
             binding.btnHigh,
-            SafetyLevel.High,
-            preSelected == SafetyLevel.High,
+            PrivateDnsLevel.High,
+            preSelectedDns == PrivateDnsLevel.High,
         ) {
             btnHigh?.updateState(true)
             btnMed?.updateState(false)
             btnLow?.updateState(false)
-            updateDescription(binding, SafetyLevel.High)
-            onModeChanged(SafetyLevel.High)
+            updateDescription(binding, PrivateDnsLevel.High)
+            onDnsModeChanged(PrivateDnsLevel.High)
         }
         btnMed = PopupButton(
             binding.btnMedium,
-            SafetyLevel.Medium,
-            preSelected == SafetyLevel.Medium,
+            PrivateDnsLevel.Medium,
+            preSelectedDns == PrivateDnsLevel.Medium,
         ) {
             btnHigh.updateState(false)
             btnMed?.updateState(true)
             btnLow?.updateState(false)
-            updateDescription(binding, SafetyLevel.Medium)
-            onModeChanged(SafetyLevel.Medium)
+            updateDescription(binding, PrivateDnsLevel.Medium)
+            onDnsModeChanged(PrivateDnsLevel.Medium)
         }
 
         btnLow = PopupButton(
             binding.btnLow,
-            SafetyLevel.Low,
-            preSelected == SafetyLevel.Low,
+            PrivateDnsLevel.Low,
+            preSelectedDns == PrivateDnsLevel.Low,
         ) {
             btnHigh.updateState(false)
             btnMed.updateState(false)
             btnLow?.updateState(true)
-            updateDescription(binding, SafetyLevel.Low)
-            onModeChanged(SafetyLevel.Low)
-        }
-
-        binding.kahfSwitch.setOnCheckedChangeListener { _, isChecked ->
-
+            updateDescription(binding, PrivateDnsLevel.Low)
+            onDnsModeChanged(PrivateDnsLevel.Low)
         }
 
         // set initially selected item
-        updateDescription(binding, preSelected)
+        updateDescription(binding, preSelectedDns)
 
         handleProgressBar()
         loadImageWithBlur(
@@ -103,31 +105,59 @@ class SafeGazePopupHandler(
         binding.btnShare.setOnClickListener { onShareClicked() }
         binding.btnSupport.setOnClickListener { onSupportClicked() }
         binding.btnTheme.setOnClickListener { onThemeChanged() }
+
+        binding.switchKahdGuard.isChecked = preSelectedDns != PrivateDnsLevel.Off
+        binding.switchSafeGaze.isChecked = preSelectedSG != SafeGazeLevel.Off
+        binding.privateDnsGroup.isVisible = preSelectedDns != PrivateDnsLevel.Off
+        binding.safeGazeGroup.isVisible = preSelectedSG != SafeGazeLevel.Off
+
+        // Toggle private dns (Kahf Guard)
+        binding.switchKahdGuard.setOnCheckedChangeListener { _, isChecked ->
+            if (!isChecked) {
+                binding.privateDnsGroup.isVisible = false
+                onDnsModeChanged(PrivateDnsLevel.Off)
+            } else {
+                binding.privateDnsGroup.isVisible = true
+                btnLow.performClick()
+            }
+        }
+
+        // Toggle image blur (Safe Gaze)
+        binding.switchSafeGaze.setOnCheckedChangeListener { _, isChecked ->
+            binding.safeGazeGroup.isVisible = isChecked
+            if (isChecked) {
+                onSafeGazeModeChanged(SafeGazeLevel.FullImage)
+            } else {
+                onSafeGazeModeChanged(SafeGazeLevel.Off)
+            }
+        }
+
     }
 
-    private fun updateDescription(binding: SafeGazePopupBinding, type: SafetyLevel) {
+    private fun updateDescription(binding: SafeGazePopupBinding, type: PrivateDnsLevel) {
         when (type) {
-            SafetyLevel.High -> {
+            PrivateDnsLevel.High -> {
                 binding.tvDescription.text = binding.root.context.getString(R.string.kahf_mode_desc_high)
                 binding.tvDescription.backgroundTintList =
                     ColorStateList.valueOf(
                         ContextCompat.getColor(binding.root.context, com.duckduckgo.mobile.android.R.color.kahf_green),
                     )
             }
-            SafetyLevel.Medium -> {
+            PrivateDnsLevel.Medium -> {
                 binding.tvDescription.text = binding.root.context.getString(R.string.kahf_mode_desc_medium)
                 binding.tvDescription.backgroundTintList =
                     ColorStateList.valueOf(
                         ContextCompat.getColor(binding.root.context, com.duckduckgo.mobile.android.R.color.kahf_orange),
                     )
             }
-            SafetyLevel.Low -> {
+            PrivateDnsLevel.Low -> {
                 binding.tvDescription.text = binding.root.context.getString(R.string.kahf_mode_desc_low)
                 binding.tvDescription.backgroundTintList =
                     ColorStateList.valueOf(
                         ContextCompat.getColor(binding.root.context, com.duckduckgo.mobile.android.R.color.kahf_red),
                     )
             }
+            else -> {}
         }
     }
 

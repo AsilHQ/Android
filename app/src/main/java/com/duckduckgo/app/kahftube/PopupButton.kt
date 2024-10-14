@@ -21,34 +21,49 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.databinding.SafegazeButtonBinding
-import com.duckduckgo.app.kahftube.SafetyLevel.High
-import com.duckduckgo.app.kahftube.SafetyLevel.Low
-import com.duckduckgo.app.kahftube.SafetyLevel.Medium
+import com.duckduckgo.app.kahftube.PrivateDnsLevel.High
+import com.duckduckgo.app.kahftube.PrivateDnsLevel.Low
+import com.duckduckgo.app.kahftube.PrivateDnsLevel.Medium
 import com.duckduckgo.common.ui.view.hide
 import com.duckduckgo.common.ui.view.show
 
-sealed class SafetyLevel(val name: String) {
-    data object High : SafetyLevel("High")
-    data object Medium : SafetyLevel("Medium")
-    data object Low : SafetyLevel("Low")
+sealed class PrivateDnsLevel(val name: String) {
+    data object High : PrivateDnsLevel("High")
+    data object Medium : PrivateDnsLevel("Medium")
+    data object Low : PrivateDnsLevel("Low")
+    data object Off : PrivateDnsLevel("Off")
 
     companion object {
         fun get(name: String) = when (name) {
             "High" -> High
             "Medium" -> Medium
             "Low" -> Low
-            else -> Low
+            else -> Off
         }
 
-        fun isSafeGazeActive(name: String) = get(name) == High
+        fun isEnabled(name: String) = get(name) != Off
+    }
+}
 
-        fun isKahfGuardActive(name: String) = get(name) == High || get(name) == Medium
+sealed class SafeGazeLevel(val name: String) {
+    data object FullImage : SafeGazeLevel("FullImage")
+    data object HumanOnly : SafeGazeLevel("HumanOnly")
+    data object Off : SafeGazeLevel("Off")
+
+    companion object {
+        fun get(name: String) = when (name) {
+            "FullImage" -> FullImage
+            "HumanOnly" -> HumanOnly
+            else -> Off
+        }
+
+        fun isEnabled(name: String) = get(name) != Off
     }
 }
 
 class PopupButton(
     private val binding: SafegazeButtonBinding,
-    type: SafetyLevel,
+    type: PrivateDnsLevel,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
@@ -98,6 +113,12 @@ class PopupButton(
                 )
                 icon = R.drawable.ic_check_red
             }
+            else -> {
+                label = binding.root.context.getString(R.string.kahf_off)
+                color = ColorStateList.valueOf(
+                    ContextCompat.getColor(binding.root.context, android.R.color.transparent)
+                )
+            }
         }
 
         updateState(isSelected)
@@ -106,4 +127,6 @@ class PopupButton(
             onClick()
         }
     }
+
+    fun performClick() = binding.btnContainer.performClick()
 }
