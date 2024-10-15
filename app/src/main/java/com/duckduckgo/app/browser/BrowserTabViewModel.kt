@@ -381,6 +381,7 @@ class BrowserTabViewModel @Inject constructor(
     private val userBrowserProperties: UserBrowserProperties,
     private val history: NavigationHistory,
     private val commandActionMapper: CommandActionMapper,
+    private val dnsResolver: CustomDnsResolver,
 ) : WebViewClientListener,
     EditSavedSiteListener,
     DeleteBookmarkListener,
@@ -389,7 +390,6 @@ class BrowserTabViewModel @Inject constructor(
     NavigationHistoryListener {
 
     private var buildingSiteFactoryJob: Job? = null
-    private val dnsResolver = CustomDnsResolver(dispatchers)
     private var hasUserSeenHistoryIAM = false
     private var lastAutoCompleteState: AutoCompleteViewState? = null
 

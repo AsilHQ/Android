@@ -1,7 +1,11 @@
 package com.duckduckgo.app.dns
 
+import android.content.SharedPreferences
 import androidx.core.net.toUri
+import com.duckduckgo.app.kahftube.PrivateDnsLevel
 import com.duckduckgo.common.utils.DispatcherProvider
+import com.duckduckgo.common.utils.KAHF_GUARD_DEFAULT
+import com.duckduckgo.common.utils.KAHF_GUARD_INTENSITY
 import okhttp3.Dns
 import org.xbill.DNS.Record
 import org.xbill.DNS.Type
@@ -33,13 +37,23 @@ data class CachedDnsResponse(
     fun isExpired() = System.currentTimeMillis() > expirationTimeMillis
 }
 
-class CustomDnsResolver(private val dispatcher: DispatcherProvider): Dns {
+class CustomDnsResolver(
+    private val dispatcher: DispatcherProvider,
+    sharedPreferences: SharedPreferences
+) : Dns {
     companion object {
         private val cache = ConcurrentHashMap<String, CachedDnsResponse>()
     }
 
-    private val dohServerUrl = "https://high.kahfguard.com/dns-query"
+    private var dohServerUrl = ""
     private val client = OkHttpClient()
+
+    init {
+        val currentMode = sharedPreferences.getString(KAHF_GUARD_INTENSITY, KAHF_GUARD_DEFAULT) ?: KAHF_GUARD_DEFAULT
+        dohServerUrl = PrivateDnsLevel.get(currentMode).url
+
+        Timber.d("tpLog Initial Dns server: $dohServerUrl")
+    }
 
     override fun lookup(hostname: String): List<InetAddress> {
         val resolvedIp: Pair<String, String>?
@@ -58,7 +72,12 @@ class CustomDnsResolver(private val dispatcher: DispatcherProvider): Dns {
         }
     }
 
+    fun updateDohServerUrl(privateDnsLevel: PrivateDnsLevel) {
+        cache.clear()
+        dohServerUrl = privateDnsLevel.url
 
+        Timber.d("tpLog DoH URL set to: $dohServerUrl")
+    }
 
     /**
      * @return Pair.first is the IP address, Pair.second is the domain name

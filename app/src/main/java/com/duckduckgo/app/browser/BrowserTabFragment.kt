@@ -1018,10 +1018,11 @@ class BrowserTabFragment :
                         viewModel.onUserSubmittedQuery("https://www.patreon.com/SafeGaze")
                     },
                     onThemeChanged = {
+                        // FIXME change theme
                         val url = "https://docs.google.com/forms/d/e/1FAIpQLSeaW7PjI-K3yqZZ4gpuXbbx5qOFxAwILLy5uy7PTerXfdzFqw/viewform"
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                         startActivity(intent)
-                    }
+                    },
                 )
 
                 lifecycleScope.launch {

@@ -18,6 +18,7 @@ package com.duckduckgo.app.browser.di
 
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import androidx.room.Room
 import androidx.work.WorkManager
@@ -72,6 +73,7 @@ import com.duckduckgo.app.tabs.ui.GridViewColumnCalculator
 import com.duckduckgo.app.trackerdetection.CloakedCnameDetector
 import com.duckduckgo.app.trackerdetection.TrackerDetector
 import com.duckduckgo.common.utils.DispatcherProvider
+import com.duckduckgo.common.utils.SAFE_GAZE_PREFERENCES
 import com.duckduckgo.cookies.api.CookieManagerProvider
 import com.duckduckgo.cookies.api.DuckDuckGoCookieManager
 import com.duckduckgo.cookies.api.ThirdPartyCookieNames
@@ -346,8 +348,8 @@ class BrowserModule {
 
     @Provides
     @SingleInstanceIn(AppScope::class)
-    fun providesDnsResolver(dispatcherProvider: DispatcherProvider): CustomDnsResolver {
-        return CustomDnsResolver(dispatcherProvider)
+    fun providesDnsResolver(dispatcherProvider: DispatcherProvider, sharedPreferences: SharedPreferences): CustomDnsResolver {
+        return CustomDnsResolver(dispatcherProvider, sharedPreferences)
     }
 
     @Provides
@@ -360,5 +362,11 @@ class BrowserModule {
     @SingleInstanceIn(AppScope::class)
     fun providesGenderDetector(context: Context): GenderDetector {
         return GenderDetector(context)
+    }
+
+    @Provides
+    @SingleInstanceIn(AppScope::class)
+    fun providesKahfSharedPreference(context: Context): SharedPreferences {
+        return context.getSharedPreferences(SAFE_GAZE_PREFERENCES, Context.MODE_PRIVATE)
     }
 }
