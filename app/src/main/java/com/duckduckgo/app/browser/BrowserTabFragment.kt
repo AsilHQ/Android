@@ -170,6 +170,7 @@ import com.duckduckgo.app.browser.omnibar.OmnibarScrolling
 import com.duckduckgo.app.browser.omnibar.animations.BrowserTrackersAnimatorHelper
 import com.duckduckgo.app.browser.omnibar.animations.PrivacyShieldAnimationHelper
 import com.duckduckgo.app.browser.omnibar.animations.TrackersAnimatorListener
+import com.duckduckgo.app.browser.omnibar.showIt
 import com.duckduckgo.app.browser.print.PrintDocumentAdapterFactory
 import com.duckduckgo.app.browser.print.PrintInjector
 import com.duckduckgo.app.browser.print.SinglePrintSafeguardFeature
@@ -1217,6 +1218,7 @@ class BrowserTabFragment :
     override fun onResume() {
         super.onResume()
         omnibar.appBarLayout.setExpanded(true)
+        bottomNav.botNav.showIt()
         viewModel.onViewResumed()
         viewModel.privateDnsEnabled = isPrivateDnsEnabled()
 
@@ -1424,6 +1426,7 @@ class BrowserTabFragment :
         binding.browserLayout.gone()
         webViewContainer.gone()
         omnibar.appBarLayout.setExpanded(true)
+        bottomNav.botNav.showIt()
         webView?.onPause()
         webView?.hide()
         errorView.errorLayout.gone()
@@ -1456,6 +1459,7 @@ class BrowserTabFragment :
         binding.newTabWallpaper.gone()
         sslErrorView.gone()
         omnibar.appBarLayout.setExpanded(true)
+        bottomNav.botNav.showIt()
         omnibar.shieldIcon.isInvisible = true
         webView?.onPause()
         webView?.hide()
@@ -1482,6 +1486,7 @@ class BrowserTabFragment :
         binding.newTabWallpaper.gone()
         webView?.onPause()
         webView?.hide()
+        bottomNav.botNav.showIt()
         omnibar.appBarLayout.setExpanded(true)
         omnibar.shieldIcon.isInvisible = true
         omnibar.searchIcon.isInvisible = true
@@ -2076,6 +2081,7 @@ class BrowserTabFragment :
 
     private fun openInNewBackgroundTab() {
         omnibar.appBarLayout.setExpanded(true, true)
+        bottomNav.botNav.showIt()
         viewModel.tabs.removeObservers(this)
         decorator.incrementTabs()
     }
@@ -3970,6 +3976,7 @@ class BrowserTabFragment :
                     omnibar.omnibarTextInput.setText(viewState.omnibarText)
                     if (viewState.forceExpand) {
                         omnibar.appBarLayout.setExpanded(true, true)
+                        bottomNav.botNav.showIt()
                     }
                     if (viewState.shouldMoveCaretToEnd) {
                         omnibar.omnibarTextInput.setSelection(viewState.omnibarText.length)
