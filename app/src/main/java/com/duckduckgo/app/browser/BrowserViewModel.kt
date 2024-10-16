@@ -171,6 +171,17 @@ class BrowserViewModel @Inject constructor(
         )
     }
 
+    suspend fun relaunchCurrentTab(url: String) {
+        val currentTabId = selectedTab.value?.tabId ?: return
+
+        tabs.value?.firstOrNull { it.tabId == currentTabId }?.let { currentTab ->
+            val newTabId = tabRepository.addNewTabAfterExistingTabAndGetId(url, currentTabId)
+            tabRepository.select(newTabId)
+            tabRepository.markDeletable(currentTab)
+            tabRepository.purgeDeletableTabs()
+        }
+    }
+
     suspend fun onTabsUpdated(tabs: List<TabEntity>?) {
         if (tabs.isNullOrEmpty()) {
             Timber.i("Tabs list is null or empty; adding default tab")

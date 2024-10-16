@@ -473,6 +473,12 @@ open class BrowserActivity : DuckDuckGoActivity() {
         }
     }
 
+    fun relaunchCurrentTab(url: String) {
+        lifecycleScope.launch {
+            viewModel.relaunchCurrentTab(url)
+        }
+    }
+
     fun launchSettings() {
         startActivity(SettingsActivity.intent(this))
     }

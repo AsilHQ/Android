@@ -1002,11 +1002,21 @@ class BrowserTabFragment :
                     editor = editor,
                     onDnsModeChanged = {
                         val updated = updateDnsSettings(it)
-                        if (updated) webView?.reload()
+                        if (updated) {
+                            dnsResolver.updateDohServerUrl(it)
+                            // Just reloading the WebView doesn't work. Relaunch the tab is required.
+                            webView?.url?.let { url ->
+                                popupWindow.dismiss()
+                                (requireActivity() as BrowserActivity).relaunchCurrentTab(url)
+                            }
+                        }
                     },
                     onSafeGazeModeChanged = {
                         val updated = updateSafeGazeSettings(it)
-                        if (updated) webView?.reload()
+                        if (updated) {
+                            popupWindow.dismiss()
+                            webView?.reload()
+                        }
                     },
                     onShareClicked = {
                         val shareIntent = Intent(Intent.ACTION_SEND)
