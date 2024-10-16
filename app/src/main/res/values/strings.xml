@@ -870,10 +870,6 @@
     <string name="removeFromFavorites">Remove from favorites</string>
     <string name="addToFavoritesMenu">Add to favorites</string>
     <string name="not_implemented">Not implemented yet</string>
-    <string name="haram_ad_blocked">Haram image blocked</string>
-    <string name="haram_site_blocked">Haram site blocked</string>
-    <string name="tracker_blocked">Tracker blocked</string>
-    <string name="_5m">6M+</string>
     <string name="clipboardYouCopied">Paste from clipboard</string>
     <string name="kahf_menu">Menu</string>
     <string name="kahf_safer_internet">Safer Internet</string>

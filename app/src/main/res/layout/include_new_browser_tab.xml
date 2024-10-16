@@ -69,23 +69,25 @@
                         android:paddingEnd="0dp">
 
                         <TextView
-                            android:id="@+id/adsBlockedCount"
+                            android:id="@+id/siteBlockCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/poppins"
                             android:textColor="@android:color/white"
                             android:textSize="24sp"
                             android:textStyle="bold"
-                            tools:text="514" />
+                            tools:text="12k"
+                            tools:ignore="DeprecatedWidgetInXml" />
 
                         <TextView
-                            android:id="@+id/adsBlockedLabel"
+                            android:id="@+id/siteBlockLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/poppins"
-                            android:text="@string/haram_ad_blocked"
+                            android:text="@string/kahf_harmful_sites"
                             android:textColor="@android:color/white"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            tools:ignore="DeprecatedWidgetInXml" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -97,23 +99,25 @@
                         android:paddingEnd="0dp">
 
                         <TextView
-                            android:id="@+id/siteBlockCount"
+                            android:id="@+id/imageBlockedCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/poppins"
                             android:textColor="@android:color/white"
                             android:textSize="24sp"
                             android:textStyle="bold"
-                            android:text="@string/_5m" />
+                            tools:text="514"
+                            tools:ignore="DeprecatedWidgetInXml" />
 
                         <TextView
-                            android:id="@+id/siteBlockLabel"
+                            android:id="@+id/imageBlockedLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/poppins"
-                            android:text="@string/haram_site_blocked"
+                            android:text="@string/kahf_indecent_pictures"
                             android:textColor="@android:color/white"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            tools:ignore="DeprecatedWidgetInXml" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -132,16 +136,18 @@
                             android:textColor="@android:color/white"
                             android:textSize="24sp"
                             android:textStyle="bold"
-                            tools:text="860" />
+                            tools:text="860"
+                            tools:ignore="DeprecatedWidgetInXml" />
 
                         <TextView
                             android:id="@+id/trackerBlockedLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/poppins"
-                            android:text="@string/tracker_blocked"
+                            android:text="@string/kahf_ads_trackers"
                             android:textColor="@android:color/white"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            tools:ignore="DeprecatedWidgetInXml" />
                     </LinearLayout>
 
 

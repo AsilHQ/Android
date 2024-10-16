@@ -4352,7 +4352,7 @@ class BrowserTabFragment :
             kahfImageBlockedDao.getTotalBlockCount()
                 .flowWithLifecycle(lifecycle)
                 .distinctUntilChanged()
-                .onEach { newBrowserTab.adsBlockedCount.setFormattedCount(it) }
+                .onEach { newBrowserTab.imageBlockedCount.setFormattedCount(it) }
                 .launchIn(lifecycleScope)
 
             lifecycleScope.launch {
@@ -4360,6 +4360,10 @@ class BrowserTabFragment :
                     newBrowserTab.trackerBlockedCount.setFormattedCount(count)
                 }
             }
+
+            newBrowserTab.siteBlockCount.setFormattedCount(
+                sharedPreferences.getInt(KAHF_BLOCKED_COUNT, 0)
+            )
 
             newBrowserTab.newTabContainerLayout.show()
             newBrowserTab.newTabLayout.show()
