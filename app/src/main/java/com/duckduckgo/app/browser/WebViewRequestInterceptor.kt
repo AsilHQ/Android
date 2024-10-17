@@ -95,7 +95,7 @@ class WebViewRequestInterceptor(
 
     private val safeSearchCandidates = listOf(
         SafeSearchCandidate("google.com", pathContains = "search", queryParam = "q", exclude = listOf("captcha")),
-        SafeSearchCandidate("bing.com", pathContains = "search", queryParam = "q"),
+        SafeSearchCandidate("bing.com", pathContains = "search", queryParam = "q"), // consider account/general
         SafeSearchCandidate("ecosia.org", queryParam = "q"),
         SafeSearchCandidate("duckduckgo.com", queryParam = "q"),
         SafeSearchCandidate("ask.com", queryParam = "q"),

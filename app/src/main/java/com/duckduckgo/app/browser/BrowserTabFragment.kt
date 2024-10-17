@@ -231,6 +231,8 @@ import com.duckduckgo.app.statistics.pixels.Pixel
 import com.duckduckgo.app.tabs.model.TabEntity
 import com.duckduckgo.app.tabs.ui.GridViewColumnCalculator
 import com.duckduckgo.app.tabs.ui.TabSwitcherActivity
+import com.duckduckgo.app.trackerdetection.db.HarmfulSiteBlocked
+import com.duckduckgo.app.trackerdetection.db.HarmfulSiteBlockedDao
 import com.duckduckgo.app.trackerdetection.db.KahfImageBlockedDao
 import com.duckduckgo.app.trackerdetection.db.WebTrackersBlockedDao
 import com.duckduckgo.app.widget.AddWidgetLauncher
@@ -581,6 +583,9 @@ class BrowserTabFragment :
 
     @Inject
     lateinit var kahfImageBlockedDao: KahfImageBlockedDao
+
+    @Inject
+    lateinit var harmfulSiteBlockedDao: HarmfulSiteBlockedDao
 
     /**
      * We use this to monitor whether the user was seeing the in-context Email Protection signup prompt
@@ -1040,6 +1045,9 @@ class BrowserTabFragment :
                     val count = kahfImageBlockedDao.getTotalBlockCount().first()
                     popupBinding.imageBlurCount.setFormattedCount(count)
 
+                    val siteBlockCount = harmfulSiteBlockedDao.getTotalBlockCount().first()
+                    popupBinding.siteBlockedCount.setFormattedCount(siteBlockCount)
+
                     webTrackersBlockedDao.getTotalTrackerCount().collect {
                         popupBinding.trackerBlockedCount.setFormattedCount(it)
                     }
@@ -1328,11 +1336,6 @@ class BrowserTabFragment :
                 it.let { renderer.renderPrivacyShield(it) }
             },
         )
-
-        viewModel.kahfBlockCountUpdate.observe(viewLifecycleOwner) {
-            val lastCount = sharedPreferences.getInt(KAHF_BLOCKED_COUNT, 0)
-            editor.putInt(KAHF_BLOCKED_COUNT, lastCount + 1).apply()
-        }
 
         addTabsObserver()
     }
@@ -4361,9 +4364,11 @@ class BrowserTabFragment :
                 }
             }
 
-            newBrowserTab.siteBlockCount.setFormattedCount(
-                sharedPreferences.getInt(KAHF_BLOCKED_COUNT, 0)
-            )
+            harmfulSiteBlockedDao.getTotalBlockCount()
+                .flowWithLifecycle(lifecycle)
+                .distinctUntilChanged()
+                .onEach { newBrowserTab.siteBlockCount.setFormattedCount(it) }
+                .launchIn(lifecycleScope)
 
             newBrowserTab.newTabContainerLayout.show()
             newBrowserTab.newTabLayout.show()

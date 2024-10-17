@@ -100,4 +100,7 @@ object DaoModule {
 
     @Provides
     fun kahfImageBlockedDao(database: AppDatabase) = database.kahfImageBlockedDao()
+
+    @Provides
+    fun harmfulSiteBlockedDao(database: AppDatabase) = database.harmfulSiteBlockedDao()
 }

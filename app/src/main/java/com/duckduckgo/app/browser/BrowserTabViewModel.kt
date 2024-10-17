@@ -233,6 +233,8 @@ import com.duckduckgo.app.surrogates.SurrogateResponse
 import com.duckduckgo.app.survey.notification.SurveyNotificationScheduler
 import com.duckduckgo.app.tabs.model.TabEntity
 import com.duckduckgo.app.tabs.model.TabRepository
+import com.duckduckgo.app.trackerdetection.db.HarmfulSiteBlocked
+import com.duckduckgo.app.trackerdetection.db.HarmfulSiteBlockedDao
 import com.duckduckgo.app.trackerdetection.model.TrackingEvent
 import com.duckduckgo.app.usage.search.SearchCountDao
 import com.duckduckgo.autofill.api.AutofillCapabilityChecker
@@ -249,6 +251,7 @@ import com.duckduckgo.common.utils.KAHF_GUARD_BLOCKED_URL
 import com.duckduckgo.common.utils.SingleLiveEvent
 import com.duckduckgo.common.utils.baseHost
 import com.duckduckgo.common.utils.device.DeviceInfo
+import com.duckduckgo.common.utils.domain
 import com.duckduckgo.common.utils.extensions.asLocationPermissionOrigin
 import com.duckduckgo.common.utils.isMobileSite
 import com.duckduckgo.common.utils.toDesktopUri
@@ -382,6 +385,7 @@ class BrowserTabViewModel @Inject constructor(
     private val history: NavigationHistory,
     private val commandActionMapper: CommandActionMapper,
     private val dnsResolver: CustomDnsResolver,
+    private val harmfulSiteBlockedDao: HarmfulSiteBlockedDao,
 ) : WebViewClientListener,
     EditSavedSiteListener,
     DeleteBookmarkListener,
@@ -427,7 +431,7 @@ class BrowserTabViewModel @Inject constructor(
     private var refreshOnViewVisible = MutableStateFlow(true)
     private var ctaChangedTicker = MutableStateFlow("")
     val hiddenIds = MutableStateFlow(HiddenBookmarksIds())
-    val kahfBlockCountUpdate: SingleLiveEvent<String> = SingleLiveEvent()
+    var lastBlockedUrl: String = ""
 
     data class HiddenBookmarksIds(
         val favorites: List<String> = emptyList(),
@@ -946,10 +950,20 @@ class BrowserTabViewModel @Inject constructor(
 
                 if (privateDnsEnabled) {
                     runBlocking {
-                        val ip = dnsResolver.resolveDomain(urlToNavigate.toUri())
-                        if (ip?.first == "0.0.0.0" || ip?.second == KAHF_GUARD_BLOCKED_URL) {
-                            urlToNavigate = "https://${ip.second}"
-                            kahfBlockCountUpdate.value = urlToNavigate
+                        if (!isKahfBlockedUrl(urlToNavigate)) {
+                            val originalUrl = String(urlToNavigate.toCharArray())
+                            val ip = dnsResolver.resolveDomain(urlToNavigate.toUri())
+
+                            if (ip?.first == "0.0.0.0" || ip?.second == KAHF_GUARD_BLOCKED_URL) {
+                                urlToNavigate = "https://${ip.second}"
+
+                                withContext(dispatchers.io()) {
+                                    if (lastBlockedUrl != originalUrl) {
+                                        lastBlockedUrl = originalUrl
+                                        harmfulSiteBlockedDao.insert(HarmfulSiteBlocked(siteUrl = urlToNavigate, mode = ""))
+                                    }
+                                }
+                            }
                         }
 
                         site?.nextUrl = urlToNavigate
@@ -1244,7 +1258,12 @@ class BrowserTabViewModel @Inject constructor(
 
     override fun onUrlBlocked(url: String) {
         onUserSubmittedQuery(url)
-        kahfBlockCountUpdate.value = url
+        viewModelScope.launch(dispatchers.io()) {
+            if (lastBlockedUrl != url) {
+                lastBlockedUrl = url
+                harmfulSiteBlockedDao.insert(HarmfulSiteBlocked(siteUrl = url, mode = ""))
+            }
+        }
     }
 
     override fun onPageContentStart(url: String) {
@@ -1356,6 +1375,10 @@ class BrowserTabViewModel @Inject constructor(
             val hasBrowserError = currentBrowserViewState().browserError != OMITTED
             privacyProtectionsPopupManager.onPageLoaded(url, httpErrorCodeEvents, hasBrowserError)
         }
+    }
+
+    private fun isKahfBlockedUrl(url: String): Boolean {
+        return url.toUri().host == KAHF_GUARD_BLOCKED_URL || url.contains(KAHF_GUARD_BLOCKED_URL)
     }
 
     private fun setAdClickActiveTabData(url: String?) {

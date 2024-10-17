@@ -103,7 +103,8 @@ import com.duckduckgo.savedsites.store.SavedSitesRelationsDao
         AuthCookieAllowedDomainEntity::class,
         Entity::class,
         Relation::class,
-        KahfImageBlocked::class
+        KahfImageBlocked::class,
+        HarmfulSiteBlocked::class,
     ],
 )
 
@@ -152,6 +153,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun authCookiesAllowedDomainsDao(): AuthCookiesAllowedDomainsDao
     abstract fun webTrackersBlockedDao(): WebTrackersBlockedDao
     abstract fun kahfImageBlockedDao(): KahfImageBlockedDao
+    abstract fun harmfulSiteBlockedDao(): HarmfulSiteBlockedDao
 
     abstract fun syncEntitiesDao(): SavedSitesEntitiesDao
 
@@ -663,10 +665,14 @@ class MigrationsProvider(val context: Context, val settingsDataStore: SettingsDa
     }
 
     private val MIGRATION_54_TO_55: Migration = object : Migration(54, 55) {
-        override fun migrate(database: SupportSQLiteDatabase) {
-            database.execSQL(
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
                 "CREATE TABLE IF NOT EXISTS `kahf_image_blocked` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
                     "`imageUrl` TEXT NOT NULL, `tag` TEXT NOT NULL, `score` REAL NOT NULL)",
+            )
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `harmful_site_blocked` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`url` TEXT NOT NULL)",
             )
         }
     }
