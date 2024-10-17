@@ -396,6 +396,7 @@ class BrowserTabViewModel @Inject constructor(
     private var buildingSiteFactoryJob: Job? = null
     private var hasUserSeenHistoryIAM = false
     private var lastAutoCompleteState: AutoCompleteViewState? = null
+    var newTabShown = false
 
     private val replyProxyMap = mutableMapOf<String, JavaScriptReplyProxy>()
 

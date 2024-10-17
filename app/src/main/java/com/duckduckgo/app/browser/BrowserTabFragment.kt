@@ -293,7 +293,6 @@ import com.duckduckgo.common.ui.viewbinding.viewBinding
 import com.duckduckgo.common.utils.ConflatedJob
 import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.common.utils.FragmentViewModelFactory
-import com.duckduckgo.common.utils.KAHF_BLOCKED_COUNT
 import com.duckduckgo.common.utils.KAHF_GUARD_DEFAULT
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
 import com.duckduckgo.common.utils.SAFE_GAZE_DEFAULT_BLUR_VALUE
@@ -1052,10 +1051,6 @@ class BrowserTabFragment :
                         popupBinding.trackerBlockedCount.setFormattedCount(it)
                     }
                 }
-
-                popupBinding.siteBlockedCount.setFormattedCount(
-                    sharedPreferences.getInt(KAHF_BLOCKED_COUNT, 0)
-                )
 
                 val leftOverDevicePixel = getDeviceWidthInPixels(requireContext()) - x
                 val popUpLayingOut = 350.dpToPx(requireContext().resources.displayMetrics) - leftOverDevicePixel
@@ -4217,21 +4212,21 @@ class BrowserTabFragment :
 
             renderIfChanged(viewState, lastSeenCtaViewState) {
                 lastSeenCtaViewState = viewState
-                when {
+                showNewTab()
+                /*when {
                     viewState.cta != null -> {
-                        showNewTab() // Keyboard not popping up on the New Tab because of this change
-                        // hideNewTab()
-                        // showCta(viewState.cta)
+                        hideNewTab()
+                        showCta(viewState.cta)
                     }
 
                     viewState.isBrowserShowing -> {
-                        // hideNewTab()
+                        hideNewTab()
                     }
 
                     viewState.daxOnboardingComplete -> {
-                        // showNewTab()
+                        showNewTab()
                     }
-                }
+                }*/
             }
         }
 
@@ -4334,12 +4329,11 @@ class BrowserTabFragment :
         }
 
         private fun showNewTab() {
+            if (viewModel.newTabShown) {
+                return
+            }
+            viewModel.newTabShown = true
             Timber.d("New Tab: showNewTab")
-
-            // Remove all views except AppStatistics from the container
-            /*for (i in newBrowserTab.newTabContainerLayout.childCount - 1 downTo 1) {
-                newBrowserTab.newTabContainerLayout.removeViewAt(i)
-            }*/
 
             newTabPageProvider.provideNewTabPageVersion().onEach { newTabPage ->
                 newBrowserTab.newTabContainerLayout.addView(
