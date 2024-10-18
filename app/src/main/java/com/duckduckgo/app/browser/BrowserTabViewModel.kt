@@ -251,7 +251,6 @@ import com.duckduckgo.common.utils.KAHF_GUARD_BLOCKED_URL
 import com.duckduckgo.common.utils.SingleLiveEvent
 import com.duckduckgo.common.utils.baseHost
 import com.duckduckgo.common.utils.device.DeviceInfo
-import com.duckduckgo.common.utils.domain
 import com.duckduckgo.common.utils.extensions.asLocationPermissionOrigin
 import com.duckduckgo.common.utils.isMobileSite
 import com.duckduckgo.common.utils.toDesktopUri
@@ -956,7 +955,7 @@ class BrowserTabViewModel @Inject constructor(
                             val ip = dnsResolver.resolveDomain(urlToNavigate.toUri())
 
                             if (ip?.first == "0.0.0.0" || ip?.second == KAHF_GUARD_BLOCKED_URL) {
-                                urlToNavigate = "https://${ip.second}"
+                                urlToNavigate = "https://$KAHF_GUARD_BLOCKED_URL?url=$originalUrl"
 
                                 withContext(dispatchers.io()) {
                                     if (lastBlockedUrl != originalUrl) {
