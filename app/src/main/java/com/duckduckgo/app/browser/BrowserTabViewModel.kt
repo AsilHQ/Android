@@ -1041,10 +1041,12 @@ class BrowserTabViewModel @Inject constructor(
         site?.nextUrl = newUrl
         Timber.d("SSLError: willOverride is $newUrl")
         navigationAwareLoginDetector.onEvent(NavigationEvent.Redirect(newUrl))
+        /* Commented out intentionally to avoid showing
+           home page (New Tab) for a glimpse when a page takes time to load
         val previousSiteStillLoading = currentLoadingViewState().isLoading
         if (previousSiteStillLoading) {
             showBlankContentfNewContentDelayed()
-        }
+        }*/
     }
 
     override fun prefetchFavicon(url: String) {
