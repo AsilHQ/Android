@@ -276,7 +276,7 @@
                         android:contentDescription="@string/checkbox_label_title"
                         android:elevation="5dp"
                         android:scaleType="fitCenter"
-                        android:src="@drawable/ic_check_green"
+                        android:src="@drawable/ic_check_bordered"
                         android:visibility="visible"
                         tools:visibility="visible" />
 
