@@ -36,6 +36,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.duckduckgo.common.ui.DuckDuckGoTheme.DARK
+import com.duckduckgo.common.ui.DuckDuckGoTheme.LIGHT
 import com.duckduckgo.common.ui.store.ThemingDataStore
 import com.duckduckgo.mobile.android.R
 import dagger.android.AndroidInjection
@@ -157,6 +158,12 @@ abstract class DuckDuckGoActivity : DaggerActivity() {
             DARK -> true
             else -> false
         }
+    }
+
+    fun toggleTheme() {
+        val newTheme = if (themingDataStore.theme == LIGHT) DARK else LIGHT
+        themingDataStore.theme = newTheme
+        sendThemeChangedBroadcast()
     }
 
     protected inline fun <reified V : ViewModel> bindViewModel() = lazy {
