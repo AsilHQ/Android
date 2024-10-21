@@ -1034,6 +1034,7 @@ class BrowserTabFragment :
                     },
                     onThemeChanged = {
                         popupWindow.dismiss()
+                        viewModel.newTabShown = false // to generate new tab contents after the Activity recreated
                         (requireActivity() as DuckDuckGoActivity).toggleTheme()
                     },
                 )

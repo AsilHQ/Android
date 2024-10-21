@@ -161,7 +161,14 @@ abstract class DuckDuckGoActivity : DaggerActivity() {
     }
 
     fun toggleTheme() {
-        val newTheme = if (themingDataStore.theme == LIGHT) DARK else LIGHT
+        val currentTheme = themingDataStore.theme
+        val newTheme = when (currentTheme) {
+            LIGHT -> DARK
+            DARK -> LIGHT
+            DuckDuckGoTheme.SYSTEM_DEFAULT -> {
+                if (isDarkThemeEnabled()) LIGHT else DARK
+            }
+        }
         themingDataStore.theme = newTheme
         sendThemeChangedBroadcast()
     }
