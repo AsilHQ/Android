@@ -94,14 +94,14 @@ class WebViewRequestInterceptor(
     private val cookieManager: CookieManager = CookieManager.getInstance()
 
     private val safeSearchCandidates = listOf(
-        SafeSearchCandidate("google.com", pathContains = listOf("search"), queryParam = "q", exclude = listOf("captcha")),
+        SafeSearchCandidate("google.com", pathContains = listOf("search"), queryParam = "q", exclude = listOf("captcha", "accounts.google.com/")),
         SafeSearchCandidate("bing.com", pathContains = listOf("search", "account/general"), queryParam = "q"),
         SafeSearchCandidate("ecosia.org", queryParam = "q"),
-        SafeSearchCandidate("duckduckgo.com", queryParam = "q"),
+        SafeSearchCandidate("duckduckgo.com", queryParam = "q", exclude = listOf("ia=chat", "duckchat")),
         SafeSearchCandidate("ask.com", queryParam = "q"),
         SafeSearchCandidate("search.yahoo.com", queryParam = "p"), // intentionally kept 'p'
         SafeSearchCandidate("search.brave.com", queryParam = ""), // not working even in system level private DNS
-        SafeSearchCandidate("youtube.com", exclude = listOf("youtubei/v1")),
+        SafeSearchCandidate("youtube.com", exclude = listOf("youtubei/v1", "accounts.youtube.com/")),
     )
 
     override fun onPageStarted(url: String) {
