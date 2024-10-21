@@ -81,6 +81,7 @@ import android.webkit.WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE
 import android.webkit.WebView.HitTestResult.UNKNOWN_TYPE
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.PopupWindow
 import android.widget.TextView
 import android.widget.Toast
@@ -88,7 +89,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.AnyThread
 import androidx.annotation.StringRes
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -678,7 +678,7 @@ class BrowserTabFragment :
     private val tabsButton: TabSwitcherButton?
         get() = bottomNav.tabSwitcher
 
-    private val safeGazeIcon: AppCompatImageView
+    private val safeGazeIcon: ImageButton
         get() = omnibar.kahfSettingsButton
 
     private var webView: DuckDuckGoWebView? = null

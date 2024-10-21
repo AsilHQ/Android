@@ -233,13 +233,14 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
 
-                        <androidx.appcompat.widget.AppCompatImageView
+                        <ImageButton
                             android:id="@+id/kahfSettingsButton"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
                             android:background="?selectableItemBackgroundBorderless"
-                            android:padding="@dimen/toolbarIconPadding"
-                            app:srcCompat="@drawable/ic_kahf" />
+                            android:contentDescription="@string/app_bar_menu_share"
+                            android:paddingHorizontal="5dp"
+                            app:srcCompat="@drawable/ic_kahf"/>
 
                         <ImageButton
                             android:id="@+id/kahfShareButton"
@@ -247,7 +248,7 @@
                             android:layout_height="match_parent"
                             android:background="?selectableItemBackgroundBorderless"
                             android:contentDescription="@string/app_bar_menu_share"
-                            android:padding="@dimen/toolbarIconPadding"
+                            android:paddingHorizontal="5dp"
                             app:srcCompat="@drawable/ic_share_control_normal_24dp"/>
 
                     </LinearLayout>
