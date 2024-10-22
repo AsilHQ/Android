@@ -132,6 +132,11 @@ class SafeGazePopupHandler(
             }
         }
 
+        // binding.btnHigh.btnLabel.textSize = 1f
+
+        binding.root.context.let {
+            binding.tvBuildNumber.text = it.packageManager.getPackageInfo(it.packageName, 0).versionCode.toString()
+        }
     }
 
     private fun updateDescription(binding: SafeGazePopupBinding, type: PrivateDnsLevel) {
