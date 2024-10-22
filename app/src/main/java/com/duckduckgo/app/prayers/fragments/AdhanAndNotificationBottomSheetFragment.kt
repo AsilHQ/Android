@@ -1,5 +1,6 @@
 package com.duckduckgo.app.prayers.fragments
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import com.duckduckgo.app.browser.databinding.AdhanAndNavigationBottomSheetFragm
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.duckduckgo.app.prayers.constants.PrayersConstants.NotificationTypes
 import com.duckduckgo.app.prayers.listeners.OnNotificationTypeSelectedListener
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 class AdhanAndNotificationBottomSheetFragment(
     private val notificationType: String,
@@ -17,6 +19,7 @@ class AdhanAndNotificationBottomSheetFragment(
 ): BottomSheetDialogFragment() {
 
     private lateinit var binding: AdhanAndNavigationBottomSheetFragmentBinding
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.adhan_and_navigation_bottom_sheet_fragment, container, false)
         binding = AdhanAndNavigationBottomSheetFragmentBinding.bind(view)
@@ -25,6 +28,15 @@ class AdhanAndNotificationBottomSheetFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            val bottomSheet = dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            bottomSheet?.let {
+                val behavior = BottomSheetBehavior.from(it)
+                behavior.peekHeight = 1000
+            }
+        }
+
         arrangeCells()
     }
 

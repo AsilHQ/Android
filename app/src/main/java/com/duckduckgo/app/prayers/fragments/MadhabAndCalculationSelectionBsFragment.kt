@@ -17,6 +17,7 @@
 package com.duckduckgo.app.prayers.fragments
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -33,6 +34,7 @@ import com.duckduckgo.app.prayers.adapters.MadhabAsrTimeRecyclerAdapter
 import com.duckduckgo.app.prayers.listeners.OnCalculationMethodClickedListener
 import com.duckduckgo.app.prayers.listeners.OnMadhabMethodClickedListener
 import com.duckduckgo.common.ui.view.toDp
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class MadhabAndCalculationSelectionBsFragment: BottomSheetDialogFragment() {
@@ -62,6 +64,14 @@ class MadhabAndCalculationSelectionBsFragment: BottomSheetDialogFragment() {
     }
 
     private fun initView() {
+        if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            val bottomSheet = dialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            bottomSheet?.let {
+                val behavior = BottomSheetBehavior.from(it)
+                behavior.peekHeight = 1000
+            }
+        }
+
         if (madhabOptions != null) {
             binding.title.text = getString(R.string.kahf_madhab_asr_time)
 
