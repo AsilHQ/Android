@@ -231,7 +231,7 @@ fun TextView.setFormattedCount(number: Int) {
 }
 
 /** Overlook system font scale **/
-fun TextView.scaleIndependentFontSize(fontSizeSp: Float) {
+fun TextView.scaleIndependentTextSize(sp: Float) {
     val density = context.resources.configuration.fontScale
-    setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, fontSizeSp / density)
+    setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, sp / density)
 }

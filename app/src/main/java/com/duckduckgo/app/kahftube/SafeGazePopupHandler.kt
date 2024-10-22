@@ -31,7 +31,7 @@ import androidx.core.view.isVisible
 import com.duckduckgo.app.browser.R
 import com.duckduckgo.app.browser.databinding.SafeGazePopupBinding
 import com.duckduckgo.app.browser.safe_gaze.SafeGazeJsInterface
-import com.duckduckgo.common.ui.view.scaleIndependentFontSize
+import com.duckduckgo.common.ui.view.scaleIndependentTextSize
 import com.duckduckgo.common.utils.KAHF_GUARD_DEFAULT
 import com.duckduckgo.common.utils.SAFE_GAZE_MODE
 import com.duckduckgo.common.utils.SAFE_GAZE_BLUR_PROGRESS
@@ -144,36 +144,36 @@ class SafeGazePopupHandler(
     private fun setFontSize() {
         with(binding) {
             // KahfGuard
-            tvOnOff.scaleIndependentFontSize(14f)
-            title.scaleIndependentFontSize(20f)
-            tvDescription.scaleIndependentFontSize(14f)
-            btnHigh.btnLabel.scaleIndependentFontSize(13f)
-            btnMedium.btnLabel.scaleIndependentFontSize(13f)
-            btnLow.btnLabel.scaleIndependentFontSize(13f)
+            tvOnOff.scaleIndependentTextSize(14f)
+            title.scaleIndependentTextSize(20f)
+            tvDescription.scaleIndependentTextSize(14f)
+            btnHigh.btnLabel.scaleIndependentTextSize(13f)
+            btnMedium.btnLabel.scaleIndependentTextSize(13f)
+            btnLow.btnLabel.scaleIndependentTextSize(13f)
 
             // SafeGaze
-            tvOnOffImage.scaleIndependentFontSize(14f)
-            tvDecent.scaleIndependentFontSize(18f)
-            blueIndecentPhotosText.scaleIndependentFontSize(14f)
-            fullImageText.scaleIndependentFontSize(12f)
-            fullImageTextLine2.scaleIndependentFontSize(12f)
-            tvHumanOnlyLine2.scaleIndependentFontSize(12f)
-            tvHumanOnly.scaleIndependentFontSize(12f)
+            tvOnOffImage.scaleIndependentTextSize(14f)
+            tvDecent.scaleIndependentTextSize(18f)
+            blueIndecentPhotosText.scaleIndependentTextSize(14f)
+            fullImageText.scaleIndependentTextSize(12f)
+            fullImageTextLine2.scaleIndependentTextSize(12f)
+            tvHumanOnlyLine2.scaleIndependentTextSize(12f)
+            tvHumanOnly.scaleIndependentTextSize(12f)
 
             // Statistics
-            statTitle.scaleIndependentFontSize(20f)
-            siteBlockedCount.scaleIndependentFontSize(24f)
-            imageBlurCount.scaleIndependentFontSize(24f)
-            trackerBlockedCount.scaleIndependentFontSize(24f)
-            adsBlockedLabel.scaleIndependentFontSize(14f)
-            imageBlurLabel.scaleIndependentFontSize(14f)
-            trackerBlockedLabel.scaleIndependentFontSize(14f)
+            statTitle.scaleIndependentTextSize(20f)
+            siteBlockedCount.scaleIndependentTextSize(24f)
+            imageBlurCount.scaleIndependentTextSize(24f)
+            trackerBlockedCount.scaleIndependentTextSize(24f)
+            adsBlockedLabel.scaleIndependentTextSize(14f)
+            imageBlurLabel.scaleIndependentTextSize(14f)
+            trackerBlockedLabel.scaleIndependentTextSize(14f)
 
             // Bottom buttons
-            btnShare.scaleIndependentFontSize(13f)
-            btnSupport.scaleIndependentFontSize(13f)
-            btnTheme.scaleIndependentFontSize(13f)
-            tvBuildNumber.scaleIndependentFontSize(11f)
+            btnShare.scaleIndependentTextSize(13f)
+            btnSupport.scaleIndependentTextSize(13f)
+            btnTheme.scaleIndependentTextSize(13f)
+            tvBuildNumber.scaleIndependentTextSize(11f)
         }
     }
 
