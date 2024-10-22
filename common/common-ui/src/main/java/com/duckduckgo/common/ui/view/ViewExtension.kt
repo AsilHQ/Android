@@ -229,3 +229,9 @@ fun TextView.setFormattedCount(number: Int) {
         else -> String.format("%.1fM", number /1000000.0)
     }
 }
+
+/** Overlook system font scale **/
+fun TextView.scaleIndependentFontSize(fontSizeSp: Float) {
+    val density = context.resources.configuration.fontScale
+    setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, fontSizeSp / density)
+}

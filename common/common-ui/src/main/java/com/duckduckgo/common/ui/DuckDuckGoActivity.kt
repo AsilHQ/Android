@@ -20,7 +20,6 @@ import android.annotation.SuppressLint
 import android.app.UiModeManager
 import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
@@ -89,13 +88,6 @@ abstract class DuckDuckGoActivity : DaggerActivity() {
             LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(it)
         }
         super.onDestroy()
-    }
-
-    override fun attachBaseContext(newBase: Context?) {
-        val newConfig = Configuration(newBase?.resources?.configuration)
-        newConfig.fontScale = 1.0f
-        applyOverrideConfiguration(newConfig)
-        super.attachBaseContext(newBase)
     }
 
     fun setupToolbar(toolbar: Toolbar) {
