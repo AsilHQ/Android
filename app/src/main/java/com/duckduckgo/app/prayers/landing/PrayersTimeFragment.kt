@@ -68,6 +68,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -192,6 +193,10 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
     override fun onDestroyView() {
         super.onDestroyView()
         locationManager.removeUpdates(locationListener)
+        cancelTimeUpdateJob()
+    }
+
+    private fun cancelTimeUpdateJob() {
         if (::job.isInitialized) {
             job.cancel()
         }
@@ -205,6 +210,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
 
         if (savedLatitude != null && savedLongitude != null) {
             coordinates = Coordinates(savedLatitude.toDouble(), savedLongitude.toDouble())
+            // coordinates = Coordinates(23.8041, 90.4152) // To test with Dhaka coordinates
             prepareData(initialCall = true)
         } else {
             checkLocationPermissionAndService()
@@ -215,12 +221,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             checkIfLocationServicesEnabled()
         } else {
-            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                requestLocationPermission()
-            } else {
-                // Permission permanently denied
-                showAppLocationPermissionNotGranted()
-            }
+            requestLocationPermission()
         }
     }
 
@@ -473,23 +474,26 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
 
         prayerModelViews = prayers.toList()
 
-        if (initialCall) {
-            job = lifecycleScope.launch(dispatcherProvider.main()) {
-                while (isActive) {
-                    val cal = Calendar.getInstance()
-                    if (cal.get(Calendar.DAY_OF_MONTH) != currentDay) {
-                        prepareData()
-                        delay(5000)
-                    } else {
-                        if (dateIndex == 1) {
-                            binding.bannerPrayerTime.text =
-                                if (prayerTimes.currentPrayer() == Prayer.SUNRISE) " --- "
-                                else convertToTitleText(prayerTimes.currentPrayer().name)
+        cancelTimeUpdateJob()
+        initializeTimeUpdateJob(prayerTimes)
+    }
 
-                            binding.bannerRemainingTimeText.text = getNextPrayerTimeText(Date())
-                        }
-                        delay(1000)
+    private fun initializeTimeUpdateJob(prayerTimes: PrayerTimes) {
+        job = lifecycleScope.launch(dispatcherProvider.main()) {
+            while (isActive) {
+                val cal = Calendar.getInstance()
+                if (cal.get(Calendar.DAY_OF_MONTH) != currentDay) {
+                    prepareData()
+                    delay(5000)
+                } else {
+                    if (dateIndex == 1) {
+                        binding.bannerPrayerTime.text =
+                            if (prayerTimes.currentPrayer() == Prayer.SUNRISE) " --- "
+                            else convertToTitleText(prayerTimes.currentPrayer().name)
+
+                        binding.bannerRemainingTimeText.text = getNextPrayerTimeText(Date())
                     }
+                    delay(1000)
                 }
             }
         }
