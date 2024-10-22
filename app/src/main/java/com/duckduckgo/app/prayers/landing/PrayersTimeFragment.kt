@@ -15,14 +15,17 @@ import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -55,12 +58,11 @@ import com.duckduckgo.app.prayers.views.PrayerModel
 import com.duckduckgo.app.prayers.views.PrayerModelView
 import com.duckduckgo.appbuildconfig.api.AppBuildConfig
 import com.duckduckgo.common.ui.DuckDuckGoFragment
+import com.duckduckgo.common.utils.DispatcherProvider
 import com.duckduckgo.di.scopes.FragmentScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -79,6 +81,9 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
 
     @Inject
     lateinit var appBuildConfig: AppBuildConfig
+
+    @Inject
+    lateinit var dispatcherProvider: DispatcherProvider
 
     private lateinit var binding: PrayersLandingFragmentBinding
     private var prayerModelViews: List<PrayerModelView>? = null
@@ -210,7 +215,12 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             checkIfLocationServicesEnabled()
         } else {
-            requestLocationPermission()
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                requestLocationPermission()
+            } else {
+                // Permission permanently denied
+                showAppLocationPermissionNotGranted()
+            }
         }
     }
 
@@ -227,7 +237,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
     }
 
     private fun getLastKnownLocation() {
-        lifecycleScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch(dispatcherProvider.main()) {
             val location = getLastLocation()
             location?.let {
                 saveLocationToSharedPreferences(it)
@@ -237,7 +247,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
     }
 
     private suspend fun getLastLocation(): Location? {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcherProvider.io()) {
             return@withContext try {
                 val lastKnownLocationGPS =
                     locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
@@ -277,9 +287,10 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
     }
 
     private fun showLocationServicesDisabledPopUp() {
-        val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.kahf_alert))
-            .setMessage(getString(R.string.kahf_location_could_not_get))
-            .setPositiveButton(
+        AlertDialog.Builder(requireContext()).also {
+            it.setTitle(getString(R.string.kahf_alert))
+            it.setMessage(getString(R.string.kahf_location_could_not_get))
+            it.setPositiveButton(
                 R.string.kahf_ok,
             ) { _: DialogInterface, _: Int ->
                 val packageManager = context?.packageManager
@@ -290,30 +301,26 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
                     }
                 }
             }
-            .create()
-
-        dialog.setOnShowListener {
-            dialog.window?.setBackgroundDrawableResource(R.drawable.kahf_item_border_gradient)
+            it.create()
+            it.show()
         }
-        dialog.show()
     }
 
     private fun showAppLocationPermissionNotGranted() {
-        MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.kahf_alert))
-            .setMessage(getString(R.string.kahf_location_could_not_get_app_level))
-            .setPositiveButton(
-                R.string.kahf_ok,
-            ) { d: DialogInterface, w: Int ->
-                val packageManager = context?.packageManager
-                if (packageManager != null) {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    intent.data = Uri.parse("package:${requireContext().packageName}")
-                    if (intent.resolveActivity(packageManager) != null) {
-                        settingsActivityResult?.launch(intent)
-                    }
+        val dialog = AlertDialog.Builder(requireContext()).create()
+        dialog.setTitle(getString(R.string.kahf_alert))
+        dialog.setMessage(getString(R.string.kahf_location_could_not_get_app_level))
+        dialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.kahf_ok)) { _, _ ->
+            val packageManager = context?.packageManager
+            if (packageManager != null) {
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                intent.data = Uri.parse("package:${requireContext().packageName}")
+                if (intent.resolveActivity(packageManager) != null) {
+                    settingsActivityResult?.launch(intent)
                 }
             }
-            .show()
+        }
+        dialog.show()
     }
 
     private fun prepareLocationInformation(location: Location) {
@@ -467,7 +474,7 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
         prayerModelViews = prayers.toList()
 
         if (initialCall) {
-            job = lifecycleScope.launch(Dispatchers.Main) {
+            job = lifecycleScope.launch(dispatcherProvider.main()) {
                 while (isActive) {
                     val cal = Calendar.getInstance()
                     if (cal.get(Calendar.DAY_OF_MONTH) != currentDay) {
@@ -532,6 +539,31 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
         binding.btnSettings.setOnClickListener {
             val popUpMenu = PopupMenu(requireContext(), it)
             popUpMenu.menuInflater.inflate(R.menu.prayers_page_popup_menu, popUpMenu.menu)
+
+            val typedValue = TypedValue()
+            requireContext().theme.resolveAttribute(com.duckduckgo.mobile.android.R.attr.kahfPrimaryText, typedValue, true)
+            val color = ContextCompat.getColor(requireContext(), typedValue.resourceId)
+
+            // Set menu item text color based on theme
+            popUpMenu.menu.findItem(R.id.prayers_page_popup_menu_option_1)
+                .setTitle(
+                    SpannableString(getString(R.string.kahf_madhab_asr_time)).also { str ->
+                        str.setSpan(ForegroundColorSpan(color), 0, str.length, 0)
+                    },
+                )
+            popUpMenu.menu.findItem(R.id.prayers_page_popup_menu_option_2)
+                .setTitle(
+                    SpannableString(getString(R.string.kahf_calculation_method)).also { str ->
+                        str.setSpan(ForegroundColorSpan(color), 0, str.length, 0)
+                    },
+                )
+            popUpMenu.menu.findItem(R.id.prayers_page_popup_update_location)
+                .setTitle(
+                    SpannableString(getString(R.string.kahf_update_location)).also { str ->
+                        str.setSpan(ForegroundColorSpan(color), 0, str.length, 0)
+                    },
+                )
+
             popUpMenu.setOnMenuItemClickListener { item: MenuItem ->
                 when (item.itemId) {
                     R.id.prayers_page_popup_menu_option_1 -> {
@@ -597,7 +629,9 @@ class PrayersTimeFragment : DuckDuckGoFragment(R.layout.prayers_landing_fragment
     }
 
     private fun removeAllAlarms() {
-        removeAlarmIfSet(todayPrayerTimes.fajr)
+        if (!::todayPrayerTimes.isInitialized) {
+            return
+        }
         removeAlarmIfSet(todayPrayerTimes.sunrise)
         removeAlarmIfSet(todayPrayerTimes.dhuhr)
         removeAlarmIfSet(todayPrayerTimes.asr)
