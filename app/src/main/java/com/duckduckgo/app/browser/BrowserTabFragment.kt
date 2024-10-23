@@ -1034,7 +1034,6 @@ class BrowserTabFragment :
                     },
                     onThemeChanged = {
                         popupWindow.dismiss()
-                        viewModel.newTabShown = false // to generate new tab contents after the Activity recreated
                         (requireActivity() as DuckDuckGoActivity).toggleTheme()
                     },
                 )
@@ -3370,6 +3369,7 @@ class BrowserTabFragment :
     }
 
     override fun onDestroy() {
+        viewModel.newTabShown = false // to generate new tab contents after the Activity recreated
         dismissAppLinkSnackBar()
         pulseAnimation.stop()
         animatorHelper.removeListener()
