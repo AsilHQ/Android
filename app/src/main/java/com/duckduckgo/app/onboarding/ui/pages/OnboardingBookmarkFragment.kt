@@ -61,9 +61,18 @@ class OnboardingBookmarkFragment: DuckDuckGoFragment(R.layout.fragment_onboardin
         // To avoid the 'Skip' button being hidden behind the navigation bar
         (requireActivity() as DuckDuckGoActivity).getNavigationBarHeight {
             binding.guidelineBottom.setGuidelinePercent(
-                if (it > 100) 0.85f else 0.9f
+                if (it > 100) 0.8f else 0.9f
             )
         }
+
+        // Alternative solution (need checking on both orientation and on multiple devices)
+        /*(requireActivity() as DuckDuckGoActivity).getNavigationBarHeight { barHeight ->
+            val pcOfNavbarHeight = ((barHeight.toDouble() / getDisplayHeightInPixel().toDouble()) * 100)
+
+            binding.guidelineBottom.setGuidelinePercent(
+                (1 - (pcOfNavbarHeight + 1) / 100).toFloat(),
+            )
+        }*/
 
         return binding.root
     }
