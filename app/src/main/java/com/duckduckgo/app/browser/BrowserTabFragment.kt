@@ -1171,9 +1171,8 @@ class BrowserTabFragment :
             newTabMenuItem.setOnClickListener {
                 launch { viewModel.userRequestedOpeningNewTab(longPress = true) }
             }
-            homeMenuItem.setOnClickListener(null)
-            timeMenuItem.setOnClickListener {
-                showToast(string.not_implemented)
+            homeMenuItem.setOnClickListener {
+                browserActivity?.launchBookmarks()
             }
             backMenuItem.setOnClickListener { activity?.onBackPressed() }
             forwardMenuItem.setOnClickListener { viewModel.onUserPressedForward() }

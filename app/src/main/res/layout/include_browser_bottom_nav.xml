@@ -49,7 +49,7 @@
                 app:tint="?attr/kahfBottomNavIcon"
                 android:layout_weight="1"
                 android:background="@drawable/ripple_bottom_oval"
-                android:src="@drawable/ic_home_filled"
+                android:src="@drawable/ic_bookmark_20"
                 android:padding="16dp"
                 tools:ignore="ContentDescription"/>
 
